@@ -6,7 +6,7 @@
   ##  Script to combine WPPP GPS collar location data with unique animal IDs,
   ##  and truncate by capture date and mortality date (if applicable). This
   ##  script was originally written by Taylor Ganz in the Prugh Lab to prepare
-  ##  ungulate location data for the WPPP.
+  ##  mule deer location data for the WPPP and I have expanded it.
   ##  =========================================================
 
   #  Clean workspace and install libraries
@@ -26,18 +26,16 @@
   ####  Read in Capture, Mortality, and Telemetry data  ####
   
   #  Capture data (latest download: 09.11.20)
-  md_cap <- read.csv("./Data/Capture (MD) 091120.csv") 
-  # md_cap <- read.csv("G:/My Drive/1_Repositories/CamTraps_and_Collars/Data/Capture (MD) 091120.csv")
-  elk_cap <- read.csv("./Data/Capture (Elk) 091120.csv")  
-  wtd_cap <- read.csv("./Data/Capture (WTD) 091120.csv")  
+  md_cap <- read.csv("./Data/Capture (MD) 091120.csv", stringsAsFactors = FALSE) 
+  elk_cap <- read.csv("./Data/Capture (Elk) 091120.csv", stringsAsFactors = FALSE)  
+  wtd_cap <- read.csv("./Data/Capture (WTD) 091120.csv", stringsAsFactors = FALSE)  
   
   str(md_cap)#; head(md_cap)
   
   #  Mortality data (latest download: 09.11.20)
-  md_mort <- read.csv("./Data/Mortality (MD) 091120.csv") 
-  # md_mort <- read.csv("G:/My Drive/1_Repositories/CamTraps_and_Collars/Data/Mortality (MD) 091120.csv")
-  elk_mort <- read.csv("./Data/Mortality (Elk) 091120.csv") 
-  wtd_mort <- read.csv("./Data/Mortality (WTD) 091120.csv") 
+  md_mort <- read.csv("./Data/Mortality (MD) 091120.csv", stringsAsFactors = FALSE) 
+  elk_mort <- read.csv("./Data/Mortality (Elk) 091120.csv", stringsAsFactors = FALSE) 
+  wtd_mort <- read.csv("./Data/Mortality (WTD) 091120.csv", stringsAsFactors = FALSE) 
   
   str(md_mort)#; head(md_mort)
   
@@ -45,8 +43,6 @@
   #  Add column with date/time in a useable format
   md_tel <- read.csv("./Data/telem_md_091020.csv") %>%    
     mutate(daytime = mdy_hms(ObsDateTimePST))
-  # md_tel <- read.csv("G:/My Drive/1_Repositories/CamTraps_and_Collars/Data/telem_md_091020.csv") %>%    
-  #   mutate(daytime = mdy_hms(ObsDateTimePST))
   elk_tel <- read.csv("./Data/telem_elk_091020.csv") %>%  
     mutate(daytime = mdy_hms(ObsDateTimePST))
   wtd_tel <- read.csv("./Data/telem_wtd_091420.csv") %>%
@@ -95,15 +91,26 @@
   dat <- cbind(dat, md_info$GPSCollarSerialNumber)
   view(dat)  # look for NAs and remove those individuals
   
-  #  Remove individuals that don't have collars/location data
-  #  Mule deer: 3969MD17, 3958MD17, R89ND18 (or should it be 89MD18?)
+  #  Remove individuals that don't have a corresponding GPSCollarSerialNumber
+  #  Mule deer: 3969MD17 , 3958MD17
   which(is.na(md_info$GPSCollarSerialNumber))
-  md_info <- md_info[!is.na(md_info$GPSCollarSerialNumber),]
+  length(unique(which(is.na(md_info$GPSCollarSerialNumber))))  # number of deer w/o collars
+  md_info <- droplevels(md_info[!is.na(md_info$GPSCollarSerialNumber),])
+  
+  #  Remove individuals that died on capture date
+  #  
+  deadcap <- as.character(md_info$IndividualIdentifier[which(md_info$CaptureDate == md_info$EstimatedMortalityDate)])
+  tst <- if(deadcap != "") {md_info[md_info$IndividualIdentifier != deadcap,]}
+  
+  
   #  89MD18 and R89ND18 have the same collar ID b/c 89MD18 died 4 days after capture
   md_info <- md_info[md_info$IndividualIdentifier != "89MD18",]
-  # md_info <- md_info[md_info$IndividualIdentifier != "3969MD17" &
-  #                      md_info$IndividualIdentifier != "3958MD17" &
-  #                      md_info$IndividualIdentifier != "89MD18",] 
+  #  Identify any GPS collars on captured deer that never generated telemetry data
+  notel <- md_info$GPSCollarSerialNumber[!(md_info$GPSCollarSerialNumber %in% md_tel$CollarID)]
+  print(notel)
+  #  Only remove these individuals if the above value is >0
+  md_info <- droplevels(md_info[md_info$GPSCollarSerialNumber != notel,])
+  
   
   
   ####  Elk  ####
@@ -141,8 +148,14 @@
   #  Remove individuals that don't have collars/location data
   #  Elk: 4836ELK20
   which(is.na(elk_info$GPSCollarSerialNumber))
-  elk_info <- elk_info[!is.na(elk_info$GPSCollarSerialNumber),]
+  elk_info <- droplevels(elk_info[!is.na(elk_info$GPSCollarSerialNumber),])
   #elk_info <- elk_info[elk_info$IndividualIdentifier != "4836ELK20",]
+  #  Identify any GPS collars on captured deer that never generated telemetry data
+  notel <- elk_info$GPSCollarSerialNumber[!(elk_info$GPSCollarSerialNumber %in% elk_tel$CollarID)]
+  print(notel)
+  #  Only remove these individuals if the above value is >0
+  # elk_info <- droplevels(elk_info[elk_info$GPSCollarSerialNumber != notel,])
+  
   
   
   ####  White-tailed deer  ####
@@ -179,88 +192,76 @@
   #  047WTD18 observed alive on 3/22/18 but died 3/5/18???
   #  4803WTD20 observed alive on 1/3/20 but captured 1/23/20, then died 1/31/20???
   
-  #  Check to make sure each unique individual has location data
-  dat <- as.data.frame(wtd_info$IndividualIdentifier)
-  dat <- cbind(dat, wtd_info$GPSCollarSerialNumber)
-  view(dat)
-  
-  #  Remove individuals that don't have collar/location data
-  #  White-tailed deer: 002WTD17, 003WTD17, 004WTD17, 005WTD17, 006WTD17... like 13 of them
+  #  Remove individuals that don't have a corresponding GPSCollarSerialNumber
   which(is.na(wtd_info$GPSCollarSerialNumber))
   length(unique(which(is.na(wtd_info$GPSCollarSerialNumber))))  # number of deer w/o collars
-  wtd_info <- wtd_info[!is.na(wtd_info$GPSCollarSerialNumber),]
+  wtd_info <- droplevels(wtd_info[!is.na(wtd_info$GPSCollarSerialNumber),])
+
   #  Remove individuals that died on capture date
   #  019WTD17, 70WTD18
-  # wtd_info <- wtd_info[wtd_info$IndividualIdentifier != "019WTD17" &
-  #                        wtd_info$IndividualIdentifier != "70WTD18",]
+  deadcap <- as.character(wtd_info$IndividualIdentifier[which(wtd_info$CaptureDate == wtd_info$EstimatedMortalityDate)])
+  #wtd_info <- wtd_info[wtd_info$IndividualIdentifier != deadcap,]
+  tst <- if(deadcap != "0") {wtd_info[wtd_info$IndividualIdentifier != deadcap,]}
+
   
-  
-  
-  # #  Add end date to truncate telemetry data
-  # #  Choose an end date if there is no mortality- today
-  # lastend <- ymd(Sys.Date())
-  # #  Assign mortality date as end date if animal died
-  # md_info$enddate <- mdy(md_info$EstimatedMortalityDate)
-  # elk_info$enddate <- mdy(elk_info$EstimatedMortalityDate)
-  # wtd_info$enddate <- mdy(wtd_info$EstimatedMortalityDate)
-  # #  Fill in other end dates with chosen date if animal did not die
-  # md_info$enddate[is.na(md_info$enddate)] <- lastend
-  # elk_info$enddate[is.na(elk_info$enddate)] <- lastend
-  # wtd_info$enddate[is.na(wtd_info$enddate)] <- lastend
-  # 
-  # #  Trouble shoot when "Error in `$<-.data.frame`(`*tmp*`, "ID", value = 1L) : 
-  # #  replacement has 1 row, data has 0" with function below.
-  # #  Typically means mismatch in number of unique collar & animal IDs
-  # # dat1 <- as.data.frame(unique(elk_info$IndividualIdentifier))
-  # # dat2 <- as.data.frame(unique(elk_info$GPSCollarSerialNumber))
-  # # dat3 <- as.data.frame(unique(elk_tel$CollarID))
-  # # id <- cbind(dat1, dat2)
-  # dat <- as.data.frame(elk_info$IndividualIdentifier)
-  # dat <- cbind(dat, elk_info$GPSCollarSerialNumber)
-  # 
-  # #  Remove individuals that don't have location data
-  # #  Mule deer: 3969MD17, 3958MD17, R89ND18   WHAT ABOUT 89MD18 & 24MD18
-  # md_info <- md_info[md_info$IndividualIdentifier != "3969MD17" &
-  #                      md_info$IndividualIdentifier != "3958MD17" &
-  #                      md_info$IndividualIdentifier != "R89ND18",]
-  # #  Elk: 4836ELK20
-  # elk_info <- elk_info[elk_info$IndividualIdentifier != "4836ELK20",]
+      tst <- ifelse(deadcap == "0", as.data.frame(wtd_info), as.data.frame(wtd_info[wtd_info$IndividualIdentifier != deadcap,]))
+    table$newvar <- if (table$age4>=2 && table$age4 <=155) {table$newvar=1} else {table$newvar=0}
+
+  #  Remove individuals with collars that are not in the telemetry data
+  #  Identify mismatches between GPS collars in wtd_info vs wtd_tel
+  notel <- wtd_info$GPSCollarSerialNumber[!(wtd_info$GPSCollarSerialNumber %in% wtd_tel$CollarID)]
+  print(notel)
+  #  Collars 24833 (90WTD19), 24867 (85WTD19)
+  wtd_info <- droplevels(wtd_info[wtd_info$GPSCollarSerialNumber != notel,])
+
+  #  Why does 001WTD17 collar stop 8/8/18 but no mort date recorded? Collar died? Is that not noted anywhere?
 
   
   ####  =========================================================
   ####  Connect location data to individual animal IDs  ####
-  
+
+  #  FYI flg columns can be used to filter out some locations
+  #  flgLocation == 1 indicate inaccurate fixes
+  #  flgDate == 1 indicate dates in the future (only issue for Telonics collars)
+  #  flgJurisdiction == 1 indicates collar outside WA State jurisdiction (e.g., Tribal land, Canada)
+  #  flgActive == 0 indicates locations where the animal that generated those locations 
+  #  is no longer alive (do NOT filter out 0's here)
+    
+  # #  Try it for a single individual
   # #  Create empty dataframe to fill iteritively
   # MDclean <- data.frame()
   # #  How many individuals are looped over?
-  # nrow(elk_info) #md_info
+  # nrow(wtd_info) #md_info
   # #  Loop over every unique individual animal and...
-  # for(i in 1:nrow(elk_info)){ #md_info
+  # for(i in 1:nrow(wtd_info)){ #md_info      # DON'T FOR LOOP IT IF ONLY TESTING 1 INDIVIDUAL
   #   #  Take the individual animal ID
-  #   mdID <- droplevels(elk_info$IndividualIdentifier[1]) #md_info
+  #   mdID <- droplevels(wtd_info$IndividualIdentifier[1]) #md_info
   #   #  Take the animal's GPS collar serial number
-  #   mdSN <- elk_info$GPSCollarSerialNumber[1] #md_info
+  #   mdSN <- wtd_info$GPSCollarSerialNumber[1] #md_info
   #   #  Buffer capture date to remove locations affected by capture event
   #   #  Suggested to only use data from 2 weeks after the capture data (some papers suggest 1 month)
-  #   start <- mdy(elk_info$CaptureDate[1]) + 14 #md_info
+  #   start <- mdy(wtd_info$CaptureDate[1]) + 14 #md_info
   #   #  Exclude locations 1 day before estimated mortality date
-  #   end <- elk_info$enddate[i] - 1 #md_info
+  #   end <- wtd_info$enddate[1] - 1 #md_info
   # 
   #   #  Subset telemetry data to the specific individual
-  #   md <- subset(elk_tel, CollarID == mdSN) #md_tel
+  #   md <- subset(wtd_tel, CollarID == mdSN) #md_tel
   #   #  Add a new column to the telemetry data with the animal's individual ID
   #   md$ID <- mdID
-  #   #  truncate telemetry data by new start and end dates for taht individual
+  #   #  Truncate telemetry data by new start and end dates for that individual
+  #   #  Important for collars that are redeployed- ensures locations generated
+  #   #  by that specific animal are included, even if collar generates more locations
+  #   #  on another animal
   #   mdlive <- subset(md, daytime >= start & daytime <= end)
   # 
   #   #  Append each unique animal's locations to a clean dataframe
   #   MDclean <- rbind(MDclean, mdlive)
   # }
   # 
-  # length(unique(md_cap$IndividualIdentifier))
-  # length(unique(md_info$IndividualIdentifier))
+  # length(unique(wtd_cap$IndividualIdentifier))
+  # length(unique(wtd_info$IndividualIdentifier))
   # length(unique(MDclean$ID))
-  # #  FYI 89MD18 & 24MD18 are dropped in when locations are truncated b/c 
+  # #  FYI 89MD18 & 24MD18 are dropped in when locations are truncated b/c
   # #  animals died within 2 weeks of capture
   # 
   # #  Organize by individual ID and chronological order of locations
@@ -288,7 +289,7 @@
       SN <- info$GPSCollarSerialNumber[i]
       #  Buffer capture date to remove locations affected by capture event
       #  Suggested to only use data from 2 weeks after the capture data (some papers suggest 1 month)
-      start <- mdy(info$CaptureDate[i]) + 14
+      start <- mdy(info$CaptureDate[i]) + 1
       #  Exclude locations 1 day before estimated mortality date
       end <- info$enddate[i] - 1
       
@@ -304,19 +305,18 @@
     }
     
     #  Organize by individual ID and chronological order of locations
-    # clean <- clean %>%
-    #   arrange(ID, daytime) %>%
-    #   #  Filter out aberrant locations
-    #   filter(flgLocation != 1) %>%
-    #   filter(flgDate != 1) %>%
-    #   filter(flgActive != 0)
+    clean <- clean %>%
+      arrange(ID, daytime) %>%
+      #  Filter out aberrant locations
+      filter(flgLocation != 1) %>%
+      filter(flgDate != 1)
     
     return(clean)
   }
   
   md_clean <- IDtelem(md_info, md_tel)
   elk_clean <- IDtelem(elk_info, elk_tel)
-  wtd_clean <- IDtelem(wtd_info, wtd_tel)  # not working yet
+  wtd_clean <- IDtelem(wtd_info, wtd_tel)  
     
 
   #  Save data!
