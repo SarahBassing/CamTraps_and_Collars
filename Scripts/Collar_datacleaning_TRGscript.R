@@ -31,14 +31,14 @@
   elk_cap <- read.csv("./Data/Capture (Elk) 091120.csv", stringsAsFactors = FALSE)  
   wtd_cap <- read.csv("./Data/Capture (WTD) 091120.csv", stringsAsFactors = FALSE)  
   
-  str(md_cap)#; head(md_cap)
+  #str(md_cap)#; head(md_cap)
   
   #  Mortality data (latest download: 09.11.20)
   md_mort <- read.csv("./Data/Mortality (MD) 091120.csv", stringsAsFactors = FALSE) 
   elk_mort <- read.csv("./Data/Mortality (Elk) 091120.csv", stringsAsFactors = FALSE) 
   wtd_mort <- read.csv("./Data/Mortality (WTD) 091120.csv", stringsAsFactors = FALSE) 
   
-  str(md_mort)#; head(md_mort)
+  #str(md_mort)#; head(md_mort)
   
   #  Telemetry data (latest download: 09.11.20)
   #  Add column with date/time in a useable format
@@ -49,7 +49,7 @@
   wtd_tel <- read.csv("./Data/telem_wtd_091420.csv") %>%
     mutate(daytime = mdy_hms(ObsDateTimePST))
   
-  str(md_tel)#; head(md_tel)
+  #str(md_tel)#; head(md_tel)
   
   #  Note: mdy_hms automatically assigns date/time to UTC unless otherwise  
   #  changed with force_tz()
@@ -195,9 +195,9 @@
   #  UTC timezone for location data!
 
   #  Save data!
-  write.csv(md_clean, paste0('MDclean ', Sys.Date(), '.csv'))
-  write.csv(elk_clean, paste0('MDclean ', Sys.Date(), '.csv'))
-  write.csv(wtd_clean, paste0('MDclean ', Sys.Date(), '.csv'))
+  write.csv(md_clean, paste0('md_clean ', Sys.Date(), '.csv'))
+  write.csv(elk_clean, paste0('elk_clean ', Sys.Date(), '.csv'))
+  write.csv(wtd_clean, paste0('wtd_clean ', Sys.Date(), '.csv'))
   
   
   #  Fin
