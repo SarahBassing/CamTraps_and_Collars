@@ -100,6 +100,7 @@
     
   }
   
+  #  Run function to merge capture and mortality data for individual animals
   md_info <- spp_info(md_cap, md_mort, md_tel)
   elk_info <- spp_info(elk_cap, elk_mort, elk_tel)
   wtd_info <- spp_info(wtd_cap, wtd_mort, wtd_tel)
@@ -136,7 +137,7 @@
   ####  =========================================================
   ####  Connect location data to individual animal IDs  ####
   
-  #  IDtelem function to attach animal IDs to their respective telemetry locations.
+  #  IDtelem function attachs animal IDs to their respective telemetry locations.
   #  This function truncates the data so that day of capture and day of mortality 
   #  (or today's locations) are excluded from the dataset. Further truncating can 
   #  happen for individual analyses.
@@ -191,7 +192,7 @@
   elk_clean <- IDtelem(elk_info, elk_tel)
   wtd_clean <- IDtelem(wtd_info, wtd_tel)  
 
-  #  UTC timezone for location data
+  #  UTC timezone for location data!
 
   #  Save data!
   write.csv(md_clean, paste0('MDclean ', Sys.Date(), '.csv'))
