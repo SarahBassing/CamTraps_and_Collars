@@ -43,7 +43,7 @@
   #  Telemetry data (latest download: 09.11.20)
   #  Add column with date/time in a useable format
   md_tel <- read.csv("./Data/telem_md_091020.csv") %>%    
-    mutate(daytime = mdy_hms(ObsDateTimePST))
+    mutate(daytime = mdy_hms(ObsDateTimePST))             #  NEED TO FIX mdy_hms timezone
   elk_tel <- read.csv("./Data/telem_elk_091020.csv") %>%  
     mutate(daytime = mdy_hms(ObsDateTimePST))
   wtd_tel <- read.csv("./Data/telem_wtd_091420.csv") %>%
