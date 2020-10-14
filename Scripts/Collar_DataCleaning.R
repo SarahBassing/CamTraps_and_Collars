@@ -54,19 +54,19 @@
     mutate(daytime = mdy_hms(ObsDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
-           floordt = floor_date(Finaldt, unit = "hour")) %>%
+           Floordt = floor_date(Finaldt, unit = "hour")) %>%
     select(-PositionID)
   elk_tel <- read.csv("./Data/telem_elk_091020.csv") %>%  
     mutate(daytime = mdy_hms(ObsDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
-           floordt = floor_date(Finaldt, unit = "hour")) %>%
+           Floordt = floor_date(Finaldt, unit = "hour")) %>%
     select(-PositionID)
   wtd_tel <- read.csv("./Data/telem_wtd_091420.csv") %>%
     mutate(daytime = mdy_hms(ObsDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
-           floordt = floor_date(Finaldt, unit = "hour")) %>%
+           Floordt = floor_date(Finaldt, unit = "hour")) %>%
     select(-PositionID)
   
   # #  Check out available timezones
@@ -202,7 +202,8 @@
       arrange(ID, Finaldt) %>%
       #  Filter out aberrant locations
       filter(flgLocation != 1) %>%
-      filter(flgDate != 1)
+      filter(flgDate != 1) %>%
+      select(-c(flgLocation, flgDate, flgActive, DaysSince))
     
     return(clean)
   }
