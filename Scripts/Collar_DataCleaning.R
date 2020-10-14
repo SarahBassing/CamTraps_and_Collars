@@ -1,11 +1,11 @@
-  ##  Telemetry Data Cleaning
-  ##  April 1, 2020
-  ##  WPPP -  Prugh Lab, University of Washington
-  ##  Taylor Ganz, updated by Sarah Bassing Sept. 2020
+  ##  Ungulate Telemetry Data Cleaning
+  ##  Washington Predator-Prey Project
+  ##  Oct. 14, 2020
+  ##  Sarah Bassing
   ##  =========================================================
   ##  Script to combine WPPP GPS collar location data with unique animal IDs,
   ##  and truncate by capture date and mortality date (if applicable). This
-  ##  script was originally written by Taylor Ganz in the Prugh Lab to prepare
+  ##  Script was originally written by Taylor Ganz in the Prugh Lab to prepare
   ##  mule deer location data for the WPPP and I have expanded it.
   ##  =========================================================
 
@@ -54,17 +54,20 @@
     mutate(daytime = mdy_hms(ObsDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
-           floordt = floor_date(Finaldt, unit = "hour"))
+           floordt = floor_date(Finaldt, unit = "hour")) %>%
+    select(-PositionID)
   elk_tel <- read.csv("./Data/telem_elk_091020.csv") %>%  
     mutate(daytime = mdy_hms(ObsDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
-           floordt = floor_date(Finaldt, unit = "hour"))
+           floordt = floor_date(Finaldt, unit = "hour")) %>%
+    select(-PositionID)
   wtd_tel <- read.csv("./Data/telem_wtd_091420.csv") %>%
     mutate(daytime = mdy_hms(ObsDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
-           floordt = floor_date(Finaldt, unit = "hour"))
+           floordt = floor_date(Finaldt, unit = "hour")) %>%
+    select(-PositionID)
   
   # #  Check out available timezones
   # OlsonNames()
@@ -87,7 +90,7 @@
   #  Combine capture and mortality data by unique animal ID               
     info <- full_join(cap, mort, by = "IndividualIdentifier") %>%
       #  Add in additional info about mortality & collar status
-      full_join(capmort, by = c("IndividualIdentifier")) %>%
+      right_join(capmort, by = c("IndividualIdentifier")) %>%
       transmute(
         IndividualIdentifier = as.factor(IndividualIdentifier),
         IndividualSpecies = IndividualSpecies.x,
@@ -116,7 +119,7 @@
   #  Remove individuals that died on capture date
     deadcap <- as.character(info$IndividualIdentifier[which(info$CaptureDate == info$EndDate)])
     if(is_empty(deadcap) != TRUE) {
-      info <- info[info$IndividualIdentifier != deadcap,]
+      info <- info[!(info$IndividualIdentifier %in% deadcap),]
     } else {
       info <- info
     }
@@ -132,18 +135,14 @@
   
   #  Run function to merge capture and mortality data for individual animals
   md_info <- spp_info(md_cap, md_mort, md_capmort, md_tel)
-  elk_info <- spp_info(elk_cap, elk_mort, elk_capmort, elk_tel)  #drops 1 elk, double check this is ok
-  wtd_info <- spp_info(wtd_cap, wtd_mort, wtd_capmort, wtd_tel)  #Warning messages... prob. NA issues
+  elk_info <- spp_info(elk_cap, elk_mort, elk_capmort, elk_tel)  
+  wtd_info <- spp_info(wtd_cap, wtd_mort, wtd_capmort, wtd_tel)  
   
   #  Remove this one rude mule deer that for some reason ruins the function... bad coding practice, I know!
   #  89MD18 and R89ND18 have the same collar ID b/c 89MD18 died 4 days after capture
-  # md_info <- md_info[md_info$IndividualIdentifier != "89MD18",]   # ... seems to be workign now
+  # md_info <- md_info[md_info$IndividualIdentifier != "89MD18",]   # ... seems to be working now
   
-  
-  ####  Questions  ####
-  #  1. Why does 001WTD17 collar stop 8/8/18 but no mort date recorded? Collar died? 
-  #  Is that not noted anywhere? How often does this happen in the data?
-  
+
   ####  Running list of collars that got nixed in this stage  ####
   #  Mule deer
   #  3969MD17, 3958MD17, 89MD18
@@ -152,12 +151,12 @@
   #  4836ELK20
   
   #  White-tailed deer
-  #  019WTD17, 70WTD18, 85WTD19, 90WTD19
+  #  019WTD17, 023WTD17, 70WTD18, 85WTD19, 90WTD19
   
   ####  =========================================================
   ####  Connect location data to individual animal IDs  ####
   
-  #  IDtelem function attachs animal IDs to their respective telemetry locations.
+  #  IDtelem function attaches animal IDs to their respective telemetry locations.
   #  This function truncates the data so that day of capture and day of mortality 
   #  (or today's locations) are excluded from the dataset. Further truncating can 
   #  happen for individual analyses.
@@ -211,9 +210,9 @@
   #  Run species-specific ID and telemetry data through the function
   md_clean <- IDtelem(md_info, md_tel)
   elk_clean <- IDtelem(elk_info, elk_tel)
-  wtd_clean <- IDtelem(wtd_info, wtd_tel)  #  ERROR!
+  wtd_clean <- IDtelem(wtd_info, wtd_tel)  
 
-  #  UTC timezone for location data!
+  #  Pacific Standard Time for location data!
 
   #  Save data!
   write.csv(md_clean, paste0('md_clean ', Sys.Date(), '.csv'))
@@ -227,8 +226,8 @@
   # ##  =====================================================  
   # ####  Broken down species by species  ####
   # 
-  # #  This version is a little easier for trouble-shooting when the IDtelem
-  # #  function isn't working thanks to weird random collar-telemetry mismatches
+  # #  This version is a little easier for trouble-shooting when the two functions
+  # #  aren't working thanks to weird random collar-telemetry mismatches, etc.
   # 
   # 
   # #  Choose an end date if there is no mortality- today
@@ -238,6 +237,7 @@
   # ####  Mule deer info ####
   # #  Combine capture and mortality data by unique animal ID
   # md_info <- full_join(md_cap, md_mort, by = "IndividualIdentifier") %>%
+  #   right_join(md_capmort, by = c("IndividualIdentifier")) %>%
   #   transmute(
   #     IndividualIdentifier = as.factor(IndividualIdentifier),
   #     IndividualSpecies = IndividualSpecies.x,
@@ -245,21 +245,26 @@
   #     IndividualID = IndividualID,
   #     CaptureID =  CaptureID,
   #     LifeStage = LifeStage.x,
-  #     CaptureDate = CaptureDate,
+  #     CaptureDate = mdy(CaptureDate.x),
   #     GPSCollarSerialNumber = GPSCollarSerialNumber,
   #     MortalityID = MortalityID,
   #     MortalityLifeStage = LifeStage.y,
-  #     LastLiveObservation = LastLiveObservation,
-  #     EstimatedMortalityDate = EstimatedMortalityDate
+  #     EndDate = mdy(EndDate),
+  #     EndCause = EndCause,
+  #     MortalityType = MortalityType.x,
+  #     MortalitySubType = MortalitySubType.x,
+  #     LastTransmission = mdy(LastTransmission),
+  #     Notes = Notes
   #   )
   # #  Make sure you got them all
   # length(unique(md_cap$IndividualIdentifier))
   # length(unique(md_info$IndividualIdentifier))
   # 
   # #  Assign mortality date as end date if animal died
-  # md_info$enddate <- mdy(md_info$EstimatedMortalityDate)
+  # #md_info$enddate <- mdy(md_info$EstimatedMortalityDate)
   # #  Fill in other end dates with chosen date if animal did not die
-  # md_info$enddate[is.na(md_info$enddate)] <- lastend
+  # #md_info$enddate[is.na(md_info$enddate)] <- lastend
+  # md_info$EndDate[is.na(md_info$EndDate)] <- lastend
   # 
   # #  Check to make sure each unique individual has location data
   # dat <- as.data.frame(md_info$IndividualIdentifier)
@@ -294,10 +299,10 @@
   # }
   # 
   # 
-  ####  Elk info  ####
-  #  Combine capture and mortality data by unique animal ID
+  # ####  Elk info  ####
+  # # Combine capture and mortality data by unique animal ID
   # elk_info <- full_join(elk_cap, elk_mort, by = "IndividualIdentifier") %>%
-  #   full_join(elk_capmort, by = c("IndividualIdentifier")) %>%
+  #   right_join(elk_capmort, by = c("IndividualIdentifier")) %>%
   #   transmute(
   #     IndividualIdentifier = as.factor(IndividualIdentifier),
   #     IndividualSpecies = IndividualSpecies.x,
@@ -315,16 +320,17 @@
   #     MortalitySubType = MortalitySubType.x,
   #     LastTransmission = mdy(LastTransmission),
   #     Notes = Notes
-  #   ) 
+  #   )
   # #  Make sure you got them all
   # length(unique(elk_cap$IndividualIdentifier))
   # length(unique(elk_info$IndividualIdentifier))
   # head(elk_info)
   # 
   # #  Assign mortality date as end date if animal died
-  # elk_info$enddate <- mdy(elk_info$EstimatedMortalityDate)
+  # #elk_info$enddate <- mdy(elk_info$EstimatedMortalityDate)
   # #  Fill in other end dates with chosen date if animal did not die
-  # elk_info$enddate[is.na(elk_info$enddate)] <- lastend
+  # lastend <- ymd(Sys.Date())
+  # #elk_info$enddate[is.na(elk_info$enddate)] <- lastend
   # elk_info$EndDate[is.na(elk_info$EndDate)] <- lastend
   # 
   # #  Check to make sure each unique individual has location data
@@ -360,6 +366,7 @@
   # ####  White-tailed deer info  ####
   # #  Combine capture and mortality data by unique animal ID
   # wtd_info <- full_join(wtd_cap, wtd_mort, by = "IndividualIdentifier") %>%
+  #   right_join(wtd_capmort, by = c("IndividualIdentifier")) %>%
   #   transmute(
   #     IndividualIdentifier = as.factor(IndividualIdentifier),
   #     IndividualSpecies = IndividualSpecies.x,
@@ -367,21 +374,32 @@
   #     IndividualID = IndividualID,
   #     CaptureID =  CaptureID,
   #     LifeStage = LifeStage.x,
-  #     CaptureDate = CaptureDate,
+  #     CaptureDate = mdy(CaptureDate.x),
   #     GPSCollarSerialNumber = GPSCollarSerialNumber,
   #     MortalityID = MortalityID,
   #     MortalityLifeStage = LifeStage.y,
-  #     LastLiveObservation = LastLiveObservation,
-  #     EstimatedMortalityDate = EstimatedMortalityDate
+  #     EndDate = mdy(EndDate),
+  #     EndCause = EndCause,
+  #     MortalityType = MortalityType.x,
+  #     MortalitySubType = MortalitySubType.x,
+  #     LastTransmission = mdy(LastTransmission),
+  #     Notes = Notes
   #   )
   # #  Make sure you got them all
   # length(unique(wtd_cap$IndividualIdentifier))
   # length(unique(wtd_info$IndividualIdentifier))
   # 
   # #  Assign mortality date as end date if animal died
-  # wtd_info$enddate <- mdy(wtd_info$EstimatedMortalityDate)
+  # #wtd_info$enddate <- mdy(wtd_info$EstimatedMortalityDate)
   # #  Fill in other end dates with chosen date if animal did not die
-  # wtd_info$enddate[is.na(wtd_info$enddate)] <- lastend
+  # lastend <- ymd(Sys.Date())
+  # #wtd_info$enddate[is.na(wtd_info$enddate)] <- lastend
+  # wtd_info$EndDate[is.na(wtd_info$EndDate)] <- lastend
+  # 
+  # #  Check to make sure each unique individual has location data
+  # dat <- as.data.frame(wtd_info$IndividualIdentifier)
+  # dat <- cbind(dat, wtd_info$GPSCollarSerialNumber)
+  # view(dat)
   # 
   # #  Remove individuals that don't have a corresponding GPSCollarSerialNumber
   # which(is.na(wtd_info$GPSCollarSerialNumber))
@@ -389,10 +407,11 @@
   # wtd_info <- droplevels(wtd_info[!is.na(wtd_info$GPSCollarSerialNumber),])
   # 
   # #  Remove individuals that died on capture date
-  # #  019WTD17, 70WTD18
-  # deadcap <- as.character(wtd_info$IndividualIdentifier[which(wtd_info$CaptureDate == wtd_info$EstimatedMortalityDate)])
+  # #  019WTD17, 70WTD18, etc.
+  # deadcap <- as.character(wtd_info$IndividualIdentifier[which(wtd_info$CaptureDate == wtd_info$EndDate)])
   # if(is_empty(deadcap) != TRUE) {
-  #   wtd_info <- wtd_info[wtd_info$IndividualIdentifier != deadcap,]
+  #   wtd_info <- wtd_info[!(wtd_info$IndividualIdentifier %in% deadcap),]
+  #   #wtd_info <- wtd_info[wtd_info$IndividualIdentifier != deadcap,]
   # } else {
   #   wtd_info <- wtd_info
   # }
