@@ -26,17 +26,23 @@
   ####  =========================================================
   ####  Read in Capture, Mortality, and Telemetry data  ####
   
-  #  Capture data (latest download: 09.11.20)
-  md_cap <- read.csv("./Data/Capture (MD) 091120.csv", stringsAsFactors = FALSE) 
-  elk_cap <- read.csv("./Data/Capture (Elk) 091120.csv", stringsAsFactors = FALSE)  
-  wtd_cap <- read.csv("./Data/Capture (WTD) 091120.csv", stringsAsFactors = FALSE)  
+  #  Capture data (latest download: 10.25.20)
+  md_cap <- read.csv("./Data/Capture (MD) 10.25.20.csv", stringsAsFactors = FALSE) %>%
+    mutate(IndividualIdentifier = ï..IndividualIdentifier) %>%
+    select(-ï..IndividualIdentifier)
+  elk_cap <- read.csv("./Data/Capture (Elk) 10.25.20.csv", stringsAsFactors = FALSE) %>%
+    mutate(IndividualIdentifier = ï..IndividualIdentifier) %>%
+    select(-ï..IndividualIdentifier)
+  wtd_cap <- read.csv("./Data/Capture (WTD) 10.25.20.csv", stringsAsFactors = FALSE) %>%
+    mutate(IndividualIdentifier = ï..IndividualIdentifier) %>%
+    select(-ï..IndividualIdentifier) 
   
   #str(md_cap)#; head(md_cap)
   
-  #  Mortality data (latest download: 09.11.20)
-  md_mort <- read.csv("./Data/Mortality (MD) 091120.csv", stringsAsFactors = FALSE) 
-  elk_mort <- read.csv("./Data/Mortality (Elk) 091120.csv", stringsAsFactors = FALSE) 
-  wtd_mort <- read.csv("./Data/Mortality (WTD) 091120.csv", stringsAsFactors = FALSE) 
+  #  Mortality data (latest download: 10.25.20)
+  md_mort <- read.csv("./Data/Mortality (MD) 10.25.20.csv", stringsAsFactors = FALSE) 
+  elk_mort <- read.csv("./Data/Mortality (Elk) 10.25.20.csv", stringsAsFactors = FALSE) 
+  wtd_mort <- read.csv("./Data/Mortality (WTD) 10.25.20.csv", stringsAsFactors = FALSE) 
   
   #str(md_mort)#; head(md_mort)
   
@@ -45,29 +51,56 @@
   elk_capmort <- read.csv("./Data/WPPP_elk_2020-10-5.csv", stringsAsFactors = FALSE)
   wtd_capmort <- read.csv("./Data/WPPP_wtd_2020-09-30.csv", stringsAsFactors = FALSE)
   
-  #  Telemetry data (latest download: 09.11.20)
+  #  Telemetry data (latest download: 10.25.20)
   #  Add column with date/time in usable format & set timezone that data downloaded in (includes daylight savings)
   #  Add column that converts times to UTC
   #  Add column that converts times to Pacific Standard Time (add 8 hours), ignoring daylight savings
   #  Add column that floors the time to the nearest hour not ahead
-  md_tel <- read.csv("./Data/telem_md_091020.csv") %>%    
-    mutate(daytime = mdy_hms(ObsDateTimePST, tz = "America/Los_Angeles"),
+  md_tel <- read.csv("./Data/dev_telem_md_10.25.20.csv") %>%    
+    mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
-    select(-PositionID)
-  elk_tel <- read.csv("./Data/telem_elk_091020.csv") %>%  
-    mutate(daytime = mdy_hms(ObsDateTimePST, tz = "America/Los_Angeles"),
+    select(-InWashingtonJurisdiction)
+  elk_tel <- read.csv("./Data/dev_telem_elk_10.25.20.csv") %>%  
+    mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
-    select(-PositionID)
-  wtd_tel <- read.csv("./Data/telem_wtd_091420.csv") %>%
-    mutate(daytime = mdy_hms(ObsDateTimePST, tz = "America/Los_Angeles"),
+    select(-InWashingtonJurisdiction)
+  wtd_tel <- read.csv("./Data/dev_telem_wtd_10.25.20.csv") %>%
+    mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
-    select(-PositionID)
+    select(-InWashingtonJurisdiction)
+  no_fix <- read.csv("./Data/dev_telem_vec_nofix_10.25.20.csv") %>%
+    #  Add extra columns to match the telemetry data with successful fixes
+    mutate(Latitude = "NA",
+           Longitude = "NA",
+           ValidLocation = "NA",
+           VEC_DOP = "NA",
+           VEC_Height = "NA",
+           daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
+           UTCdt = with_tz(daytime, "UTC"),
+           Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
+           Floordt = floor_date(Finaldt, unit = "hour")) %>%
+    select(-OBJECTID) %>%
+    #  Reorganize columns to match column order in telemetry data
+    relocate(c("Latitude", "Longitude"), .after = CollarID) %>%
+    relocate("ValidLocation", .after = DbLoadedDateTimePST) %>%
+    relocate(c("VEC_DOP", "VEC_Height"), .after = VEC_Origin)
+  colnames(no_fix)[1] <- "OBJECTID"
+  
+  #  Extract species-specific missing fixes
+  md_nofix <- no_fix[no_fix$Species == "Mule Deer",]
+  elk_nofix <- no_fix[no_fix$Species == "Elk",]
+  wtd_nofix <- no_fix[no_fix$Species == "White-tailed Deer",]
+  
+  #  Merge location and missed fixes data
+  md_tel <- rbind(md_tel, md_nofix)
+  elk_tel <- rbind(elk_tel, elk_nofix)
+  wtd_tel <- rbind(wtd_tel, wtd_nofix)
   
   # #  Check out available timezones
   # OlsonNames()
@@ -100,7 +133,7 @@
         LifeStage = LifeStage.x,
         CaptureDate = mdy(CaptureDate.x),
         GPSCollarSerialNumber = GPSCollarSerialNumber,
-        MortalityID = MortalityID,
+        MortalityID = ï..MortalityID,                        # note the "ï.."
         MortalityLifeStage = LifeStage.y,
         EndDate = mdy(EndDate),
         EndCause = EndCause,
@@ -160,13 +193,6 @@
   #  This function truncates the data so that day of capture and day of mortality 
   #  (or today's locations) are excluded from the dataset. Further truncating can 
   #  happen for individual analyses.
-
-  #  flg columns can be used to filter out some locations
-  #  flgLocation == 1 indicate inaccurate fixes
-  #  flgDate == 1 indicate dates in the future (only issue for Telonics collars)
-  #  flgJurisdiction == 1 indicates collar outside WA State jurisdiction (e.g., Tribal land, Canada)
-  #  flgActive == 0 indicates locations where the animal that generated those locations 
-  #  is no longer alive (do NOT filter out 0's here)
     
   IDtelem <- function(info, telem) {
     #  Create empty dataframe to fill iteratively
@@ -199,11 +225,9 @@
     
     #  Organize by individual ID and chronological order of locations
     clean <- clean %>%
-      arrange(ID, Finaldt) %>%
+      arrange(ID, Finaldt) #%>%
       #  Filter out aberrant locations
-      filter(flgLocation != 1) %>%
-      filter(flgDate != 1) %>%
-      select(-c(flgLocation, flgDate, flgActive, DaysSince))
+      #select(-DaysSince)
     
     return(clean)
   }
@@ -213,6 +237,18 @@
   elk_clean <- IDtelem(elk_info, elk_tel)
   wtd_clean <- IDtelem(wtd_info, wtd_tel)  
 
+  elk_missfix <- IDtelem(elk_info, elk_nofix)
+  elk_misffix <- IDtelem(elk_info, tst)
+  
+  ####  ===============================================
+  ####  Merge missing fix data for each species 
+  
+  #  Merge no fix data with species-specific location data
+  md_full <- rbind(md_clean, md_nofix) %>%
+    arrange()
+  
+  
+  
   #  Pacific Standard Time for location data!
 
   #  Save data!
@@ -425,53 +461,53 @@
   # wtd_info <- droplevels(wtd_info[wtd_info$GPSCollarSerialNumber != notel,])
   # 
   # 
-  # #### Merge info & telem for 1 individual  ####
-  # # If the IDtelem function is too much, try it for a single individual!
-  # 
-  # #  Create empty dataframe to fill iteritively
-  # MDclean <- data.frame()
-  # #  How many individuals are looped over?
-  # nrow(elk_info) #md_info
-  # #  Loop over every unique individual animal and...
-  # for(i in 1:nrow(elk_info)){ #md_info      # DON'T FOR LOOP IT IF ONLY TESTING 1 INDIVIDUAL
-  #   #  Take the individual animal ID
-  #   mdID <- droplevels(elk_info$IndividualIdentifier[1]) #md_info
-  #   #  Take the animal's GPS collar serial number
-  #   mdSN <- elk_info$GPSCollarSerialNumber[1] #md_info
-  #   #  Buffer capture date to remove locations affected by capture event
-  #   #  Suggested to only use data from 2 weeks after the capture data (some papers suggest 1 month)
-  #   start <- elk_info$CaptureID[1] + 14
-  #   #  Exclude locations 1 day before estimated mortality date
-  #   end <- elk_info$EndDate[i] - 1
-  # 
-  #   #  Subset telemetry data to the specific individual
-  #   md <- subset(elk_tel, CollarID == mdSN) #md_tel
-  #   #  Add a new column to the telemetry data with the animal's individual ID
-  #   md$ID <- mdID
-  #   #  Truncate telemetry data by new start and end dates for that individual
-  #   #  Important for collars that are redeployed- ensures locations generated
-  #   #  by that specific animal are included, even if collar generates more locations
-  #   #  on another animal
-  #   mdlive <- subset(md, Finaldt >= start & Finaldt <= end)
-  # 
-  #   #  Append each unique animal's locations to a clean dataframe
-  #   MDclean <- rbind(MDclean, mdlive)
-  # }
-  # 
-  # length(unique(wtd_cap$IndividualIdentifier))
-  # length(unique(wtd_info$IndividualIdentifier))
-  # length(unique(MDclean$ID))
-  # #  FYI 89MD18 & 24MD18 are dropped in when locations are truncated b/c
-  # #  animals died within 2 weeks of capture
-  # 
-  # #  Organize by individual ID and chronological order of locations
-  # MDclean <- MDclean %>%
-  #   arrange(ID, daytime) %>%
-  #   #  Filter out aberrant locations
-  #   filter(flgLocation != 1) %>%
-  #   filter(flgDate != 1) %>%
-  # # flgLocation == 1 indicate inaccurate fixes
-  # # flgDate == 1 indicate dates in the future (only issue for Telonics collars)
-  # # flgJurisdiction == 1 indicates collar outside WA State jurisdiction (e.g., Tribal land, Canada)
-  # # flgActive == 0 indicates locations where the animal that generated those locations is no longer alive (do NOT filter out 0's here)
+  #### Merge info & telem for 1 individual  ####
+  # If the IDtelem function is too much, try it for a single individual!
+
+  #  Create empty dataframe to fill iteritively
+  MDclean <- data.frame()
+  #  How many individuals are looped over?
+  nrow(elk_info) #md_info
+  #  Loop over every unique individual animal and...
+  for(i in 1:nrow(elk_info)){ #md_info      # DON'T FOR LOOP IT IF ONLY TESTING 1 INDIVIDUAL
+    #  Take the individual animal ID
+    mdID <- droplevels(elk_info$IndividualIdentifier[1]) #md_info
+    #  Take the animal's GPS collar serial number
+    mdSN <- elk_info$GPSCollarSerialNumber[1] #md_info
+    #  Buffer capture date to remove locations affected by capture event
+    #  Suggested to only use data from 2 weeks after the capture data (some papers suggest 1 month)
+    start <- elk_info$CaptureID[1] #+ 14
+    #  Exclude locations 1 day before estimated mortality date
+    end <- elk_info$EndDate[i] #- 1
+
+    #  Subset telemetry data to the specific individual
+    md <- subset(elk_nofix, CollarID == mdSN) #md_tel
+    #  Add a new column to the telemetry data with the animal's individual ID
+    md$ID <- mdID
+    #  Truncate telemetry data by new start and end dates for that individual
+    #  Important for collars that are redeployed- ensures locations generated
+    #  by that specific animal are included, even if collar generates more locations
+    #  on another animal
+    mdlive <- subset(md, Finaldt >= start & Finaldt <= end)
+
+    #  Append each unique animal's locations to a clean dataframe
+    MDclean <- rbind(MDclean, mdlive)
+  }
+
+  length(unique(wtd_cap$IndividualIdentifier))
+  length(unique(wtd_info$IndividualIdentifier))
+  length(unique(MDclean$ID))
+  #  FYI 89MD18 & 24MD18 are dropped in when locations are truncated b/c
+  #  animals died within 2 weeks of capture
+
+  #  Organize by individual ID and chronological order of locations
+  MDclean <- MDclean %>%
+    arrange(ID, daytime) #%>%
+    #  Filter out aberrant locations
+    # filter(flgLocation != 1) %>%
+    # filter(flgDate != 1) %>%
+  # flgLocation == 1 indicate inaccurate fixes
+  # flgDate == 1 indicate dates in the future (only issue for Telonics collars)
+  # flgJurisdiction == 1 indicates collar outside WA State jurisdiction (e.g., Tribal land, Canada)
+  # flgActive == 0 indicates locations where the animal that generated those locations is no longer alive (do NOT filter out 0's here)
   
