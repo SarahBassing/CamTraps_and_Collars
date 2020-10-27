@@ -3,10 +3,20 @@
   ##  Oct. 14, 2020
   ##  Sarah Bassing
   ##  =========================================================
-  ##  Script to combine WPPP GPS collar location data with unique animal IDs,
-  ##  and truncate by capture date and mortality date (if applicable). This
+  ##  Script to create MASTER & CLEANED data sets for WPPP ungulate data.
+  ##    1. Combines WPPP GPS collar location data with unique animal IDs, 
+  ##       and other capture/mortality information. 
+  ##    2. Creates a MASTER data set that includes all fixes (missed & successful) 
+  ##       and makes sure date/times are in correct time zone (Pacific Standard 
+  ##       Time all year round). 
+  ##    3. Creates CLEAN data set that excludes missed locations and low accuracy 
+  ##       fixes. Removes extra locations generated when fix rate increased beyond 
+  ##       4-hr fix schedule and on wrong 4-hr schedule. Truncate by capture date  
+  ##       and mortality date (if applicable).
+  ##    Bonus: Calculates summary stats about problem locations by species and 
+  ##       individual animal.
   ##  Script was originally written by Taylor Ganz in the Prugh Lab to prepare
-  ##  mule deer location data for the WPPP and I have expanded it.
+  ##  mule deer location data for the WPPP. I have expanded it.
   ##  =========================================================
 
   #  Clean workspace and install libraries
@@ -23,7 +33,7 @@
   options(digits=15) 
   
   
-  ####  =========================================================
+  ####  ====================================================
   ####  Read in Capture, Mortality, and Telemetry data  ####
   
   #  Capture data (latest download: 10.25.20)
@@ -114,7 +124,7 @@
   
   #str(elk_tel)#; head(elk_tel)
   
-  ####  =========================================================
+  ####  ======================================================
   ####  Combine Capture & Mortality data for each animal  ####
   
   spp_info <- function(cap, mort, capmort, tel) {
@@ -184,9 +194,10 @@
   #  White-tailed deer
   #  019WTD17, 023WTD17, 70WTD18, 85WTD19, 90WTD19
   
-  ####  =========================================================
-  ####  Connect location data to individual animal IDs  ####
+  ####  =====================================================
+  ####  Create MASTER data set for each ungulate species ####
   
+  #  Connect location data to individual animal IDs:
   #  IDtelem function attaches animal IDs to their respective telemetry locations.
   #  This function truncates the data so that day of capture and day of mortality 
   #  (or today's locations) are excluded from the dataset. Further truncating can 
@@ -265,58 +276,131 @@
   }
   
   #  Run species-specific ID and telemetry data through the function
-  md_full <- IDtelem(md_info, md_tel)
-  elk_full <- IDtelem(elk_info, elk_tel)
-  wtd_full <- IDtelem(wtd_info, wtd_tel)  
-  
-  #  IGNORE the warnings! Just saying that there are NAs in these columns due to 
-  #  missed fixes
+  md_master <- IDtelem(md_info, md_tel)
+  elk_master <- IDtelem(elk_info, elk_tel)
+  wtd_master <- IDtelem(wtd_info, wtd_tel)  
+  #  IGNORE the warnings! Just saying that there are NAs in these columns 
+  #  due to missed fixes- these NAs are expected
 
   #  Pacific Standard Time for location data!
 
-  #  Save data!
-  write.csv(md_full, paste0('md_full ', Sys.Date(), '.csv'))
-  write.csv(elk_full, paste0('elk_full ', Sys.Date(), '.csv'))
-  write.csv(wtd_full, paste0('wtd_full ', Sys.Date(), '.csv'))
+  #  Save MASTER data files
+  write.csv(md_master, paste0('md_master ', Sys.Date(), '.csv'))
+  write.csv(elk_master, paste0('elk_master ', Sys.Date(), '.csv'))
+  write.csv(wtd_master, paste0('wtd_master ', Sys.Date(), '.csv'))
   
   
-  ####  ================================================
-  ####  Further cleaning of telemetry data ready for analyses  ####
+  ####  ====================================================
+  ####  Create CLEAN data set for each ungulate species ####
+  
+  #  Further cleaning of telemetry data ready for analyses-
+  #  Drop missing fixes and locations with poor accuracy
+  #  Drop extra locations when fix schedule increases
   
   #  Drop missing fixes & locations with poor accuracy for a cleaner data set
   #  DOP >10 is not good (~20-30 meter accuracy)
-  md_clean <- md_full %>%
+  md_clean <- md_master %>%
     filter(VEC_FixType != "No fix") %>%
     filter(VEC_DOP <= 10)
-  elk_clean <- elk_full %>%
+  elk_clean <- elk_master %>%
     filter(VEC_FixType != "No fix") %>%
     filter(VEC_DOP <= 10)
-  wtd_clean <- wtd_full %>%
+  wtd_clean <- wtd_master %>%
     filter(VEC_FixType != "No fix") %>%
     filter(VEC_DOP <= 10) 
 
-  #  Save location with high accuracy fixes only
+  
+  #  Save locations with high accuracy fixes only
   write.csv(md_clean, paste0('md_clean ', Sys.Date(), '.csv'))
   write.csv(elk_clean, paste0('elk_clean ', Sys.Date(), '.csv'))
   write.csv(wtd_clean, paste0('wtd_clean ', Sys.Date(), '.csv'))
+  
+  
+  ####  ==========================
+  ####  Rarefy location data  ####
+  #  KEEP locations with 4-hr fix schedule with 2, 6, 10, 14, 18, 22 hr fixes
+  #  DISCARD: 
+  #    -Initial deployment data on the wrong fix schedule (0, 4, 8 hr);
+  #    -Extra locations from summer elk collars & collars in mortality-mode   
+  #     where collars increase fix schedule to 20 min. interval.
+
+  #  Note: incorporate this into the cleaning process above once I confirm this 
+  #  makes sense and we're ok with dropping odd schedule locations
+  
+  thin_locs <- function(clean) {
+    skinny <- with(clean, clean[hour(Floordt) == 2 | hour(Floordt) == 6 | 
+                                  hour(Floordt) == 10 | hour(Floordt) == 14 | 
+                                  hour(Floordt) == 18 | hour(Floordt) == 22,])
+    return(skinny)
+  }
+  
+  md_skinny <- thin_locs(md_clean)
+  elk_skinny <- thin_locs(elk_clean)
+  wtd_skinny <- thin_locs(wtd_clean)
+
+  #  Gut check- did I drop too many locations?
+  nrow(md_clean) - nrow(md_skinny)
+  nrow(elk_clean) - nrow(elk_skinny)
+  nrow(wtd_clean) - nrow(wtd_skinny)
+  #  ...seems like a lot :(
+  
+  #  Is the hour filtering really working? (this ignores really weird times)
+  # wtd_wrong <- with(wtd_clean, wtd_clean[hour(Floordt) == 0 | hour(Floordt) == 4 | 
+  #                            hour(Floordt) == 8 | hour(Floordt) == 12 | 
+  #                            hour(Floordt) == 16 | hour(Floordt) == 20,])
+  not_sched <- with(wtd_clean, wtd_clean[hour(Floordt) != 2 & hour(Floordt) != 6 &
+                                           hour(Floordt) != 10 & hour(Floordt) != 14 &
+                                           hour(Floordt) != 18 & hour(Floordt) != 22,])
+  #  Is it all collars or just some?
+  length(unique(not_sched$ID)); length(unique(wtd_clean$ID))  # apparently just some
+  #  Is it just collars that failed or went into mort-mode?
+  drop_locs <- as.data.frame(droplevels(unique(not_sched$ID))) %>%
+    mutate(Wrong_schedule = "Wrong Sched")  # collars on wrong schedule for some reason
+  colnames(drop_locs) <- "ID"
+  fail_deer <- drop_na(wtd_info, EndCause)  # collars that failed or animal died
+  fail_deer <- droplevels(unique(fail_deer$IndividualIdentifier))
+  fail_deer <- as.data.frame(fail_deer) %>%
+    mutate(Fail_Dead = "Fail/Dead")
+  colnames(fail_deer) <- c("ID", "Fail/Dead")
+  wtf <- full_join(drop_locs, fail_deer, by = "ID") # not all wrong schedules are from collars that died/failed
+  
+  
+  #  Save locations thinned to standard fix schedule
+  write.csv(md_skinny, paste0('md_clean ', Sys.Date(), '.csv'))
+  write.csv(elk_skinny, paste0('elk_clean ', Sys.Date(), '.csv'))
+  write.csv(wtd_skinny, paste0('wtd_clean ', Sys.Date(), '.csv'))
+  
+ 
+  ####  ================================================
+  ####  Check individual collars for odd locations  ####
+  
+  #  Double check mule deer collars for animals that were relocated during collaring
+  #  Do these collars need to be truncated differently than others?
+  #  Double check individual animals whose collars have a lot of missing data
+  
+  
+  
+  ####  =================================
+  ####  Truncate start and end data  ####
+  
   
   
   ####  =============================================
   ####  Summary Stats on Fix Success & Accuracy  ####
   
   #  Function to calculate summary stats on telemetry data
-  fix_stats <- function(full, nofix, clean) {
+  fix_stats <- function(master, nofix, clean) {
     #  Total number of possible locations (included missed fixes)
-    total <- nrow(full)
+    total <- nrow(master)
     #  Number of missed locations
     missed <- nrow(nofix)
     #  Percent of missed fixes out of total possible locations
-    perc_missed <- nrow(nofix)/nrow(full)
+    perc_missed <- nrow(nofix)/nrow(master)
     
     #  Total number of successful fixes
     locations <- nrow(clean)
     #  Number of low accuracy fixes (DOP > 10)
-    lowacc <- nrow(filter(full, VEC_DOP > 10))
+    lowacc <- nrow(filter(master, VEC_DOP > 10))
     #  Percent of low accuracy fixes out of all successful locations
     perc_lowacc <- lowacc/nrow(clean)
     
@@ -328,9 +412,9 @@
   }
   
   #  Run species location data through summary stats function
-  md_stats <- fix_stats(md_full, md_nofix, md_clean)
-  elk_stats <- fix_stats(elk_full, elk_nofix, elk_clean)
-  wtd_stats <- fix_stats(wtd_full, wtd_nofix, wtd_clean)
+  md_stats <- fix_stats(md_master, md_nofix, md_clean)
+  elk_stats <- fix_stats(elk_master, elk_nofix, elk_clean)
+  wtd_stats <- fix_stats(wtd_master, wtd_nofix, wtd_clean)
   
   telem_stats <- as.data.frame(rbind(md_stats, elk_stats, wtd_stats))
   colnames(telem_stats) <- c("Total_Locs", "Missed_Locs", "Perc_Missed", "Successful_Locs", "LowAccuracy_Locs", "Perc_LowAccuracy")
@@ -338,8 +422,8 @@
   
   #  Collar-specific issues
   #  Function to calculate missing data and low accuracy fixes per animal
-  lame_locs <- function(full) {
-    NoFix <- full %>%
+  lame_locs <- function(master) {
+    NoFix <- master %>%
       group_by(ID) %>%
       count(VEC_FixType == "No fix") %>%
       ungroup() %>%
@@ -347,7 +431,7 @@
       spread(ID, n)
     colnames(NoFix)[1] <- "Problem"
     
-    InaccFix <- full %>%
+    InaccFix <- master %>%
       group_by(ID) %>%
       na.omit() %>%
       count(VEC_DOP > 10) %>%
@@ -374,11 +458,11 @@
   }
   
   #  Run species-specific data through function and combine
-  md_probs <- lame_locs(md_full) %>%
+  md_probs <- lame_locs(md_master) %>%
     mutate(Species = "Mule Deer")
-  elk_probs <- lame_locs(elk_full) %>%
+  elk_probs <- lame_locs(elk_master) %>%
     mutate(Species = "Elk")
-  wtd_probs <- lame_locs(wtd_full) %>%
+  wtd_probs <- lame_locs(wtd_master) %>%
     mutate(Species = "White-tailed Deer")
   Problem_locs <- rbind(md_probs, elk_probs, wtd_probs) %>%
     relocate(Species)  # default puts this column first
