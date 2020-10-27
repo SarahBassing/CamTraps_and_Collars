@@ -141,8 +141,6 @@
         MortalitySubType = MortalitySubType.x,
         LastTransmission = mdy(LastTransmission),
         Notes = Notes
-        # LastLiveObservation = LastLiveObservation,
-        # EstimatedMortalityDate = EstimatedMortalityDate
       )
   #  Fill in EndDate with chosen date if animal did not die/collar did not fail
     info$EndDate[is.na(info$EndDate)] <- lastend
@@ -224,37 +222,170 @@
     }
     
     #  Organize by individual ID and chronological order of locations
+    #  Format data fields
     clean <- clean %>%
-      arrange(ID, Finaldt) #%>%
-      #  Filter out aberrant locations
-      #select(-DaysSince)
+      arrange(ID, Finaldt) %>%
+      transmute(
+        OBJECTID = OBJECTID,
+        PositionID = PositionID,
+        CollarID = CollarID,
+        Latitude = Latitude,
+        Longitude = Longitude,
+        ObservationDateTimePST = ObservationDateTimePST,
+        TransmissionDateTimePST = TransmissionDateTimePST,
+        DbLoadedDateTimePST = DbLoadedDateTimePST,
+        ValidLocation = as.numeric(ValidLocation),
+        ValidDate = as.numeric(ValidDate),
+        VEC_MortalityStatus = as.factor(as.character(VEC_MortalityStatus)),
+        VEC_FixType = as.factor(as.character(VEC_FixType)),
+        VEC_Origin = as.factor(as.character(VEC_Origin)),
+        VEC_DOP = as.numeric(VEC_DOP),
+        VEC_Height = as.numeric(VEC_Height),
+        Project = Project,
+        CaptureID = CaptureID,
+        DeploymentID = DeploymentID,
+        TransmitterID = TransmitterID,
+        Species = Species,
+        Sex = as.factor(as.character(Sex)),
+        IndividualName = IndividualName,
+        Fate = Fate,
+        SerialNumber = SerialNumber,
+        CaptureDate = CaptureDate,
+        FateDate = FateDate,
+        DateMortality = DateMortality,
+        DaysDelta = DaysDelta,
+        daytime = daytime,
+        UTCdt = UTCdt,
+        Finaldt = Finaldt,
+        Floordt = Floordt,
+        ID = ID
+      )
     
     return(clean)
   }
   
   #  Run species-specific ID and telemetry data through the function
-  md_clean <- IDtelem(md_info, md_tel)
-  elk_clean <- IDtelem(elk_info, elk_tel)
-  wtd_clean <- IDtelem(wtd_info, wtd_tel)  
+  md_full <- IDtelem(md_info, md_tel)
+  elk_full <- IDtelem(elk_info, elk_tel)
+  wtd_full <- IDtelem(wtd_info, wtd_tel)  
+  
+  #  IGNORE the warnings! Just saying that there are NAs in these columns due to 
+  #  missed fixes
 
-  elk_missfix <- IDtelem(elk_info, elk_nofix)
-  elk_misffix <- IDtelem(elk_info, tst)
-  
-  ####  ===============================================
-  ####  Merge missing fix data for each species 
-  
-  #  Merge no fix data with species-specific location data
-  md_full <- rbind(md_clean, md_nofix) %>%
-    arrange()
-  
-  
-  
   #  Pacific Standard Time for location data!
 
   #  Save data!
+  write.csv(md_full, paste0('md_full ', Sys.Date(), '.csv'))
+  write.csv(elk_full, paste0('elk_full ', Sys.Date(), '.csv'))
+  write.csv(wtd_full, paste0('wtd_full ', Sys.Date(), '.csv'))
+  
+  
+  ####  ================================================
+  ####  Further cleaning of telemetry data ready for analyses  ####
+  
+  #  Drop missing fixes & locations with poor accuracy for a cleaner data set
+  #  DOP >10 is not good (~20-30 meter accuracy)
+  md_clean <- md_full %>%
+    filter(VEC_FixType != "No fix") %>%
+    filter(VEC_DOP <= 10)
+  elk_clean <- elk_full %>%
+    filter(VEC_FixType != "No fix") %>%
+    filter(VEC_DOP <= 10)
+  wtd_clean <- wtd_full %>%
+    filter(VEC_FixType != "No fix") %>%
+    filter(VEC_DOP <= 10) 
+
+  #  Save location with high accuracy fixes only
   write.csv(md_clean, paste0('md_clean ', Sys.Date(), '.csv'))
   write.csv(elk_clean, paste0('elk_clean ', Sys.Date(), '.csv'))
   write.csv(wtd_clean, paste0('wtd_clean ', Sys.Date(), '.csv'))
+  
+  
+  ####  =============================================
+  ####  Summary Stats on Fix Success & Accuracy  ####
+  
+  #  Function to calculate summary stats on telemetry data
+  fix_stats <- function(full, nofix, clean) {
+    #  Total number of possible locations (included missed fixes)
+    total <- nrow(full)
+    #  Number of missed locations
+    missed <- nrow(nofix)
+    #  Percent of missed fixes out of total possible locations
+    perc_missed <- nrow(nofix)/nrow(full)
+    
+    #  Total number of successful fixes
+    locations <- nrow(clean)
+    #  Number of low accuracy fixes (DOP > 10)
+    lowacc <- nrow(filter(full, VEC_DOP > 10))
+    #  Percent of low accuracy fixes out of all successful locations
+    perc_lowacc <- lowacc/nrow(clean)
+    
+    #  Combine all summary stats
+    stats <- c(total, missed, perc_missed, locations, lowacc, perc_lowacc)
+    
+    return(stats)
+    
+  }
+  
+  #  Run species location data through summary stats function
+  md_stats <- fix_stats(md_full, md_nofix, md_clean)
+  elk_stats <- fix_stats(elk_full, elk_nofix, elk_clean)
+  wtd_stats <- fix_stats(wtd_full, wtd_nofix, wtd_clean)
+  
+  telem_stats <- as.data.frame(rbind(md_stats, elk_stats, wtd_stats))
+  colnames(telem_stats) <- c("Total_Locs", "Missed_Locs", "Perc_Missed", "Successful_Locs", "LowAccuracy_Locs", "Perc_LowAccuracy")
+  print(telem_stats)
+  
+  #  Collar-specific issues
+  #  Function to calculate missing data and low accuracy fixes per animal
+  lame_locs <- function(full) {
+    NoFix <- full %>%
+      group_by(ID) %>%
+      count(VEC_FixType == "No fix") %>%
+      ungroup() %>%
+      #  Spread data for easier summarizing below (wide format)
+      spread(ID, n)
+    colnames(NoFix)[1] <- "Problem"
+    
+    InaccFix <- full %>%
+      group_by(ID) %>%
+      na.omit() %>%
+      count(VEC_DOP > 10) %>%
+      ungroup() %>%
+      #  Spread data for easier summarizing below (wide format)
+      spread(ID, n)
+    colnames(InaccFix)[1] <- "Problem"
+    
+    Collar_probs <- rbind(NoFix, InaccFix)
+    Problem_Type <- c("Missed Fix", "Missed Fix", "Low Accuracy", "Low Accuracy")
+    Collar_probs <- cbind(Problem_Type, Collar_probs)
+    #  Gather wide data back into long-format w/ NAs where no missing data occurred
+    Collar_problems <- gather(Collar_probs, "Animal_ID", "n", 3:ncol(Collar_probs)) %>%
+      #  Reorder so easier to read
+      transmute(
+        Animal_ID = Animal_ID,
+        Nmbr_Locations = n,
+        Problem_Type = Problem_Type,
+        Problem = Problem
+      )
+    
+    return(Collar_problems)
+    
+  }
+  
+  #  Run species-specific data through function and combine
+  md_probs <- lame_locs(md_full) %>%
+    mutate(Species = "Mule Deer")
+  elk_probs <- lame_locs(elk_full) %>%
+    mutate(Species = "Elk")
+  wtd_probs <- lame_locs(wtd_full) %>%
+    mutate(Species = "White-tailed Deer")
+  Problem_locs <- rbind(md_probs, elk_probs, wtd_probs) %>%
+    relocate(Species)  # default puts this column first
+  
+  #  Save summary stats
+  write.csv(telem_stats, paste0('Telemetry_stats ', Sys.Date(), '.csv'))
+  write.csv(Problem_locs, paste0('Collar_stats ', Sys.Date(), '.csv'))
   
   
   #  Fin
