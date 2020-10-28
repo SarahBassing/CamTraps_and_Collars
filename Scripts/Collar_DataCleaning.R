@@ -320,17 +320,25 @@
   ####  Rarefy location data  ####
   #  KEEP locations with 4-hr fix schedule with 2, 6, 10, 14, 18, 22 hr fixes
   #  DISCARD: 
-  #    -Initial deployment data on the wrong fix schedule (0, 4, 8 hr);
   #    -Extra locations from summer elk collars & collars in mortality-mode   
-  #     where collars increase fix schedule to 20 min. interval.
+  #     where collars increase fix schedule to 2-hr or 20-min. interval, respectfully.
+  #    -Initial deployment data on the wrong fix schedule (0, 4, 8 hr)- NOT DOING currently.
 
   #  Note: incorporate this into the cleaning process above once I confirm this 
   #  makes sense and we're ok with dropping odd schedule locations
   
   thin_locs <- function(clean) {
+    #  Keep only locations on correct 4-hr fix schedule
     skinny <- with(clean, clean[hour(Floordt) == 2 | hour(Floordt) == 6 | 
                                   hour(Floordt) == 10 | hour(Floordt) == 14 | 
                                   hour(Floordt) == 18 | hour(Floordt) == 22,])
+    #  Also keep locations on wrong 4-hr fix schedule 
+    #  This effectively does NOT thin extra 2-hr elk locations
+    skinny2 <- with(clean, clean[hour(Floordt) == 0 | hour(Floordt) == 4 |
+                                    hour(Floordt) == 8 | hour(Floordt) == 12 |
+                                    hour(Floordt) == 16 | hour(Floordt) == 20,])
+    skinny <- as.data.frame(rbind(skinny, skinny2)) %>%
+      arrange(ID, Floordt)
     return(skinny)
   }
   
@@ -342,7 +350,7 @@
   nrow(md_clean) - nrow(md_skinny)
   nrow(elk_clean) - nrow(elk_skinny)
   nrow(wtd_clean) - nrow(wtd_skinny)
-  #  ...seems like a lot :(
+  #  ...seems like a lot when I drop the 4-hr fixes on the wrong schedule :(
   
   #  Is the hour filtering really working? (this ignores really weird times)
   # wtd_wrong <- with(wtd_clean, wtd_clean[hour(Floordt) == 0 | hour(Floordt) == 4 | 
@@ -355,7 +363,7 @@
   length(unique(not_sched$ID)); length(unique(wtd_clean$ID))  # apparently just some
   #  Is it just collars that failed or went into mort-mode?
   drop_locs <- as.data.frame(droplevels(unique(not_sched$ID))) %>%
-    mutate(Wrong_schedule = "Wrong Sched")  # collars on wrong schedule for some reason
+    mutate(Wrong_schedule = "Wrong Sched")  # collars on wrong schedule for any reason
   colnames(drop_locs) <- "ID"
   fail_deer <- drop_na(wtd_info, EndCause)  # collars that failed or animal died
   fail_deer <- droplevels(unique(fail_deer$IndividualIdentifier))
@@ -365,10 +373,10 @@
   wtf <- full_join(drop_locs, fail_deer, by = "ID") # not all wrong schedules are from collars that died/failed
   
   
-  #  Save locations thinned to standard fix schedule
-  write.csv(md_skinny, paste0('md_clean ', Sys.Date(), '.csv'))
-  write.csv(elk_skinny, paste0('elk_clean ', Sys.Date(), '.csv'))
-  write.csv(wtd_skinny, paste0('wtd_clean ', Sys.Date(), '.csv'))
+  #  Save locations thinned to correct fix schedule
+  write.csv(md_skinny, paste0('md_skinny ', Sys.Date(), '.csv'))
+  write.csv(elk_skinny, paste0('elk_skinny ', Sys.Date(), '.csv'))
+  write.csv(wtd_skinny, paste0('wtd_skinny ', Sys.Date(), '.csv'))
   
  
   ####  ================================================
