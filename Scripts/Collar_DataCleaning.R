@@ -285,9 +285,12 @@
   #  Pacific Standard Time for location data!
 
   #  Save MASTER data files
-  write.csv(md_master, paste0('md_master ', Sys.Date(), '.csv'))
-  write.csv(elk_master, paste0('elk_master ', Sys.Date(), '.csv'))
-  write.csv(wtd_master, paste0('wtd_master ', Sys.Date(), '.csv'))
+  # write.csv(md_master, paste0('md_master ', Sys.Date(), '.csv'))
+  # write.csv(elk_master, paste0('elk_master ', Sys.Date(), '.csv'))
+  # write.csv(wtd_master, paste0('wtd_master ', Sys.Date(), '.csv'))
+  
+  
+  ####  NEED TO ADD SOMETHING THAT PLOTS DISTANCE BTWN TIMES TO MAKE SURE I'M NOT MISSING LOCATIONS/ATTEMPTED FIXES
   
   
   ####  ====================================================
@@ -311,9 +314,9 @@
 
   
   #  Save locations with high accuracy fixes only
-  write.csv(md_clean, paste0('md_clean ', Sys.Date(), '.csv'))
-  write.csv(elk_clean, paste0('elk_clean ', Sys.Date(), '.csv'))
-  write.csv(wtd_clean, paste0('wtd_clean ', Sys.Date(), '.csv'))
+  # write.csv(md_clean, paste0('md_clean ', Sys.Date(), '.csv'))
+  # write.csv(elk_clean, paste0('elk_clean ', Sys.Date(), '.csv'))
+  # write.csv(wtd_clean, paste0('wtd_clean ', Sys.Date(), '.csv'))
   
   
   ####  ==========================
@@ -323,9 +326,6 @@
   #    -Extra locations from summer elk collars & collars in mortality-mode   
   #     where collars increase fix schedule to 2-hr or 20-min. interval, respectfully.
   #    -Initial deployment data on the wrong fix schedule (0, 4, 8 hr)- NOT DOING currently.
-
-  #  Note: incorporate this into the cleaning process above once I confirm this 
-  #  makes sense and we're ok with dropping odd schedule locations
   
   thin_locs <- function(clean) {
     #  Keep only locations on correct 4-hr fix schedule
@@ -338,7 +338,12 @@
                                     hour(Floordt) == 8 | hour(Floordt) == 12 |
                                     hour(Floordt) == 16 | hour(Floordt) == 20,])
     skinny <- as.data.frame(rbind(skinny, skinny2)) %>%
-      arrange(ID, Floordt)
+      arrange(ID, Floordt) %>%
+      #  Make sure lat/long are in a numeric format
+      mutate(
+        Latitude = as.numeric(Latitude),
+        Longitude = as.numeric(Longitude)
+      )
     return(skinny)
   }
   
@@ -374,11 +379,40 @@
   
   
   #  Save locations thinned to correct fix schedule
-  write.csv(md_skinny, paste0('md_skinny ', Sys.Date(), '.csv'))
-  write.csv(elk_skinny, paste0('elk_skinny ', Sys.Date(), '.csv'))
-  write.csv(wtd_skinny, paste0('wtd_skinny ', Sys.Date(), '.csv'))
+  # write.csv(md_skinny, paste0('md_skinny ', Sys.Date(), '.csv'))
+  # write.csv(elk_skinny, paste0('elk_skinny ', Sys.Date(), '.csv'))
+  # write.csv(wtd_skinny, paste0('wtd_skinny ', Sys.Date(), '.csv'))
   
  
+  ####  ============================================
+  ####  Review individual collars for oddities  ####
+  
+  #  Plot all locations for a given species and look at their distribution
+  #  Plot all locations for a given individual and look at their distribution
+  #  Take special note of collars that failed or have not sent data recently
+  
+  #  Load required packages for spatial work
+  require(sp)
+  require(rgdal)
+  require(rgeos)
+  
+  #  Read in study area shapefiles and reproject to lat/long
+  OK_SA <- readOGR("./Shapefiles/fwdstudyareamaps", layer = "METHOW_SA")
+  NE_SA <- readOGR("./Shapefiles/fwdstudyareamaps", layer = "NE_SA")
+  wgs84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+  OK_wgs84 <- spTransform(OK_SA, new_proj)
+  NE_wgs84 <- spTransform(NE_SA, new_proj)
+  
+  #  Make collar location data spatial
+  md_spdf <- SpatialPointsDataFrame(coords = md_skinny[,4:5], data = md_skinny, proj4string = wgs84)
+  elk_spdf <- SpatialPointsDataFrame(coords = elk_skinny[,4:5], data = elk_skinny, proj4string = wgs84)
+  wtd_spdf <- SpatialPointsDataFrame(coords = wtd_skinny[,4:5], data = wtd_skinny, proj4string = wgs84)
+  
+  #  Plot all locations
+  plot(OK_wgs84)
+  plot(md_spdf, add = TRUE)
+  
+  
   ####  ================================================
   ####  Check individual collars for odd locations  ####
   
