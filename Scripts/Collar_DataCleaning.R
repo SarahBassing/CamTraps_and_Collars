@@ -389,30 +389,171 @@
   
   #  Plot all locations for a given species and look at their distribution
   #  Plot all locations for a given individual and look at their distribution
-  #  Take special note of collars that failed or have not sent data recently
+  #  Take special note of individuals with odd locations or distributions
   
   #  Load required packages for spatial work
-  require(sp)
-  require(rgdal)
-  require(rgeos)
+  require(sf)
+  require(ggplot2)
   
   #  Read in study area shapefiles and reproject to lat/long
-  OK_SA <- readOGR("./Shapefiles/fwdstudyareamaps", layer = "METHOW_SA")
-  NE_SA <- readOGR("./Shapefiles/fwdstudyareamaps", layer = "NE_SA")
+  OK_SA <- st_read("./Shapefiles/fwdstudyareamaps", layer = "METHOW_SA")
+  NE_SA <- st_read("./Shapefiles/fwdstudyareamaps", layer = "NE_SA")
   wgs84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
-  OK_wgs84 <- spTransform(OK_SA, new_proj)
-  NE_wgs84 <- spTransform(NE_SA, new_proj)
+  OK_wgs84 <- st_transform(OK_SA, wgs84)
+  NE_wgs84 <- st_transform(NE_SA, wgs84)
   
   #  Make collar location data spatial
-  md_spdf <- SpatialPointsDataFrame(coords = md_skinny[,4:5], data = md_skinny, proj4string = wgs84)
-  elk_spdf <- SpatialPointsDataFrame(coords = elk_skinny[,4:5], data = elk_skinny, proj4string = wgs84)
-  wtd_spdf <- SpatialPointsDataFrame(coords = wtd_skinny[,4:5], data = wtd_skinny, proj4string = wgs84)
+  md_spdf <- st_as_sf(md_skinny, coords = c("Longitude", "Latitude"), crs = wgs84)
+  elk_spdf <- st_as_sf(elk_skinny, coords = c("Longitude", "Latitude"), crs = wgs84)
+  wtd_spdf <- st_as_sf(wtd_skinny, coords = c("Longitude", "Latitude"), crs = wgs84)
+
+  #  Plot all locations (takes forever!)
+  # ggplot() +
+  #   geom_sf(data = md_spdf, aes(colour = ID))
+  # ggplot() +
+  #   geom_sf(data = elk_spdf, aes(colour = ID))
+  # ggplot()+
+  #   geom_sf(data = wtd_spdf, aes(colour = ID))
+
+  #  Plot an individual collar
+  ind_animal <- group_split(elk_spdf, elk_spdf$ID)
+  #  Plot one animal
+  ggplot() +
+    geom_sf(data = NE_SA, fill = NA) +
+    geom_sf(data = ind_animal[[1]], aes(color = ID))  
   
-  #  Plot all locations
-  plot(OK_wgs84)
-  plot(md_spdf, add = TRUE)
   
+  #  Plotting by study area with study area boundary for context
+  #  Function to plot locations from individual animals in the NORTHEAST study area
+  plot_telem_NE <- function(spdf){
+    #  Split out spatial points df by individual animal ID
+    ind_animal <- group_split(spdf, spdf$ID)
+    #  Empty list to hold individual maps
+    plot_list <- list()
+    #  Loop through all animals one at a time to create maps of their locations
+    for(i in 1:length(unique(ind_animal))) {
+      plot <- ggplot() +
+        geom_sf(data = NE_SA, fill = NA) +
+        geom_sf(data = ind_animal[[i]], aes(color = ID))
+      plot_list[[i]] <- plot
+      #print(plot)
+    }
+    return(plot_list)
+  }
   
+  #  Function to plot locations from individual animals in the OKANOGAN study area
+  plot_telem_OK <- function(spdf){
+    #  Split out spatial points df by individual animal ID
+    ind_animal <- group_split(spdf, spdf$ID)
+    #  Empty list to hold individual maps
+    plot_list <- list()
+    #  Loop through all animals one at a time to create maps of their locations
+    for(i in 1:length(unique(ind_animal))) {
+      plot <- ggplot() +
+        geom_sf(data = OK_SA, fill = NA) +
+        geom_sf(data = ind_animal[[i]], aes(color = ID))
+      plot_list[[i]] <- plot
+      #print(plot)
+    }
+    return(plot_list)
+  }
+  
+  #  Feed elk & wtd through function to map individual telemetry data in NE
+  elk_NE_maps <- plot_telem_NE(elk_spdf)
+  wtd_NE_maps <- plot_telem_NE(wtd_spdf)
+  
+  #  Feed mule deer through function to map individual telemetry data in OK
+  md_OK_maps <- plot_telem_OK(md_spdf)
+  
+  #  Plotting zoomed in location data without study area boundary for context
+  plot_telem <- function(spdf){
+    #  Split out spatial points df by individual animal ID
+    ind_animal <- group_split(spdf, spdf$ID)
+    #  Empty list to hold individual maps
+    plot_list <- list()
+    #  Loop through all animals one at a time to create maps of their locations
+    for(i in 1:length(unique(ind_animal))) {
+      plot <- ggplot() +
+        geom_sf(data = ind_animal[[i]], aes(color = ID))
+      plot_list[[i]] <- plot
+      #print(plot)
+    }
+    return(plot_list)
+  }
+  
+  #  Feed all species through function to map zoomed in telemetry data 
+  elk_maps <- plot_telem(elk_spdf)
+  wtd_maps <- plot_telem(wtd_spdf)
+  md_maps <- plot_telem(md_spdf)
+  
+  #  Save individual plots in a single pdf for each species
+  #  With NE or OK study area boundary for context
+  pdf("./Outputs/elk_NE_maps.pdf")
+  for (i in 1:length(unique(elk_NE_maps))) {
+    print(elk_NE_maps[[i]])
+  }
+  dev.off()
+  pdf("./Outputs/wtd_NE_maps.pdf")
+  for (i in 1:length(unique(wtd_NE_maps))) {
+    print(wtd_NE_maps[[i]])
+  }
+  dev.off()
+  pdf("./Outputs/md_OK_maps.pdf")
+  for (i in 1:length(unique(md_OK_maps))) {
+    print(md_OK_maps[[i]])
+  }
+  dev.off()
+  
+  #  Without study area boundary for context
+  pdf("./Outputs/elk_maps.pdf")
+  for (i in 1:length(unique(elk_maps))) {
+    print(elk_maps[[i]])
+  }
+  dev.off()
+  pdf("./Outputs/wtd_maps.pdf")
+  for (i in 1:length(unique(wtd_maps))) {
+    print(wtd_maps[[i]])
+  }
+  dev.off()
+  pdf("./Outputs/md_maps.pdf")
+  for (i in 1:length(unique(md_maps))) {
+    print(md_maps[[i]])
+  }
+  dev.off()
+  
+
+  
+  #  Take a closer look at animals with odd locations
+  #  Questionable points or walk-abouts
+  elk_review <- filter(elk_spdf, ID == "4830ELK20" | elk_spdf$ID =="3974ELK18" |
+                       ID == "3712ELK18" | ID == "3686EA17" | ID == "3676EA17")
+  review <- group_split(elk_review, elk_review$ID)
+  # for(i in 1:length(unique(review))) {
+  #   plot <- ggplot() +
+  #     geom_sf(data = NE_SA, fill = NA) +
+  #     geom_sf(data = review[[i]], aes(color = ID)) 
+  #   print(plot)
+  # }
+  
+  #  Create empty list to hold individual plots
+  plot_list <- list()
+  #  Loop through each funky elk and create a plot of its locations
+  for(i in 1:length(unique(review))) {
+    plot <- ggplot() +
+      #geom_sf(data = NE_SA, fill = NA) +
+      geom_sf(data = review[[i]], aes(color = ID)) +
+      theme(legend.position="top")
+    plot_list[[i]] <- plot
+  }
+  
+  #  Save individual plots in a single pdf
+  pdf("./Outputs/odd_collars_review.pdf")
+  for (i in 1:length(unique(review))) {
+    print(plot_list[[i]])
+  }
+  dev.off()
+  
+
   ####  ================================================
   ####  Check individual collars for odd locations  ####
   
@@ -718,53 +859,53 @@
   # wtd_info <- droplevels(wtd_info[wtd_info$GPSCollarSerialNumber != notel,])
   # 
   # 
-  #### Merge info & telem for 1 individual  ####
-  # If the IDtelem function is too much, try it for a single individual!
-
-  #  Create empty dataframe to fill iteritively
-  MDclean <- data.frame()
-  #  How many individuals are looped over?
-  nrow(elk_info) #md_info
-  #  Loop over every unique individual animal and...
-  for(i in 1:nrow(elk_info)){ #md_info      # DON'T FOR LOOP IT IF ONLY TESTING 1 INDIVIDUAL
-    #  Take the individual animal ID
-    mdID <- droplevels(elk_info$IndividualIdentifier[1]) #md_info
-    #  Take the animal's GPS collar serial number
-    mdSN <- elk_info$GPSCollarSerialNumber[1] #md_info
-    #  Buffer capture date to remove locations affected by capture event
-    #  Suggested to only use data from 2 weeks after the capture data (some papers suggest 1 month)
-    start <- elk_info$CaptureID[1] #+ 14
-    #  Exclude locations 1 day before estimated mortality date
-    end <- elk_info$EndDate[i] #- 1
-
-    #  Subset telemetry data to the specific individual
-    md <- subset(elk_nofix, CollarID == mdSN) #md_tel
-    #  Add a new column to the telemetry data with the animal's individual ID
-    md$ID <- mdID
-    #  Truncate telemetry data by new start and end dates for that individual
-    #  Important for collars that are redeployed- ensures locations generated
-    #  by that specific animal are included, even if collar generates more locations
-    #  on another animal
-    mdlive <- subset(md, Finaldt >= start & Finaldt <= end)
-
-    #  Append each unique animal's locations to a clean dataframe
-    MDclean <- rbind(MDclean, mdlive)
-  }
-
-  length(unique(wtd_cap$IndividualIdentifier))
-  length(unique(wtd_info$IndividualIdentifier))
-  length(unique(MDclean$ID))
-  #  FYI 89MD18 & 24MD18 are dropped in when locations are truncated b/c
-  #  animals died within 2 weeks of capture
-
-  #  Organize by individual ID and chronological order of locations
-  MDclean <- MDclean %>%
-    arrange(ID, daytime) #%>%
-    #  Filter out aberrant locations
-    # filter(flgLocation != 1) %>%
-    # filter(flgDate != 1) %>%
-  # flgLocation == 1 indicate inaccurate fixes
-  # flgDate == 1 indicate dates in the future (only issue for Telonics collars)
-  # flgJurisdiction == 1 indicates collar outside WA State jurisdiction (e.g., Tribal land, Canada)
-  # flgActive == 0 indicates locations where the animal that generated those locations is no longer alive (do NOT filter out 0's here)
-  
+  # #### Merge info & telem for 1 individual  ####
+  # # If the IDtelem function is too much, try it for a single individual!
+  # 
+  # #  Create empty dataframe to fill iteritively
+  # MDclean <- data.frame()
+  # #  How many individuals are looped over?
+  # nrow(elk_info) #md_info
+  # #  Loop over every unique individual animal and...
+  # for(i in 1:nrow(elk_info)){ #md_info      # DON'T FOR LOOP IT IF ONLY TESTING 1 INDIVIDUAL
+  #   #  Take the individual animal ID
+  #   mdID <- droplevels(elk_info$IndividualIdentifier[1]) #md_info
+  #   #  Take the animal's GPS collar serial number
+  #   mdSN <- elk_info$GPSCollarSerialNumber[1] #md_info
+  #   #  Buffer capture date to remove locations affected by capture event
+  #   #  Suggested to only use data from 2 weeks after the capture data (some papers suggest 1 month)
+  #   start <- elk_info$CaptureID[1] #+ 14
+  #   #  Exclude locations 1 day before estimated mortality date
+  #   end <- elk_info$EndDate[i] #- 1
+  # 
+  #   #  Subset telemetry data to the specific individual
+  #   md <- subset(elk_nofix, CollarID == mdSN) #md_tel
+  #   #  Add a new column to the telemetry data with the animal's individual ID
+  #   md$ID <- mdID
+  #   #  Truncate telemetry data by new start and end dates for that individual
+  #   #  Important for collars that are redeployed- ensures locations generated
+  #   #  by that specific animal are included, even if collar generates more locations
+  #   #  on another animal
+  #   mdlive <- subset(md, Finaldt >= start & Finaldt <= end)
+  # 
+  #   #  Append each unique animal's locations to a clean dataframe
+  #   MDclean <- rbind(MDclean, mdlive)
+  # }
+  # 
+  # length(unique(wtd_cap$IndividualIdentifier))
+  # length(unique(wtd_info$IndividualIdentifier))
+  # length(unique(MDclean$ID))
+  # #  FYI 89MD18 & 24MD18 are dropped in when locations are truncated b/c
+  # #  animals died within 2 weeks of capture
+  # 
+  # #  Organize by individual ID and chronological order of locations
+  # MDclean <- MDclean %>%
+  #   arrange(ID, daytime) #%>%
+  #   #  Filter out aberrant locations
+  #   # filter(flgLocation != 1) %>%
+  #   # filter(flgDate != 1) %>%
+  # # flgLocation == 1 indicate inaccurate fixes
+  # # flgDate == 1 indicate dates in the future (only issue for Telonics collars)
+  # # flgJurisdiction == 1 indicates collar outside WA State jurisdiction (e.g., Tribal land, Canada)
+  # # flgActive == 0 indicates locations where the animal that generated those locations is no longer alive (do NOT filter out 0's here)
+  # 
