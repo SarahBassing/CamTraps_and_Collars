@@ -434,7 +434,8 @@
     for(i in 1:length(unique(ind_animal))) {
       plot <- ggplot() +
         geom_sf(data = NE_SA, fill = NA) +
-        geom_sf(data = ind_animal[[i]], aes(color = ID))
+        geom_sf(data = ind_animal[[i]], aes(color = ID)) +
+        theme(legend.position="top")
       plot_list[[i]] <- plot
       #print(plot)
     }
@@ -451,7 +452,8 @@
     for(i in 1:length(unique(ind_animal))) {
       plot <- ggplot() +
         geom_sf(data = OK_SA, fill = NA) +
-        geom_sf(data = ind_animal[[i]], aes(color = ID))
+        geom_sf(data = ind_animal[[i]], aes(color = ID)) +
+        theme(legend.position="top")
       plot_list[[i]] <- plot
       #print(plot)
     }
@@ -465,6 +467,7 @@
   #  Feed mule deer through function to map individual telemetry data in OK
   md_OK_maps <- plot_telem_OK(md_spdf)
   
+  
   #  Plotting zoomed in location data without study area boundary for context
   plot_telem <- function(spdf){
     #  Split out spatial points df by individual animal ID
@@ -474,7 +477,8 @@
     #  Loop through all animals one at a time to create maps of their locations
     for(i in 1:length(unique(ind_animal))) {
       plot <- ggplot() +
-        geom_sf(data = ind_animal[[i]], aes(color = ID))
+        geom_sf(data = ind_animal[[i]], aes(color = ID)) +
+        theme(legend.position="top")
       plot_list[[i]] <- plot
       #print(plot)
     }
@@ -485,6 +489,7 @@
   elk_maps <- plot_telem(elk_spdf)
   wtd_maps <- plot_telem(wtd_spdf)
   md_maps <- plot_telem(md_spdf)
+  
   
   #  Save individual plots in a single pdf for each species
   #  With NE or OK study area boundary for context
@@ -521,51 +526,46 @@
   }
   dev.off()
   
-
+  #  NOTES
+  #  Many mule deer collars still include at least one start point in Winthrop (hotel?)
+  #  Handful of wtd, 1 elk, and a couple of mule deer have very few points- probably want to exclude
   
-  #  Take a closer look at animals with odd locations
-  #  Questionable points or walk-abouts
-  elk_review <- filter(elk_spdf, ID == "4830ELK20" | elk_spdf$ID =="3974ELK18" |
-                       ID == "3712ELK18" | ID == "3686EA17" | ID == "3676EA17")
-  review <- group_split(elk_review, elk_review$ID)
-  # for(i in 1:length(unique(review))) {
-  #   plot <- ggplot() +
-  #     geom_sf(data = NE_SA, fill = NA) +
-  #     geom_sf(data = review[[i]], aes(color = ID)) 
-  #   print(plot)
-  # }
-  
-  #  Create empty list to hold individual plots
-  plot_list <- list()
-  #  Loop through each funky elk and create a plot of its locations
-  for(i in 1:length(unique(review))) {
-    plot <- ggplot() +
-      #geom_sf(data = NE_SA, fill = NA) +
-      geom_sf(data = review[[i]], aes(color = ID)) +
-      theme(legend.position="top")
-    plot_list[[i]] <- plot
-  }
-  
-  #  Save individual plots in a single pdf
-  pdf("./Outputs/odd_collars_review.pdf")
-  for (i in 1:length(unique(review))) {
-    print(plot_list[[i]])
-  }
-  dev.off()
-  
-
-  ####  ================================================
-  ####  Check individual collars for odd locations  ####
   
   #  Double check mule deer collars for animals that were relocated during collaring
   #  Do these collars need to be truncated differently than others?
   #  Double check individual animals whose collars have a lot of missing data
   
   
-  
-  ####  =================================
-  ####  Truncate start and end data  ####
-  
+  # #  Probably not needed but just in case...
+  # #  Take a closer look at animals with odd locations
+  # #  Questionable points or walk-abouts
+  # elk_review <- filter(elk_spdf, ID == "4830ELK20" | elk_spdf$ID =="3974ELK18" |
+  #                      ID == "3712ELK18" | ID == "3686EA17" | ID == "3676EA17")
+  # review <- group_split(elk_review, elk_review$ID)
+  # # for(i in 1:length(unique(review))) {
+  # #   plot <- ggplot() +
+  # #     geom_sf(data = NE_SA, fill = NA) +
+  # #     geom_sf(data = review[[i]], aes(color = ID)) 
+  # #   print(plot)
+  # # }
+  # 
+  # #  Create empty list to hold individual plots
+  # plot_list <- list()
+  # #  Loop through each funky elk and create a plot of its locations
+  # for(i in 1:length(unique(review))) {
+  #   plot <- ggplot() +
+  #     #geom_sf(data = NE_SA, fill = NA) +
+  #     geom_sf(data = review[[i]], aes(color = ID)) +
+  #     theme(legend.position="top")
+  #   plot_list[[i]] <- plot
+  # }
+  # 
+  # #  Save individual plots in a single pdf
+  # pdf("./Outputs/odd_collars_review.pdf")
+  # for (i in 1:length(unique(review))) {
+  #   print(plot_list[[i]])
+  # }
+  # dev.off()
   
   
   ####  =============================================
@@ -656,6 +656,11 @@
   
   
   #  Fin
+  
+  
+  ####  ====================================================================
+  ####  Truncate start/end dates & drop collars with too few locations  ####
+  
   
   
   # ##  =====================================================  
