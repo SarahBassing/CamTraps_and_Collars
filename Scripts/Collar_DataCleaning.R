@@ -12,7 +12,9 @@
   ##    3. Creates CLEAN data set that excludes missed locations and low accuracy 
   ##       fixes. Removes extra locations generated when fix rate increased beyond 
   ##       4-hr fix schedule and on wrong 4-hr schedule. Truncate by capture date  
-  ##       and mortality date (if applicable).
+  ##       and mortality date (if applicable). 
+  ##    4. Maps telemetry locations by individual animal for more thorough review
+  ##       of location data.
   ##    Bonus: Calculates summary stats about problem locations by species and 
   ##       individual animal.
   ##  Script was originally written by Taylor Ganz in the Prugh Lab to prepare
@@ -428,16 +430,20 @@
   plot_telem_NE <- function(spdf){
     #  Split out spatial points df by individual animal ID
     ind_animal <- group_split(spdf, spdf$ID)
+    #  Place holder for unique animal ID
+    names <- c()
     #  Empty list to hold individual maps
     plot_list <- list()
     #  Loop through all animals one at a time to create maps of their locations
     for(i in 1:length(unique(ind_animal))) {
+      names <- c(names, unique(as.character(ind_animal[[i]]$ID)))
       plot <- ggplot() +
         geom_sf(data = NE_SA, fill = NA) +
         geom_sf(data = ind_animal[[i]], aes(color = ID)) +
-        theme(legend.position="top")
+        labs(title = paste(names[i], "Locations", sep = " "), x = "Longitude",
+             y = "Latitude") +
+        theme(legend.position = "none")
       plot_list[[i]] <- plot
-      #print(plot)
     }
     return(plot_list)
   }
@@ -446,48 +452,55 @@
   plot_telem_OK <- function(spdf){
     #  Split out spatial points df by individual animal ID
     ind_animal <- group_split(spdf, spdf$ID)
+    #  Place holder for unique animal ID
+    names <- c()
     #  Empty list to hold individual maps
     plot_list <- list()
     #  Loop through all animals one at a time to create maps of their locations
     for(i in 1:length(unique(ind_animal))) {
+      names <- c(names, unique(as.character(ind_animal[[i]]$ID)))
       plot <- ggplot() +
         geom_sf(data = OK_SA, fill = NA) +
         geom_sf(data = ind_animal[[i]], aes(color = ID)) +
-        theme(legend.position="top")
+        labs(title = paste(names[i], "Locations", sep = " "), x = "Longitude",
+             y = "Latitude") +
+        theme(legend.position = "none")
       plot_list[[i]] <- plot
-      #print(plot)
     }
     return(plot_list)
   }
   
   #  Feed elk & wtd through function to map individual telemetry data in NE
+  #  Plot an example map
   elk_NE_maps <- plot_telem_NE(elk_spdf)
+  plot(elk_NE_maps[[1]])
+  
   wtd_NE_maps <- plot_telem_NE(wtd_spdf)
+  plot(wtd_NE_maps[[1]])
   
   #  Feed mule deer through function to map individual telemetry data in OK
+  #  Plot an example map
   md_OK_maps <- plot_telem_OK(md_spdf)
+  plot(md_OK_maps[[1]])
   
   
   #  Plotting zoomed in location data without study area boundary for context
   plot_telem <- function(spdf){
     #  Split out spatial points df by individual animal ID
     ind_animal <- group_split(spdf, spdf$ID)
+    #  Place holder for unique animal ID
+    names <- c()
     #  Empty list to hold individual maps
     plot_list <- list()
-    #name <- unique(ind_animal$ID)  # DOES NOT WORK- NULL object :(
     #  Loop through all animals one at a time to create maps of their locations
     for(i in 1:length(unique(ind_animal))) {
+      names <- c(names, unique(as.character(ind_animal[[i]]$ID)))
       plot <- ggplot() +
-        geom_sf(data = ind_animal[[i]], aes(color = Floordt))  #aes(color = ID)
-        #scale_colour_continuous(fill = "Floordt")
-        #theme(legend.title = element_text(name = "Test"))  
-        #guides(col = guide_legend("Location Year")) +
-        #ggtitle(paste(1:unique(ind_animal)))
-        #theme(title = paste0(ind_animal[[i]]))
-        #labs(title="Locations")
-        #labs(title= paste(ind_animal$ID))
-        #labs(title = paste(name, "locations", sep = " "))  #DOES NOT WORK!!!! How to get ID number?!?!?
-        #theme(legend.position="top") 
+        geom_sf(data = ind_animal[[i]], aes(color = Floordt)) + 
+        labs(title = paste(names[i], "Locations", sep = " "), x = "Longitude",
+             y = "Latitude") +
+        #  Keep the legend but drop the title
+        theme(legend.title = element_blank())
       plot_list[[i]] <- plot
       #print(plot)
     }
@@ -546,39 +559,33 @@
   #  Double check individual animals whose collars have a lot of missing data
   
   
-  #  Probably not needed but just in case...
-  #  Take a closer look at animals with odd locations
-  #  Questionable points or walk-abouts
-  elk_review <- filter(elk_spdf, ID == "4830ELK20" | elk_spdf$ID =="3974ELK18" |
-                       ID == "3712ELK18" | ID == "3686EA17" | ID == "3676EA17")
-  review <- group_split(elk_review, elk_review$ID)
+  # #  Probably not needed but just in case...
+  # #  Take a closer look at animals with odd locations
+  # #  Questionable points or walk-abouts
+  # elk_review <- filter(elk_spdf, ID == "4830ELK20" | elk_spdf$ID =="3974ELK18" |
+  #                      ID == "3712ELK18" | ID == "3686EA17" | ID == "3676EA17")
+  # review <- group_split(elk_review, elk_review$ID)
+  # 
+  # #  Loop through each funky elk and create a plot of its locations
+  # names <- c()
   # for(i in 1:length(unique(review))) {
+  #   names <- c(names, unique(as.character(review[[i]]$ID)))
   #   plot <- ggplot() +
-  #     geom_sf(data = NE_SA, fill = NA) +
-  #     geom_sf(data = review[[i]], aes(color = ID))
-  #   print(plot)
+  #     #geom_sf(data = NE_SA, fill = NA) +
+  #     geom_sf(data = review[[i]], aes(color = Floordt)) + #aes(color = ID)
+  #     labs(title = paste(names[i], "Locations", sep = " "), x = "Longitude",
+  #          y = "Latitude") +
+  #     theme(legend.title = element_blank()) 
+  #   plot_list[[i]] <- plot
   # }
-
-  #  Create empty list to hold individual plots
-  plot_list <- list()
-  name <- unique(review$ID)   #THIS DOESN'T WORK! Can't extract animal ID from the individual lists?!?!?!
-  #  Loop through each funky elk and create a plot of its locations
-  for(i in 1:length(unique(review))) {
-    plot <- ggplot() +
-      #geom_sf(data = NE_SA, fill = NA) +
-      geom_sf(data = review[[i]], aes(color = Floordt)) + #aes(color = ID)
-      labs(title = paste(name[[i]], "locations", sep = " "))
-      #theme(legend.position="top")
-    plot_list[[i]] <- plot
-  }
-  print(plot_list[[1]])
-  
-  #  Save individual plots in a single pdf
-  pdf("./Outputs/odd_collars_review.pdf")
-  for (i in 1:length(unique(review))) {
-    print(plot_list[[i]])
-  }
-  dev.off()
+  # print(plot_list[[2]])
+  # 
+  # #  Save individual plots in a single pdf
+  # pdf("./Outputs/odd_collars_review.pdf")
+  # for (i in 1:length(unique(review))) {
+  #   print(plot_list[[i]])
+  # }
+  # dev.off()
   
   
   ####  =============================================
