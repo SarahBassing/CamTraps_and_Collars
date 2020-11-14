@@ -357,27 +357,26 @@
   nrow(md_clean) - nrow(md_skinny)
   nrow(elk_clean) - nrow(elk_skinny)
   nrow(wtd_clean) - nrow(wtd_skinny)
-  #  ...seems like a lot when I drop the 4-hr fixes on the wrong schedule :(
   
-  #  Is the hour filtering really working? (this ignores really weird times)
-  # wtd_wrong <- with(wtd_clean, wtd_clean[hour(Floordt) == 0 | hour(Floordt) == 4 | 
-  #                            hour(Floordt) == 8 | hour(Floordt) == 12 | 
-  #                            hour(Floordt) == 16 | hour(Floordt) == 20,])
-  not_sched <- with(wtd_clean, wtd_clean[hour(Floordt) != 2 & hour(Floordt) != 6 &
-                                           hour(Floordt) != 10 & hour(Floordt) != 14 &
-                                           hour(Floordt) != 18 & hour(Floordt) != 22,])
-  #  Is it all collars or just some?
-  length(unique(not_sched$ID)); length(unique(wtd_clean$ID))  # apparently just some
-  #  Is it just collars that failed or went into mort-mode?
-  drop_locs <- as.data.frame(droplevels(unique(not_sched$ID))) %>%
-    mutate(Wrong_schedule = "Wrong Sched")  # collars on wrong schedule for any reason
-  colnames(drop_locs) <- "ID"
-  fail_deer <- drop_na(wtd_info, EndCause)  # collars that failed or animal died
-  fail_deer <- droplevels(unique(fail_deer$IndividualIdentifier))
-  fail_deer <- as.data.frame(fail_deer) %>%
-    mutate(Fail_Dead = "Fail/Dead")
-  colnames(fail_deer) <- c("ID", "Fail/Dead")
-  wtf <- full_join(drop_locs, fail_deer, by = "ID") # not all wrong schedules are from collars that died/failed
+  # #  Is the hour filtering really working? (this ignores really weird times)
+  # # wtd_wrong <- with(wtd_clean, wtd_clean[hour(Floordt) == 0 | hour(Floordt) == 4 | 
+  # #                            hour(Floordt) == 8 | hour(Floordt) == 12 | 
+  # #                            hour(Floordt) == 16 | hour(Floordt) == 20,])
+  # not_sched <- with(wtd_clean, wtd_clean[hour(Floordt) != 2 & hour(Floordt) != 6 &
+  #                                          hour(Floordt) != 10 & hour(Floordt) != 14 &
+  #                                          hour(Floordt) != 18 & hour(Floordt) != 22,])
+  # #  Is it all collars or just some?
+  # length(unique(not_sched$ID)); length(unique(wtd_clean$ID))  # apparently just some
+  # #  Is it just collars that failed or went into mort-mode?
+  # drop_locs <- as.data.frame(droplevels(unique(not_sched$ID))) %>%
+  #   mutate(Wrong_schedule = "Wrong Sched")  # collars on wrong schedule for any reason
+  # colnames(drop_locs) <- "ID"
+  # fail_deer <- drop_na(wtd_info, EndCause)  # collars that failed or animal died
+  # fail_deer <- droplevels(unique(fail_deer$IndividualIdentifier))
+  # fail_deer <- as.data.frame(fail_deer) %>%
+  #   mutate(Fail_Dead = "Fail/Dead")
+  # colnames(fail_deer) <- c("ID", "Fail/Dead")
+  # wtf <- full_join(drop_locs, fail_deer, by = "ID") # not all wrong schedules are from collars that died/failed
   
   
   #  Save locations thinned to correct fix schedule
