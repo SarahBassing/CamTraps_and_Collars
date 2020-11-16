@@ -399,7 +399,7 @@
   #  Read in study area shapefiles and reproject to lat/long
   OK_SA <- st_read("./Shapefiles/fwdstudyareamaps", layer = "METHOW_SA")
   NE_SA <- st_read("./Shapefiles/fwdstudyareamaps", layer = "NE_SA")
-  wgs84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+  wgs84 <- st_crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
   OK_wgs84 <- st_transform(OK_SA, wgs84)
   NE_wgs84 <- st_transform(NE_SA, wgs84)
   
