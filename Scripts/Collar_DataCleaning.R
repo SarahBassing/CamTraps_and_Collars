@@ -219,9 +219,9 @@
       #  Buffer capture date to remove locations affected by capture event
       #  Suggested to only use data from 2 weeks after the capture data
       #  Currently not buffering but can change the +/- values in the future
-      start <- info$CaptureDate[i] #+ 1
+      start <- info$CaptureDate[i] + 1
       #  Exclude locations 1 day before estimated mortality date
-      end <- info$EndDate[i] #- 1
+      end <- info$EndDate[i] - 1
       
       #  Subset telemetry data to the specific individual
       collar <- subset(telem, CollarID == SN)
@@ -306,13 +306,26 @@
   #  DOP >10 is not good (~20-30 meter accuracy)
   md_clean <- md_master %>%
     filter(VEC_FixType != "No fix") %>%
+    #filter(VEC_FixType != "GPS-2D") %>%
+    #filter(VEC_Height < 2000 & VEC_Height > 0) %>%
     filter(VEC_DOP <= 10)
   elk_clean <- elk_master %>%
     filter(VEC_FixType != "No fix") %>%
+    #filter(VEC_FixType != "GPS-2D") %>%
+    filter(VEC_Height < 2000 & VEC_Height > 0) %>%
     filter(VEC_DOP <= 10)
   wtd_clean <- wtd_master %>%
     filter(VEC_FixType != "No fix") %>%
+    #filter(VEC_FixType != "GPS-2D") %>%
+    #filter(VEC_Height < 2000 & VEC_Height > 0) %>%
     filter(VEC_DOP <= 10) 
+  
+  #  VEH_Height also associated with accuracy so need to see if there are any 
+  #  odd outliers that should be excluded due to low accuracy fixes
+  hist(elk_clean$VEC_Height, breaks = c(100), main = "Elk locations (ALL VEC_Height values)")
+  plot(elk_clean$VEC_Height)  # takes awhile
+  summary(elk_clean$VEC_Height)
+  oddball <- elk_clean[elk_clean$VEC_Height >= 2000 | elk_clean$VEC_Height < 0,]
 
   
   #  Save locations with high accuracy fixes only
@@ -345,7 +358,7 @@
       mutate(
         Latitude = as.numeric(Latitude),
         Longitude = as.numeric(Longitude)
-      )
+      ) 
     return(skinny)
   }
   
@@ -357,6 +370,7 @@
   nrow(md_clean) - nrow(md_skinny)
   nrow(elk_clean) - nrow(elk_skinny)
   nrow(wtd_clean) - nrow(wtd_skinny)
+
   
   # #  Is the hour filtering really working? (this ignores really weird times)
   # # wtd_wrong <- with(wtd_clean, wtd_clean[hour(Floordt) == 0 | hour(Floordt) == 4 | 
@@ -515,7 +529,7 @@
   
   #  Save individual plots in a single pdf for each species
   #  With NE or OK study area boundary for context
-  pdf("./Outputs/elk_NE_maps.pdf")
+  pdf("./Outputs/elk_NE_maps2.pdf")
   for (i in 1:length(unique(elk_NE_maps))) {
     print(elk_NE_maps[[i]])
   }
@@ -532,7 +546,7 @@
   dev.off()
   
   #  Without study area boundary for context
-  pdf("./Outputs/elk_maps.pdf")
+  pdf("./Outputs/elk_maps2.pdf")
   for (i in 1:length(unique(elk_maps))) {
     print(elk_maps[[i]])
   }
