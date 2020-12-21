@@ -68,6 +68,7 @@
   #  Add column with date/time in usable format & set timezone that data downloaded in (includes daylight savings)
   #  Add column that converts times to UTC
   #  Add column that converts times to Pacific Standard Time (add 8 hours), ignoring daylight savings
+  #  Note: Etc/GMT+8 is UTC -8 and outputs in Pacific standard time only (so no daylight savings time)
   #  Add column that floors the time to the nearest hour not ahead
   md_tel <- read.csv("./Data/dev_telem_md_11.16.20.csv") %>%    
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
@@ -84,7 +85,7 @@
   wtd_tel <- read.csv("./Data/dev_telem_wtd_11.16.20.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
-           Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
+           Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),  
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     select(-InWashingtonJurisdiction)
   no_fix <- read.csv("./Data/dev_telem_vec_nofix_11.16.20.csv") %>%
@@ -317,12 +318,12 @@
   elk_clean <- elk_master %>%
     filter(VEC_FixType != "No fix") %>%
     filter(VEC_FixType != "GPS-2D") %>%
-    #filter(VEC_Height < 2000 & VEC_Height > 0) %>%
+    filter(VEC_Height < 2000 & VEC_Height > 0) %>%
     filter(VEC_DOP <= 8)
   wtd_clean <- wtd_master %>%
     filter(VEC_FixType != "No fix") %>%
     filter(VEC_FixType != "GPS-2D") %>%
-    #filter(VEC_Height < 2000 & VEC_Height > 0) %>%
+    filter(VEC_Height < 3000 & VEC_Height > 0) %>%
     filter(VEC_DOP <= 8) 
   
   #  VEH_Height also associated with accuracy so need to see if there are any
