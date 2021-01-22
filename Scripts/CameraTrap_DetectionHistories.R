@@ -38,9 +38,9 @@
   
   #'  Read in data, format, and filter
   #'  Heads up: DON'T format the dates in the cam_stations file yet!
-  cam_stations <- read.csv("G:/My Drive/1 Predator Prey Project/Field Work/Data Entry/All_Camera_Stations_18-19_updated_12.22.20.csv")
+  cam_stations <- read.csv("G:/My Drive/1 Predator Prey Project/Field Work/Data Entry/All_Camera_Stations_18-19_updated_1.21.21.csv")
  
-  megadata <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/full_camdata_2021-01-13.csv") %>%
+  megadata <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/full_camdata_2021-01-21.csv") %>%
     dplyr::select("File", "DateTime", "Date", "Time", "CameraLocation", 
                   "Camera_Lat", "Camera_Long", "Animal", "Human", "Vehicle", 
                   "Species", "HumanActivity", "Count") %>%
@@ -60,10 +60,8 @@
                             format="%Y-%m-%d %H:%M:%S",tz="America/Los_Angeles"),
       Date = as.Date(Date, format = "%Y-%m-%d"),
       Time = chron(times = Time)
-      # DateTimeOriginal = as.POSIXct(paste(Date, Time), format = "%Y-%m-%d %H:%M:%S")
-      # Cell_ID = as.character(str_sub(CameraLocation, 1, 6)),
-      # Camera_ID = as.character(CameraLocation)
     )
+  
   #'  Number rows and add to data frame
   ID <- as.data.frame(1:nrow(megadata))
   colnames(ID) <- "ID"
@@ -71,6 +69,15 @@
   #'  Create unique name for each individual image file
   megadata$Image <- str_c(megadata$CameraLocation, megadata$File, megadata$ID,  sep = "-")
   megadata <- dplyr::select(megadata, -ID)
+  #'  Not sure this step was actually needed anymore but oh well
+  
+  
+   
+  #'  DO I WANT TO INCLUDE INDEPENDENT DETECTION EVENTS IN HERE???? IF SO,
+  #'  I SHOULD GENERATE INDEPENDENT DETECTION EVENTS FOR MULTIPLE TIME PERIODS 
+  #'  (E.G., 5 min & 30 min GAPT BTWN DETECTIONS OF SAME SPECIES).
+  
+  
   
   #'  Filter dates to specific range 
   #'  Summer 2018: 06/01/2018 - 09/30/2018
