@@ -73,9 +73,36 @@
   
   
    
-  #'  DO I WANT TO INCLUDE INDEPENDENT DETECTION EVENTS IN HERE???? IF SO,
-  #'  I SHOULD GENERATE INDEPENDENT DETECTION EVENTS FOR MULTIPLE TIME PERIODS 
-  #'  (E.G., 5 min & 30 min GAPT BTWN DETECTIONS OF SAME SPECIES).
+  #'  CONSIDER RARIFYING BY INDEPENDENT DETECTION EVENTS 
+  #'  SHOULD GENERATE INDEPENDENT DETECTION EVENTS FOR MULTIPLE TIME PERIODS 
+  #'  (E.G., 5 min & 30 min GAPT BTWN DETECTIONS OF SAME SPECIES)?
+  
+  #' #'  Extract independent detections
+  #' #'  Create a column identifying whether each image is an "independent" event
+  #' #'  If camera site is diff from previous row then give unique value. If not then...
+  #' #'  If species detected is diff from previous row at same site then give unique value. If not then...
+  #' #'  If DateTime is >30 min from previous DateTime at same site for same species then give unique value. If not then...
+  #' #'  Capture value is the same as that in the previous row.
+  #' dat <- arrange(megadata, CameraLocation, DateTime)
+  #' caps <- c()
+  #' caps[1] <- 1
+  #' for (i in 2:nrow(dat)){
+  #'   if (dat$CameraLocation[i-1] != dat$CameraLocation[i]) caps[i] = i
+  #'   else (if (dat$Species[i-1] != dat$Species[i]) caps[i] = i
+  #'         else (if (difftime(dat$DateTime[i], dat$DateTime[i-1], units = c("mins")) > 30) caps[i] = i
+  #'               else caps[i] = caps[i-1]))
+  #' }
+  #' 
+  #' caps <- as.factor(caps)
+  #' 
+  #' #'  Add new column to larger data set
+  #' capdata <- cbind(as.data.frame(dat), caps)
+  #' 
+  #' #'  Retain only the first image from each unique detection event
+  #' detections <- capdata %>%
+  #'   group_by(caps) %>%
+  #'   slice(1L) %>%
+  #'   ungroup()
   
   
   
