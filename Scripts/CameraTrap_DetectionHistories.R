@@ -211,17 +211,16 @@
                                     species = "Bobcat",
                                     occasionLength = 7,
                                     day1 = "2018-07-01", 
-                                    datesAsOccasionNames = TRUE,
+                                    # datesAsOccasionNames = TRUE,
                                     # occasionStartTime = 12, # starts at noon
                                     timeZone = "America/Los_Angeles",
                                     output = "binary",
                                     includeEffort = TRUE,
                                     scaleEffort = FALSE,
-                                    writecsv = TRUE,
+                                    # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_bob_smr18 <- DH_bob_smr18[[1]][,1:13]
-  # DH_bob_smr18 <- as.data.frame(DH_bob_smr18[[1]][,1:13])
-  # DH_bob_smr18 <- cbind(CameraLocation = rownames(DH_bob_smr18), DH_bob_smr18)
+  DH_bob_smr18 <- DH_bob_smr18[[1]][1:125,1:13]
+  # DH_bob_smr18 <- DH_bob_smr18[[1]][,1:13]
   
   DH_bob_wtr1819 <- detectionHistory(recordTable = images_winter1819,
                                       camOp = camop_problem,
@@ -232,17 +231,16 @@
                                       species = "Bobcat",
                                       occasionLength = 7,
                                       day1 = "2018-12-01", 
-                                      datesAsOccasionNames = TRUE,
+                                      # datesAsOccasionNames = TRUE,
                                       # occasionStartTime = 12, # starts at noon
                                       timeZone = "America/Los_Angeles",
                                       output = "binary",
                                       includeEffort = TRUE,
                                       scaleEffort = FALSE,
-                                      writecsv = TRUE,
+                                      # writecsv = TRUE,
                                       outDir = "./Data/Detection_Histories")
-  DH_bob_wtr1819 <- DH_bob_wtr1819[[1]][,1:13]
-  # DH_bob_wtr1819 <- as.data.frame(DH_bob_wtr1819[[1]][,1:13])
-  # DH_bob_wtr1819 <- cbind(CameraLocation = rownames(DH_bob_wtr1819), DH_bob_wtr1819)
+  DH_bob_wtr1819 <- DH_bob_wtr1819[[1]][1:125,1:13]
+  # DH_bob_wtr1819 <- DH_bob_wtr1819[[1]][,1:13]
   
   DH_bob_smr19 <- detectionHistory(recordTable = images_summer19,
                                    camOp = camop_problem,
@@ -253,17 +251,16 @@
                                    species = "Bobcat",
                                    occasionLength = 7,
                                    day1 = "2019-07-01", 
-                                   datesAsOccasionNames = TRUE,
+                                   # datesAsOccasionNames = TRUE,
                                    # occasionStartTime = 12, # starts at noon
                                    timeZone = "America/Los_Angeles",
                                    output = "binary",
                                    includeEffort = TRUE,
                                    scaleEffort = FALSE,
-                                   writecsv = TRUE,
+                                   # writecsv = TRUE,
                                    outDir = "./Data/Detection_Histories")
-  DH_bob_smr19 <- DH_bob_smr19[[1]][,1:13]
-  # DH_bob_smr19 <- as.data.frame(DH_bob_smr19[[1]][,1:13])
-  # DH_bob_smr19 <- cbind(CameraLocation = rownames(DH_bob_smr19), DH_bob_smr19)
+  DH_bob_smr19 <- DH_bob_smr19[[1]][126:242,1:13]
+  # DH_bob_smr19 <- DH_bob_smr19[[1]][,1:13]
   
   DH_bob_wtr1920 <- detectionHistory(recordTable = images_winter1920,
                                      camOp = camop_problem,
@@ -274,17 +271,22 @@
                                      species = "Bobcat",
                                      occasionLength = 7,
                                      day1 = "2019-12-01", 
-                                     datesAsOccasionNames = TRUE,
+                                     # datesAsOccasionNames = TRUE,
                                      # occasionStartTime = 12, # starts at noon
                                      timeZone = "America/Los_Angeles",
                                      output = "binary",
                                      includeEffort = TRUE,
                                      scaleEffort = FALSE,
-                                     writecsv = TRUE,
+                                     # writecsv = TRUE,
                                      outDir = "./Data/Detection_Histories")
-  DH_bob_wtr1920 <- DH_bob_wtr1920[[1]][,1:13]
-  # DH_bob_wtr1920 <- as.data.frame(DH_bob_wtr1920[[1]][,1:13])
-  # DH_bob_wtr1920 <- cbind(CameraLocation = rownames(DH_bob_wtr1920), DH_bob_wtr1920)
+  DH_bob_wtr1920 <- DH_bob_wtr1920[[1]][126:242,1:13]
+  # DH_bob_wtr1920 <- DH_bob_wtr1920[[1]][,1:13]
+  
+  #'  Merge summer 2018 and summer 2019 data together
+  DH_bob_smr1819 <- rbind(DH_bob_smr18, DH_bob_smr19)
+  #'  Merge winter 2018/2019 and winter 2019/2020 data together
+  DH_bob_wtr1820 <- rbind(DH_bob_wtr1819, DH_bob_wtr1920)
+
   
   
   ####  COUGARS  ####
@@ -297,17 +299,16 @@
                                     species = "Cougar",
                                     occasionLength = 7,
                                     day1 = "2018-07-01", 
-                                    datesAsOccasionNames = TRUE,
+                                    # datesAsOccasionNames = TRUE,
                                     # occasionStartTime = 12, # starts at noon
                                     timeZone = "America/Los_Angeles",
                                     output = "binary",
                                     includeEffort = TRUE,
                                     scaleEffort = FALSE,
-                                    writecsv = TRUE,
+                                    # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_coug_smr18 <- DH_coug_smr18[[1]][,1:13]
-  # DH_coug_smr18 <- as.data.frame(DH_coug_smr18[[1]][,1:13])
-  # DH_coug_smr18 <- cbind(CameraLocation = rownames(DH_coug_smr18), DH_coug_smr18)
+  DH_coug_smr18 <- DH_coug_smr18[[1]][1:125,1:13]
+  # DH_coug_smr18 <- DH_coug_smr18[[1]][,1:13]
 
   DH_coug_wtr1819 <- detectionHistory(recordTable = images_winter1819,
                                       camOp = camop_problem,
@@ -318,17 +319,16 @@
                                       species = "Cougar",
                                       occasionLength = 7,
                                       day1 = "2018-12-01", 
-                                      datesAsOccasionNames = TRUE,
+                                      # datesAsOccasionNames = TRUE,
                                       # occasionStartTime = 12, # starts at noon
                                       timeZone = "America/Los_Angeles",
                                       output = "binary",
                                       includeEffort = TRUE,
                                       scaleEffort = FALSE,
-                                      writecsv = TRUE,
+                                      # writecsv = TRUE,
                                       outDir = "./Data/Detection_Histories")
-  DH_coug_wtr1819 <- DH_coug_wtr1819[[1]][,1:13]
-  # DH_coug_wtr1819 <- as.data.frame(DH_coug_wtr1819[[1]][,1:13])
-  # DH_coug_wtr1819 <- cbind(CameraLocation = rownames(DH_coug_wtr1819), DH_coug_wtr1819)
+  DH_coug_wtr1819 <- DH_coug_wtr1819[[1]][1:125,1:13]
+  # DH_coug_wtr1819 <- DH_coug_wtr1819[[1]][,1:13]
   
   DH_coug_smr19 <- detectionHistory(recordTable = images_summer19,
                                    camOp = camop_problem,
@@ -339,15 +339,16 @@
                                    species = "Cougar",
                                    occasionLength = 7,
                                    day1 = "2019-07-01", 
-                                   datesAsOccasionNames = TRUE,
+                                   # datesAsOccasionNames = TRUE,
                                    # occasionStartTime = 12, # starts at noon
                                    timeZone = "America/Los_Angeles",
                                    output = "binary",
                                    includeEffort = TRUE,
                                    scaleEffort = FALSE,
-                                   writecsv = TRUE,
+                                   # writecsv = TRUE,
                                    outDir = "./Data/Detection_Histories")
-  DH_coug_smr19 <- DH_coug_smr19[[1]][,1:13]
+  DH_coug_smr19 <- DH_coug_smr19[[1]][126:242,1:13]
+  # DH_coug_smr19 <- DH_coug_smr19[[1]][,1:13]
   
   DH_coug_wtr1920 <- detectionHistory(recordTable = images_winter1920,
                                      camOp = camop_problem,
@@ -358,16 +359,23 @@
                                      species = "Cougar",
                                      occasionLength = 7,
                                      day1 = "2019-12-01", 
-                                     datesAsOccasionNames = TRUE,
+                                     # datesAsOccasionNames = TRUE,
                                      # occasionStartTime = 12, # starts at noon
                                      timeZone = "America/Los_Angeles",
                                      output = "binary",
                                      includeEffort = TRUE,
                                      scaleEffort = FALSE,
-                                     writecsv = TRUE,
+                                     # writecsv = TRUE,
                                      outDir = "./Data/Detection_Histories")
-  DH_coug_wtr1920 <- DH_coug_wtr1920[[1]][,1:13]
+  DH_coug_wtr1920 <- DH_coug_wtr1920[[1]][126:242,1:13]
+  # DH_coug_wtr1920 <- DH_coug_wtr1920[[1]][,1:13]
 
+  #'  Merge summer 2018 and summer 2019 data together
+  DH_coug_smr1819 <- rbind(DH_coug_smr18, DH_coug_smr19)
+  #'  Merge winter 2018/2019 and winter 2019/2020 data together
+  DH_coug_wtr1820 <- rbind(DH_coug_wtr1819, DH_coug_wtr1920)
+
+  
   ####  COYOTES  ####
   DH_coy_smr18 <- detectionHistory(recordTable = images_summer18,
                                     camOp = camop_problem,
@@ -378,17 +386,16 @@
                                     species = "Coyote",
                                     occasionLength = 7,
                                     day1 = "2018-07-01", 
-                                    datesAsOccasionNames = TRUE,
+                                    # datesAsOccasionNames = TRUE,
                                     # occasionStartTime = 12, # starts at noon
                                     timeZone = "America/Los_Angeles",
                                     output = "binary",
                                     includeEffort = TRUE,
                                     scaleEffort = FALSE,
-                                    writecsv = TRUE,
+                                    # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_coy_smr18 <- DH_coy_smr18[[1]][,1:13]
-  # DH_coy_smr18 <- as.data.frame(DH_coy_smr18[[1]][,1:13])
-  # DH_coy_smr18 <- cbind(CameraLocation = rownames(DH_coy_smr18), DH_coy_smr18)
+  DH_coy_smr18 <- DH_coy_smr18[[1]][1:125,1:13]
+  # DH_coy_smr18 <- DH_coy_smr18[[1]][,1:13]
   
   DH_coy_wtr1819 <- detectionHistory(recordTable = images_winter1819,
                                       camOp = camop_problem,
@@ -399,17 +406,16 @@
                                       species = "Coyote",
                                       occasionLength = 7,
                                       day1 = "2018-12-01", 
-                                      datesAsOccasionNames = TRUE,
+                                      # datesAsOccasionNames = TRUE,
                                       # occasionStartTime = 12, # starts at noon
                                       timeZone = "America/Los_Angeles",
                                       output = "binary",
                                       includeEffort = TRUE,
                                       scaleEffort = FALSE,
-                                      writecsv = TRUE,
+                                      # writecsv = TRUE,
                                       outDir = "./Data/Detection_Histories")
-  DH_coy_wtr1819 <- DH_coy_wtr1819[[1]][,1:13]
-  # DH_coy_wtr1819 <- as.data.frame(DH_coy_wtr1819[[1]][,1:13])
-  # DH_coy_wtr1819 <- cbind(CameraLocation = rownames(DH_coy_wtr1819), DH_coy_wtr1819)
+  DH_coy_wtr1819 <- DH_coy_wtr1819[[1]][1:125,1:13]
+  # DH_coy_wtr1819 <- DH_coy_wtr1819[[1]][,1:13]
   
   DH_coy_smr19 <- detectionHistory(recordTable = images_summer19,
                                     camOp = camop_problem,
@@ -420,15 +426,15 @@
                                     species = "Coyote",
                                     occasionLength = 7,
                                     day1 = "2019-07-01", 
-                                    datesAsOccasionNames = TRUE,
+                                    # datesAsOccasionNames = TRUE,
                                     # occasionStartTime = 12, # starts at noon
                                     timeZone = "America/Los_Angeles",
                                     output = "binary",
                                     includeEffort = TRUE,
                                     scaleEffort = FALSE,
-                                    writecsv = TRUE,
+                                    # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_coy_smr19 <- DH_coy_smr19[[1]][,1:13]
+  DH_coy_smr19 <- DH_coy_smr19[[1]][126:242,1:13]
   
   DH_coy_wtr1920 <- detectionHistory(recordTable = images_winter1920,
                                       camOp = camop_problem,
@@ -439,15 +445,21 @@
                                       species = "Coyote",
                                       occasionLength = 7,
                                       day1 = "2019-12-01", 
-                                      datesAsOccasionNames = TRUE,
+                                      # datesAsOccasionNames = TRUE,
                                       # occasionStartTime = 12, # starts at noon
                                       timeZone = "America/Los_Angeles",
                                       output = "binary",
                                       includeEffort = TRUE,
                                       scaleEffort = FALSE,
-                                      writecsv = TRUE,
+                                      # writecsv = TRUE,
                                       outDir = "./Data/Detection_Histories")
-  DH_coy_wtr1920 <- DH_coy_wtr1920[[1]][,1:13]
+  DH_coy_wtr1920 <- DH_coy_wtr1920[[1]][126:242,1:13]
+  
+  #'  Merge summer 2018 and summer 2019 data together
+  DH_coy_smr1819 <- rbind(DH_coy_smr18, DH_coy_smr19)
+  #'  Merge winter 2018/2019 and winter 2019/2020 data together
+  DH_coy_wtr1820 <- rbind(DH_coy_wtr1819, DH_coy_wtr1920)
+  
   
   ####  WOLVES  ####
   DH_wolf_smr18 <- detectionHistory(recordTable = images_summer18,
@@ -459,17 +471,16 @@
                                     species = "Wolf",
                                     occasionLength = 7,
                                     day1 = "2018-07-01", 
-                                    datesAsOccasionNames = TRUE,
+                                    # datesAsOccasionNames = TRUE,
                                     # occasionStartTime = 12, # starts at noon
                                     timeZone = "America/Los_Angeles",
                                     output = "binary",
                                     includeEffort = TRUE,
                                     scaleEffort = FALSE,
-                                    writecsv = TRUE,
+                                    # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_wolf_smr18 <- DH_wolf_smr18[[1]][,1:13]
-  # DH_wolf_smr18 <- as.data.frame(DH_wolf_smr18[[1]][,1:13])
-  # DH_wolf_smr18 <- cbind(CameraLocation = rownames(DH_wolf_smr18), DH_wolf_smr18)
+  DH_wolf_smr18 <- DH_wolf_smr18[[1]][1:125,1:13]
+  # DH_wolf_smr18 <- DH_wolf_smr18[[1]][,1:13]
   
   DH_wolf_wtr1819 <- detectionHistory(recordTable = images_winter1819,
                                       camOp = camop_problem,
@@ -480,17 +491,16 @@
                                       species = "Wolf",
                                       occasionLength = 7,
                                       day1 = "2018-12-01", 
-                                      datesAsOccasionNames = TRUE,
+                                      # datesAsOccasionNames = TRUE,
                                       # occasionStartTime = 12, # starts at noon
                                       timeZone = "America/Los_Angeles",
                                       output = "binary",
                                       includeEffort = TRUE,
                                       scaleEffort = FALSE,
-                                      writecsv = TRUE,
+                                      # writecsv = TRUE,
                                       outDir = "./Data/Detection_Histories")
-  DH_wolf_wtr1819 <- DH_wolf_wtr1819[[1]][,1:13]
-  # DH_wolf_wtr1819 <- as.data.frame(DH_wolf_wtr1819[[1]][,1:13])
-  # DH_wolf_wtr1819 <- cbind(CameraLocation = rownames(DH_wolf_wtr1819), DH_wolf_wtr1819)
+  DH_wolf_wtr1819 <- DH_wolf_wtr1819[[1]][1:125,1:13]
+  # DH_wolf_wtr1819 <- DH_wolf_wtr1819[[1]][,1:13]
   
   DH_wolf_smr19 <- detectionHistory(recordTable = images_summer19,
                                    camOp = camop_problem,
@@ -501,15 +511,15 @@
                                    species = "Wolf",
                                    occasionLength = 7,
                                    day1 = "2019-07-01", 
-                                   datesAsOccasionNames = TRUE,
+                                   # datesAsOccasionNames = TRUE,
                                    # occasionStartTime = 12, # starts at noon
                                    timeZone = "America/Los_Angeles",
                                    output = "binary",
                                    includeEffort = TRUE,
                                    scaleEffort = FALSE,
-                                   writecsv = TRUE,
+                                   # writecsv = TRUE,
                                    outDir = "./Data/Detection_Histories")
-  DH_wolf_smr19 <- DH_wolf_smr19[[1]][,1:13]
+  DH_wolf_smr19 <- DH_wolf_smr19[[1]][126:242,1:13]
   
   DH_wolf_wtr1920 <- detectionHistory(recordTable = images_winter1920,
                                      camOp = camop_problem,
@@ -520,15 +530,21 @@
                                      species = "Wolf",
                                      occasionLength = 7,
                                      day1 = "2019-12-01", 
-                                     datesAsOccasionNames = TRUE,
+                                     # datesAsOccasionNames = TRUE,
                                      # occasionStartTime = 12, # starts at noon
                                      timeZone = "America/Los_Angeles",
                                      output = "binary",
                                      includeEffort = TRUE,
                                      scaleEffort = FALSE,
-                                     writecsv = TRUE,
+                                     # writecsv = TRUE,
                                      outDir = "./Data/Detection_Histories")
-  DH_wolf_wtr1920 <- DH_wolf_wtr1920[[1]][,1:13]
+  DH_wolf_wtr1920 <- DH_wolf_wtr1920[[1]][126:242,1:13]
+  
+  #'  Merge summer 2018 and summer 2019 data together
+  DH_wolf_smr1819 <- rbind(DH_wolf_smr18, DH_wolf_smr19)
+  #'  Merge winter 2018/2019 and winter 2019/2020 data together
+  DH_wolf_wtr1820 <- rbind(DH_wolf_wtr1819, DH_wolf_wtr1920)
+  
   
   ####  ELK  ####
   DH_elk_smr18 <- detectionHistory(recordTable = images_summer18,
@@ -540,17 +556,16 @@
                                    species = "Elk",
                                    occasionLength = 7,
                                    day1 = "2018-07-01", 
-                                   datesAsOccasionNames = TRUE,
+                                   # datesAsOccasionNames = TRUE,
                                    # occasionStartTime = 12, # starts at noon
                                    timeZone = "America/Los_Angeles",
                                    output = "binary",
                                    includeEffort = TRUE,
                                    scaleEffort = FALSE,
-                                   writecsv = TRUE,
+                                   # writecsv = TRUE,
                                    outDir = "./Data/Detection_Histories")
-  DH_elk_smr18 <- DH_elk_smr18[[1]][,1:13]
-  # DH_elk_smr18 <- as.data.frame(DH_elk_smr18[[1]][,1:13])
-  # DH_elk_smr18 <- cbind(CameraLocation = rownames(DH_elk_smr18), DH_elk_smr18)
+  DH_elk_smr18 <- DH_elk_smr18[[1]][1:125,1:13]
+  # DH_elk_smr18 <- as.data.frame(DH_elk_smr18[[1]][,1:13]
   
   DH_elk_wtr1819 <- detectionHistory(recordTable = images_winter1819,
                                      camOp = camop_problem,
@@ -561,17 +576,16 @@
                                      species = "Elk",
                                      occasionLength = 7,
                                      day1 = "2018-12-01", 
-                                     datesAsOccasionNames = TRUE,
+                                     # datesAsOccasionNames = TRUE,
                                      # occasionStartTime = 12, # starts at noon
                                      timeZone = "America/Los_Angeles",
                                      output = "binary",
                                      includeEffort = TRUE,
                                      scaleEffort = FALSE,
-                                     writecsv = TRUE,
+                                     # writecsv = TRUE,
                                      outDir = "./Data/Detection_Histories")
-  DH_elk_wtr1819 <- DH_elk_wtr1819[[1]][,1:13]
-  # DH_elk_wtr1819 <- as.data.frame(DH_elk_wtr1819[[1]][,1:13])
-  # DH_elk_wtr1819 <- cbind(CameraLocation = rownames(DH_elk_wtr1819), DH_elk_wtr1819)
+  DH_elk_wtr1819 <- DH_elk_wtr1819[[1]][1:125,1:13]
+  # DH_elk_wtr1819 <- DH_elk_wtr1819[[1]][,1:13]
   
   DH_elk_smr19 <- detectionHistory(recordTable = images_summer19,
                                     camOp = camop_problem,
@@ -582,15 +596,15 @@
                                     species = "Elk",
                                     occasionLength = 7,
                                     day1 = "2019-07-01", 
-                                    datesAsOccasionNames = TRUE,
+                                    # datesAsOccasionNames = TRUE,
                                     # occasionStartTime = 12, # starts at noon
                                     timeZone = "America/Los_Angeles",
                                     output = "binary",
                                     includeEffort = TRUE,
                                     scaleEffort = FALSE,
-                                    writecsv = TRUE,
+                                    # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_elk_smr19 <- DH_elk_smr19[[1]][,1:13]
+  DH_elk_smr19 <- DH_elk_smr19[[1]][126:242,1:13]
   
   DH_elk_wtr1920 <- detectionHistory(recordTable = images_winter1920,
                                       camOp = camop_problem,
@@ -601,15 +615,21 @@
                                       species = "Elk",
                                       occasionLength = 7,
                                       day1 = "2019-12-01", 
-                                      datesAsOccasionNames = TRUE,
+                                      # datesAsOccasionNames = TRUE,
                                       # occasionStartTime = 12, # starts at noon
                                       timeZone = "America/Los_Angeles",
                                       output = "binary",
                                       includeEffort = TRUE,
                                       scaleEffort = FALSE,
-                                      writecsv = TRUE,
+                                      # writecsv = TRUE,
                                       outDir = "./Data/Detection_Histories")
-  DH_elk_wtr1920 <- DH_elk_wtr1920[[1]][,1:13]
+  DH_elk_wtr1920 <- DH_elk_wtr1920[[1]][126:242,1:13]
+  
+  #'  Merge summer 2018 and summer 2019 data together
+  DH_elk_smr1819 <- rbind(DH_elk_smr18, DH_elk_smr19)
+  #'  Merge winter 2018/2019 and winter 2019/2020 data together
+  DH_elk_wtr1820 <- rbind(DH_elk_wtr1819, DH_elk_wtr1920)
+  
   
   ####  MULE DEER  ####
   DH_md_smr18 <- detectionHistory(recordTable = images_summer18,
@@ -621,17 +641,16 @@
                                     species = "Mule Deer",
                                     occasionLength = 7,
                                     day1 = "2018-07-01", 
-                                    datesAsOccasionNames = TRUE,
+                                    # datesAsOccasionNames = TRUE,
                                     # occasionStartTime = 12, # starts at noon
                                     timeZone = "America/Los_Angeles",
                                     output = "binary",
                                     includeEffort = TRUE,
                                     scaleEffort = FALSE,
-                                    writecsv = TRUE,
+                                    # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_md_smr18 <- DH_md_smr18[[1]][,1:13]
-  # DH_md_smr18 <- as.data.frame(DH_md_smr18[[1]][,1:13])
-  # DH_md_smr18 <- cbind(CameraLocation = rownames(DH_md_smr18), DH_md_smr18)
+  DH_md_smr18 <- DH_md_smr18[[1]][1:125,1:13]
+  # DH_md_smr18 <- DH_md_smr18[[1]][,1:13]
   
   DH_md_wtr1819 <- detectionHistory(recordTable = images_winter1819,
                                       camOp = camop_problem,
@@ -642,17 +661,16 @@
                                       species = "Mule Deer",
                                       occasionLength = 7,
                                       day1 = "2018-12-01", 
-                                      datesAsOccasionNames = TRUE,
+                                      # datesAsOccasionNames = TRUE,
                                       # occasionStartTime = 12, # starts at noon
                                       timeZone = "America/Los_Angeles",
                                       output = "binary",
                                       includeEffort = TRUE,
                                       scaleEffort = FALSE,
-                                      writecsv = TRUE,
+                                      # writecsv = TRUE,
                                       outDir = "./Data/Detection_Histories")
-  DH_md_wtr1819 <- DH_md_wtr1819[[1]][,1:13]
-  # DH_md_wtr1819 <- as.data.frame(DH_md_wtr1819[[1]][,1:13])
-  # DH_md_wtr1819 <- cbind(CameraLocation = rownames(DH_md_wtr1819), DH_md_wtr1819)
+  DH_md_wtr1819 <- DH_md_wtr1819[[1]][1:125,1:13]
+  # DH_md_wtr1819 <- DH_md_wtr1819[[1]][,1:13]
   
   DH_md_smr19 <- detectionHistory(recordTable = images_summer19,
                                    camOp = camop_problem,
@@ -663,15 +681,15 @@
                                    species = "Mule Deer",
                                    occasionLength = 7,
                                    day1 = "2019-07-01", 
-                                   datesAsOccasionNames = TRUE,
+                                   # datesAsOccasionNames = TRUE,
                                    # occasionStartTime = 12, # starts at noon
                                    timeZone = "America/Los_Angeles",
                                    output = "binary",
                                    includeEffort = TRUE,
                                    scaleEffort = FALSE,
-                                   writecsv = TRUE,
+                                   # writecsv = TRUE,
                                    outDir = "./Data/Detection_Histories")
-  DH_md_smr19 <- DH_md_smr19[[1]][,1:13]
+  DH_md_smr19 <- DH_md_smr19[[1]][126:242,1:13]
   
   DH_md_wtr1920 <- detectionHistory(recordTable = images_winter1920,
                                      camOp = camop_problem,
@@ -682,15 +700,21 @@
                                      species = "Mule Deer",
                                      occasionLength = 7,
                                      day1 = "2019-12-01", 
-                                     datesAsOccasionNames = TRUE,
+                                     # datesAsOccasionNames = TRUE,
                                      # occasionStartTime = 12, # starts at noon
                                      timeZone = "America/Los_Angeles",
                                      output = "binary",
                                      includeEffort = TRUE,
                                      scaleEffort = FALSE,
-                                     writecsv = TRUE,
+                                     # writecsv = TRUE,
                                      outDir = "./Data/Detection_Histories")
-  DH_md_wtr1920 <- DH_md_wtr1920[[1]][,1:13]
+  DH_md_wtr1920 <- DH_md_wtr1920[[1]][126:242,1:13]
+  
+  #'  Merge summer 2018 and summer 2019 data together
+  DH_md_smr1819 <- rbind(DH_md_smr18, DH_md_smr19)
+  #'  Merge winter 2018/2019 and winter 2019/2020 data together
+  DH_md_wtr1820 <- rbind(DH_md_wtr1819, DH_md_wtr1920)
+  
   
   ####  WHITE-TAILED DEER  ####
   DH_wtd_smr18 <- detectionHistory(recordTable = images_summer18,
@@ -702,17 +726,16 @@
                                   species = "White-tailed Deer",
                                   occasionLength = 7,
                                   day1 = "2018-07-01", 
-                                  datesAsOccasionNames = TRUE,
+                                  # datesAsOccasionNames = TRUE,
                                   # occasionStartTime = 12, # starts at noon
                                   timeZone = "America/Los_Angeles",
                                   output = "binary",
                                   includeEffort = TRUE,
                                   scaleEffort = FALSE,
-                                  writecsv = TRUE,
+                                  # writecsv = TRUE,
                                   outDir = "./Data/Detection_Histories")
-  DH_wtd_smr18 <- DH_wtd_smr18[[1]][,1:13]
-  # DH_wtd_smr18 <- as.data.frame(DH_wtd_smr18[[1]][,1:13])
-  # DH_wtd_smr18 <- cbind(CameraLocation = rownames(DH_wtd_smr18), DH_wtd_smr18)
+  DH_wtd_smr18 <- DH_wtd_smr18[[1]][1:125,1:13]
+  # DH_wtd_smr18 <- DH_wtd_smr18[[1]][,1:13]
   
   DH_wtd_wtr1819 <- detectionHistory(recordTable = images_winter1819,
                                     camOp = camop_problem,
@@ -723,17 +746,16 @@
                                     species = "White-tailed Deer",
                                     occasionLength = 7,
                                     day1 = "2018-12-01", 
-                                    datesAsOccasionNames = TRUE,
+                                    # datesAsOccasionNames = TRUE,
                                     # occasionStartTime = 12, # starts at noon
                                     timeZone = "America/Los_Angeles",
                                     output = "binary",
                                     includeEffort = TRUE,
                                     scaleEffort = FALSE,
-                                    writecsv = TRUE,
+                                    # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_wtd_wtr1819 <- DH_wtd_wtr1819[[1]][,1:13]
-  # DH_wtd_wtr1819 <- as.data.frame(DH_wtd_wtr1819[[1]][,1:13])
-  # DH_wtd_wtr1819 <- cbind(CameraLocation = rownames(DH_wtd_wtr1819), DH_wtd_wtr1819)
+  DH_wtd_wtr1819 <- DH_wtd_wtr1819[[1]][1:125,1:13]
+  # DH_wtd_wtr1819 <- DH_wtd_wtr1819[[1]][,1:13]
   
   DH_wtd_smr19 <- detectionHistory(recordTable = images_summer19,
                                   camOp = camop_problem,
@@ -744,15 +766,15 @@
                                   species = "White-tailed Deer",
                                   occasionLength = 7,
                                   day1 = "2019-07-01", 
-                                  datesAsOccasionNames = TRUE,
+                                  # datesAsOccasionNames = TRUE,
                                   # occasionStartTime = 12, # starts at noon
                                   timeZone = "America/Los_Angeles",
                                   output = "binary",
                                   includeEffort = TRUE,
                                   scaleEffort = FALSE,
-                                  writecsv = TRUE,
+                                  # writecsv = TRUE,
                                   outDir = "./Data/Detection_Histories")
-  DH_wtd_smr19 <- DH_wtd_smr19[[1]][,1:13]
+  DH_wtd_smr19 <- DH_wtd_smr19[[1]][126:242,1:13]
   
   DH_wtd_wtr1920 <- detectionHistory(recordTable = images_winter1920,
                                     camOp = camop_problem,
@@ -763,20 +785,47 @@
                                     species = "White-tailed Deer",
                                     occasionLength = 7,
                                     day1 = "2019-12-01", 
-                                    datesAsOccasionNames = TRUE,
+                                    # datesAsOccasionNames = TRUE,
                                     # occasionStartTime = 12, # starts at noon
                                     timeZone = "America/Los_Angeles",
                                     output = "binary",
                                     includeEffort = TRUE,
                                     scaleEffort = FALSE,
-                                    writecsv = TRUE,
+                                    # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_wtd_wtr1920 <- DH_wtd_wtr1920[[1]][,1:13]
+  DH_wtd_wtr1920 <- DH_wtd_wtr1920[[1]][126:242,1:13]
 
-  
+  #'  Merge summer 2018 and summer 2019 data together
+  DH_wtd_smr1819 <- rbind(DH_wtd_smr18, DH_wtd_smr19)
+  #'  Merge winter 2018/2019 and winter 2019/2020 data together
+  DH_wtd_wtr1820 <- rbind(DH_wtd_wtr1819, DH_wtd_wtr1920)
 
 
-  
+  #' #'  Is it worth keeping data from Year1 cameras collected in 2019?
+  #' #'  Look at which sites have data for both years
+  #' #'  How many sites, how many sampling occasions, how many detections?
+  #' #'  Requires DH include all rows (don't truncate at 1:125 or 126:242)
+  #' 
+  #' #'  Merge summer 2018 and summer 2019 data together
+  #' DH_bob_sm1819 <- rbind(DH_bob_smr18, DH_bob_smr19)
+  #' #'  Reorder so repeat camera sites are grouped together 
+  #' orderDH <- DH_bob_sm1819[order(row.names(DH_bob_sm1819)),]
+  #' #'  Drop rows that have all NAs so it's easier to see repeat sites with data
+  #' repcams <- orderDH[rowSums(is.na(orderDH)) != ncol(orderDH), ]
+  #' #'  Identify which repeat camera sites have data in 2019
+  #' dups <- repcams[duplicated(row.names(repcams)),]
+  #' (srvys <- apply(dups, MARGIN = 1, function(x) sum(!is.na(x))))
+  #' nsrvys <- table(srvys)
+  #' sum(nsrvys)
+  #' #'  Histogram of the number of survey occasions for repeat camera sites
+  #' hist(srvys, breaks = 20, xlim = c(0,14), main = "Number of Survey Occasions, Yr1 cams in 2019")
+  #' #'  Identify how many detections occurred at repeat sites in 2019
+  #' (ndets <- apply(dups, MARGIN = 1, function(x) sum((x), na.rm=TRUE)))
+  #' hist(ndets, breaks = 3, xlim = c(0, 5), main = "Number of Bobcat Detections, Yr1 cams in 2019")
+  #' #'  Number of detections
+  #' sum(ndets)
+  #' #'  Number of cameras where a detection occurred
+  #' sum(ndets > 0)
   
   
   
