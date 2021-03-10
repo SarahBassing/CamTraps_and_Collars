@@ -1002,10 +1002,25 @@
   
   
   ####  Goodness of Fit Test  ####
-  #'  Checking model fit: Chi^2 test
-  #'  Code from unmarked vingette
+  #'  Checking model fit: Chi^2 test for binary data (1 df)
+  #'  Chi^2 GOF is a one-sided test used to determine if a sample matches the 
+  #'   population & asks what's the probability that the test statistic is greater  
+  #'   than (falls above) the critical value on the tail of the Chi^2 distribution.
+  #'  H0: there is no significant difference between the observed and the expected value
+  #'  Ha: there is a significant difference between the observed and the expected value
+  #'  If the Chi^2 test statistic is greater than the critical value derived from
+  #'   the Chi^2 distribution (determined by degrees of freedom), then reject
+  #'   the null & conclude there is a significant difference btwn observed & expected. 
+  #'  If test statistic is less than the critical value then fail to reject & 
+  #'   conclude there is no significant difference btwn observed & expected frequencies.
+  #'  Use p-value with alpha-level 0.05 to reject/fail to reject the null hypothesis.
+  #'  Failing to reject the null (p-value > 0.05) indicates adequate model fit.
+  #'  
+  #'  Code from unmarked vignette
+  #'  Parametric Bootstrap Statistics:
   #'  t0 = Original statistic computed from data
   #'  t_B = Vector of bootstrap samples
+  #'  If Pr(t_B > t0) is > 0.05 then fail to reject null & conclude model fit is adequate
   chisq <- function(fm) {
     umf <- getData(fm)
     y <- getY(umf)
