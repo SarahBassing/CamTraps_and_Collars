@@ -33,7 +33,7 @@
   #'  Canopy cover, land management & owner, habitat type => site-level occ covs
   #'  Dist. to focal pt, height, monitoring = > survey/site-level detection covs
   # stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18_2021-02-15.csv") %>%
-  stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-03-04.csv") %>%
+  stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-03-08.csv") %>%
     #'  Get rid of mysterious space after one of the NEs
     mutate(
       Study_Area = ifelse(Study_Area == "NE ", "NE", as.character(Study_Area)),
@@ -141,7 +141,13 @@
       Canopy18 = scale(canopy18),               # Courser-scale, 30m res
       Canopy19 = scale(canopy19),
       Canopy = scale(canopy),
-      NearestH2o = scale(km2water)
+      Landfire = scale(landfire),
+      WaterDensity = scale(water_density),
+      RoadDensity = scale(road_density),
+      NearestH2o = scale(km2water),
+      NearestRd = scale(km2road),
+      HumanDensity = scale(human_density),
+      HumanModified = scale(modified)
     )
   #WaterDen = scale(water_density)
   
@@ -175,9 +181,9 @@
   
   #'  Replace missing covariate values with mean value
   #'  Missing 2018 Canopy_Cov obs in forested are so using mean instead of median
-  # stations[is.na(stations$Distance),] <- 0
-  # stations[is.na(stations$Height),] <- 0
-  # stations[is.na(stations$Canopy_Cov),] <- 0
+  stations$Distance[is.na(stations$Distance),] <- 0
+  stations$Height[is.na(stations$Height),] <- 0
+  stations$Canopy_Cov[is.na(stations$Canopy_Cov),] <- 0
     
   #'  Check for correlation among covaraites
   #'  Watch out for NAs (use="complete.obs")
@@ -190,12 +196,22 @@
   cor(stations$Elev, stations$NDVI_sm18, use = "complete.obs")
   cor(stations$Slope, stations$NDVI_sm18, use = "complete.obs")
   cor(stations$Aspect, stations$NDVI_sm18, use = "complete.obs")
+  cor(stations$TRI, stations$WaterDensity, use = "complete.obs")
+  cor(stations$Elev, stations$WaterDensity, use = "complete.obs")
+  cor(stations$Elev, stations$RoadDensity, use = "complete.obs")
+  cor(stations$WaterDensity, stations$NearestH2o, use = "complete.obs")
+  cor(stations$RoadDensity, stations$NearestRd, use = "complete.obs")
+  cor(stations$RoadDensity, stations$HumanDensity, use = "complete.obs")
+  cor(stations$WaterDensity, stations$HumanDensity, use = "complete.obs")
+  cor(stations$Landfire, stations$Canopy, use = "complete.obs")  #  correlated-ish
+  cor(stations$HumanDensity, stations$HumanModified, use = "complete.obs")  #  somewhat correlated
+  cor(stations$HumanModified, stations$RoadDensity, use = "complete.obs")
   
   #'  Create survey-level covariate matrix
-  #'  Requires uniqe column for each sampling occasion and covariate
+  #'  Requires unique column for each sampling occasion and covariate
   nrows <- nrow(stations)
   ncols <- 13
- 
+  
   srvy_covs <- list(
     Height = matrix(c(Hgt1 = stations$Height, Hgt2 = stations$Height,
                       Hgt3 = stations$Height, Hgt4 = stations$Height,
@@ -212,13 +228,17 @@
                         Dist9 = stations$Distance, Dist10 = stations$Distance,
                         Dist11 = stations$Distance, Dist12 = stations$Distance,
                         Dist13 = stations$Distance),
-                      nrow = nrows, ncol = ncols, byrow = FALSE)
+                      nrow = nrows, ncol = ncols, byrow = FALSE),
+    Effort_smr = matrix(Effort_smr1819, nrow = nrows, ncol = ncols, byrow = FALSE),
+    Effort_wtr = matrix(Effort_wtr1820, nrow = nrows, ncol = ncols, byrow = FALSE)
     )
+  #'  FYI effort covariate does weird things when scaled so not doing it now
   
   #'  Double check it looks OK
   head(srvy_covs[[2]])
+  head(srvy_covs[[3]])
   
-  #'  NEED TO BRING IN EFFORT DATA AS WELL!
+  #'  NEED TO BRING IN TEMPERATURE DATA AS WELL
   
 
 
@@ -237,17 +257,23 @@
                                                          Slope = stations$Slope,
                                                          Aspect = stations$Aspect,
                                                          Tree_cov = stations$Canopy,
-                                                         NearestH2o = stations$NearestH2o),
+                                                         Landfire = stations$Landfire,
+                                                         NearestH2o = stations$NearestH2o,
+                                                         NearestRd = stations$NearestRd,
+                                                         WaterDensity = stations$WaterDensity,
+                                                         RoadDensity = stations$RoadDensity,
+                                                         HumanDensity = stations$HumanDensity,
+                                                         HumanMod = stations$HumanModified),
                                    obsCovs = srvy_covs)
   # Mgnt = stations$Land_Mgnt,
   # Habitat = stations$Habitat_Type,
   # dNBR = stations$dNBR_sm,  #  THINK ABOUT USING BURN SEVERITY FROM PREVIOUS YEAR INSTEAD
   # TRI = stations$TRI,
   
+  nrow(bob_s1819_UMF@y)
   #'  Remove rows with missing observation covariate data (Height & Distance data)
-  nrow(bob_s1819_UMF@y)
-  bob_s1819_UMF <- bob_s1819_UMF[-missing_dat]
-  nrow(bob_s1819_UMF@y)
+  # bob_s1819_UMF <- bob_s1819_UMF[-missing_dat]
+  # nrow(bob_s1819_UMF@y)
   ##### DOES IT MAKE SENSE TO DROP ENTIRE CAMERA SITE DUE TO 1 MISSING SITE COVARIATE THAT OFTEN ISN'T EVEN SIGNIFICANT?
 
   bob_w1820_UMF <- unmarkedFrameOccu(DH_bob_wtr1820,
@@ -262,13 +288,19 @@
                                                            Slope = stations$Slope,
                                                            Aspect = stations$Aspect,
                                                            Tree_cov = stations$Canopy,
-                                                           NearestH2o = stations$NearestH2o),
+                                                           Landfire = stations$Landfire,
+                                                           NearestH2o = stations$NearestH2o,
+                                                           NearestRd = stations$NearestRd,
+                                                           WaterDensity = stations$WaterDensity,
+                                                           RoadDensity = stations$RoadDensity,
+                                                           HumanDensity = stations$HumanDensity,
+                                                           HumanMod = stations$HumanModified),
                                      obsCovs = srvy_covs)
 
-  #'  Remove rows with missing observation covariate data (Height & Distance data)
   nrow(bob_w1820_UMF@y)
-  bob_w1820_UMF <- bob_w1820_UMF[-missing_dat]
-  nrow(bob_w1820_UMF@y)
+  #' #'  Remove rows with missing observation covariate data (Height & Distance data)
+  #' bob_w1820_UMF <- bob_w1820_UMF[-missing_dat]
+  #' nrow(bob_w1820_UMF@y)
   
   summary(bob_w1820_UMF)
   
@@ -286,11 +318,17 @@
                                                           Aspect = stations$Aspect,
                                                           TRI = stations$TRI,
                                                           Tree_cov = stations$Canopy,
-                                                          NearestH2o = stations$NearestH2o),
+                                                          Landfire = stations$Landfire,
+                                                          NearestH2o = stations$NearestH2o,
+                                                          NearestRd = stations$NearestRd,
+                                                          WaterDensity = stations$WaterDensity,
+                                                          RoadDensity = stations$RoadDensity,
+                                                          HumanDensity = stations$HumanDensity,
+                                                          HumanMod = stations$HumanModified),
                                     obsCovs = srvy_covs)
   nrow(coug_s1819_UMF@y)
-  coug_s1819_UMF <- coug_s1819_UMF[-missing_dat]
-  nrow(coug_s1819_UMF@y)
+  # coug_s1819_UMF <- coug_s1819_UMF[-missing_dat]
+  # nrow(coug_s1819_UMF@y)
   
   coug_w1820_UMF <- unmarkedFrameOccu(DH_coug_wtr1820,
                                     siteCovs = data.frame(Year = stations$Year,
@@ -305,48 +343,18 @@
                                                           Aspect = stations$Aspect,
                                                           TRI = stations$TRI,
                                                           Tree_cov = stations$Canopy,
-                                                          NearestH2o = stations$NearestH2o),
+                                                          Landfire = stations$Landfire,
+                                                          NearestH2o = stations$NearestH2o,
+                                                          NearestRd = stations$NearestRd,
+                                                          WaterDensity = stations$WaterDensity,
+                                                          RoadDensity = stations$RoadDensity,
+                                                          HumanDensity = stations$HumanDensity,
+                                                          HumanMod = stations$HumanModified),
                                     obsCovs = srvy_covs)
   nrow(coug_w1820_UMF@y)
-  coug_w1820_UMF <- coug_w1820_UMF[-missing_dat]
-  nrow(coug_w1820_UMF@y)
+  # coug_w1820_UMF <- coug_w1820_UMF[-missing_dat]
+  # nrow(coug_w1820_UMF@y)
   
-  # coug_s19_UMF <- unmarkedFrameOccu(DH_coug_smr19,
-  #                                   siteCovs = data.frame(Year = stations$Year,
-  #                                                         Area = stations$Study_Area,
-  #                                                         Trail = stations$Trail,
-  #                                                         Canopy_cov = stations$Canopy_Cov,
-  #                                                         Landcov = stations$Landcov,
-  #                                                         NLCD = stations$NLCD,
-  #                                                         NDVI = stations$NDVI_sm,  
-  #                                                         Elev = stations$Elev,
-  #                                                         Slope = stations$Slope,
-  #                                                         Aspect = stations$Aspect,
-  #                                                         TRI = stations$TRI,
-  #                                                         Tree_cov = stations$Canopy,
-  #                                                         NearestH2o = stations$NearestH2o),
-  #                                   obsCovs = srvy_covs)
-  # nrow(coug_s19_UMF@y)
-  # coug_s19_UMF <- coug_s19_UMF[-missing_dat]
-  # nrow(coug_s19_UMF@y)
-  # coug_w1920_UMF <- unmarkedFrameOccu(DH_coug_wtr1920,
-  #                                     siteCovs = data.frame(Year = stations$Year,
-  #                                                           Area = stations$Study_Area,
-  #                                                           Trail = stations$Trail,
-  #                                                           Canopy_cov = stations$Canopy_Cov,
-  #                                                           Landcov = stations$Landcov,
-  #                                                           NLCD = stations$NLCD,
-  #                                                           NDVI = stations$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
-  #                                                           Elev = stations$Elev,
-  #                                                           Slope = stations$Slope,
-  #                                                           Aspect = stations$Aspect,
-  #                                                           TRI = stations$TRI,
-  #                                                           Tree_cov = stations$Canopy,
-  #                                                           NearestH2o = stations$NearestH2o),
-  #                                     obsCovs = srvy_covs)
-  # nrow(coug_w1920_UMF@y)
-  # coug_w1920_UMF <- coug_w1920_UMF[-missing_dat]
-  # nrow(coug_w1920_UMF@y)
   
   ####  COYOTE UMF  ####
   coy_s1819_UMF <- unmarkedFrameOccu(DH_coy_smr1819,
@@ -361,9 +369,15 @@
                                                           Slope = stations$Slope,
                                                           Aspect = stations$Aspect,
                                                           Tree_cov = stations$Canopy,
-                                                          NearestH2o = stations$NearestH2o),
+                                                          Landfire = stations$Landfire,
+                                                          NearestH2o = stations$NearestH2o,
+                                                          NearestRd = stations$NearestRd,
+                                                          WaterDensity = stations$WaterDensity,
+                                                          RoadDensity = stations$RoadDensity,
+                                                          HumanDensity = stations$HumanDensity,
+                                                          HumanMod = stations$HumanModified),
                                     obsCovs = srvy_covs)
-  coy_s1819_UMF <- coy_s1819_UMF[-missing_dat]
+  # coy_s1819_UMF <- coy_s1819_UMF[-missing_dat]
   
   coy_w1820_UMF <- unmarkedFrameOccu(DH_coy_wtr1820,
                                       siteCovs = data.frame(Year = stations$Year,
@@ -377,9 +391,15 @@
                                                             Slope = stations$Slope,
                                                             Aspect = stations$Aspect,
                                                             Tree_cov = stations$Canopy,
-                                                            NearestH2o = stations$NearestH2o),
+                                                            Landfire = stations$Landfire,
+                                                            NearestH2o = stations$NearestH2o,
+                                                            NearestRd = stations$NearestRd,
+                                                            WaterDensity = stations$WaterDensity,
+                                                            RoadDensity = stations$RoadDensity,
+                                                            HumanDensity = stations$HumanDensity,
+                                                            HumanMod = stations$HumanModified),
                                       obsCovs = srvy_covs)
-  coy_w1820_UMF <- coy_w1820_UMF[-missing_dat]
+  # coy_w1820_UMF <- coy_w1820_UMF[-missing_dat]
   
   ####  WOLF UMF  ####
   wolf_s1819_UMF <- unmarkedFrameOccu(DH_wolf_smr1819,
@@ -394,9 +414,15 @@
                                                          Slope = stations$Slope,
                                                          Aspect = stations$Aspect,
                                                          Tree_cov = stations$Canopy,
-                                                         NearestH2o = stations$NearestH2o),
+                                                         Landfire = stations$Landfire,
+                                                         NearestH2o = stations$NearestH2o,
+                                                         NearestRd = stations$NearestRd,
+                                                         WaterDensity = stations$WaterDensity,
+                                                         RoadDensity = stations$RoadDensity,
+                                                         HumanDensity = stations$HumanDensity,
+                                                         HumanMod = stations$HumanModified),
                                    obsCovs = srvy_covs)
-  wolf_s1819_UMF <- wolf_s1819_UMF[-missing_dat]
+  # wolf_s1819_UMF <- wolf_s1819_UMF[-missing_dat]
   
   wolf_w1820_UMF <- unmarkedFrameOccu(DH_wolf_wtr1820,
                                      siteCovs = data.frame(Year = stations$Year,
@@ -410,9 +436,15 @@
                                                            Slope = stations$Slope,
                                                            Aspect = stations$Aspect,
                                                            Tree_cov = stations$Canopy,
-                                                           NearestH2o = stations$NearestH2o),
+                                                           Landfire = stations$Landfire,
+                                                           NearestH2o = stations$NearestH2o,
+                                                           NearestRd = stations$NearestRd,
+                                                           WaterDensity = stations$WaterDensity,
+                                                           RoadDensity = stations$RoadDensity,
+                                                           HumanDensity = stations$HumanDensity,
+                                                           HumanMod = stations$HumanModified),
                                      obsCovs = srvy_covs)
-  wolf_w1820_UMF <- wolf_w1820_UMF[-missing_dat]
+  # wolf_w1820_UMF <- wolf_w1820_UMF[-missing_dat]
   
   
   ####  ELK UMF  ####
@@ -429,9 +461,15 @@
                                                           Slope = stations$Slope,
                                                           Aspect = stations$Aspect,
                                                           Tree_cov = stations$Canopy,
-                                                          NearestH2o = stations$NearestH2o),
+                                                          Landfire = stations$Landfire,
+                                                          NearestH2o = stations$NearestH2o,
+                                                          NearestRd = stations$NearestRd,
+                                                          WaterDensity = stations$WaterDensity,
+                                                          RoadDensity = stations$RoadDensity,
+                                                          HumanDensity = stations$HumanDensity,
+                                                          HumanMod = stations$HumanModified),
                                     obsCovs = srvy_covs)
-  elk_s1819_UMF <- elk_s1819_UMF[-missing_dat]
+  # elk_s1819_UMF <- elk_s1819_UMF[-missing_dat]
   
   elk_w1820_UMF <- unmarkedFrameOccu(DH_elk_wtr1820,
                                       siteCovs = data.frame(Year = stations$Year,
@@ -445,9 +483,15 @@
                                                             Slope = stations$Slope,
                                                             Aspect = stations$Aspect,
                                                             Tree_cov = stations$Canopy,
-                                                            NearestH2o = stations$NearestH2o),
+                                                            Landfire = stations$Landfire,
+                                                            NearestH2o = stations$NearestH2o,
+                                                            NearestRd = stations$NearestRd,
+                                                            WaterDensity = stations$WaterDensity,
+                                                            RoadDensity = stations$RoadDensity,
+                                                            HumanDensity = stations$HumanDensity,
+                                                            HumanMod = stations$HumanModified),
                                       obsCovs = srvy_covs)
-  elk_w1820_UMF <- elk_w1820_UMF[-missing_dat]
+  # elk_w1820_UMF <- elk_w1820_UMF[-missing_dat]
   
   ####  MULE DEER UMF  ####
   md_s1819_UMF <- unmarkedFrameOccu(DH_md_smr1819,
@@ -462,9 +506,15 @@
                                                          Slope = stations$Slope,
                                                          Aspect = stations$Aspect,
                                                          Tree_cov = stations$Canopy,
-                                                         NearestH2o = stations$NearestH2o),
+                                                         Landfire = stations$Landfire,
+                                                         NearestH2o = stations$NearestH2o,
+                                                         NearestRd = stations$NearestRd,
+                                                         WaterDensity = stations$WaterDensity,
+                                                         RoadDensity = stations$RoadDensity,
+                                                         HumanDensity = stations$HumanDensity,
+                                                         HumanMod = stations$HumanModified),
                                    obsCovs = srvy_covs)
-  md_s1819_UMF <- md_s1819_UMF[-missing_dat]
+  # md_s1819_UMF <- md_s1819_UMF[-missing_dat]
   
   md_w1820_UMF <- unmarkedFrameOccu(DH_md_wtr1820,
                                      siteCovs = data.frame(Year = stations$Year,
@@ -478,9 +528,15 @@
                                                            Slope = stations$Slope,
                                                            Aspect = stations$Aspect,
                                                            Tree_cov = stations$Canopy,
-                                                           NearestH2o = stations$NearestH2o),
+                                                           Landfire = stations$Landfire,
+                                                           NearestH2o = stations$NearestH2o,
+                                                           NearestRd = stations$NearestRd,
+                                                           WaterDensity = stations$WaterDensity,
+                                                           RoadDensity = stations$RoadDensity,
+                                                           HumanDensity = stations$HumanDensity,
+                                                           HumanMod = stations$HumanModified),
                                      obsCovs = srvy_covs)
-  md_w1820_UMF <- md_w1820_UMF[-missing_dat]
+  # md_w1820_UMF <- md_w1820_UMF[-missing_dat]
   
   ####  WHITE-TAILED DEER UMF  ####
   wtd_s1819_UMF <- unmarkedFrameOccu(DH_wtd_smr1819,
@@ -495,9 +551,15 @@
                                                         Slope = stations$Slope,
                                                         Aspect = stations$Aspect,
                                                         Tree_cov = stations$Canopy,
-                                                        NearestH2o = stations$NearestH2o),
+                                                        Landfire = stations$Landfire,
+                                                        NearestH2o = stations$NearestH2o,
+                                                        NearestRd = stations$NearestRd,
+                                                        WaterDensity = stations$WaterDensity,
+                                                        RoadDensity = stations$RoadDensity,
+                                                        HumanDensity = stations$HumanDensity,
+                                                        HumanMod = stations$HumanModified),
                                   obsCovs = srvy_covs)
-  wtd_s1819_UMF <- wtd_s1819_UMF[-missing_dat]
+  # wtd_s1819_UMF <- wtd_s1819_UMF[-missing_dat]
   
   wtd_w1820_UMF <- unmarkedFrameOccu(DH_wtd_wtr1820,
                                     siteCovs = data.frame(Year = stations$Year,
@@ -511,9 +573,16 @@
                                                           Slope = stations$Slope,
                                                           Aspect = stations$Aspect,
                                                           Tree_cov = stations$Canopy,
-                                                          NearestH2o = stations$NearestH2o),
+                                                          Landfire = stations$Landfire,
+                                                          NearestH2o = stations$NearestH2o,
+                                                          NearestRd = stations$NearestRd,
+                                                          WaterDensity = stations$WaterDensity,
+                                                          RoadDensity = stations$RoadDensity,
+                                                          HumanDensity = stations$HumanDensity,
+                                                          HumanMod = stations$HumanModified),
                                     obsCovs = srvy_covs)
-  wtd_w1820_UMF <- wtd_w1820_UMF[-missing_dat]
+  # wtd_w1820_UMF <- wtd_w1820_UMF[-missing_dat]
+  nrow( wtd_w1820_UMF@y)
   
   
   #'  Occupancy models
@@ -524,7 +593,7 @@
   #'  Use chi-sq test to evaluate model fit after model selection (pg. 4 vignette)
 
 
-  ####  BOBCAT MODELS  ####                   NLCD more signif than Landcov
+  ####  BOBCAT MODELS  ####                   # NLCD more signif than Landcov
   #'  Included covariates informed by 
   
   #'  SUMMERS 2018 & 2019
@@ -533,22 +602,29 @@
   backTransform(bob_s1819_null, 'det')
   backTransform(bob_s1819_null, 'state')
   #'  Null with detection covariates
-  (bob_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, bob_s1819_UMF))
+  (bob_s1819_null2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~1, bob_s1819_UMF))
   #'  Terrain model
-  (bob_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Elev + Slope, bob_s1819_UMF))
-  (bob_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope, bob_s1819_UMF))
+  (bob_s1819_terrain <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + Slope, bob_s1819_UMF))
+  (bob_s1819_terrain2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + I(Elev^2) + Slope, bob_s1819_UMF))
   #'  Vegetation model
-  (bob_s1819_veg <- occu(~Height*Distance + Trail + Year ~NDVI + NLCD, bob_s1819_UMF))
+  (bob_s1819_veg <- occu(~Height*Distance + Trail + Effort_smr + Year ~NDVI + NLCD, bob_s1819_UMF))
   #'  Habitat model
-  (bob_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD, bob_s1819_UMF))
-  (bob_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, bob_s1819_UMF))
-  #'  Anthropogenic model- dist to road/road density, human pop, 
+  (bob_s1819_terrain_veg <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + Slope + NDVI + NLCD, bob_s1819_UMF))
+  (bob_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, bob_s1819_UMF))
+  #'  Anthropogenic model 
+  (bob_s1819_anthro <- occu(~Height*Distance + Trail + Effort_smr + Year ~RoadDensity + HumanMod, bob_s1819_UMF))
   #'  Combined model
+  (bob_s1819_full <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, bob_s1819_UMF))
+  (bob_s1819_full2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, bob_s1819_UMF))
   
-  mods <- fitList(bob_s1819_null, bob_s1819_null2, bob_s1819_terrain, bob_s1819_terrain2, bob_s1819_veg, bob_s1819_terrain_veg, bob_s1819_terrain_veg2)
+  
+  mods <- fitList(bob_s1819_null, bob_s1819_null2, bob_s1819_terrain, bob_s1819_terrain2, 
+                  bob_s1819_veg, bob_s1819_anthro, bob_s1819_terrain_veg, bob_s1819_terrain_veg2, 
+                  bob_s1819_full, bob_s1819_full2)
   modSel(mods)
   
-  #'  WINTERS 2018-2019 & 2019-2020
+  
+  #'  WINTERS 2018-2019 & 2019-2020           #  NOTE: Effort_wtr excluded b/c fails to converge on all bobcat winter models
   #'  Null
   (bob_w1820_null <- occu(~1 ~1, bob_w1820_UMF))
   backTransform(bob_w1820_null, 'det')
@@ -564,16 +640,23 @@
   (bob_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD, bob_w1820_UMF))
   (bob_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, bob_w1820_UMF))
   #'  Anthropogenic model
+  #'  Anthropogenic model 
+  (bob_w1820_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, bob_w1820_UMF))
   #'  Combined model
+  (bob_w1820_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, bob_w1820_UMF))
+  (bob_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, bob_w1820_UMF))
   
-  mods <- fitList(bob_w1820_null, bob_w1820_null2, bob_w1820_terrain, bob_w1820_terrain2, bob_w1820_veg, bob_w1820_terrain_veg, bob_w1820_terrain_veg2)
+  
+  mods <- fitList(bob_w1820_null, bob_w1820_null2, bob_w1820_terrain, bob_w1820_terrain2, 
+                  bob_w1820_veg, bob_w1820_anthro, bob_w1820_terrain_veg, bob_w1820_terrain_veg2,
+                  bob_w1820_full, bob_w1820_full2)
   modSel(mods)
   
   ####  COUGAR MODELS  ####
   #'  Included covariates informed by Dickson & Beier 2002, Kertson et al. 2011, 
   #'  Smereka et al. 2020
-                                              #  No real diff btwn NLCD & landcov in summer
-  #'  SUMMERS 2018 & 2019
+                                              
+  #'  SUMMERS 2018 & 2019                     #  NOTE: Effort_smr excluded due to convergence failure
   #'  Null
   (coug_s1819_null <- occu(~1 ~1, coug_s1819_UMF))
   backTransform(coug_s1819_null, 'det')
@@ -588,10 +671,16 @@
   #'  Habitat model
   (coug_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD, coug_s1819_UMF))
   (coug_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, coug_s1819_UMF))
-  #'  Anthropogenic model- dist to road/road density, human pop, 
+  #'  Anthropogenic model
+  (coug_s1819_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, coug_s1819_UMF))
   #'  Combined model
+  (coug_s1819_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, coug_s1819_UMF))
+  (coug_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, coug_s1819_UMF))
+  
 
-  mods <- fitList(coug_s1819_null, coug_s1819_null2, coug_s1819_terrain, coug_s1819_terrain2, coug_s1819_veg, coug_s1819_terrain_veg, coug_s1819_terrain_veg2)
+  mods <- fitList(coug_s1819_null, coug_s1819_null2, coug_s1819_terrain, coug_s1819_terrain2, 
+                  coug_s1819_veg, coug_s1819_anthro, coug_s1819_terrain_veg, coug_s1819_terrain_veg2,
+                  coug_s1819_full, coug_s1819_full2)
   modSel(mods)
   
   #'  WINTERS 2018-2019 & 2019-2020
@@ -600,19 +689,25 @@
   backTransform(coug_w1820_null, 'det')
   backTransform(coug_w1820_null, 'state')
   #'  Null with detection covariates
-  (coug_w1820_null2 <- occu(~Height*Distance + Trail + Year ~1, coug_w1820_UMF))
+  (coug_w1820_null2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~1, coug_w1820_UMF))
   #'  Terrain model
-  (coug_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Elev + Slope, coug_w1820_UMF))
-  (coug_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope, coug_w1820_UMF))
+  (coug_w1820_terrain <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Elev + Slope, coug_w1820_UMF))
+  (coug_w1820_terrain2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Elev + I(Elev^2) + Slope, coug_w1820_UMF))
   #'  Vegetation model
-  (coug_w1820_veg <- occu(~Height*Distance + Trail + Year ~NDVI + NLCD, coug_w1820_UMF))  #Aspect makes NDVI very significant
+  (coug_w1820_veg <- occu(~Height*Distance + Trail + Effort_wtr + Year ~NDVI + NLCD, coug_w1820_UMF))  #Aspect makes NDVI very significant
   #'  Habitat model
-  (coug_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD, coug_w1820_UMF))
-  (coug_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, coug_w1820_UMF))
+  (coug_w1820_terrain_veg <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Elev + Slope + NDVI + NLCD, coug_w1820_UMF))
+  (coug_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, coug_w1820_UMF))
   #'  Anthropogenic model
+  (coug_w1820_anthro <- occu(~Height*Distance + Trail + Effort_wtr + Year ~RoadDensity + HumanMod, coug_w1820_UMF))
   #'  Combined model
+  (coug_w1820_full <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, coug_w1820_UMF))
+  (coug_w1820_full2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, coug_w1820_UMF))
   
-  mods <- fitList(coug_w1820_null, coug_w1820_null2, coug_w1820_terrain, coug_w1820_terrain2, coug_w1820_veg, coug_w1820_terrain_veg, coug_w1820_terrain_veg2)
+  
+  mods <- fitList(coug_w1820_null, coug_w1820_null2, coug_w1820_terrain, coug_w1820_terrain2, 
+                  coug_w1820_veg, coug_w1820_anthro, coug_w1820_terrain_veg, coug_w1820_terrain_veg2,
+                  coug_w1820_full, coug_w1820_full2)
   modSel(mods)
 
   
@@ -625,22 +720,28 @@
   backTransform(coy_s1819_null, 'det')
   backTransform(coy_s1819_null, 'state')
   #'  Null with detection covariates
-  (coy_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, coy_s1819_UMF))
+  (coy_s1819_null2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~1, coy_s1819_UMF))
   #'  Terrain model
-  (coy_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Elev + Slope, coy_s1819_UMF))
-  (coy_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope, coy_s1819_UMF))
+  (coy_s1819_terrain <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + Slope, coy_s1819_UMF))
+  (coy_s1819_terrain2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + I(Elev^2) + Slope, coy_s1819_UMF))
   #'  Vegetation model
-  (coy_s1819_veg <- occu(~Height*Distance + Trail + Year ~NDVI + NLCD, coy_s1819_UMF))
+  (coy_s1819_veg <- occu(~Height*Distance + Trail + Effort_smr + Year ~NDVI + NLCD, coy_s1819_UMF))
   #'  Habitat model
-  (coy_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD, coy_s1819_UMF))
-  (coy_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, coy_s1819_UMF))
-  #'  Anthropogenic model- dist to road/road density, human pop, 
+  (coy_s1819_terrain_veg <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + Slope + NDVI + NLCD, coy_s1819_UMF))
+  (coy_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, coy_s1819_UMF))
+  #'  Anthropogenic model
+  (coy_s1819_anthro <- occu(~Height*Distance + Trail + Effort_smr + Year ~RoadDensity + HumanMod, coy_s1819_UMF))
   #'  Combined model
+  (coy_s1819_full <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, coy_s1819_UMF))
+  (coy_s1819_full2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, coy_s1819_UMF))
   
-  mods <- fitList(coy_s1819_null, coy_s1819_null2, coy_s1819_terrain, coy_s1819_terrain2, coy_s1819_veg, coy_s1819_terrain_veg, coy_s1819_terrain_veg2)
+  
+  mods <- fitList(coy_s1819_null, coy_s1819_null2, coy_s1819_terrain, coy_s1819_terrain2, 
+                  coy_s1819_veg, coy_s1819_anthro, coy_s1819_terrain_veg, coy_s1819_terrain_veg2, 
+                  coy_s1819_full, coy_s1819_full2)
   modSel(mods)
   
-  #'  WINTERS 2018-2019 & 2019-2020
+  #'  WINTERS 2018-2019 & 2019-2020              #  NOTE: Effort_wtr excluded due to convergence failure
   #'  Null
   (coy_w1820_null <- occu(~1 ~1, coy_w1820_UMF))
   backTransform(coy_w1820_null, 'det')
@@ -656,17 +757,21 @@
   (coy_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD, coy_w1820_UMF))
   (coy_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, coy_w1820_UMF))
   #'  Anthropogenic model
+  (coy_w1820_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, coy_w1820_UMF))
   #'  Combined model
+  (coy_w1820_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, coy_w1820_UMF))
+  (coy_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, coy_w1820_UMF))
   
-  mods <- fitList(coy_w1820_null, coy_w1820_null2, coy_w1820_terrain, coy_w1820_terrain2, coy_w1820_veg, coy_w1820_terrain_veg, coy_w1820_terrain_veg2)
+  mods <- fitList(coy_w1820_null, coy_w1820_null2, coy_w1820_terrain, coy_w1820_terrain2, 
+                  coy_w1820_veg, coy_w1820_anthro, coy_w1820_terrain_veg, coy_w1820_terrain_veg2,
+                  coy_w1820_full, coy_w1820_full2)
   modSel(mods)
-  
   
   
   ####  WOLF MODELS  ####
   #'  Included covariates informed by 
   
-  #'  SUMMERS 2018 & 2019
+  #'  SUMMERS 2018 & 2019                      #  NOTE: Effort_smr excluded due to convergence failure
   #'  Null
   (wolf_s1819_null <- occu(~1 ~1, wolf_s1819_UMF))
   backTransform(wolf_s1819_null, 'det')
@@ -681,13 +786,18 @@
   #'  Habitat model
   (wolf_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD, wolf_s1819_UMF))
   (wolf_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, wolf_s1819_UMF))
-  #'  Anthropogenic model- dist to road/road density, human pop, 
+  #'  Anthropogenic model 
+  (wolf_s1819_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, wolf_s1819_UMF))
   #'  Combined model
+  (wolf_s1819_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, wolf_s1819_UMF))
+  (wolf_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, wolf_s1819_UMF))
   
-  mods <- fitList(wolf_s1819_null, wolf_s1819_null2, wolf_s1819_terrain, wolf_s1819_terrain2, wolf_s1819_veg, wolf_s1819_terrain_veg, wolf_s1819_terrain_veg2)
+  mods <- fitList(wolf_s1819_null, wolf_s1819_null2, wolf_s1819_terrain, 
+                  wolf_s1819_terrain2, wolf_s1819_veg, wolf_s1819_anthro, 
+                  wolf_s1819_terrain_veg, wolf_s1819_terrain_veg2, wolf_s1819_full, wolf_s1819_full2)
   modSel(mods)
   
-  #'  WINTERS 2018-2019 & 2019-2020
+  #'  WINTERS 2018-2019 & 2019-2020            #  NOTE: Effort_wtr excluded due to convergence failure
   #'  Null
   (wolf_w1820_null <- occu(~1 ~1, wolf_w1820_UMF))
   backTransform(wolf_w1820_null, 'det')
@@ -698,14 +808,21 @@
   (wolf_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Elev + Slope, wolf_w1820_UMF))
   (wolf_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope, wolf_w1820_UMF))
   #'  Vegetation model
-  (wolf_w1820_veg <- occu(~Height*Distance + Trail + Year ~NDVI + NLCD, wolf_w1820_UMF))
+  (wolf_w1820_NDVI <- occu(~Height*Distance + Trail + Year ~NDVI, wolf_w1820_UMF))
+  # (wolf_w1820_veg <- occu(~Height*Distance + Trail + Year ~NDVI + NLCD, wolf_w1820_UMF))  # Fails to converge
   #'  Habitat model
-  (wolf_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + NLCD, wolf_w1820_UMF))
-  (wolf_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD, wolf_w1820_UMF))
+  (wolf_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI, wolf_w1820_UMF))  #  Excluded NLCD due to failed convergence
+  (wolf_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI, wolf_w1820_UMF))  #  Excluded NLCD due to failed convergence
   #'  Anthropogenic model
+  (wolf_w1820_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, wolf_w1820_UMF))
   #'  Combined model
+  (wolf_w1820_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + RoadDensity + HumanMod, wolf_w1820_UMF))  #  Excluded NLCD due to failed convergence
+  (wolf_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + RoadDensity + HumanMod, wolf_w1820_UMF))  #  Excluded NLCD due to failed convergence
   
-  mods <- fitList(wolf_w1820_null, wolf_w1820_null2, wolf_w1820_terrain, wolf_w1820_terrain2, wolf_w1820_veg, wolf_w1820_terrain_veg, wolf_w1820_terrain_veg2)
+  
+  mods <- fitList(wolf_w1820_null, wolf_w1820_null2, wolf_w1820_terrain, wolf_w1820_terrain2, 
+                  wolf_w1820_NDVI, wolf_w1820_terrain_veg, wolf_w1820_terrain_veg2, 
+                  wolf_w1820_anthro, wolf_w1820_full, wolf_w1820_full2)
   modSel(mods)
   
   
@@ -718,23 +835,29 @@
   backTransform(elk_s1819_null, 'det')
   backTransform(elk_s1819_null, 'state')
   #'  Null with detection covariates
-  (elk_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, elk_s1819_UMF))
+  (elk_s1819_null2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~1, elk_s1819_UMF))
   #'  Terrain model
-  (elk_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, elk_s1819_UMF))
-  (elk_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, elk_s1819_UMF))
+  (elk_s1819_terrain <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + Slope, elk_s1819_UMF))
+  (elk_s1819_terrain2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + I(Elev^2) + Slope, elk_s1819_UMF))
   #'  Vegetation model
-  (elk_s1819_veg <- occu(~Height*Distance + Trail + Year ~Area + NDVI + NLCD, elk_s1819_UMF))
+  (elk_s1819_veg <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + NDVI + NLCD, elk_s1819_UMF))
   #'  Habitat model
-  (elk_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + NDVI + NLCD, elk_s1819_UMF))
-  (elk_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + NLCD, elk_s1819_UMF))
-  #'  Anthropogenic model- dist to road/road density, human pop, 
+  (elk_s1819_terrain_veg <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + Slope + NDVI + NLCD, elk_s1819_UMF))
+  (elk_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + NLCD, elk_s1819_UMF))
+  #'  Anthropogenic model 
+  (elk_s1819_anthro <- occu(~Height*Distance + Trail + Effort_smr + Year ~RoadDensity + HumanMod, elk_s1819_UMF))
   #'  Combined model
+  (elk_s1819_full <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, elk_s1819_UMF))
+  (elk_s1819_full2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, elk_s1819_UMF))
   
-  mods <- fitList(elk_s1819_null, elk_s1819_null2, elk_s1819_terrain, elk_s1819_terrain2, elk_s1819_veg, elk_s1819_terrain_veg, elk_s1819_terrain_veg2)
+  
+  mods <- fitList(elk_s1819_null, elk_s1819_null2, elk_s1819_terrain, elk_s1819_terrain2, 
+                  elk_s1819_veg, elk_s1819_terrain_veg, elk_s1819_terrain_veg2, 
+                  elk_s1819_anthro, elk_s1819_full, elk_s1819_full2)
   modSel(mods)
   
-  #'  WINTERS 2018-2019 & 2019-2020                    #NLCD fails to converge but Landcov ok
-  #'  Null
+  #'  WINTERS 2018-2019 & 2019-2020                # Effort_wtr failed to converge    
+  #'  Null                                         # NLCD fails to converge but Landcov ok- maybe there's not enough data in the "Developed" category for elk?
   (elk_w1820_null <- occu(~1 ~1, elk_w1820_UMF))
   backTransform(elk_w1820_null, 'det')
   backTransform(elk_w1820_null, 'state')
@@ -749,9 +872,15 @@
   (elk_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + NDVI + Landcov, elk_w1820_UMF))
   (elk_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + Landcov, elk_w1820_UMF))
   #'  Anthropogenic model
+  (elk_w1820_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, elk_w1820_UMF))
   #'  Combined model
+  (elk_w1820_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + NDVI + Landcov + RoadDensity + HumanMod, elk_w1820_UMF))
+  (elk_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + NDVI + Landcov + RoadDensity + HumanMod, elk_w1820_UMF))
   
-  mods <- fitList(elk_w1820_null, elk_w1820_null2, elk_w1820_terrain, elk_w1820_terrain2, elk_w1820_veg, elk_w1820_terrain_veg, elk_w1820_terrain_veg2)
+  
+  mods <- fitList(elk_w1820_null, elk_w1820_null2, elk_w1820_terrain, elk_w1820_terrain2, 
+                  elk_w1820_veg, elk_w1820_terrain_veg, elk_w1820_terrain_veg2, 
+                  elk_w1820_anthro, elk_w1820_full, elk_w1820_full2)
   modSel(mods)
   
   
@@ -764,19 +893,25 @@
   backTransform(md_s1819_null, 'det')
   backTransform(md_s1819_null, 'state')
   #'  Null with detection covariates
-  (md_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, md_s1819_UMF))
+  (md_s1819_null2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~1, md_s1819_UMF))
   #'  Terrain model
-  (md_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, md_s1819_UMF))
-  (md_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, md_s1819_UMF))
+  (md_s1819_terrain <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + Slope, md_s1819_UMF))
+  (md_s1819_terrain2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + I(Elev^2) + Slope, md_s1819_UMF))
   #'  Vegetation model
-  (md_s1819_veg <- occu(~Height*Distance + Trail + Year ~Area + NDVI + NLCD, md_s1819_UMF))
+  (md_s1819_veg <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + NDVI + NLCD, md_s1819_UMF))
   #'  Habitat model
-  (md_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + NDVI + NLCD, md_s1819_UMF))
-  (md_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + NLCD, md_s1819_UMF))
-  #'  Anthropogenic model- dist to road/road density, human pop, 
+  (md_s1819_terrain_veg <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + Slope + NDVI + NLCD, md_s1819_UMF))
+  (md_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + NLCD, md_s1819_UMF))
+  #'  Anthropogenic model
+  (md_s1819_anthro <- occu(~Height*Distance + Trail + Effort_smr + Year ~RoadDensity + HumanMod, md_s1819_UMF))
   #'  Combined model
+  (md_s1819_full <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, md_s1819_UMF))
+  (md_s1819_full2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, md_s1819_UMF))
   
-  mods <- fitList(md_s1819_null, md_s1819_null2, md_s1819_terrain, md_s1819_terrain2, md_s1819_veg, md_s1819_terrain_veg, md_s1819_terrain_veg2)
+  
+  mods <- fitList(md_s1819_null, md_s1819_null2, md_s1819_terrain, md_s1819_terrain2, 
+                  md_s1819_veg, md_s1819_terrain_veg, md_s1819_terrain_veg2, 
+                  md_s1819_anthro, md_s1819_full, md_s1819_full2)
   modSel(mods)
   
   #'  WINTERS 2018-2019 & 2019-2020                    #Landcov signif but NLCD is not
@@ -785,19 +920,25 @@
   backTransform(md_w1820_null, 'det')
   backTransform(md_w1820_null, 'state')
   #'  Null with detection covariates
-  (md_w1820_null2 <- occu(~Height*Distance + Trail + Year ~1, md_w1820_UMF))
+  (md_w1820_null2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~1, md_w1820_UMF))
   #'  Terrain model
-  (md_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, md_w1820_UMF))
-  (md_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, md_w1820_UMF))
+  (md_w1820_terrain <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Area + Elev + Slope, md_w1820_UMF))
+  (md_w1820_terrain2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Area + Elev + I(Elev^2) + Slope, md_w1820_UMF))
   #'  Vegetation model
-  (md_w1820_veg <- occu(~Height*Distance + Trail + Year ~Area + NDVI + Landcov, md_w1820_UMF))
+  (md_w1820_veg <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Area + NDVI + Landcov, md_w1820_UMF))
   #'  Habitat model
-  (md_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + NDVI + Landcov, md_w1820_UMF))
-  (md_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + Landcov, md_w1820_UMF))
+  (md_w1820_terrain_veg <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Area + Elev + Slope + NDVI + Landcov, md_w1820_UMF))
+  (md_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + Landcov, md_w1820_UMF))
   #'  Anthropogenic model
+  (md_w1820_anthro <- occu(~Height*Distance + Trail + Effort_wtr + Year ~RoadDensity + HumanMod, md_w1820_UMF))
   #'  Combined model
+  (md_w1820_full <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, md_w1820_UMF))
+  (md_w1820_full2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, md_w1820_UMF))
   
-  mods <- fitList(md_w1820_null, md_w1820_null2, md_w1820_terrain, md_w1820_terrain2, md_w1820_veg, md_w1820_terrain_veg, md_w1820_terrain_veg2)
+  
+  mods <- fitList(md_w1820_null, md_w1820_null2, md_w1820_terrain, md_w1820_terrain2, 
+                  md_w1820_veg, md_w1820_terrain_veg, md_w1820_terrain_veg2, 
+                  md_w1820_anthro, md_w1820_full, md_w1820_full2)
   modSel(mods)
   
   
@@ -810,19 +951,25 @@
   backTransform(wtd_s1819_null, 'det')
   backTransform(wtd_s1819_null, 'state')
   #'  Null with detection covariates
-  (wtd_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, wtd_s1819_UMF))
+  (wtd_s1819_null2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~1, wtd_s1819_UMF))
   #'  Terrain model
-  (wtd_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, wtd_s1819_UMF))
-  (wtd_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, wtd_s1819_UMF))
+  (wtd_s1819_terrain <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + Slope, wtd_s1819_UMF))
+  (wtd_s1819_terrain2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + I(Elev^2) + Slope, wtd_s1819_UMF))
   #'  Vegetation model
-  (wtd_s1819_veg <- occu(~Height*Distance + Trail + Year ~Area + NDVI + NLCD, wtd_s1819_UMF))
+  (wtd_s1819_veg <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + NDVI + NLCD, wtd_s1819_UMF))
   #'  Habitat model
-  (wtd_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + NDVI + NLCD, wtd_s1819_UMF))
-  (wtd_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + NLCD, wtd_s1819_UMF))
-  #'  Anthropogenic model- dist to road/road density, human pop, 
+  (wtd_s1819_terrain_veg <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + Slope + NDVI + NLCD, wtd_s1819_UMF))
+  (wtd_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + NLCD, wtd_s1819_UMF))
+  #'  Anthropogenic model
+  (wtd_s1819_anthro <- occu(~Height*Distance + Trail + Effort_smr + Year ~RoadDensity + HumanMod, wtd_s1819_UMF))
   #'  Combined model
+  (wtd_s1819_full <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, wtd_s1819_UMF))
+  (wtd_s1819_full2 <- occu(~Height*Distance + Trail + Effort_smr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, wtd_s1819_UMF))
   
-  mods <- fitList(wtd_s1819_null, wtd_s1819_null2, wtd_s1819_terrain, wtd_s1819_terrain2, wtd_s1819_veg, wtd_s1819_terrain_veg, wtd_s1819_terrain_veg2)
+  
+  mods <- fitList(wtd_s1819_null, wtd_s1819_null2, wtd_s1819_terrain, wtd_s1819_terrain2, 
+                  wtd_s1819_veg, wtd_s1819_terrain_veg, wtd_s1819_terrain_veg2, 
+                  wtd_s1819_anthro, wtd_s1819_full, wtd_s1819_full2)
   modSel(mods)
   
   #'  WINTERS 2018-2019 & 2019-2020                    #Landcov signif but NLCD is not
@@ -831,22 +978,60 @@
   backTransform(wtd_w1820_null, 'det')
   backTransform(wtd_w1820_null, 'state')
   #'  Null with detection covariates
-  (wtd_w1820_null2 <- occu(~Height*Distance + Trail + Year ~1, wtd_w1820_UMF))
+  (wtd_w1820_null2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~1, wtd_w1820_UMF))
   #'  Terrain model
-  (wtd_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, wtd_w1820_UMF))
-  (wtd_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, wtd_w1820_UMF))
+  (wtd_w1820_terrain <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Area + Elev + Slope, wtd_w1820_UMF))
+  (wtd_w1820_terrain2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Area + Elev + I(Elev^2) + Slope, wtd_w1820_UMF))
   #'  Vegetation model
-  (wtd_w1820_veg <- occu(~Height*Distance + Trail + Year ~Area + NDVI + Landcov, wtd_w1820_UMF))
+  (wtd_w1820_veg <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Area + NDVI + Landcov, wtd_w1820_UMF))
   #'  Habitat model
-  (wtd_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + NDVI + Landcov, wtd_w1820_UMF))
-  (wtd_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + Landcov, wtd_w1820_UMF))
+  (wtd_w1820_terrain_veg <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Area + Elev + Slope + NDVI + Landcov, wtd_w1820_UMF))
+  (wtd_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Area + Elev + I(Elev^2) + Slope + NDVI + Landcov, wtd_w1820_UMF))
   #'  Anthropogenic model
+  (wtd_w1820_anthro <- occu(~Height*Distance + Trail + Effort_wtr + Year ~RoadDensity + HumanMod, wtd_w1820_UMF))
   #'  Combined model
+  (wtd_w1820_full <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Elev + Slope + NDVI + NLCD + RoadDensity + HumanMod, wtd_w1820_UMF))
+  (wtd_w1820_full2 <- occu(~Height*Distance + Trail + Effort_wtr + Year ~Elev + I(Elev^2) + Slope + NDVI + NLCD + RoadDensity + HumanMod, wtd_w1820_UMF))
   
-  mods <- fitList(wtd_w1820_null, wtd_w1820_null2, wtd_w1820_terrain, wtd_w1820_terrain2, wtd_w1820_veg, wtd_w1820_terrain_veg, wtd_w1820_terrain_veg2)
+  
+  mods <- fitList(wtd_w1820_null, wtd_w1820_null2, wtd_w1820_terrain, wtd_w1820_terrain2, 
+                  wtd_w1820_veg, wtd_w1820_terrain_veg, wtd_w1820_terrain_veg2, 
+                  wtd_w1820_anthro, wtd_w1820_full, wtd_w1820_full2)
   modSel(mods)
   
   
   
+  ####  Goodness of Fit Test  ####
+  #'  Checking model fit: Chi^2 test
+  #'  Code from unmarked vingette
+  #'  t0 = Original statistic computed from data
+  #'  t_B = Vector of bootstrap samples
+  chisq <- function(fm) {
+    umf <- getData(fm)
+    y <- getY(umf)
+    y[y>1] <- 1
+    sr <- fm@sitesRemoved
+    if(length(sr)>0)
+      y <- y[-sr,,drop=FALSE]
+    fv <- fitted(fm, na.rm=TRUE)
+    y[is.na(fv)] <- NA
+    sum((y-fv)^2/(fv*(1-fv)), na.rm=TRUE)
+  }
+  
+  #'  Chi^2 test for models within 2 delta AIC for each species and season
+  (pb_bob_s1819_veg <- parboot(bob_s1819_veg, statistic = chisq, nsim = 100, parallel = FALSE))
+  (pb_bob_w1820_full <- parboot(bob_w1820_full, statistic = chisq, nsim = 100, parallel = FALSE))  #bob_w1820_null  
+  (pb_coug_s1819_terrain_veg <- parboot(coug_s1819_terrain_veg, statistic = chisq, nsim = 100, parallel = FALSE)) #coug_s1819_terrain_veg2
+  (pb_coug_w1820_terrain_veg <- parboot(coug_w1820_terrain_veg, statistic = chisq, nsim = 100, parallel = FALSE))  #all models with lower AICs Pr < 0.05; reject the null and fail the Chi^2 test   
+  (pb_coy_s1819_terrain_veg <- parboot(coy_s1819_terrain_veg, statistic = chisq, nsim = 100, parallel = FALSE))
+  (pb_coy_w1820_terrain_veg <- parboot(coy_w1820_terrain_veg, statistic = chisq, nsim = 100, parallel = FALSE))
+  (pb_wolf_s1819_anthro <- parboot(wolf_s1819_anthro, statistic = chisq, nsim = 100, parallel = FALSE))  #wolf_s1819_terrain2
+  (pb_wolf_w1820_NDVI <- parboot(wolf_w1820_NDVI, statistic = chisq, nsim = 100, parallel = FALSE))  
+  (pb_elk_s1819_veg <- parboot(elk_s1819_veg, statistic = chisq, nsim = 100, parallel = FALSE))  #elk_s1819_veg #elk_s1819_terrain_veg2 #elk_s1819_terrain2 #elk_s1819_terrain #elk_s1819_terrain_veg
+  (pb_elk_w1820_terrain2 <- parboot(elk_w1820_terrain2, statistic = chisq, nsim = 100, parallel = FALSE))  
+  (pb_md_s1819_terrain2 <- parboot(md_s1819_terrain2, statistic = chisq, nsim = 100, parallel = FALSE))  
+  (pb_md_w1820_terrain_veg2 <- parboot(md_w1820_terrain_veg2, statistic = chisq, nsim = 100, parallel = FALSE))
+  (pb_wtd_s1819_terrain2 <- parboot(wtd_s1819_terrain2, statistic = chisq, nsim = 100, parallel = FALSE))  
+  (pb_wtd_w1820_terrain2 <- parboot(wtd_w1820_terrain2, statistic = chisq, nsim = 100, parallel = FALSE))  #wtd_w1820_terrain2 #wtd_w1820_terrain_veg2 
   
   
