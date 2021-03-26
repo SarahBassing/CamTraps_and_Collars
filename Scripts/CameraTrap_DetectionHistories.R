@@ -43,10 +43,17 @@
   cam_stations <- rbind(cam_stationsYr1, cam_stationsYr2)
     #  Remove Probs2 because no data in these columns in Year 2
     # dplyr::select(-c(Problem2_from, Problem2_to))
+  #'  Count number of camera stations per year and study area
+  ncam_yr1 <- nrow(cam_stationsYr1)
+  nNE_yr1 <- nrow(filter(cam_stationsYr1, grepl("NE", CameraLocation)))
+  nOK_yr1 <- nrow(filter(cam_stationsYr1, grepl("OK", CameraLocation)))
+  ncam_yr2 <- nrow(cam_stationsYr2)
+  nNE_yr2 <- nrow(filter(cam_stationsYr2, grepl("NE", CameraLocation)))
+  nOK_yr2 <- nrow(filter(cam_stationsYr2, grepl("OK", CameraLocation)))
    
   # megadata <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/full_camdata_2021-01-21.csv") %>%
   # megadata <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/full_camdataYr2_2021-03-02.csv") %>%
-  megadata <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/full_camdata18-20_2021-03-04.csv") %>%
+  megadata <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/full_camdata18-20_2021-03-16.csv") %>%
     dplyr::select("File", "DateTime", "Date", "Time", "CameraLocation", 
                   "Camera_Lat", "Camera_Long", "Animal", "Human", "Vehicle", 
                   "Species", "HumanActivity", "Count") %>%
@@ -119,21 +126,34 @@
     filter(Date > "2018-06-30") %>%
     filter(Date < "2018-10-01") %>%
     dplyr::select("Image", "File", "CameraLocation", "DateTime", "Date", "Time", "Species") #"DateTimeOriginal", 
+  #'  Subset by study area
+  NE_smr18 <- filter(images_summer18, grepl("NE", CameraLocation))
+  OK_smr18 <- filter(images_summer18, grepl("OK", CameraLocation))
   #'  Winter 2018-2019: 12/1/2018 - 03/1/2019 (thirteen 7-day sampling periods)
   images_winter1819 <- detections %>%
     filter(Date > "2018-11-30") %>%
     filter(Date < "2019-03-02") %>%
-    dplyr::select("Image", "File", "CameraLocation", "DateTime", "Date", "Time", "Species") #"DateTimeOriginal", 
+    dplyr::select("Image", "File", "CameraLocation", "DateTime", "Date", "Time", "Species") #"DateTimeOriginal",
+  #'  Subset by study area
+  NE_wtr1819 <- filter(images_winter1819, grepl("NE", CameraLocation))
+  OK_wtr1819 <- filter(images_winter1819, grepl("OK", CameraLocation))
   #'  Summer 2019: 07/01/2019 - 09/29/2019 (thirteen 7-day sampling periods)
   images_summer19 <- detections %>%
     filter(Date > "2019-06-30") %>%
     filter(Date < "2019-10-01") %>%
     dplyr::select("Image", "File", "CameraLocation", "DateTime", "Date", "Time", "Species")  
+  #'  Subset by study area
+  NE_smr19 <- filter(images_summer19, grepl("NE", CameraLocation))
+  OK_smr19 <- filter(images_summer19, grepl("OK", CameraLocation))
   #'  Winter 2019-2020: 12/1/2019 - 02/29/2020 (thirteen 7-day sampling periods)... 29 days in Feb 2020
   images_winter1920 <- detections %>%
     filter(Date > "2019-11-30") %>%
     filter(Date < "2020-03-01") %>%
     dplyr::select("Image", "File", "CameraLocation", "DateTime", "Date", "Time", "Species")  
+  #'  Subset by study area
+  NE_wtr1920 <- filter(images_winter1920, grepl("NE", CameraLocation))
+  OK_wtr1920 <- filter(images_winter1920, grepl("OK", CameraLocation))
+  
   
   
   #'  Double check these were truncated correctly
@@ -170,11 +190,31 @@
   probs <- as.data.frame(camop_problem)
   head(probs)
   
+  #'  Filter data by study area
+  NEcams <- filter(cam_stations, grepl("NE", CameraLocation))
+  camop_problem_NE <- cameraOperation(CTtable = NEcams,
+                                      stationCol = "CameraLocation",
+                                      setupCol = "Setup_date",
+                                      retrievalCol = "Retrieval_date",
+                                      hasProblems = TRUE,
+                                      dateFormat = "%m/%d/%Y", 
+                                      writecsv = FALSE) 
+
+  OKcams <- filter(cam_stations, grepl("OK", CameraLocation))
+  camop_problem_OK <- cameraOperation(CTtable = OKcams,
+                                      stationCol = "CameraLocation",
+                                      setupCol = "Setup_date",
+                                      retrievalCol = "Retrieval_date",
+                                      hasProblems = TRUE,
+                                      dateFormat = "%m/%d/%Y", 
+                                      writecsv = FALSE) 
+  
   
   ####  Detection Histories  ####
   #'  ---------------------------
   #'  Function to create season-specific detection histories for each species
-  #'  for each season of interest (summer 2018, winter 2018-2019)
+  #'  for each season of interest (summer 2018, winter 2018-2019) and create a
+  #'  sampling effort matrix for each season.
   #'  
   #'  Key arguments:
   #'  -occasionLength: currently using 7 day sampling occasions
@@ -202,7 +242,7 @@
   #'  Consider changing detection data date range to encompass full 18th week
   
   ####  BOBCATS  ####
-  DH_bob_smr18 <- detectionHistory(recordTable = images_summer18,
+  bob_smr18 <- detectionHistory(recordTable = images_summer18,
                                     camOp = camop_problem,
                                     stationCol = "CameraLocation",
                                     speciesCol = "Species",
@@ -219,10 +259,10 @@
                                     scaleEffort = FALSE,
                                     # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_bob_smr18 <- DH_bob_smr18[[1]][1:125,1:13]
+  DH_bob_smr18 <- bob_smr18[[1]][1:125,1:13]
   # DH_bob_smr18 <- DH_bob_smr18[[1]][,1:13]
   
-  DH_bob_wtr1819 <- detectionHistory(recordTable = images_winter1819,
+  bob_wtr1819 <- detectionHistory(recordTable = images_winter1819,
                                       camOp = camop_problem,
                                       stationCol = "CameraLocation",
                                       speciesCol = "Species",
@@ -239,10 +279,10 @@
                                       scaleEffort = FALSE,
                                       # writecsv = TRUE,
                                       outDir = "./Data/Detection_Histories")
-  DH_bob_wtr1819 <- DH_bob_wtr1819[[1]][1:125,1:13]
+  DH_bob_wtr1819 <- bob_wtr1819[[1]][1:125,1:13]
   # DH_bob_wtr1819 <- DH_bob_wtr1819[[1]][,1:13]
   
-  DH_bob_smr19 <- detectionHistory(recordTable = images_summer19,
+  bob_smr19 <- detectionHistory(recordTable = images_summer19,
                                    camOp = camop_problem,
                                    stationCol = "CameraLocation",
                                    speciesCol = "Species",
@@ -259,10 +299,10 @@
                                    scaleEffort = FALSE,
                                    # writecsv = TRUE,
                                    outDir = "./Data/Detection_Histories")
-  DH_bob_smr19 <- DH_bob_smr19[[1]][126:242,1:13]
+  DH_bob_smr19 <- bob_smr19[[1]][126:242,1:13]
   # DH_bob_smr19 <- DH_bob_smr19[[1]][,1:13]
   
-  DH_bob_wtr1920 <- detectionHistory(recordTable = images_winter1920,
+  bob_wtr1920 <- detectionHistory(recordTable = images_winter1920,
                                      camOp = camop_problem,
                                      stationCol = "CameraLocation",
                                      speciesCol = "Species",
@@ -279,8 +319,9 @@
                                      scaleEffort = FALSE,
                                      # writecsv = TRUE,
                                      outDir = "./Data/Detection_Histories")
-  DH_bob_wtr1920 <- DH_bob_wtr1920[[1]][126:242,1:13]
+  DH_bob_wtr1920 <- bob_wtr1920[[1]][126:242,1:13]
   # DH_bob_wtr1920 <- DH_bob_wtr1920[[1]][,1:13]
+  
   
   #'  Merge summer 2018 and summer 2019 data together
   DH_bob_smr1819 <- rbind(DH_bob_smr18, DH_bob_smr19)
@@ -288,6 +329,26 @@
   DH_bob_wtr1820 <- rbind(DH_bob_wtr1819, DH_bob_wtr1920)
 
   
+  #'  Save sampling effort for each camera and season
+  #'  This is the same for all species so only need to do this once
+  Effort_smr18 <- bob_smr18[[2]][1:125,1:13]
+  Effort_smr19 <- bob_smr19[[2]][126:242,1:13]
+  Effort_wtr1819 <- bob_wtr1819[[2]][1:125,1:13]
+  Effort_wtr1920 <- bob_wtr1920[[2]][126:242,1:13]
+  
+  Effort_smr1819 <- rbind(Effort_smr18, Effort_smr19)
+  Effort_wtr1820 <- rbind(Effort_wtr1819, Effort_wtr1920)
+  
+  #'  How many sampling occasions had incomplete sampling effort (ignoring NAs)
+  loweff <- sum(Effort_smr1819 < 7, na.rm = TRUE)
+  #'  Number of sampling occasions total
+  dim(Effort_smr1819)
+  nocc1819 <- 242*13
+  #'  What percent of sampling occasions had incomplete sampling effort?
+  #'  If less than 5%, no going to worry about accounting for sampling effort
+  #'  in detection process
+  loweff/nocc1819
+
   
   ####  COUGARS  ####
   DH_coug_smr18 <- detectionHistory(recordTable = images_summer18,
@@ -547,8 +608,9 @@
   
   
   ####  ELK  ####
-  DH_elk_smr18 <- detectionHistory(recordTable = images_summer18,
-                                   camOp = camop_problem,
+  #'  Using the NE camera & detection data only
+  DH_elk_smr18 <- detectionHistory(recordTable = NE_smr18,
+                                   camOp = camop_problem_NE,
                                    stationCol = "CameraLocation",
                                    speciesCol = "Species",
                                    recordDateTimeCol = "DateTime",
@@ -564,11 +626,11 @@
                                    scaleEffort = FALSE,
                                    # writecsv = TRUE,
                                    outDir = "./Data/Detection_Histories")
-  DH_elk_smr18 <- DH_elk_smr18[[1]][1:125,1:13]
+  DH_elk_smr18 <- DH_elk_smr18[[1]][1:nNE_yr1,1:13] # NE Year1 only                                
   # DH_elk_smr18 <- as.data.frame(DH_elk_smr18[[1]][,1:13]
   
-  DH_elk_wtr1819 <- detectionHistory(recordTable = images_winter1819,
-                                     camOp = camop_problem,
+  DH_elk_wtr1819 <- detectionHistory(recordTable = NE_wtr1819,
+                                     camOp = camop_problem_NE,
                                      stationCol = "CameraLocation",
                                      speciesCol = "Species",
                                      recordDateTimeCol = "DateTime",
@@ -584,11 +646,11 @@
                                      scaleEffort = FALSE,
                                      # writecsv = TRUE,
                                      outDir = "./Data/Detection_Histories")
-  DH_elk_wtr1819 <- DH_elk_wtr1819[[1]][1:125,1:13]
+  DH_elk_wtr1819 <- DH_elk_wtr1819[[1]][1:nNE_yr1,1:13] # NE Year1 only
   # DH_elk_wtr1819 <- DH_elk_wtr1819[[1]][,1:13]
   
-  DH_elk_smr19 <- detectionHistory(recordTable = images_summer19,
-                                    camOp = camop_problem,
+  DH_elk_smr19 <- detectionHistory(recordTable = NE_smr19,
+                                    camOp = camop_problem_NE,
                                     stationCol = "CameraLocation",
                                     speciesCol = "Species",
                                     recordDateTimeCol = "DateTime",
@@ -604,10 +666,10 @@
                                     scaleEffort = FALSE,
                                     # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_elk_smr19 <- DH_elk_smr19[[1]][126:242,1:13]
+  DH_elk_smr19 <- DH_elk_smr19[[1]][(nNE_yr1 + 1):(nNE_yr1 + nNE_yr2),1:13] # NE Year2 only
   
-  DH_elk_wtr1920 <- detectionHistory(recordTable = images_winter1920,
-                                      camOp = camop_problem,
+  DH_elk_wtr1920 <- detectionHistory(recordTable = NE_wtr1920,
+                                      camOp = camop_problem_NE,
                                       stationCol = "CameraLocation",
                                       speciesCol = "Species",
                                       recordDateTimeCol = "DateTime",
@@ -623,7 +685,7 @@
                                       scaleEffort = FALSE,
                                       # writecsv = TRUE,
                                       outDir = "./Data/Detection_Histories")
-  DH_elk_wtr1920 <- DH_elk_wtr1920[[1]][126:242,1:13]
+  DH_elk_wtr1920 <- DH_elk_wtr1920[[1]][(nNE_yr1 + 1):(nNE_yr1 + nNE_yr2),1:13] # NE Year2 only
   
   #'  Merge summer 2018 and summer 2019 data together
   DH_elk_smr1819 <- rbind(DH_elk_smr18, DH_elk_smr19)
@@ -632,8 +694,9 @@
   
   
   ####  MULE DEER  ####
-  DH_md_smr18 <- detectionHistory(recordTable = images_summer18,
-                                    camOp = camop_problem,
+  #'  Using the OK camera & detection data only
+  DH_md_smr18 <- detectionHistory(recordTable = OK_smr18,
+                                    camOp = camop_problem_OK,
                                     stationCol = "CameraLocation",
                                     speciesCol = "Species",
                                     recordDateTimeCol = "DateTime",
@@ -649,11 +712,11 @@
                                     scaleEffort = FALSE,
                                     # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_md_smr18 <- DH_md_smr18[[1]][1:125,1:13]
+  DH_md_smr18 <- DH_md_smr18[[1]][1:nOK_yr1,1:13] # OK Year1 only
   # DH_md_smr18 <- DH_md_smr18[[1]][,1:13]
   
-  DH_md_wtr1819 <- detectionHistory(recordTable = images_winter1819,
-                                      camOp = camop_problem,
+  DH_md_wtr1819 <- detectionHistory(recordTable = OK_wtr1819,
+                                      camOp = camop_problem_OK,
                                       stationCol = "CameraLocation",
                                       speciesCol = "Species",
                                       recordDateTimeCol = "DateTime",
@@ -669,11 +732,11 @@
                                       scaleEffort = FALSE,
                                       # writecsv = TRUE,
                                       outDir = "./Data/Detection_Histories")
-  DH_md_wtr1819 <- DH_md_wtr1819[[1]][1:125,1:13]
+  DH_md_wtr1819 <- DH_md_wtr1819[[1]][1:nOK_yr1,1:13] # OK Year1 only
   # DH_md_wtr1819 <- DH_md_wtr1819[[1]][,1:13]
   
-  DH_md_smr19 <- detectionHistory(recordTable = images_summer19,
-                                   camOp = camop_problem,
+  DH_md_smr19 <- detectionHistory(recordTable = OK_smr19,
+                                   camOp = camop_problem_OK,
                                    stationCol = "CameraLocation",
                                    speciesCol = "Species",
                                    recordDateTimeCol = "DateTime",
@@ -689,10 +752,10 @@
                                    scaleEffort = FALSE,
                                    # writecsv = TRUE,
                                    outDir = "./Data/Detection_Histories")
-  DH_md_smr19 <- DH_md_smr19[[1]][126:242,1:13]
+  DH_md_smr19 <- DH_md_smr19[[1]][(nOK_yr1 + 1):(nOK_yr1 + nOK_yr2),1:13] # OK Year2 only
   
-  DH_md_wtr1920 <- detectionHistory(recordTable = images_winter1920,
-                                     camOp = camop_problem,
+  DH_md_wtr1920 <- detectionHistory(recordTable = OK_wtr1920,
+                                     camOp = camop_problem_OK,
                                      stationCol = "CameraLocation",
                                      speciesCol = "Species",
                                      recordDateTimeCol = "DateTime",
@@ -708,7 +771,7 @@
                                      scaleEffort = FALSE,
                                      # writecsv = TRUE,
                                      outDir = "./Data/Detection_Histories")
-  DH_md_wtr1920 <- DH_md_wtr1920[[1]][126:242,1:13]
+  DH_md_wtr1920 <- DH_md_wtr1920[[1]][(nOK_yr1 + 1):(nOK_yr1 + nOK_yr2),1:13] # OK Year2 only
   
   #'  Merge summer 2018 and summer 2019 data together
   DH_md_smr1819 <- rbind(DH_md_smr18, DH_md_smr19)
@@ -717,8 +780,9 @@
   
   
   ####  WHITE-TAILED DEER  ####
-  DH_wtd_smr18 <- detectionHistory(recordTable = images_summer18,
-                                  camOp = camop_problem,
+  #'  Using the NE camera & detection data only
+  DH_wtd_smr18 <- detectionHistory(recordTable = NE_smr18,
+                                  camOp = camop_problem_NE,
                                   stationCol = "CameraLocation",
                                   speciesCol = "Species",
                                   recordDateTimeCol = "DateTime",
@@ -734,11 +798,11 @@
                                   scaleEffort = FALSE,
                                   # writecsv = TRUE,
                                   outDir = "./Data/Detection_Histories")
-  DH_wtd_smr18 <- DH_wtd_smr18[[1]][1:125,1:13]
+  DH_wtd_smr18 <- DH_wtd_smr18[[1]][1:nNE_yr1,1:13] # NE Year1 only
   # DH_wtd_smr18 <- DH_wtd_smr18[[1]][,1:13]
   
-  DH_wtd_wtr1819 <- detectionHistory(recordTable = images_winter1819,
-                                    camOp = camop_problem,
+  DH_wtd_wtr1819 <- detectionHistory(recordTable = NE_wtr1819,
+                                    camOp = camop_problem_NE,
                                     stationCol = "CameraLocation",
                                     speciesCol = "Species",
                                     recordDateTimeCol = "DateTime",
@@ -754,11 +818,11 @@
                                     scaleEffort = FALSE,
                                     # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_wtd_wtr1819 <- DH_wtd_wtr1819[[1]][1:125,1:13]
+  DH_wtd_wtr1819 <- DH_wtd_wtr1819[[1]][1:nNE_yr1,1:13] # NE Year1 only
   # DH_wtd_wtr1819 <- DH_wtd_wtr1819[[1]][,1:13]
   
-  DH_wtd_smr19 <- detectionHistory(recordTable = images_summer19,
-                                  camOp = camop_problem,
+  DH_wtd_smr19 <- detectionHistory(recordTable = NE_smr19,
+                                  camOp = camop_problem_NE,
                                   stationCol = "CameraLocation",
                                   speciesCol = "Species",
                                   recordDateTimeCol = "DateTime",
@@ -774,10 +838,10 @@
                                   scaleEffort = FALSE,
                                   # writecsv = TRUE,
                                   outDir = "./Data/Detection_Histories")
-  DH_wtd_smr19 <- DH_wtd_smr19[[1]][126:242,1:13]
+  DH_wtd_smr19 <- DH_wtd_smr19[[1]][(nNE_yr1 + 1):(nNE_yr1 + nNE_yr2),1:13] # NE Year2 only
   
-  DH_wtd_wtr1920 <- detectionHistory(recordTable = images_winter1920,
-                                    camOp = camop_problem,
+  DH_wtd_wtr1920 <- detectionHistory(recordTable = NE_wtr1920,
+                                    camOp = camop_problem_NE,
                                     stationCol = "CameraLocation",
                                     speciesCol = "Species",
                                     recordDateTimeCol = "DateTime",
@@ -793,7 +857,7 @@
                                     scaleEffort = FALSE,
                                     # writecsv = TRUE,
                                     outDir = "./Data/Detection_Histories")
-  DH_wtd_wtr1920 <- DH_wtd_wtr1920[[1]][126:242,1:13]
+  DH_wtd_wtr1920 <- DH_wtd_wtr1920[[1]][(nNE_yr1 + 1):(nNE_yr1 + nNE_yr2),1:13] # NE Year2 only
 
   #'  Merge summer 2018 and summer 2019 data together
   DH_wtd_smr1819 <- rbind(DH_wtd_smr18, DH_wtd_smr19)
