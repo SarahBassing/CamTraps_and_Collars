@@ -3,14 +3,14 @@
   ##  Nov. 16, 2020
   ##  Sarah Bassing
   ##  =========================================================
-  ##  Script takes cleaned master GPS satelite data and takes final  steps to 
+  ##  Script takes cleaned master GPS satellite data and takes final  steps to 
   ##  truncate and filter telemetry data for analyses specific to my project.
   ##     1. Truncating 2-wks after animal was captured to ensure any movements 
   ##        affected by the capture are excluded from analyses.
   ##     2. Thinning data to only include locations on the WPPP chosen 4-hr fix
   ##        schedule. Location times should be: 2:00, 6:00, 10:00, 14:00, 18:00, 
   ##        & 22:00 for all individuals.
-  ##     3. Remove any indiviudals that have very few locations or are missing
+  ##     3. Remove any individuals that have very few locations or are missing
   ##        a lot of data due to collar malfunctions or previous filtering.
   ##  This should produce the final data set to be used with HMMs to evaluate
   ##  habitat associations under different movement states.
