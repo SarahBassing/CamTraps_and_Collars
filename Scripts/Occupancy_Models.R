@@ -68,32 +68,32 @@
       NLCD_landcov = ifelse(NLCD_landcov == "71", "Ag-Grassland", as.character(NLCD_landcov)), # Grassland / Agriculture
       NLCD_landcov = ifelse(NLCD_landcov == "81", "Ag-Grassland", as.character(NLCD_landcov)), 
       NLCD_landcov = ifelse(NLCD_landcov == "82", "Ag-Grassland", as.character(NLCD_landcov)),
-      landcov18 = ifelse(landcov18 == "201", "Forest", as.character(landcov18)),
-      landcov18 = ifelse(landcov18 == "230", "Forest", as.character(landcov18)),
-      landcov18 = ifelse(landcov18 == "211", "Grass", as.character(landcov18)),
-      landcov18 = ifelse(landcov18 == "212", "Grass", as.character(landcov18)), 
-      landcov18 = ifelse(landcov18 == "310", "Grass", as.character(landcov18)), 
-      landcov18 = ifelse(landcov18 == "332", "Shrub", as.character(landcov18)),  
-      landcov18 = ifelse(landcov18 == "221", "Shrub", as.character(landcov18)),
-      landcov18 = ifelse(landcov18 == "222", "Shrub", as.character(landcov18)), 
-      landcov19 = ifelse(landcov19 == "121", "Grass", as.character(landcov19)), 
-      landcov19 = ifelse(landcov19 == "201", "Forest", as.character(landcov19)),
-      landcov19 = ifelse(landcov19 == "230", "Forest", as.character(landcov19)),
-      landcov19 = ifelse(landcov19 == "211", "Grass", as.character(landcov19)),
-      landcov19 = ifelse(landcov19 == "212", "Grass", as.character(landcov19)),
-      landcov19 = ifelse(landcov19 == "310", "Grass", as.character(landcov19)), 
-      landcov19 = ifelse(landcov19 == "332", "Shrub", as.character(landcov19)),  
-      landcov19 = ifelse(landcov19 == "221", "Shrub", as.character(landcov19)),
-      landcov19 = ifelse(landcov19 == "222", "Shrub", as.character(landcov19)),  
-      landcov = ifelse(landcov == "211", "MesicMix", as.character(landcov)),
-      landcov = ifelse(landcov == "121", "MesicMix", as.character(landcov)), # Barren becomes grass
-      landcov = ifelse(landcov == "201", "Forest", as.character(landcov)), # Emergent Wetland becomes forest
+      landcov18 = ifelse(landcov18 == "201", "ForestMix", as.character(landcov18)),
+      landcov18 = ifelse(landcov18 == "230", "ForestMix", as.character(landcov18)),
+      landcov18 = ifelse(landcov18 == "211", "MesicGrass", as.character(landcov18)),
+      landcov18 = ifelse(landcov18 == "212", "XericGrass", as.character(landcov18)), 
+      landcov18 = ifelse(landcov18 == "310", "Developed", as.character(landcov18)), 
+      landcov18 = ifelse(landcov18 == "332", "Developed", as.character(landcov18)),  
+      landcov18 = ifelse(landcov18 == "221", "ForestMix", as.character(landcov18)),
+      landcov18 = ifelse(landcov18 == "222", "XericShrub", as.character(landcov18)), 
+      landcov19 = ifelse(landcov19 == "121", "MesicGrass", as.character(landcov19)), 
+      landcov19 = ifelse(landcov19 == "201", "ForestMix", as.character(landcov19)),
+      landcov19 = ifelse(landcov19 == "230", "ForestMix", as.character(landcov19)),
+      landcov19 = ifelse(landcov19 == "211", "MesicGrass", as.character(landcov19)),
+      landcov19 = ifelse(landcov19 == "212", "XericGrass", as.character(landcov19)),
+      landcov19 = ifelse(landcov19 == "310", "Developed", as.character(landcov19)), 
+      landcov19 = ifelse(landcov19 == "332", "Developed", as.character(landcov19)),  
+      landcov19 = ifelse(landcov19 == "221", "ForestMix", as.character(landcov19)),
+      landcov19 = ifelse(landcov19 == "222", "XericShrub", as.character(landcov19)),  
+      landcov = ifelse(landcov == "211", "MesicGrass", as.character(landcov)),
+      landcov = ifelse(landcov == "121", "MesicGrass", as.character(landcov)), # Barren becomes mesic grass
+      landcov = ifelse(landcov == "201", "ForestMix", as.character(landcov)),  # Emergent Wetland becomes forest
       landcov = ifelse(landcov == "212", "XericGrass", as.character(landcov)),
-      landcov = ifelse(landcov == "310", "MesicMix", as.character(landcov)), # Agriculture becomes grass
-      landcov = ifelse(landcov == "332", "XericShrub", as.character(landcov)), # Residential becomes shrub (Omak) (for now...) 
-      landcov = ifelse(landcov == "221", "MesicMix", as.character(landcov)),   
+      landcov = ifelse(landcov == "310", "Developed", as.character(landcov)), # Agriculture becomes developed
+      landcov = ifelse(landcov == "332", "Developed", as.character(landcov)), # Residential becomes developed 
+      landcov = ifelse(landcov == "221", "ForestMix", as.character(landcov)), # Mesic shrub becomes forest  
       landcov = ifelse(landcov == "222", "XericShrub", as.character(landcov)),
-      landcov = ifelse(landcov == "230", "Forest", as.character(landcov))
+      landcov = ifelse(landcov == "230", "ForestMix", as.character(landcov))
     ) %>%
     #'  Rename, format, and scale as needed
     transmute(
@@ -305,6 +305,78 @@
   tail(srvy_covs[[1]])
   tail(srvy_covs_OK[[1]])
   
+  
+  ####  Naive Occupancy & Covariates  ####
+  
+  #'  Get a feel for naive occupancy across covaraites
+  smbob <- as.numeric(apply(DH_bob_smr1819, 1, max, na.rm=FALSE))
+  wtrbob <- as.numeric(apply(DH_bob_wtr1820, 1, max, na.rm=FALSE))
+  smcoug <- as.numeric(apply(DH_coug_smr1819, 1, max, na.rm=FALSE))
+  wtrcoug <- as.numeric(apply(DH_coug_wtr1820, 1, max, na.rm=FALSE))
+  smcoy <- as.numeric(apply(DH_coy_smr1819, 1, max, na.rm=FALSE))
+  wtrcoy <- as.numeric(apply(DH_coy_wtr1820, 1, max, na.rm=FALSE))
+  smwolf <- as.numeric(apply(DH_wolf_smr1819, 1, max, na.rm=FALSE))
+  wtrwolf <- as.numeric(apply(DH_wolf_wtr1820, 1, max, na.rm=FALSE))
+  smelk <- as.numeric(apply(DH_elk_smr1819, 1, max, na.rm=FALSE))
+  wtrelk <- as.numeric(apply(DH_elk_wtr1820, 1, max, na.rm=FALSE))
+  smmd <- as.numeric(apply(DH_md_smr1819, 1, max, na.rm=FALSE))
+  wtrmd <- as.numeric(apply(DH_md_wtr1820, 1, max, na.rm=FALSE))
+  smwtd <- as.numeric(apply(DH_wtd_smr1819, 1, max, na.rm=FALSE))
+  wtrwtd <- as.numeric(apply(DH_wtd_wtr1820, 1, max, na.rm=FALSE))
+  
+  #'  Raw detections by landcover categories
+  landcov <- as.character(as.factor(stations$Landcov))
+  landcovNE <- as.character(as.factor(stations_NE$Landcov))
+  landcovOK <- as.character(as.factor(stations_OK$Landcov))
+  hab_det <- as.data.frame(cbind(landcov, smbob, wtrbob, smcoug, wtrcoug, smcoy, wtrcoy, smwolf, wtrwolf)) %>%
+    mutate(
+      smbob = as.numeric(smbob),
+      wtrbob = as.numeric(wtrbob),
+      smcoug = as.numeric(smcoug),
+      wtrcoug = as.numeric(wtrcoug),
+      smcoy = as.numeric(smcoy),
+      wtrcoy = as.numeric(wtrcoy),
+      smwolf = as.numeric(smwolf),
+      wtrwolf = as.numeric(wtrwolf)
+    )
+  habNE_det <- as.data.frame(cbind(landcovNE, smelk, wtrelk, smwtd, wtrwtd)) %>%
+    mutate(
+      smelk = as.numeric(smelk),
+      wtrelk = as.numeric(wtrelk),
+      smwtd = as.numeric(smwtd),
+      wtrwtd = as.numeric(wtrwtd)
+    )
+  habOK_det <- as.data.frame(cbind(landcovOK, smmd, wtrmd)) %>%
+    mutate(
+      smmd = as.numeric(smmd),
+      wtrmd = as.numeric(wtrmd)
+    )
+  #'  Count number of raw detections per landcover category
+  tbl_pred <- hab_det %>%
+    group_by(landcov) %>%
+    summarise(across(smbob:wtrwolf, sum, na.rm= TRUE)) %>%
+    ungroup()
+  tbl_NE <- habNE_det %>%
+    group_by(landcovNE) %>%
+    summarise(across(smelk:wtrwtd, sum, na.rm= TRUE)) %>%
+    ungroup()
+  tbl_OK <- habOK_det %>%
+    group_by(landcovOK) %>%
+    summarise(across(smmd:wtrmd, sum, na.rm= TRUE)) %>%
+    ungroup()
+  sum_raw_det <- full_join(tbl_pred, tbl_OK, by = c("landcov" = "landcovOK")) %>%
+    full_join(tbl_NE, by = c("landcov" = "landcovNE"))
+  #'  Visualize another way
+  barplot(sum_raw_det$smwtd, names.arg = sum_raw_det$landcov, 
+          xlab = "Landcover Type", ylab = "Raw Detections")
+
+  #'  Raw detections and continuous variables (remember- these are center & scaled)
+  plot(stations$HumanModified, wtrcoy)
+  plot(stations$PercForestMix, wtrcoy)
+  hist(stations$PercForestMix[hab_det$wtrcoy == "1",], breaks = 50)
+  hist(stations$PercXericShrub[habOK_det$wtrmd == "1",], breaks = 25)
+  hist(stations$PercXericShrub[hab_det$wtrcoy == "1",], breaks = 25)
+
   
   
   #'  Create unmarked dataframes
@@ -747,7 +819,6 @@
   #'  Habitat model
   (bob_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub, bob_w1820_UMF))
   (bob_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub, bob_w1820_UMF))
-  #'  Anthropogenic model
   #'  Anthropogenic model 
   (bob_w1820_anthro <- occu(~Height*Distance + Trail + Year ~Area + RoadDensity + HumanMod, bob_w1820_UMF))
   #'  Combined model
@@ -1144,7 +1215,7 @@
   (pb_bob_s1819 <- parboot(bob_s1819_anthro, statistic = chisq, nsim = 100, parallel = FALSE))         
   (pb_bob_w1820 <- parboot(bob_w1820_anthro, statistic = chisq, nsim = 100, parallel = FALSE))          
   (pb_coug_s1819 <- parboot(coug_s1819_terrain_veg2, statistic = chisq, nsim = 100, parallel = FALSE))         
-  (pb_coug_w1820 <- parboot(coug_w1820_terrain_veg2, statistic = chisq, nsim = 100, parallel = FALSE))    #pval= 0.0396
+  (pb_coug_w1820 <- parboot(coug_w1820_terrain_veg2, statistic = chisq, nsim = 100, parallel = FALSE))    #pval= 0.0396 Trash model
   (pb_coy_s1819 <- parboot(coy_s1819_terrain, statistic = chisq, nsim = 100, parallel = FALSE))   
   (pb_coy_w1820 <- parboot(coy_w1820_terrain, statistic = chisq, nsim = 100, parallel = FALSE))   
   (pb_wolf_s1819 <- parboot(wolf_s1819_terrain, statistic = chisq, nsim = 100, parallel = FALSE))      
@@ -1153,8 +1224,8 @@
   (pb_elk_w1820 <- parboot(elk_w1820_null, statistic = chisq, nsim = 100, parallel = FALSE))          
   (pb_md_s1819 <- parboot(md_s1819_anthro, statistic = chisq, nsim = 100, parallel = FALSE))          
   (pb_md_w1820 <- parboot(md_w1820_terrain_veg2, statistic = chisq, nsim = 100, parallel = FALSE))             
-  (pb_wtd_s1819 <- parboot(wtd_s1819_null2, statistic = chisq, nsim = 100, parallel = FALSE))    
-  (pb_wtd_w1820 <- parboot(wtd_w1820_terrain_veg, statistic = chisq, nsim = 100, parallel = FALSE))       #wtd_w1820_terrain2 #wtd_w1820_terrain_veg 
+  (pb_wtd_s1819 <- parboot(wtd_s1819_null2, statistic = chisq, nsim = 100, parallel = FALSE))          # wtd_s1819_terrain
+  (pb_wtd_w1820 <- parboot(wtd_w1820_terrain_veg, statistic = chisq, nsim = 100, parallel = FALSE))        
   
   
   ####  Summary tables  ####
@@ -1176,20 +1247,20 @@
   }
   
   #'  Run each model through function
-  bob_s1819_occ <- occ_out(bob_s1819_veg, "Bobcat", "Summer")
+  bob_s1819_occ <- occ_out(bob_s1819_anthro, "Bobcat", "Summer")
   bob_w1820_occ <- occ_out(bob_w1820_anthro, "Bobcat", "Winter")
-  coug_s1819_occ <- occ_out(coug_s1819_veg, "Cougar", "Summer")
-  coug_w1820_occ <- occ_out(coug_w1820_terrain2, "Cougar", "Winter")
-  coy_s1819_occ <- occ_out(coy_s1819_terrain_veg, "Coyote", "Summer")
-  coy_w1820_occ <- occ_out(coy_w1820_terrain_veg, "Coyote", "Winter")
-  wolf_s1819_occ <- occ_out(wolf_s1819_anthro, "Wolf", "Summer")
-  wolf_w1820_occ <- occ_out(wolf_w1820_null2, "Wolf", "Winter")
+  coug_s1819_occ <- occ_out(coug_s1819_terrain_veg2, "Cougar", "Summer")
+  coug_w1820_occ <- occ_out(coug_w1820_terrain_veg2, "Cougar", "Winter")
+  coy_s1819_occ <- occ_out(coy_s1819_terrain, "Coyote", "Summer")
+  coy_w1820_occ <- occ_out(coy_w1820_terrain, "Coyote", "Winter")
+  wolf_s1819_occ <- occ_out(wolf_s1819_terrain, "Wolf", "Summer")
+  wolf_w1820_occ <- occ_out(wolf_w1820_anthro, "Wolf", "Winter")
   elk_s1819_occ <- occ_out(elk_s1819_null2, "Elk", "Summer")
   elk_w1820_occ <- occ_out(elk_w1820_null, "Elk", "Winter")
   md_s1819_occ <- occ_out(md_s1819_anthro, "Mule Deer", "Summer")
-  md_w1820_occ <- occ_out(md_w1820_veg, "Mule Deer", "Winter")
-  wtd_s1819_occ <- occ_out(wtd_s1819_terrain_veg, "White-tailed Deer", "Summer")
-  wtd_w1820_occ <- occ_out(wtd_w1820_terrain, "White-tailed Deer", "Winter")
+  md_w1820_occ <- occ_out(md_w1820_terrain_veg2, "Mule Deer", "Winter")
+  wtd_s1819_occ <- occ_out(wtd_s1819_null2, "White-tailed Deer", "Summer")
+  wtd_w1820_occ <- occ_out(wtd_w1820_terrain_veg, "White-tailed Deer", "Winter")
   
   #'  Merge into larger data frames for easy comparison
   summer_occ <- rbind(bob_s1819_occ, coug_s1819_occ, coy_s1819_occ, wolf_s1819_occ,
@@ -1227,20 +1298,20 @@
   }
   
   #'  Run each model through detection function
-  bob_s1819_det <- det_out(bob_s1819_veg, "Bobcat", "Summer")
+  bob_s1819_det <- det_out(bob_s1819_anthro, "Bobcat", "Summer")
   bob_w1820_det <- det_out(bob_w1820_anthro, "Bobcat", "Winter")
   coug_s1819_det <- det_out(coug_s1819_veg, "Cougar", "Summer")
   coug_w1820_det <- det_out(coug_w1820_terrain2, "Cougar", "Winter")
-  coy_s1819_det <- det_out(coy_s1819_terrain_veg, "Coyote", "Summer")
-  coy_w1820_det <- det_out(coy_w1820_terrain_veg, "Coyote", "Winter")
-  wolf_s1819_det <- det_out(wolf_s1819_anthro, "Wolf", "Summer")
-  wolf_w1820_det <- det_out(wolf_w1820_null2, "Wolf", "Winter")
+  coy_s1819_det <- det_out(coy_s1819_terrain, "Coyote", "Summer")
+  coy_w1820_det <- det_out(coy_w1820_terrain, "Coyote", "Winter")
+  wolf_s1819_det <- det_out(wolf_s1819_terrain, "Wolf", "Summer")
+  wolf_w1820_det <- det_out(wolf_w1820_anthro, "Wolf", "Winter")
   elk_s1819_det <- det_out(elk_s1819_null2, "Elk", "Summer")
   elk_w1820_det <- det_out(elk_w1820_null, "Elk", "Winter")
   md_s1819_det <- det_out(md_s1819_anthro, "Mule Deer", "Summer")
-  md_w1820_det <- det_out(md_w1820_veg, "Mule Deer", "Winter")
-  wtd_s1819_det <- det_out(wtd_s1819_terrain_veg, "White-tailed Deer", "Summer")
-  wtd_w1820_det <- det_out(wtd_w1820_terrain, "White-tailed Deer", "Winter")
+  md_w1820_det <- det_out(md_w1820_terrain_veg2, "Mule Deer", "Winter")
+  wtd_s1819_det <- det_out(wtd_s1819_null2, "White-tailed Deer", "Summer")
+  wtd_w1820_det <- det_out(wtd_w1820_terrain_veg, "White-tailed Deer", "Winter")
   
   #'  Merge into larger data frames for easy comparison
   summer_det <- rbind(bob_s1819_det, coug_s1819_det, coy_s1819_det, wolf_s1819_det,
