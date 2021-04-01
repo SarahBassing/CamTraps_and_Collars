@@ -220,6 +220,9 @@
   cor(stations$PercForest, stations$PercMesicMix, use = "complete.obs")   # EHH -0.567
   cor(stations$PercForestMix, stations$Landfire, use = "complete.obs")    # YEAH 0.681
   
+  
+  plot(stations$Elev, stations$HumanModified) # seems to be a break point around mid-elevation
+  
   #'  Study area specific correlations
   cor(stations_NE$Elev, stations_NE$HumanModified, use = "complete.obs")  # MEH -0.567
   cor(stations_OK$Elev, stations_OK$HumanModified, use = "complete.obs")  # YEP -0.688
@@ -308,74 +311,74 @@
   
   ####  Naive Occupancy & Covariates  ####
   
-  #'  Get a feel for naive occupancy across covaraites
-  smbob <- as.numeric(apply(DH_bob_smr1819, 1, max, na.rm=FALSE))
-  wtrbob <- as.numeric(apply(DH_bob_wtr1820, 1, max, na.rm=FALSE))
-  smcoug <- as.numeric(apply(DH_coug_smr1819, 1, max, na.rm=FALSE))
-  wtrcoug <- as.numeric(apply(DH_coug_wtr1820, 1, max, na.rm=FALSE))
-  smcoy <- as.numeric(apply(DH_coy_smr1819, 1, max, na.rm=FALSE))
-  wtrcoy <- as.numeric(apply(DH_coy_wtr1820, 1, max, na.rm=FALSE))
-  smwolf <- as.numeric(apply(DH_wolf_smr1819, 1, max, na.rm=FALSE))
-  wtrwolf <- as.numeric(apply(DH_wolf_wtr1820, 1, max, na.rm=FALSE))
-  smelk <- as.numeric(apply(DH_elk_smr1819, 1, max, na.rm=FALSE))
-  wtrelk <- as.numeric(apply(DH_elk_wtr1820, 1, max, na.rm=FALSE))
-  smmd <- as.numeric(apply(DH_md_smr1819, 1, max, na.rm=FALSE))
-  wtrmd <- as.numeric(apply(DH_md_wtr1820, 1, max, na.rm=FALSE))
-  smwtd <- as.numeric(apply(DH_wtd_smr1819, 1, max, na.rm=FALSE))
-  wtrwtd <- as.numeric(apply(DH_wtd_wtr1820, 1, max, na.rm=FALSE))
-  
-  #'  Raw detections by landcover categories
-  landcov <- as.character(as.factor(stations$Landcov))
-  landcovNE <- as.character(as.factor(stations_NE$Landcov))
-  landcovOK <- as.character(as.factor(stations_OK$Landcov))
-  hab_det <- as.data.frame(cbind(landcov, smbob, wtrbob, smcoug, wtrcoug, smcoy, wtrcoy, smwolf, wtrwolf)) %>%
-    mutate(
-      smbob = as.numeric(smbob),
-      wtrbob = as.numeric(wtrbob),
-      smcoug = as.numeric(smcoug),
-      wtrcoug = as.numeric(wtrcoug),
-      smcoy = as.numeric(smcoy),
-      wtrcoy = as.numeric(wtrcoy),
-      smwolf = as.numeric(smwolf),
-      wtrwolf = as.numeric(wtrwolf)
-    )
-  habNE_det <- as.data.frame(cbind(landcovNE, smelk, wtrelk, smwtd, wtrwtd)) %>%
-    mutate(
-      smelk = as.numeric(smelk),
-      wtrelk = as.numeric(wtrelk),
-      smwtd = as.numeric(smwtd),
-      wtrwtd = as.numeric(wtrwtd)
-    )
-  habOK_det <- as.data.frame(cbind(landcovOK, smmd, wtrmd)) %>%
-    mutate(
-      smmd = as.numeric(smmd),
-      wtrmd = as.numeric(wtrmd)
-    )
-  #'  Count number of raw detections per landcover category
-  tbl_pred <- hab_det %>%
-    group_by(landcov) %>%
-    summarise(across(smbob:wtrwolf, sum, na.rm= TRUE)) %>%
-    ungroup()
-  tbl_NE <- habNE_det %>%
-    group_by(landcovNE) %>%
-    summarise(across(smelk:wtrwtd, sum, na.rm= TRUE)) %>%
-    ungroup()
-  tbl_OK <- habOK_det %>%
-    group_by(landcovOK) %>%
-    summarise(across(smmd:wtrmd, sum, na.rm= TRUE)) %>%
-    ungroup()
-  sum_raw_det <- full_join(tbl_pred, tbl_OK, by = c("landcov" = "landcovOK")) %>%
-    full_join(tbl_NE, by = c("landcov" = "landcovNE"))
-  #'  Visualize another way
-  barplot(sum_raw_det$smwtd, names.arg = sum_raw_det$landcov, 
-          xlab = "Landcover Type", ylab = "Raw Detections")
-
-  #'  Raw detections and continuous variables (remember- these are center & scaled)
-  plot(stations$HumanModified, wtrcoy)
-  plot(stations$PercForestMix, wtrcoy)
-  hist(stations$PercForestMix[hab_det$wtrcoy == "1",], breaks = 50)
-  hist(stations$PercXericShrub[habOK_det$wtrmd == "1",], breaks = 25)
-  hist(stations$PercXericShrub[hab_det$wtrcoy == "1",], breaks = 25)
+  #' #'  Get a feel for naive occupancy across covaraites
+  #' smbob <- as.numeric(apply(DH_bob_smr1819, 1, max, na.rm=FALSE))
+  #' wtrbob <- as.numeric(apply(DH_bob_wtr1820, 1, max, na.rm=FALSE))
+  #' smcoug <- as.numeric(apply(DH_coug_smr1819, 1, max, na.rm=FALSE))
+  #' wtrcoug <- as.numeric(apply(DH_coug_wtr1820, 1, max, na.rm=FALSE))
+  #' smcoy <- as.numeric(apply(DH_coy_smr1819, 1, max, na.rm=FALSE))
+  #' wtrcoy <- as.numeric(apply(DH_coy_wtr1820, 1, max, na.rm=FALSE))
+  #' smwolf <- as.numeric(apply(DH_wolf_smr1819, 1, max, na.rm=FALSE))
+  #' wtrwolf <- as.numeric(apply(DH_wolf_wtr1820, 1, max, na.rm=FALSE))
+  #' smelk <- as.numeric(apply(DH_elk_smr1819, 1, max, na.rm=FALSE))
+  #' wtrelk <- as.numeric(apply(DH_elk_wtr1820, 1, max, na.rm=FALSE))
+  #' smmd <- as.numeric(apply(DH_md_smr1819, 1, max, na.rm=FALSE))
+  #' wtrmd <- as.numeric(apply(DH_md_wtr1820, 1, max, na.rm=FALSE))
+  #' smwtd <- as.numeric(apply(DH_wtd_smr1819, 1, max, na.rm=FALSE))
+  #' wtrwtd <- as.numeric(apply(DH_wtd_wtr1820, 1, max, na.rm=FALSE))
+  #' 
+  #' #'  Raw detections by landcover categories
+  #' landcov <- as.character(as.factor(stations$Landcov))
+  #' landcovNE <- as.character(as.factor(stations_NE$Landcov))
+  #' landcovOK <- as.character(as.factor(stations_OK$Landcov))
+  #' hab_det <- as.data.frame(cbind(landcov, smbob, wtrbob, smcoug, wtrcoug, smcoy, wtrcoy, smwolf, wtrwolf)) %>%
+  #'   mutate(
+  #'     smbob = as.numeric(smbob),
+  #'     wtrbob = as.numeric(wtrbob),
+  #'     smcoug = as.numeric(smcoug),
+  #'     wtrcoug = as.numeric(wtrcoug),
+  #'     smcoy = as.numeric(smcoy),
+  #'     wtrcoy = as.numeric(wtrcoy),
+  #'     smwolf = as.numeric(smwolf),
+  #'     wtrwolf = as.numeric(wtrwolf)
+  #'   )
+  #' habNE_det <- as.data.frame(cbind(landcovNE, smelk, wtrelk, smwtd, wtrwtd)) %>%
+  #'   mutate(
+  #'     smelk = as.numeric(smelk),
+  #'     wtrelk = as.numeric(wtrelk),
+  #'     smwtd = as.numeric(smwtd),
+  #'     wtrwtd = as.numeric(wtrwtd)
+  #'   )
+  #' habOK_det <- as.data.frame(cbind(landcovOK, smmd, wtrmd)) %>%
+  #'   mutate(
+  #'     smmd = as.numeric(smmd),
+  #'     wtrmd = as.numeric(wtrmd)
+  #'   )
+  #' #'  Count number of raw detections per landcover category
+  #' tbl_pred <- hab_det %>%
+  #'   group_by(landcov) %>%
+  #'   summarise(across(smbob:wtrwolf, sum, na.rm= TRUE)) %>%
+  #'   ungroup()
+  #' tbl_NE <- habNE_det %>%
+  #'   group_by(landcovNE) %>%
+  #'   summarise(across(smelk:wtrwtd, sum, na.rm= TRUE)) %>%
+  #'   ungroup()
+  #' tbl_OK <- habOK_det %>%
+  #'   group_by(landcovOK) %>%
+  #'   summarise(across(smmd:wtrmd, sum, na.rm= TRUE)) %>%
+  #'   ungroup()
+  #' sum_raw_det <- full_join(tbl_pred, tbl_OK, by = c("landcov" = "landcovOK")) %>%
+  #'   full_join(tbl_NE, by = c("landcov" = "landcovNE"))
+  #' #'  Visualize another way
+  #' barplot(sum_raw_det$smwtd, names.arg = sum_raw_det$landcov, 
+  #'         xlab = "Landcover Type", ylab = "Raw Detections")
+  #' 
+  #' #'  Raw detections and continuous variables (remember- these are center & scaled)
+  #' plot(stations$HumanModified, wtrcoy)
+  #' plot(stations$PercForestMix, wtrcoy)
+  #' hist(stations$PercForestMix[hab_det$wtrcoy == "1",], breaks = 50)
+  #' hist(stations$PercXericShrub[habOK_det$wtrmd == "1",], breaks = 25)
+  #' hist(stations$PercXericShrub[hab_det$wtrcoy == "1",], breaks = 25)
 
   
   
@@ -785,24 +788,23 @@
   #'  Null with detection covariates
   (bob_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, bob_s1819_UMF))
   #'  Terrain model
-  (bob_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, bob_s1819_UMF))
-  (bob_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, bob_s1819_UMF))
+  (bob_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev, bob_s1819_UMF))
+  (bob_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2), bob_s1819_UMF))
   #'  Vegetation model
   (bob_s1819_veg <- occu(~Height*Distance + Trail + Year ~Area + PercForMix + PercXGrass + PercXShrub, bob_s1819_UMF))
   #'  Habitat model
-  (bob_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub, bob_s1819_UMF))
-  (bob_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub, bob_s1819_UMF))
+  (bob_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub, bob_s1819_UMF))
+  (bob_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub, bob_s1819_UMF))
   #'  Anthropogenic model 
   (bob_s1819_anthro <- occu(~Height*Distance + Trail + Year ~Area + RoadDensity + HumanMod, bob_s1819_UMF))
   #'  Combined model
-  (bob_s1819_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, bob_s1819_UMF))
-  (bob_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, bob_s1819_UMF))
+  (bob_s1819_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, bob_s1819_UMF))
+  (bob_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, bob_s1819_UMF))
   
-  mods <- fitList(bob_s1819_null, bob_s1819_null2, bob_s1819_terrain, bob_s1819_terrain2, 
-                  bob_s1819_veg, bob_s1819_anthro, bob_s1819_terrain_veg, bob_s1819_terrain_veg2, 
-                  bob_s1819_full, bob_s1819_full2)
-  modSel(mods)
-  
+  mods1 <- fitList(bob_s1819_null, bob_s1819_null2, bob_s1819_terrain, bob_s1819_terrain2, 
+                   bob_s1819_veg, bob_s1819_anthro, bob_s1819_terrain_veg, bob_s1819_terrain_veg2, 
+                   bob_s1819_full, bob_s1819_full2)
+  modSel(mods1)
   
   #'  WINTERS 2018-2019 & 2019-2020           
   #'  Null
@@ -812,53 +814,52 @@
   #'  Null with detection covariates
   (bob_w1820_null2 <- occu(~Height*Distance + Trail + Year ~1, bob_w1820_UMF))
   #'  Terrain model
-  (bob_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, bob_w1820_UMF))
-  (bob_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, bob_w1820_UMF))
+  (bob_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev, bob_w1820_UMF))
+  (bob_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2), bob_w1820_UMF))
   #'  Vegetation model
   (bob_w1820_veg <- occu(~Height*Distance + Trail + Year ~Area + PercForMix + PercXGrass + PercXShrub, bob_w1820_UMF))  
   #'  Habitat model
-  (bob_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub, bob_w1820_UMF))
-  (bob_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub, bob_w1820_UMF))
+  (bob_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub, bob_w1820_UMF))
+  (bob_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub, bob_w1820_UMF))
   #'  Anthropogenic model 
   (bob_w1820_anthro <- occu(~Height*Distance + Trail + Year ~Area + RoadDensity + HumanMod, bob_w1820_UMF))
   #'  Combined model
-  (bob_w1820_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, bob_w1820_UMF))
-  (bob_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, bob_w1820_UMF))
+  (bob_w1820_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, bob_w1820_UMF))
+  (bob_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, bob_w1820_UMF))
   
-  mods <- fitList(bob_w1820_null, bob_w1820_null2, bob_w1820_terrain, bob_w1820_terrain2, 
+  mods1 <- fitList(bob_w1820_null, bob_w1820_null2, bob_w1820_terrain, bob_w1820_terrain2, 
                   bob_w1820_veg, bob_w1820_anthro, bob_w1820_terrain_veg, bob_w1820_terrain_veg2,
                   bob_w1820_full, bob_w1820_full2)
-  modSel(mods)
+  modSel(mods1)
   
   ####  COUGAR MODELS  ####
   #'  Included covariates informed by Dickson & Beier 2002, Kertson et al. 2011, 
   #'  Smereka et al. 2020
                                               
-  #'  SUMMERS 2018 & 2019                     
-  #'  Null
+  #'  SUMMERS 2018 & 2019
   (coug_s1819_null <- occu(~1 ~1, coug_s1819_UMF))
   backTransform(coug_s1819_null, 'det')
   backTransform(coug_s1819_null, 'state')
   #'  Null with detection covariates
   (coug_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, coug_s1819_UMF))
   #'  Terrain model
-  (coug_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, coug_s1819_UMF))
-  (coug_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, coug_s1819_UMF))
+  (coug_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev, coug_s1819_UMF))
+  (coug_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2), coug_s1819_UMF))
   #'  Vegetation model
   (coug_s1819_veg <- occu(~Height*Distance + Trail + Year ~Area + PercForMix + PercXGrass + PercXShrub, coug_s1819_UMF))
   #'  Habitat model
-  (coug_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub, coug_s1819_UMF))
-  (coug_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub, coug_s1819_UMF))
+  (coug_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub, coug_s1819_UMF))
+  (coug_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub, coug_s1819_UMF))
   #'  Anthropogenic model
   (coug_s1819_anthro <- occu(~Height*Distance + Trail + Year ~Area + RoadDensity + HumanMod, coug_s1819_UMF))
   #'  Combined model
-  (coug_s1819_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coug_s1819_UMF))
-  (coug_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coug_s1819_UMF))
-
-  mods <- fitList(coug_s1819_null, coug_s1819_null2, coug_s1819_terrain, coug_s1819_terrain2, 
+  (coug_s1819_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coug_s1819_UMF))
+  (coug_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coug_s1819_UMF))
+  
+  mods1 <- fitList(coug_s1819_null, coug_s1819_null2, coug_s1819_terrain, coug_s1819_terrain2, 
                   coug_s1819_veg, coug_s1819_anthro, coug_s1819_terrain_veg, coug_s1819_terrain_veg2,
                   coug_s1819_full, coug_s1819_full2) 
-  modSel(mods)
+  modSel(mods1)
   
   #'  WINTERS 2018-2019 & 2019-2020
   #'  Null
@@ -868,28 +869,28 @@
   #'  Null with detection covariates
   (coug_w1820_null2 <- occu(~Height*Distance + Trail + Year ~1, coug_w1820_UMF))
   #'  Terrain model
-  (coug_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, coug_w1820_UMF))
-  (coug_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, coug_w1820_UMF))
+  (coug_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev, coug_w1820_UMF))
+  (coug_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2), coug_w1820_UMF))
   #'  Vegetation model
   (coug_w1820_veg <- occu(~Height*Distance + Trail + Year ~Area + PercForMix + PercXGrass + PercXShrub, coug_w1820_UMF))
   #'  Habitat model
-  (coug_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub, coug_w1820_UMF))
-  (coug_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub, coug_w1820_UMF))
+  (coug_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub, coug_w1820_UMF))
+  (coug_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub, coug_w1820_UMF))
   #'  Anthropogenic model
   (coug_w1820_anthro <- occu(~Height*Distance + Trail + Year ~Area + RoadDensity + HumanMod, coug_w1820_UMF))
   #'  Combined model
-  (coug_w1820_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coug_w1820_UMF))
-  (coug_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coug_w1820_UMF))
+  (coug_w1820_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coug_w1820_UMF))
+  (coug_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coug_w1820_UMF))
   
-  mods <- fitList(coug_w1820_null, coug_w1820_null2, coug_w1820_terrain, coug_w1820_terrain2, 
+  mods1 <- fitList(coug_w1820_null, coug_w1820_null2, coug_w1820_terrain, coug_w1820_terrain2, 
                   coug_w1820_veg, coug_w1820_anthro, coug_w1820_terrain_veg, coug_w1820_terrain_veg2,
                   coug_w1820_full, coug_w1820_full2)
-  modSel(mods)
+  modSel(mods1)
 
   
   ####  COYOTE MODELS  ####
   #'  Included covariates informed by 
-  
+
   #'  SUMMERS 2018 & 2019
   #'  Null
   (coy_s1819_null <- occu(~1 ~1, coy_s1819_UMF))
@@ -898,23 +899,23 @@
   #'  Null with detection covariates
   (coy_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, coy_s1819_UMF))
   #'  Terrain model
-  (coy_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, coy_s1819_UMF))
-  (coy_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, coy_s1819_UMF))
+  (coy_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev, coy_s1819_UMF))
+  (coy_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2), coy_s1819_UMF))
   #'  Vegetation model
   (coy_s1819_veg <- occu(~Height*Distance + Trail + Year ~Area + PercForMix + PercXGrass + PercXShrub, coy_s1819_UMF))
   #'  Habitat model
-  (coy_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub, coy_s1819_UMF))
-  (coy_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub, coy_s1819_UMF))
+  (coy_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub, coy_s1819_UMF))
+  (coy_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub, coy_s1819_UMF))
   #'  Anthropogenic model
   (coy_s1819_anthro <- occu(~Height*Distance + Trail + Year ~Area + RoadDensity + HumanMod, coy_s1819_UMF))
   #'  Combined model
-  (coy_s1819_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coy_s1819_UMF))
-  (coy_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coy_s1819_UMF))
+  (coy_s1819_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coy_s1819_UMF))
+  (coy_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coy_s1819_UMF))
   
-  mods <- fitList(coy_s1819_null, coy_s1819_null2, coy_s1819_terrain, coy_s1819_terrain2, 
+  mods1 <- fitList(coy_s1819_null, coy_s1819_null2, coy_s1819_terrain, coy_s1819_terrain2, 
                   coy_s1819_veg, coy_s1819_anthro, coy_s1819_terrain_veg, coy_s1819_terrain_veg2, 
                   coy_s1819_full, coy_s1819_full2)
-  modSel(mods)
+  modSel(mods1)
   
   #'  WINTERS 2018-2019 & 2019-2020              
   #'  Null
@@ -924,28 +925,28 @@
   #'  Null with detection covariates
   (coy_w1820_null2 <- occu(~Height*Distance + Trail + Year ~1, coy_w1820_UMF))
   #'  Terrain model
-  (coy_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, coy_w1820_UMF))
-  (coy_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, coy_w1820_UMF))
+  (coy_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev, coy_w1820_UMF))
+  (coy_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2), coy_w1820_UMF))
   #'  Vegetation model
   (coy_w1820_veg <- occu(~Height*Distance + Trail + Year ~Area + PercForMix + PercXGrass + PercXShrub, coy_w1820_UMF))
   #'  Habitat model
-  (coy_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub, coy_w1820_UMF))
-  (coy_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub, coy_w1820_UMF))
+  (coy_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub, coy_w1820_UMF))
+  (coy_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub, coy_w1820_UMF))
   #'  Anthropogenic model
   (coy_w1820_anthro <- occu(~Height*Distance + Trail + Year ~Area + RoadDensity + HumanMod, coy_w1820_UMF))
   #'  Combined model
-  (coy_w1820_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coy_w1820_UMF))
-  (coy_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coy_w1820_UMF))
+  (coy_w1820_full <- occu(~Height*Distance + Trail + Year ~Area + Elev  + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coy_w1820_UMF))
+  (coy_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coy_w1820_UMF))
   
-  mods <- fitList(coy_w1820_null, coy_w1820_null2, coy_w1820_terrain, coy_w1820_terrain2, 
+  mods1 <- fitList(coy_w1820_null, coy_w1820_null2, coy_w1820_terrain, coy_w1820_terrain2, 
                   coy_w1820_veg, coy_w1820_anthro, coy_w1820_terrain_veg, coy_w1820_terrain_veg2,
                   coy_w1820_full, coy_w1820_full2)
-  modSel(mods)
+  modSel(mods1)
   
   
   ####  WOLF MODELS  ####
   #'  Included covariates informed by 
-  
+
   #'  SUMMERS 2018 & 2019                      
   #'  Null
   (wolf_s1819_null <- occu(~1 ~1, wolf_s1819_UMF))
@@ -954,25 +955,25 @@
   #'  Null with detection covariates
   (wolf_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, wolf_s1819_UMF))
   #'  Terrain model
-  (wolf_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, wolf_s1819_UMF))
-  (wolf_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, wolf_s1819_UMF))
+  (wolf_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev, wolf_s1819_UMF))
+  (wolf_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2), wolf_s1819_UMF))
   #'  Vegetation model------------------ NOTE: Dropped Xeric Shrub from model due to lack of convergence (was messing with intercept too)
   (wolf_s1819_veg <- occu(~Height*Distance + Trail + Year ~Area + PercForMix + PercXGrass, wolf_s1819_UMF))
   #'  Habitat model
-  (wolf_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass, wolf_s1819_UMF))
-  (wolf_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass, wolf_s1819_UMF))
+  (wolf_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass, wolf_s1819_UMF))
+  (wolf_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass, wolf_s1819_UMF))
   #'  Anthropogenic model 
   (wolf_s1819_anthro <- occu(~Height*Distance + Trail + Year ~Area + RoadDensity + HumanMod, wolf_s1819_UMF))
   #'  Combined model
-  (wolf_s1819_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_s1819_UMF))
-  (wolf_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_s1819_UMF))
+  (wolf_s1819_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_s1819_UMF))
+  (wolf_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_s1819_UMF))
   
-  mods <- fitList(wolf_s1819_null, wolf_s1819_null2, wolf_s1819_terrain, wolf_s1819_terrain2, 
+  mods1 <- fitList(wolf_s1819_null, wolf_s1819_null2, wolf_s1819_terrain, wolf_s1819_terrain2, 
                   wolf_s1819_veg, wolf_s1819_anthro, wolf_s1819_terrain_veg, 
                   wolf_s1819_terrain_veg2, wolf_s1819_full, wolf_s1819_full2)
-  modSel(mods)
+  modSel(mods1)
   #  Naive occupancy low (0.139) so may limit estimable effect of most covariates
-  
+
   #'  WINTERS 2018-2019 & 2019-2020            
   #'  Null
   (wolf_w1820_null <- occu(~1 ~1, wolf_w1820_UMF))
@@ -981,25 +982,26 @@
   #'  Null with detection covariates
   (wolf_w1820_null2 <- occu(~Height*Distance + Trail + Year ~1, wolf_w1820_UMF))
   #'  Terrain model
-  (wolf_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope, wolf_w1820_UMF))
-  (wolf_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope, wolf_w1820_UMF))
+  (wolf_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Area + Elev, wolf_w1820_UMF))
+  (wolf_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2), wolf_w1820_UMF))
   #'  Vegetation model
   (wolf_w1820_veg <- occu(~Height*Distance + Trail + Year ~Area + PercForMix + PercXGrass + PercXShrub, wolf_w1820_UMF))
   #'  Habitat model
-  (wolf_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + PercXShrub, wolf_w1820_UMF))  
-  (wolf_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub, wolf_w1820_UMF))  
+  (wolf_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + PercXShrub, wolf_w1820_UMF))  
+  (wolf_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub, wolf_w1820_UMF))  
   #'  Anthropogenic model
   (wolf_w1820_anthro <- occu(~Height*Distance + Trail + Year ~Area + RoadDensity + HumanMod, wolf_w1820_UMF))
   #'  Combined model
-  (wolf_w1820_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_w1820_UMF))  
-  (wolf_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_w1820_UMF))  #  FAILS to converge
+  (wolf_w1820_full <- occu(~Height*Distance + Trail + Year ~Area + Elev + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_w1820_UMF))  
+  (wolf_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Area + Elev + I(Elev^2) + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_w1820_UMF))  #  FAILS to converge
   
-  mods <- fitList(wolf_w1820_null, wolf_w1820_null2, wolf_w1820_terrain,  
+  mods1 <- fitList(wolf_w1820_null, wolf_w1820_null2, wolf_w1820_terrain,  
                   wolf_w1820_veg, wolf_w1820_anthro, wolf_w1820_terrain_veg) 
-                  #wolf_w1820_terrain2, #wolf_w1820_terrain_veg2, #wolf_w1820_full, #wolf_w1820_full2 FAILS
-  modSel(mods)
-  #'  Naive occupancy low (0.122) so may limit estimable effect of most covariates
-  #'  Anthro model lowest AIC b/c includes Area covariate- has nothing to do with anthro effects
+  #wolf_w1820_terrain2, #wolf_w1820_terrain_veg2, #wolf_w1820_full, #wolf_w1820_full2 FAILS
+  modSel(mods1)
+  #  Naive occupancy low (0.122) so may limit estimable effect of most covariates
+  #' Anthro model lowest AIC b/c includes Area covariate- has nothing to do with anthro effects
+  
   
   ####  ELK MODELS ####                          
   #'  Included covariates informed by 
@@ -1012,23 +1014,23 @@
   #'  Null with detection covariates
   (elk_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, elk_s1819_UMF))
   #'  Terrain model
-  (elk_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Elev + Slope, elk_s1819_UMF))
-  (elk_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope, elk_s1819_UMF))
+  (elk_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Elev, elk_s1819_UMF))
+  (elk_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2), elk_s1819_UMF))
   #'  Vegetation model--------- NOTE: removed Xeric Shrub from veg models b/c very little Xeric Shrub in NE study area
   (elk_s1819_veg <- occu(~Height*Distance + Trail + Year ~PercForMix + PercXGrass , elk_s1819_UMF))
   #'  Habitat model
-  (elk_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass, elk_s1819_UMF))
-  (elk_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass, elk_s1819_UMF))
+  (elk_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass, elk_s1819_UMF))
+  (elk_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass, elk_s1819_UMF))
   #'  Anthropogenic model 
   (elk_s1819_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, elk_s1819_UMF))
   #'  Combined model
-  (elk_s1819_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, elk_s1819_UMF))
-  (elk_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, elk_s1819_UMF))
+  (elk_s1819_full <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass + RoadDensity + HumanMod, elk_s1819_UMF))
+  (elk_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass + RoadDensity + HumanMod, elk_s1819_UMF))
   
-  mods <- fitList(elk_s1819_null, elk_s1819_null2, elk_s1819_terrain, elk_s1819_terrain2, 
+  mods1 <- fitList(elk_s1819_null, elk_s1819_null2, elk_s1819_terrain, elk_s1819_terrain2, 
                   elk_s1819_veg, elk_s1819_terrain_veg, elk_s1819_terrain_veg2, 
                   elk_s1819_anthro, elk_s1819_full, elk_s1819_full2)
-  modSel(mods)
+  modSel(mods1)
   # Naive occupancy isn't that low (0.409) so not sure why no psi covariates are significant
   
   #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect                
@@ -1039,30 +1041,29 @@
   #'  Null with detection covariates
   (elk_w1820_null2 <- occu(~Height*Distance + Trail + Year ~1, elk_w1820_UMF))
   #'  Terrain model
-  (elk_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Elev + Slope, elk_w1820_UMF))
-  (elk_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope, elk_w1820_UMF))
+  (elk_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Elev, elk_w1820_UMF))
+  (elk_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2), elk_w1820_UMF))
   #'  Vegetation model--------- NOTE: removed Xeric Shrub from veg models b/c very little Xeric Shrub in NE study area
   (elk_w1820_veg <- occu(~Height*Distance + Trail + Year ~PercForMix + PercXGrass, elk_w1820_UMF))
   #'  Habitat model
-  (elk_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass, elk_w1820_UMF))
-  (elk_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass, elk_w1820_UMF))
+  (elk_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass, elk_w1820_UMF))
+  (elk_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass, elk_w1820_UMF))
   #'  Anthropogenic model
   (elk_w1820_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, elk_w1820_UMF))
   #'  Combined model
-  (elk_w1820_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, elk_w1820_UMF))
-  (elk_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, elk_w1820_UMF))
+  (elk_w1820_full <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass + RoadDensity + HumanMod, elk_w1820_UMF))
+  (elk_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass + RoadDensity + HumanMod, elk_w1820_UMF))
   
-  mods <- fitList(elk_w1820_null, elk_w1820_null2, elk_w1820_terrain, elk_w1820_terrain2, 
+  mods1 <- fitList(elk_w1820_null, elk_w1820_null2, elk_w1820_terrain, elk_w1820_terrain2, 
                   elk_w1820_veg, elk_w1820_terrain_veg, elk_w1820_terrain_veg2, 
                   elk_w1820_anthro, elk_w1820_full, elk_w1820_full2) 
-                  #elk_w1820_veg, #elk_w1820_terrain_veg, #elk_w1820_terrain_veg2, #, elk_w1820_full, #elk_w1820_full2 questionable convergence on Grass variable
-  modSel(mods)
+  #elk_w1820_veg, #elk_w1820_terrain_veg, #elk_w1820_terrain_veg2, #, elk_w1820_full, #elk_w1820_full2 questionable convergence on Grass variable
+  modSel(mods1)
   #  Naive occupancy pretty low (0.159) which may explain why psi covaraites not significant
-  
   
   ####  MULE DEER MODELS  ####
   #'  Included covariates informed by knowledge of study system & 
-  
+
   #'  SUMMERS 2018 & 2019, OK study area only so no Area effect
   #'  Null
   (md_s1819_null <- occu(~1 ~1, md_s1819_UMF))
@@ -1071,28 +1072,24 @@
   #'  Null with detection covariates
   (md_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, md_s1819_UMF))
   #'  Terrain model
-  (md_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Elev + Slope, md_s1819_UMF))
-  (md_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope, md_s1819_UMF))
+  (md_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Elev, md_s1819_UMF))
+  (md_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2), md_s1819_UMF))
   #'  Vegetation model
   (md_s1819_veg <- occu(~Height*Distance + Trail + Year ~PercForMix + PercXGrass + PercXShrub, md_s1819_UMF))
   #'  Habitat model
-  (md_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub, md_s1819_UMF))
-  (md_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub, md_s1819_UMF))
+  (md_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass + PercXShrub, md_s1819_UMF))
+  (md_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub, md_s1819_UMF))
   #'  Anthropogenic model
   (md_s1819_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, md_s1819_UMF))
   #'  Combined model
-  (md_s1819_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_s1819_UMF))
-  (md_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_s1819_UMF))
+  (md_s1819_full <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_s1819_UMF))
+  (md_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_s1819_UMF))
   
-  mods <- fitList(md_s1819_null, md_s1819_null2, md_s1819_terrain, md_s1819_terrain2, 
+  mods1 <- fitList(md_s1819_null, md_s1819_null2, md_s1819_terrain, md_s1819_terrain2, 
                   md_s1819_veg, md_s1819_terrain_veg, md_s1819_terrain_veg2, 
                   md_s1819_anthro, md_s1819_full, md_s1819_full2)
-  modSel(mods)
+  modSel(mods1)
   #'  Naive occupancy is high (0.84) but can still estimate at least some covariate effects on psi
-  #'  Given elev & hum mod are highly correlated in the OK I suspect -effect of 
-  #'  hum mod in anthro model is more associated with human-elevation relationship
-  #'  than actual avoidance of humans... then again, why wouldn't there be a similarly
-  #'  significant -effect of elevation in th terrain model is that were the case?
   
   #'  WINTERS 2018-2019 & 2019-2020, OK study area only so no Area effect                    
   #'  Null
@@ -1102,24 +1099,23 @@
   #'  Null with detection covariates
   (md_w1820_null2 <- occu(~Height*Distance + Trail + Year ~1, md_w1820_UMF))
   #'  Terrain model
-  (md_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Elev + Slope, md_w1820_UMF))
-  (md_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope, md_w1820_UMF))
+  (md_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Elev, md_w1820_UMF))
+  (md_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2), md_w1820_UMF))
   #'  Vegetation model
   (md_w1820_veg <- occu(~Height*Distance + Trail + Year ~PercForMix + PercXGrass + PercXShrub, md_w1820_UMF))
   #'  Habitat model
-  (md_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub, md_w1820_UMF))
-  (md_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub, md_w1820_UMF))
+  (md_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass + PercXShrub, md_w1820_UMF))
+  (md_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub, md_w1820_UMF))
   #'  Anthropogenic model
   (md_w1820_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, md_w1820_UMF))
   #'  Combined model
-  (md_w1820_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_w1820_UMF))
-  (md_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_w1820_UMF))
+  (md_w1820_full <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_w1820_UMF))
+  (md_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_w1820_UMF))
   
-  mods <- fitList(md_w1820_null, md_w1820_null2, md_w1820_terrain, md_w1820_terrain2, 
+  mods1 <- fitList(md_w1820_null, md_w1820_null2, md_w1820_terrain, md_w1820_terrain2, 
                   md_w1820_veg, md_w1820_terrain_veg, md_w1820_terrain_veg2, 
                   md_w1820_anthro, md_w1820_full, md_w1820_full2)
-  modSel(mods)
-  
+  modSel(mods1)
   
   ####  WHITE-TAILED DEER MODELS  ####
   #'  Included covariates informed by 
@@ -1132,24 +1128,24 @@
   #'  Null with detection covariates
   (wtd_s1819_null2 <- occu(~Height*Distance + Trail + Year ~1, wtd_s1819_UMF))
   #'  Terrain model
-  (wtd_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Elev + Slope, wtd_s1819_UMF))
-  (wtd_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope, wtd_s1819_UMF))
+  (wtd_s1819_terrain <- occu(~Height*Distance + Trail + Year ~Elev, wtd_s1819_UMF))
+  (wtd_s1819_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2), wtd_s1819_UMF))
   #'  Vegetation model--------- NOTE: removed Xeric Shrub from veg models b/c very little Xeric Shrub in NE study area
   (wtd_s1819_veg <- occu(~Height*Distance + Trail + Year ~PercForMix + PercXGrass, wtd_s1819_UMF))
   #'  Habitat model
-  (wtd_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass, wtd_s1819_UMF))
-  (wtd_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass, wtd_s1819_UMF))
+  (wtd_s1819_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev  + PercForMix + PercXGrass, wtd_s1819_UMF))
+  (wtd_s1819_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass, wtd_s1819_UMF))
   #'  Anthropogenic model
   (wtd_s1819_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, wtd_s1819_UMF))
   #'  Combined model
-  (wtd_s1819_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_s1819_UMF))
-  (wtd_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_s1819_UMF))
+  (wtd_s1819_full <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_s1819_UMF))
+  (wtd_s1819_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_s1819_UMF))
   
-  mods <- fitList(wtd_s1819_null, wtd_s1819_null2, wtd_s1819_terrain, wtd_s1819_terrain2, 
+  mods1 <- fitList(wtd_s1819_null, wtd_s1819_null2, wtd_s1819_terrain, wtd_s1819_terrain2, 
                   wtd_s1819_veg, wtd_s1819_terrain_veg, wtd_s1819_terrain_veg2, 
                   wtd_s1819_anthro, wtd_s1819_full, wtd_s1819_full2)
-  modSel(mods)
-  # Naive occupancy so high (0.92) not able to estimate effects of variables on psi
+  modSel(mods1)
+  # Naive occupancy so high (0.92) but still able to estimate effects of variables on psi
   
   #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect              
   #'  Null
@@ -1159,23 +1155,23 @@
   #'  Null with detection covariates
   (wtd_w1820_null2 <- occu(~Height*Distance + Trail + Year ~1, wtd_w1820_UMF))
   #'  Terrain model
-  (wtd_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Elev + Slope, wtd_w1820_UMF))
-  (wtd_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope, wtd_w1820_UMF))
+  (wtd_w1820_terrain <- occu(~Height*Distance + Trail + Year ~Elev, wtd_w1820_UMF))
+  (wtd_w1820_terrain2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2), wtd_w1820_UMF))
   #'  Vegetation model--------- NOTE: removed Xeric Shrub from veg models b/c very little Xeric Shrub in NE study area
   (wtd_w1820_veg <- occu(~Height*Distance + Trail + Year ~PercForMix + PercXGrass, wtd_w1820_UMF))
   #'  Habitat model
-  (wtd_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass, wtd_w1820_UMF))
-  (wtd_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass, wtd_w1820_UMF))
+  (wtd_w1820_terrain_veg <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass, wtd_w1820_UMF))
+  (wtd_w1820_terrain_veg2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass, wtd_w1820_UMF))
   #'  Anthropogenic model
   (wtd_w1820_anthro <- occu(~Height*Distance + Trail + Year ~RoadDensity + HumanMod, wtd_w1820_UMF))
   #'  Combined model
-  (wtd_w1820_full <- occu(~Height*Distance + Trail + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_w1820_UMF))
-  (wtd_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_w1820_UMF))
+  (wtd_w1820_full <- occu(~Height*Distance + Trail + Year ~Elev + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_w1820_UMF))
+  (wtd_w1820_full2 <- occu(~Height*Distance + Trail + Year ~Elev + I(Elev^2) + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_w1820_UMF))
   
-  mods <- fitList(wtd_w1820_null, wtd_w1820_null2, wtd_w1820_terrain, wtd_w1820_terrain2, 
+  mods1 <- fitList(wtd_w1820_null, wtd_w1820_null2, wtd_w1820_terrain, wtd_w1820_terrain2, 
                   wtd_w1820_veg, wtd_w1820_terrain_veg, wtd_w1820_terrain_veg2, 
                   wtd_w1820_anthro, wtd_w1820_full, wtd_w1820_full2)
-  modSel(mods)
+  modSel(mods1)
   
   
   
@@ -1215,16 +1211,16 @@
   (pb_bob_s1819 <- parboot(bob_s1819_anthro, statistic = chisq, nsim = 100, parallel = FALSE))         
   (pb_bob_w1820 <- parboot(bob_w1820_anthro, statistic = chisq, nsim = 100, parallel = FALSE))          
   (pb_coug_s1819 <- parboot(coug_s1819_terrain_veg2, statistic = chisq, nsim = 100, parallel = FALSE))         
-  (pb_coug_w1820 <- parboot(coug_w1820_terrain_veg2, statistic = chisq, nsim = 100, parallel = FALSE))    #pval= 0.0396 Trash model
+  (pb_coug_w1820 <- parboot(coug_w1820_full, statistic = chisq, nsim = 100, parallel = FALSE))    #coug_w1820_terrain2 pval= 0.018 Trash model; all models with AIC lower than full model are trash apparently
   (pb_coy_s1819 <- parboot(coy_s1819_terrain, statistic = chisq, nsim = 100, parallel = FALSE))   
-  (pb_coy_w1820 <- parboot(coy_w1820_terrain, statistic = chisq, nsim = 100, parallel = FALSE))   
+  (pb_coy_w1820 <- parboot(coug_w1820_terrain_veg, statistic = chisq, nsim = 100, parallel = FALSE))   
   (pb_wolf_s1819 <- parboot(wolf_s1819_terrain, statistic = chisq, nsim = 100, parallel = FALSE))      
   (pb_wolf_w1820 <- parboot(wolf_w1820_anthro, statistic = chisq, nsim = 100, parallel = FALSE))       
   (pb_elk_s1819 <- parboot(elk_s1819_null2, statistic = chisq, nsim = 100, parallel = FALSE))         
   (pb_elk_w1820 <- parboot(elk_w1820_null, statistic = chisq, nsim = 100, parallel = FALSE))          
-  (pb_md_s1819 <- parboot(md_s1819_anthro, statistic = chisq, nsim = 100, parallel = FALSE))          
+  (pb_md_s1819 <- parboot(md_s1819_anthro, statistic = chisq, nsim = 100, parallel = FALSE))       #md_s1819_terrain2 pval= 0.046 Trash model       
   (pb_md_w1820 <- parboot(md_w1820_terrain_veg2, statistic = chisq, nsim = 100, parallel = FALSE))             
-  (pb_wtd_s1819 <- parboot(wtd_s1819_null2, statistic = chisq, nsim = 100, parallel = FALSE))          # wtd_s1819_terrain
+  (pb_wtd_s1819 <- parboot(wtd_s1819_terrain, statistic = chisq, nsim = 100, parallel = FALSE))          
   (pb_wtd_w1820 <- parboot(wtd_w1820_terrain_veg, statistic = chisq, nsim = 100, parallel = FALSE))        
   
   
@@ -1250,7 +1246,7 @@
   bob_s1819_occ <- occ_out(bob_s1819_anthro, "Bobcat", "Summer")
   bob_w1820_occ <- occ_out(bob_w1820_anthro, "Bobcat", "Winter")
   coug_s1819_occ <- occ_out(coug_s1819_terrain_veg2, "Cougar", "Summer")
-  coug_w1820_occ <- occ_out(coug_w1820_terrain_veg2, "Cougar", "Winter")
+  coug_w1820_occ <- occ_out(coug_w1820_full, "Cougar", "Winter")
   coy_s1819_occ <- occ_out(coy_s1819_terrain, "Coyote", "Summer")
   coy_w1820_occ <- occ_out(coy_w1820_terrain, "Coyote", "Winter")
   wolf_s1819_occ <- occ_out(wolf_s1819_terrain, "Wolf", "Summer")
@@ -1259,7 +1255,7 @@
   elk_w1820_occ <- occ_out(elk_w1820_null, "Elk", "Winter")
   md_s1819_occ <- occ_out(md_s1819_anthro, "Mule Deer", "Summer")
   md_w1820_occ <- occ_out(md_w1820_terrain_veg2, "Mule Deer", "Winter")
-  wtd_s1819_occ <- occ_out(wtd_s1819_null2, "White-tailed Deer", "Summer")
+  wtd_s1819_occ <- occ_out(wtd_s1819_terrain, "White-tailed Deer", "Summer")
   wtd_w1820_occ <- occ_out(wtd_w1820_terrain_veg, "White-tailed Deer", "Winter")
   
   #'  Merge into larger data frames for easy comparison
@@ -1272,7 +1268,7 @@
   colnames(occ_results) <- c("Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
 
   #'  Round so numbers are easier to look at
-  occ_results <- occ_results %>%
+  results_psi <- occ_results %>%
     mutate(
       Estimate = round(Estimate, 3),
       SE = round(SE, 3),
@@ -1280,7 +1276,7 @@
       Pval = round(Pval, 3)
     )
   #'  Save!
-  # write.csv(occ_results, paste0("./Outputs/OccMod_OccProb_Results_", Sys.Date(), ".csv"))
+  # write.csv(results_psi, paste0("./Outputs/OccMod_OccProb_Results_", Sys.Date(), ".csv"))
   
  
   #'  Function to save detection results
@@ -1300,8 +1296,8 @@
   #'  Run each model through detection function
   bob_s1819_det <- det_out(bob_s1819_anthro, "Bobcat", "Summer")
   bob_w1820_det <- det_out(bob_w1820_anthro, "Bobcat", "Winter")
-  coug_s1819_det <- det_out(coug_s1819_veg, "Cougar", "Summer")
-  coug_w1820_det <- det_out(coug_w1820_terrain2, "Cougar", "Winter")
+  coug_s1819_det <- det_out(coug_s1819_terrain_veg2, "Cougar", "Summer")
+  coug_w1820_det <- det_out(coug_w1820_full, "Cougar", "Winter")
   coy_s1819_det <- det_out(coy_s1819_terrain, "Coyote", "Summer")
   coy_w1820_det <- det_out(coy_w1820_terrain, "Coyote", "Winter")
   wolf_s1819_det <- det_out(wolf_s1819_terrain, "Wolf", "Summer")
@@ -1310,7 +1306,7 @@
   elk_w1820_det <- det_out(elk_w1820_null, "Elk", "Winter")
   md_s1819_det <- det_out(md_s1819_anthro, "Mule Deer", "Summer")
   md_w1820_det <- det_out(md_w1820_terrain_veg2, "Mule Deer", "Winter")
-  wtd_s1819_det <- det_out(wtd_s1819_null2, "White-tailed Deer", "Summer")
+  wtd_s1819_det <- det_out(wtd_s1819_terrain, "White-tailed Deer", "Summer")
   wtd_w1820_det <- det_out(wtd_w1820_terrain_veg, "White-tailed Deer", "Winter")
   
   #'  Merge into larger data frames for easy comparison
@@ -1323,7 +1319,7 @@
   colnames(det_results) <- c("Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
 
   #'  Round so numbers are a little easier to interpret
-  det_results <- det_results %>%
+  results_det <- det_results %>%
     mutate(
       Estimate = round(Estimate, 3),
       SE = round(SE, 3),
@@ -1332,7 +1328,7 @@
     )
   
   #'  Save!
-  # write.csv(det_results, paste0("./Outputs/OccMod_DetProb_Results_", Sys.Date(), ".csv"))
+  # write.csv(results_det, paste0("./Outputs/OccMod_DetProb_Results_", Sys.Date(), ".csv"))
 
 
 
