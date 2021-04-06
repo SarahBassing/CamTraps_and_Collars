@@ -124,7 +124,7 @@
   #'  Summer 2018: 07/01/2018 - 09/29/2018 (thirteen 7-day sampling periods)
   images_summer18 <- detections %>%
     filter(Date > "2018-06-30") %>%
-    filter(Date < "2018-10-01") %>%
+    filter(Date < "2018-09-30") %>%
     dplyr::select("Image", "File", "CameraLocation", "DateTime", "Date", "Time", "Species") #"DateTimeOriginal", 
   #'  Subset by study area
   NE_smr18 <- filter(images_summer18, grepl("NE", CameraLocation))
@@ -140,7 +140,7 @@
   #'  Summer 2019: 07/01/2019 - 09/29/2019 (thirteen 7-day sampling periods)
   images_summer19 <- detections %>%
     filter(Date > "2019-06-30") %>%
-    filter(Date < "2019-10-01") %>%
+    filter(Date < "2019-09-30") %>%
     dplyr::select("Image", "File", "CameraLocation", "DateTime", "Date", "Time", "Species")  
   #'  Subset by study area
   NE_smr19 <- filter(images_summer19, grepl("NE", CameraLocation))
