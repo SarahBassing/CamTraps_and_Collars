@@ -29,43 +29,64 @@
   
   #  Read in data
   #  Make sure specific columns are formatted correctly for data manipulation
-  md_info <- read.csv("md_info 2020-11-16.csv") %>%
+  md_info <- read.csv("md_info 2020-11-17.csv") %>%
     mutate(
       IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
       CaptureDate = as_date(CaptureDate)
       ) %>%
     select(-X)
-  elk_info <- read.csv("elk_info 2020-11-16.csv")%>%
+  elk_info <- read.csv("elk_info 2020-11-17.csv")%>%
     mutate(
       IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
       CaptureDate = as_date(CaptureDate)
     ) %>%
     select(-X)
-  wtd_info <- read.csv("wtd_info 2020-11-16.csv")%>%
+  wtd_info <- read.csv("wtd_info 2020-11-17.csv")%>%
     mutate(
       IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
       CaptureDate = as_date(CaptureDate)
     ) %>%
     select(-X)
+  #  Created based on data provided by L.Satterfield
+  cougwolf_info <- read.csv("cougwolf_info_2021-04-01.csv") %>%
+    mutate(
+      IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
+      CaptureDate = mdy(CaptureDate, tz = "America/Los_Angeles"),
+      EndDate = mdy(EndDate, tz = "America/Los_Angeles")
+    )
+  #  Created based on data provided by B.Windell
+  meso_info <- read.csv("meso_info_11162020.csv") %>%
+    mutate(
+      IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
+      CaptureDate = mdy(CaptureDate, tz = "America/Los_Angeles"),
+      EndDate = mdy(EndDate, tz = "America/Los_Angeles")
+    )
   
-  md_skinny <- read.csv("md_skinny 2020-11-16.csv") %>%
+  md_skinny <- read.csv("md_skinny 2020-11-17.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     select(-X)
-  elk_skinny <- read.csv("elk_skinny 2020-11-16.csv") %>%
+  elk_skinny <- read.csv("elk_skinny 2020-11-17.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     select(-X)
-  wtd_skinny <- read.csv("wtd_skinny 2020-11-16.csv") %>%
+  wtd_skinny <- read.csv("wtd_skinny 2020-11-17.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     select(-X)
+  # coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_All.csv") %>%
+  #   mutate(daytime = as.POSIXct(LMT_DateTime, format = "%Y-%m-%d %H:%M:%S", tz = "America/Los_Angeles"),
+  #          UTCdt = with_tz(daytime, "UTC"), 
+  #          Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
+  #          Floordt = floor_date(Finaldt, unit = "hour"))
+  # wolf_skinny <- read.csv("./Data/Wolf_Vectronic_Spring2021_All.csv")
+  # meso_skinny <- read.csv()
 
   #  Function to truncate & thin telemetry data for a final data set appropriate 
   #  for HMM analyses.
@@ -109,57 +130,16 @@
       mutate(
         Latitude = as.numeric(Latitude),
         Longitude = as.numeric(Longitude)
-      ) #%>%
-      # #  3. Thin data to retain only the 1st location on the hour
-      # #  Important when collar goes into mortality mode but animal is still alive- 
-      # #  Fix rate increases but flooring process puts all those times on the hour
-      # group_by(ID) %>%
-      # distinct(Floordt, .keep_all = TRUE) %>%   # .keep_all = TRUE saves all columns
-      # ungroup()
+      ) %>%
+      
+      #  3. Thin data to retain only the 1st location on the hour
+      #  Important when collar goes into mortality mode but animal is still alive-
+      #  Fix rate increases but flooring process puts all those times on the hour
+      group_by(ID) %>%
+      distinct(Floordt, .keep_all = TRUE) %>%   # .keep_all = TRUE saves all columns
+      ungroup()
 
     return(thin_fix)
-    
-    # #  Organize by individual ID and chronological order of locations
-    # #  Format data fields
-    # clean <- clean %>%
-    #   arrange(ID, Finaldt) %>%
-    #   transmute(
-    #     OBJECTID = OBJECTID,
-    #     PositionID = PositionID,
-    #     CollarID = CollarID,
-    #     Latitude = Latitude,
-    #     Longitude = Longitude,
-    #     ObservationDateTimePST = ObservationDateTimePST,
-    #     TransmissionDateTimePST = TransmissionDateTimePST,
-    #     DbLoadedDateTimePST = DbLoadedDateTimePST,
-    #     ValidLocation = as.numeric(ValidLocation),
-    #     ValidDate = as.numeric(ValidDate),
-    #     VEC_MortalityStatus = as.factor(as.character(VEC_MortalityStatus)),
-    #     VEC_FixType = as.factor(as.character(VEC_FixType)),
-    #     VEC_Origin = as.factor(as.character(VEC_Origin)),
-    #     VEC_DOP = as.numeric(VEC_DOP),
-    #     VEC_Height = as.numeric(VEC_Height),
-    #     Project = Project,
-    #     CaptureID = CaptureID,
-    #     DeploymentID = DeploymentID,
-    #     TransmitterID = TransmitterID,
-    #     Species = Species,
-    #     Sex = as.factor(as.character(Sex)),
-    #     IndividualName = IndividualName,
-    #     Fate = Fate,
-    #     SerialNumber = SerialNumber,
-    #     CaptureDate = CaptureDate,
-    #     FateDate = FateDate,
-    #     DateMortality = DateMortality,
-    #     DaysDelta = DaysDelta,
-    #     daytime = daytime,
-    #     UTCdt = UTCdt,
-    #     Finaldt = Finaldt,
-    #     Floordt = Floordt,
-    #     ID = ID
-    #   )
-    
-    #return(trunk)
   }
   
   #  Run species-specific ID and telemetry data through the function
@@ -167,6 +147,89 @@
   elk_final <- Final_telem(elk_info, elk_skinny)
   wtd_final <- Final_telem(wtd_info, wtd_skinny)  
 
+  #  Filter data to desired date ranges that match occupancy models' primary 
+  #  sampling occasion (91 days; 13 weeks)
+  Seasonal_telem <- function(telem) {
+    #  Summer 2018: 07/01/2018 - 09/29/2018 
+    telem_summer18 <- telem %>%
+      filter(Floordt > "2018-07-01 00:00:00") %>%
+      filter(Floordt < "2018-09-30 00:00:00") %>%
+      mutate(
+        Season = "Summer18",
+        Year = "Year1"
+      )
+    #  Summer 2019: 07/01/2019 - 09/29/2019 
+    telem_summer19 <- telem %>%
+      filter(Floordt > "2019-07-01 00:00:00") %>%
+      filter(Floordt < "2019-09-30 00:00:00") %>%
+      mutate(
+        Season = "Summer19",
+        Year = "Year2"
+      )
+    #  Winter 2018-2019: 12/1/2018 - 03/1/2019
+    telem_winter1819 <- telem %>%
+      filter(Floordt > "2018-12-01 00:00:00") %>%
+      filter(Floordt < "2019-03-02 00:00:00") %>%
+      mutate(
+        Season = "Winter1819",
+        Year = "Year1"
+      )
+    #  Winter 2019-2020: 12/1/2019 - 02/29/2020 
+    telem_winter1920 <- telem %>%
+      filter(Floordt > "2019-12-01 00:00:00") %>%
+      filter(Floordt < "2020-03-01 00:00:00")  %>%
+      mutate(
+        Season = "Winter1920",
+        Year = "Year2"
+      )
+    #  Combine into single file
+    telem_smwtr <- rbind(telem_summer18, telem_winter1819, telem_summer19, telem_winter1920)
+    return(telem_smwtr)
+  }
+
+  #  Run species-specific telemetry data through function to filter by data range
+  md_season <- Seasonal_telem(md_final)
+  elk_season <- Seasonal_telem(elk_final)
+  wtd_season <- Seasonal_telem(wtd_final)
+  
+  #  Same thing but include data from both fix schedules
+  md_season2 <- Seasonal_telem(md_skinny)
+  elk_season2 <- Seasonal_telem(elk_skinny)
+  wtd_season2 <- Seasonal_telem(wtd_skinny)
+  
+  
+  ####  Summary Stats on Fix Success & Accuracy  ####
+  
+  #  Function to calculate number of locations per individual and season
+  #  91 day sampling period with 6 fixes/day = 546 locations if no missed locations
+  sum_locs <- function(telem) {
+    
+    Nmb_locs <- telem %>%
+      group_by(ID, Season) %>%
+      summarise(count = n())
+    
+    return(Nmb_locs)
+  }
+  
+  #  Run species-specific data through function based on preferred fix schedule
+  md_counts <- sum_locs(md_season) 
+  elk_counts <- sum_locs(elk_season) 
+  wtd_counts <- sum_locs(wtd_season) 
+  
+  #'  How much data am I losing if I stick to only 1 fix schedule?
+  md_counts2 <- sum_locs(md_season2) 
+  elk_counts2 <- sum_locs(elk_season2) 
+  wtd_counts2 <- sum_locs(wtd_season2)
+  
+  md_cnt <- full_join(md_counts, md_counts2, by = c("ID", "Season"))
+  elk_cnt <- full_join(elk_counts, elk_counts2, by = c("ID", "Season"))
+  wtd_cnt <- full_join(wtd_counts, wtd_counts2, by = c("ID", "Season"))
+  
+  #  Summary stats on the seasonal locations
+  summary(md_counts$count); sd(md_counts$count)
+  summary(elk_counts$count); sd(elk_counts$count)
+  summary(wtd_counts$count); sd(wtd_counts$count)
+  
   
 
   
