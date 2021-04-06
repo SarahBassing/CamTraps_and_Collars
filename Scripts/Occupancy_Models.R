@@ -1330,8 +1330,8 @@
   #'  Save!
   # write.csv(results_det, paste0("./Outputs/OccMod_DetProb_Results_", Sys.Date(), ".csv"))
 
-
-
+  #'  Save workspace
+  # save.image(file = "CamvCollar_OccMods.RData")
 
 
 
