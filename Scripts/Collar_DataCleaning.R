@@ -310,6 +310,8 @@
   #  Drop locations with poor accuracy for a cleaner data set
   #  No 2D locations and no locations with VEC_Height <0 or >2000 (arbitrary cutoffs)
   #  DOP >10 is not good (~20-30 meter accuracy)--- using DOP = 8 as cutoff
+  #  From Vectronic: Dilution of precision (DOP); "High values indicate that the 
+  #  location is likely to be inaccurate while low values indicate a better precision."
   md_clean <- md_master %>%
     filter(VEC_FixType != "No fix") %>%
     filter(VEC_FixType != "GPS-2D") %>%
@@ -701,11 +703,7 @@
   
   
   #  Fin
-  
-  
-  ####  ====================================================================
-  ####  Truncate start/end dates & drop collars with too few locations  ####
-  
+
   
   
   # ##  =====================================================  
