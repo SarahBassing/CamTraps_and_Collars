@@ -35,58 +35,100 @@
       CaptureDate = as_date(CaptureDate)
       ) %>%
     select(-X)
-  elk_info <- read.csv("elk_info 2020-11-17.csv")%>%
+  elk_info <- read.csv("elk_info 2020-11-17.csv") %>%
     mutate(
       IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
       CaptureDate = as_date(CaptureDate)
     ) %>%
     select(-X)
-  wtd_info <- read.csv("wtd_info 2020-11-17.csv")%>%
+  wtd_info <- read.csv("wtd_info 2020-11-17.csv") %>%
     mutate(
       IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
       CaptureDate = as_date(CaptureDate)
     ) %>%
     select(-X)
   #  Created based on data provided by L.Satterfield
-  cougwolf_info <- read.csv("cougwolf_info_2021-04-01.csv") %>%
+  cougwolf_info <- read.csv("cougwolf_info.csv") %>%
     mutate(
-      IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
-      CaptureDate = mdy(CaptureDate, tz = "America/Los_Angeles"),
-      EndDate = mdy(EndDate, tz = "America/Los_Angeles")
-    )
+      IndividualIdentifier = as.factor(as.character(Animal_ID)),
+      GPSCollarSerialNumber = Collar,
+      CaptureDate = mdy(AnimalStart, tz = "America/Los_Angeles"),
+      CaptureDate = as_date(CaptureDate),
+      EndDate = mdy(DataEnd, tz = "America/Los_Angeles"),
+      EndDate = as_date(EndDate)
+    ) %>%
+    dplyr::select(-c(Animal_ID, Collar, AnimalStart, DataEnd)) %>%
+    relocate(c(IndividualIdentifier, GPSCollarSerialNumber, CaptureDate, EndDate), .before = StudyArea)
+  coug_info <- droplevels(filter(cougwolf_info, Species == "Cougar")) %>%
+    #  Remove cougar with no telemetry data
+    filter(IndividualIdentifier != "MVC203M")
+  wolf_info <- droplevels(filter(cougwolf_info, Species == "Wolf")) %>%
+    #  Add "W" to start of AnimalID to match IDs in location data
+    mutate(
+      IndividualIdentifier = as.factor(as.character(paste0("W", IndividualIdentifier)))
+    ) %>%
+    #  Remove wolf with no telemetry data
+    filter(IndividualIdentifier != "W110M")
   #  Created based on data provided by B.Windell
-  meso_info <- read.csv("meso_info_11162020.csv") %>%
+  meso_info <- read.csv("meso_info 2021-04-09.csv") %>%
     mutate(
       IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
-      CaptureDate = mdy(CaptureDate, tz = "America/Los_Angeles"),
-      EndDate = mdy(EndDate, tz = "America/Los_Angeles")
-    )
+      CaptureDate = as_date(CaptureDate),
+      EndDate = as_date(EndDate)
+    ) %>%
+    select(-X)
   
+  #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
   md_skinny <- read.csv("md_skinny 2020-11-17.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     select(-X)
+  #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
   elk_skinny <- read.csv("elk_skinny 2020-11-17.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     select(-X)
+  #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
   wtd_skinny <- read.csv("wtd_skinny 2020-11-17.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     select(-X)
-  # coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_All.csv") %>%
-  #   mutate(daytime = as.POSIXct(LMT_DateTime, format = "%Y-%m-%d %H:%M:%S", tz = "America/Los_Angeles"),
-  #          UTCdt = with_tz(daytime, "UTC"), 
-  #          Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
-  #          Floordt = floor_date(Finaldt, unit = "hour"))
-  # wolf_skinny <- read.csv("./Data/Wolf_Vectronic_Spring2021_All.csv")
-  # meso_skinny <- read.csv()
+  #  Note: data in UTC timezone to begin with
+  meso_skinny <- read.csv("meso_skinny 2021-04-09.csv") %>%
+    mutate(
+      daytime = as.POSIXct(daytime, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
+      UTCdt = with_tz(daytime, "UTC"),
+      Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
+      Floordt = floor_date(Finaldt, unit = "hour")) %>%
+    select(-X)
+  #  Note: already thinned, floored, tz adjusted & AnimalID attached by L.Satterfield
+  coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_4hrs.csv") %>%
+    mutate(ID = as.factor(as.character(ID)),
+           CollarID = Collar,
+           Latitude = Lat,
+           Longitude = Long,
+           daytime = as.POSIXct(LMT_DateTime, format = "%Y-%m-%d %H:%M:%S", tz = "Etc/GMT+8"),
+           Finaldt = daytime,
+           Floordt = daytime,
+           AnimalID = ID) %>%
+    dplyr::select(-c(Collar, Lat, Long))
+  #  Note: already thinned, floored, tz adjusted & AnimalID attached by L.Satterfield
+  wolf_skinny <- read.csv("./Data/Wolf_Vectronic_Spring2021_4hrs.csv") %>%
+    mutate(ID = as.factor(as.character(ID)),
+           CollarID = Collar,
+           Latitude = Lat,
+           Longitude = Long,
+           daytime = as.POSIXct(LMT_DateTime, format = "%Y-%m-%d %H:%M:%S", tz = "Etc/GMT+8"),
+           Finaldt = daytime,
+           Floordt = daytime,
+           AnimalID = ID) %>%
+    dplyr::select(-c(Collar, Lat, Long))
 
   #  Function to truncate & thin telemetry data for a final data set appropriate 
   #  for HMM analyses.
@@ -119,7 +161,7 @@
       #  Append each unique animal's locations to a clean dataframe
       trunk <- rbind(trunk, collartrunk)
     }
-    
+
     #  2. Thin truncated data to only include locations on correct fix schedule
     thin_trunk <- with(trunk, trunk[hour(Floordt) == 2 | hour(Floordt) == 6 |
                                       hour(Floordt) == 10 | hour(Floordt) == 14 |
@@ -131,7 +173,7 @@
         Latitude = as.numeric(Latitude),
         Longitude = as.numeric(Longitude)
       ) %>%
-      
+
       #  3. Thin data to retain only the 1st location on the hour
       #  Important when collar goes into mortality mode but animal is still alive-
       #  Fix rate increases but flooring process puts all those times on the hour
@@ -143,10 +185,26 @@
   }
   
   #  Run species-specific ID and telemetry data through the function
+  #  Don't forget that all meso data were collected on the "wrong" fix schedule
   md_final <- Final_telem(md_info, md_skinny)
   elk_final <- Final_telem(elk_info, elk_skinny)
-  wtd_final <- Final_telem(wtd_info, wtd_skinny)  
+  wtd_final <- Final_telem(wtd_info, wtd_skinny) 
+  meso_final <- Final_telem(meso_info, meso_skinny)
+  coug_final <- Final_telem(coug_info, coug_skinny)
+  wolf_final <- Final_telem(wolf_info, wolf_skinny)
+  
+  # #  Function not working? 
+  # #  Probably have a mismatched number of unique IDs in telem vs info data
+  # t <- as.data.frame(unique(coug_skinny$ID)) %>%
+  #   mutate(d = "telemetry data")
+  # colnames(t) <- c("UniqueID", "data source")
+  # i <- as.data.frame(unique(coug_info$IndividualIdentifier)) %>%
+  #   mutate(d = "capture data")
+  # colnames(i) <- c("UniqueID", "data source")
+  # diff <- full_join(t, i, by = "UniqueID")
 
+  
+  
   #  Filter data to desired date ranges that match occupancy models' primary 
   #  sampling occasion (91 days; 13 weeks)
   Seasonal_telem <- function(telem) {
@@ -166,6 +224,15 @@
         Season = "Summer19",
         Year = "Year2"
       )
+    # #  Summer 2020: 07/01/2020 - 10/31/2020
+    # #  For Beth only
+    # telem_summer20 <- telem %>%
+    #   filter(Floordt > "2019-07-01 00:00:00") %>%
+    #   filter(Floordt < "2019-11-01 00:00:00") %>%
+    #   mutate(
+    #     Season = "Summer20",
+    #     Year = "Year2"
+    #   )
     #  Winter 2018-2019: 12/1/2018 - 03/1/2019
     telem_winter1819 <- telem %>%
       filter(Floordt > "2018-12-01 00:00:00") %>%
@@ -183,7 +250,7 @@
         Year = "Year2"
       )
     #  Combine into single file
-    telem_smwtr <- rbind(telem_summer18, telem_winter1819, telem_summer19, telem_winter1920)
+    telem_smwtr <- rbind(telem_summer18, telem_winter1819, telem_summer19, telem_winter1920) #, telem_summer20
     return(telem_smwtr)
   }
 
@@ -191,12 +258,17 @@
   md_season <- Seasonal_telem(md_final)
   elk_season <- Seasonal_telem(elk_final)
   wtd_season <- Seasonal_telem(wtd_final)
+  meso_season <- Seasonal_telem(meso_final)
+  coug_season <- Seasonal_telem(coug_final)
+  wolf_season <- Seasonal_telem(wolf_final)
   
   #  Same thing but include data from both fix schedules
   md_season2 <- Seasonal_telem(md_skinny)
   elk_season2 <- Seasonal_telem(elk_skinny)
   wtd_season2 <- Seasonal_telem(wtd_skinny)
-  
+  meso_season2 <- Seasonal_telem(meso_skinny)
+  coug_season2 <- Seasonal_telem(coug_skinny)
+  wolf_season2 <- Seasonal_telem(wolf_skinny)
   
   ####  Summary Stats on Fix Success & Accuracy  ####
   
@@ -215,21 +287,120 @@
   md_counts <- sum_locs(md_season) 
   elk_counts <- sum_locs(elk_season) 
   wtd_counts <- sum_locs(wtd_season) 
+  meso_counts <- sum_locs(meso_season)
+  coug_counts <- sum_locs(coug_season) 
+  wolf_counts <- sum_locs(wolf_season) 
   
-  #'  How much data am I losing if I stick to only 1 fix schedule?
+  #  How much data am I losing if I stick to only 1 fix schedule?
   md_counts2 <- sum_locs(md_season2) 
   elk_counts2 <- sum_locs(elk_season2) 
   wtd_counts2 <- sum_locs(wtd_season2)
+  meso_counts2 <- sum_locs(meso_season2)
+  coug_counts2 <- sum_locs(coug_season2)
+  wolf_counts2 <- sum_locs(wolf_season2)
   
+  #  Visually inspect counts
+  #  Looking for time periods with many missing fixes (< 400/season) &
+  #  collars that were on wrong schedule, switched schedules, or took extra locations
   md_cnt <- full_join(md_counts, md_counts2, by = c("ID", "Season"))
   elk_cnt <- full_join(elk_counts, elk_counts2, by = c("ID", "Season"))
   wtd_cnt <- full_join(wtd_counts, wtd_counts2, by = c("ID", "Season"))
+  meso_cnt <- full_join(meso_counts, meso_counts2, by = c("ID", "Season"))
+  coug_cnt <- full_join(coug_counts, coug_counts2, by = c("ID", "Season"))
+  wolf_cnt <- full_join(wolf_counts, wolf_counts2, by = c("ID", "Season"))
+
+  #  Pull out collars with lots of missing fixes (< 400/season)
+  md_400 <- md_cnt[md_cnt$count.x < 401 & md_cnt$count.y < 401 | is.na(md_cnt$count.x) & md_cnt$count.y < 401,]
+  elk_400 <- elk_cnt[elk_cnt$count.x < 401 & elk_cnt$count.y < 401 | is.na(elk_cnt$count.x) & elk_cnt$count.y < 401,]
+  wtd_400 <- wtd_cnt[wtd_cnt$count.x < 401 & wtd_cnt$count.y < 401 | is.na(wtd_cnt$count.x) & wtd_cnt$count.y < 401,]
+  meso_400 <- meso_cnt[meso_cnt$count.x < 401 & meso_cnt$count.y < 401 | is.na(meso_cnt$count.x) & meso_cnt$count.y < 401,]
+  coug_400 <- coug_cnt[coug_cnt$count.x < 401 & coug_cnt$count.y < 401 | is.na(coug_cnt$count.x) & coug_cnt$count.y < 401,]
+  wolf_400 <- wolf_cnt[wolf_cnt$count.x < 401 & wolf_cnt$count.y < 401 | is.na(wolf_cnt$count.x) & wolf_cnt$count.y < 401,]
   
-  #  Summary stats on the seasonal locations
-  summary(md_counts$count); sd(md_counts$count)
-  summary(elk_counts$count); sd(elk_counts$count)
-  summary(wtd_counts$count); sd(wtd_counts$count)
+  #  Are these missing fixes randomly distributed across the season or are there 
+  #  large blocks of missing time (e.g., at beginning or end of time period?)
+  md_locs <- inner_join(md_season2, md_400, by = c("ID", "Season"))
+  elk_locs <- inner_join(elk_season2, elk_400, by = c("ID", "Season"))
+  wtd_locs <- inner_join(wtd_season2, wtd_400, by = c("ID", "Season"))
+  meso_locs <- inner_join(meso_season2, meso_400, by = c("ID", "Season"))
+  coug_locs <- inner_join(coug_season2, coug_400, by = c("ID", "Season"))
+  wolf_locs <- inner_join(wolf_season2, wolf_400, by = c("ID", "Season"))
+  
+  #  Calculate the number of hours between subsequent locations
+  #  How often are there big gaps and when are those gaps occurring?
+  diftime <- function(locs) {
+    time_gap <- locs %>%
+      group_by(ID, Season) %>%
+      arrange(Floordt) %>%
+      mutate(
+        time_gap = difftime(Floordt, lag(Floordt), tz = "Etc/GMT+8", units = "hours"),
+        time_gap = as.numeric(time_gap),
+        gap_8hr = ifelse(time_gap <= 8, 0, time_gap),
+        gap_24hr = ifelse(time_gap <= 24, 0, time_gap),
+        date_range = difftime(max(Floordt), min(Floordt), tz = "Etc/GMT+8", units = "days"),
+        date_range = round(date_range, digits = 0)
+      )
+    #  Plot gaps in telemetry locations that are greater than 24hrs in length
+    hist(time_gap$gap_24hr, breaks = 50, main = "Histogram of time gaps", xlab = "Hours between locations")
+    return(time_gap)
+  }
+  
+  #  Run data through function & visually inspect potentially problematic collars
+  md_gaps <- as.data.frame(diftime(md_locs))
+  #  MULE DEER: 3959MD17, 90MD18, 66MD18, 44MD18, 42MD18, 29MD18, 23MD18, 190MD18, 20MD18 ended early
+  #  251MD20, 196MD20, & 200MD20 missing 1 or 2 large chunks fo data in Winter1920
+  #  2020 mule deer collars deployed in early Jan so short 1.5 months of Winter1920 data
+  elk_gaps <- as.data.frame(diftime(elk_locs))
+  #  ELK: 3692EA17, 3705EA17 & 3726ELK18 failed or animal died part way through season
+  #  2020 elk collars deployed in early Jan so short 1.5 months of Winter1920 data
+  #  3696EA17 & 3697EA17 are missing large chunks of data sporadically thru all seasons
+  wtd_gaps <- as.data.frame(diftime(wtd_locs))
+  #  WHITE-TAILED DEER: many collars have delayed start in winter season
+  #  Some with large sporadic gaps missing
+  #  Many collars don't last a full month during a season
+  meso_gaps <- as.data.frame(diftime(meso_locs))
+  #  MESO: many bobcat collars have delayed start in winter, coyotes in summer
+  #  Some with large gaps missing, many with frequent small gaps
+  coug_gaps <- as.data.frame(diftime(coug_locs))
+  #  COUGAR: Some delayed starts in winter, some sporadic big gaps
+  wolf_gaps <- as.data.frame(diftime(wolf_locs))
+  #  WOLF: Some delayed starts in winter and summer
+  #  Mostly some HUG gaps reduce number of locations to very few sequential points
+  #  Not sure how much I'm going to get out of the wolf data... :(
+
+
+  #  Exclude collars with too few locations in a given season
+  #  Too few locations tend to arise from either many HUGE gaps in a full season  
+  #  or collars starting/stopping sometime within a season. 
+  #  Arbitrary cut-offs to exclude collars with very little data:
+  #  Collars must collect 90+ locations/season or be deployed for 20+ days/season
+  #  Chose 20 days b/c wanted to include collars that were deployed late in season
+  #  or died early but still provided 20 days of consecutive data
+  #  Chose 90 locations b/c that would average to 1 location per day over 90 day season
+  #  1. Identify which collars/season need to go
+  tf_md <- md_gaps[md_gaps$count.y < 90 | md_gaps$date_range < 20,]
+  tf_elk <- elk_gaps[elk_gaps$count.y < 90 | elk_gaps$date_range < 20,]
+  tf_wtd <- wtd_gaps[wtd_gaps$count.y < 90 | wtd_gaps$date_range < 20,]
+  tf_meso <- meso_gaps[meso_gaps$count.y < 90 | meso_gaps$date_range < 20,]
+  tf_coug <- coug_gaps[coug_gaps$count.y < 90 | coug_gaps$date_range < 20,]
+  tf_wolf <- wolf_gaps[wolf_gaps$count.y < 90 | wolf_gaps$date_range < 20,]
+  #  2. Exclude these locations from telemetry data so data are good-to-go for analyses
+  md_gtg <- anti_join(md_season2, tf_md, by = c("ID", "Season"))
+  elk_gtg <- anti_join(elk_season2, tf_elk, by = c("ID", "Season"))
+  wtd_gtg <- anti_join(wtd_season2, tf_wtd, by = c("ID", "Season"))
+  meso_gtg <- anti_join(meso_season2, tf_meso, by = c("ID", "Season"))
+  coug_gtg <- anti_join(coug_season2, tf_coug, by = c("ID", "Season"))
+  wolf_gtg <- anti_join(wolf_season2, tf_wolf, by = c("ID", "Season"))
+  
+  
+  #  Don't forget to separate out bobcats from coyotes for actual analyses
+  
   
   
 
   
+  # #  Summary stats on the seasonal locations
+  # summary(md_counts$count); sd(md_counts$count)
+  # summary(elk_counts$count); sd(elk_counts$count)
+  # summary(wtd_counts$count); sd(wtd_counts$count)
+  # summary(meso_counts$count); sd(meso_counts$count)
