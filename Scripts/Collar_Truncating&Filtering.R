@@ -391,16 +391,10 @@
   meso_gtg <- anti_join(meso_season2, tf_meso, by = c("ID", "Season"))
   coug_gtg <- anti_join(coug_season2, tf_coug, by = c("ID", "Season"))
   wolf_gtg <- anti_join(wolf_season2, tf_wolf, by = c("ID", "Season"))
-  
-  
   #  Don't forget to separate out bobcats from coyotes for actual analyses
-  
+  coy_gtg <- filter(meso_gtg, Species == "Coyote")
+  bob_gtg <- filter(meso_gtg, Species == "Bobcat")
   
   
 
   
-  # #  Summary stats on the seasonal locations
-  # summary(md_counts$count); sd(md_counts$count)
-  # summary(elk_counts$count); sd(elk_counts$count)
-  # summary(wtd_counts$count); sd(wtd_counts$count)
-  # summary(meso_counts$count); sd(meso_counts$count)
