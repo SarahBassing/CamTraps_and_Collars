@@ -778,608 +778,68 @@
   #'  unmarked formula: ~detection ~occupancy
   #'  ~1 for intercept only
   #'  
-  #'  Model building and selection methods are as follows:
-  #'  1) Using FORWARD STEP SELECTION to build each sub-model while holding the 
-  #'  other sub-model at its intercept. Variables are added one at a time. Each  
-  #'  variable is retained if it is significant at the alpha = 0.05 level. Once 
-  #'  a variable is included, it cannot be removed.
-  #'  2) Using AIC to evaluate each suite of sub-models that contain significant 
-  #'  variables as indicated by forward step selection process.
-  #'  3) Building full occupancy models by combining different sub-models that  
-  #'  are within 5 delta-AIC of the top sub-model (Secondary set model selection; 
-  #'  Morin et al. 2020) & using AIC to identify top model from this final suite.
-  #'  Models that failed to converge were excluded from model selection stages.
-  #'  4) Using chi-sq test to evaluate model fit after model selection (pg.4 vignette)
+  #'  Running global model for all species and seasons.
+  #'  Only removed Study Area covariate if data only collected in one area.
+  #'  Only removed PercXShrub if converged poorly (usually due to no/few 
+  #'  detections in areas with shrubland). 
   #'  =============================
 
-
   ####  BOBCAT MODELS  ####                   
-  #'  Included covariates informed by 
-  
   #'  SUMMERS 2018 & 2019
-  #'  Null
-  (bob_s1819_null <- occu(~1 ~1, bob_s1819_UMF))
-  backTransform(bob_s1819_null, 'det')
-  backTransform(bob_s1819_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (bob_s1819_det <- occu(~Trail + Height ~1, bob_s1819_UMF))
-  # (bob_s1819_det <- occu(~Trail + Height*Distance + Year ~1, bob_s1819_UMF))
-  (bob_s1819_det1 <- occu(~Trail ~1, bob_s1819_UMF))
-  (bob_s1819_det2 <- occu(~Trail + Distance ~1, bob_s1819_UMF))
-  (bob_s1819_det3 <- occu(~Trail + Height*Distance ~1, bob_s1819_UMF))
-  det_mods <- fitList(bob_s1819_null, bob_s1819_det1, bob_s1819_det2, bob_s1819_det3)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (bob_s1819_occ <- occu(~1 ~Elev, bob_s1819_UMF))
-  # (bob_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + Slope, bob_s1819_UMF))
-  # (bob_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + Aspect, bob_s1819_UMF))
-  # (bob_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + PercForMix + PercXGrass, bob_s1819_UMF))
-  # (bob_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + PercForMix + PercXShrub, bob_s1819_UMF))
-  # (bob_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + PercForMix + NearestRd, bob_s1819_UMF))
-  # (bob_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + PercForMix + HumanMod, bob_s1819_UMF))
-  # (bob_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + PercForMix + Area, bob_s1819_UMF))
-  (bob_s1819_occ1 <- occu(~1 ~Elev + I(Elev^2), bob_s1819_UMF))
-  (bob_s1819_occ2 <- occu(~1 ~Elev + I(Elev^2) + PercForMix, bob_s1819_UMF))
-  occ_mods <- fitList(bob_s1819_null, bob_s1819_occ1, bob_s1819_occ2)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  sub-model selection process (Morin et al. 2020)
-  (bob_s1819_full1 <- occu(~Trail + Height*Distance ~Elev + I(Elev^2) + PercForMix, bob_s1819_UMF))
-  mods <- fitList(bob_s1819_null, bob_s1819_full1)
-  modSel(mods)
-  
-  #'  WINTERS 2018-2019 & 2019-2020           
-  #'  Null
-  (bob_w1820_null <- occu(~1 ~1, bob_w1820_UMF))
-  backTransform(bob_w1820_null, 'det')
-  backTransform(bob_w1820_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (bob_w1820_det <- occu(~Trail ~1, bob_w1820_UMF))
-  # (bob_w1820_det <- occu(~Height ~1, bob_w1820_UMF))
-  # (bob_w1820_det <- occu(~Distance ~1, bob_w1820_UMF))
-  # (bob_w1820_det <- occu(~Height*Distance ~1, bob_w1820_UMF))
-  # (bob_w1820_det <- occu(~Year ~1, bob_w1820_UMF))
-  det_mods <- fitList(bob_w1820_null)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (bob_w1820_occ <- occu(~1 ~Elev, bob_w1820_UMF))
-  # (bob_w1820_occ <- occu(~1 ~Elev + I(Elev^2), bob_w1820_UMF))
-  # (bob_w1820_occ <- occu(~1 ~Slope, bob_w1820_UMF))
-  # (bob_w1820_occ <- occu(~1 ~Aspect, bob_w1820_UMF))
-  # (bob_w1820_occ <- occu(~1 ~PercForMix + PercXGrass, bob_w1820_UMF))
-  # (bob_w1820_occ <- occu(~1 ~PercForMix + PercXShrub, bob_w1820_UMF))
-  # (bob_w1820_occ <- occu(~1 ~PercForMix + NearestRd, bob_w1820_UMF))
-  # (bob_w1820_occ <- occu(~1 ~PercForMix + HumanMod, bob_w1820_UMF))
-  # (bob_w1820_occ <- occu(~1 ~PercForMix + Area, bob_w1820_UMF))
-  (bob_w1820_occ1 <- occu(~1 ~PercForMix, bob_w1820_UMF))
-  occ_mods <- fitList(bob_w1820_null, bob_w1820_occ1)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  sub-model selection process (Morin et al. 2020)
-  #'  !No covariates on detection sub-model so full model is same as above!
-  mods <- fitList(bob_w1820_null, bob_w1820_occ1)
-  modSel(mods)
-  
-  
+  (bob_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_s1819_UMF))
+    #'  WINTERS 2018-2019 & 2019-2020           
+  (bob_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_w1820_UMF))
+
   ####  COUGAR MODELS  ####
-  #'  Included covariates informed by Dickson & Beier 2002, Kertson et al. 2011, 
-  #'  Smereka et al. 2020
-                                              
   #'  SUMMERS 2018 & 2019
-  #'  Null
-  (coug_s1819_null <- occu(~1 ~1, coug_s1819_UMF))
-  backTransform(coug_s1819_null, 'det')
-  backTransform(coug_s1819_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (coug_s1819_det <- occu(~Trail + Height ~1, coug_s1819_UMF))
-  # (coug_s1819_det <- occu(~Trail + Distance ~1, coug_s1819_UMF))
-  # (coug_s1819_det <- occu(~Trail + Height*Distance ~1, coug_s1819_UMF))
-  (coug_s1819_det1 <- occu(~Trail ~1, coug_s1819_UMF))
-  (coug_s1819_det2 <- occu(~Trail + Year ~1, coug_s1819_UMF))
-  det_mods <- fitList(coug_s1819_null, coug_s1819_det1, coug_s1819_det2)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (coug_s1819_occ <- occu(~1 ~Elev + I(Elev^2), coug_s1819_UMF))
-  # (coug_s1819_occ <- occu(~1 ~Elev + Slope, coug_s1819_UMF))
-  # (coug_s1819_occ <- occu(~1 ~Elev + Aspect, coug_s1819_UMF))
-  # (coug_s1819_occ <- occu(~1 ~Elev + PercForMix + PercXGrass, coug_s1819_UMF))
-  # (coug_s1819_occ <- occu(~1 ~Elev + PercForMix + PercXShrub, coug_s1819_UMF))
-  # (coug_s1819_occ <- occu(~1 ~Elev + PercForMix + NearestRd, coug_s1819_UMF))
-  # (coug_s1819_occ <- occu(~1 ~Elev + PercForMix + HumanMod, coug_s1819_UMF))
-  (coug_s1819_occ1 <- occu(~1 ~Elev, coug_s1819_UMF))
-  (coug_s1819_occ2 <- occu(~1 ~Elev + PercForMix, coug_s1819_UMF))
-  (coug_s1819_occ3 <- occu(~1 ~Elev + PercForMix + Area, coug_s1819_UMF))
-  occ_mods <- fitList(coug_s1819_null, coug_s1819_occ1, coug_s1819_occ2, coug_s1819_occ3)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  sub-model selection process (Morin et al. 2020)
-  (coug_s1819_full1 <- occu(~Trail + Year ~Elev + PercForMix + Area, coug_s1819_UMF))
-  (coug_s1819_full2 <- occu(~Trail ~Elev + PercForMix + Area, coug_s1819_UMF))
-  (coug_s1819_full3 <- occu(~Trail + Year ~Elev + PercForMix, coug_s1819_UMF))
-  (coug_s1819_full4 <- occu(~Trail ~Elev + PercForMix, coug_s1819_UMF))
-  mods <- fitList(coug_s1819_null, coug_s1819_full1, coug_s1819_full2, 
-                  coug_s1819_full3, coug_s1819_full4)
-  modSel(mods)
- 
+  (coug_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coug_s1819_UMF))
   #'  WINTERS 2018-2019 & 2019-2020           
-  #'  Null
-  (coug_w1820_null <- occu(~1 ~1, coug_w1820_UMF))
-  backTransform(coug_w1820_null, 'det')
-  backTransform(coug_w1820_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (coug_w1820_det <- occu(~Trail + Height ~1, coug_w1820_UMF))
-  # (coug_w1820_det <- occu(~Trail + Distance ~1, coug_w1820_UMF))
-  # (coug_w1820_det <- occu(~Trail + Height*Distance ~1, coug_w1820_UMF))
-  # (coug_w1820_det <- occu(~Trail + Year ~1, coug_w1820_UMF))
-  (coug_w1820_det1 <- occu(~Trail ~1, coug_w1820_UMF))
-  det_mods <- fitList(coug_w1820_null, coug_w1820_det1)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (coug_w1820_occ <- occu(~1 ~Elev, coug_w1820_UMF))
-  # (coug_w1820_occ <- occu(~1 ~Elev + I(Elev^2), coug_w1820_UMF))
-  # (coug_w1820_occ <- occu(~1 ~Slope, coug_w1820_UMF))
-  # (coug_w1820_occ <- occu(~1 ~Aspect, coug_w1820_UMF))
-  # (coug_w1820_occ <- occu(~1 ~PercForMix + PercXGrass, coug_w1820_UMF))
-  # (coug_w1820_occ <- occu(~1 ~PercForMix + PercXShrub, coug_w1820_UMF))
-  # (coug_w1820_occ <- occu(~1 ~PercForMix + NearestRd, coug_w1820_UMF))
-  # (coug_w1820_occ <- occu(~1 ~PercForMix + HumanMod, coug_w1820_UMF))
-  # (coug_w1820_occ <- occu(~1 ~PercForMix + Area, coug_w1820_UMF))
-  (coug_w1820_occ1 <- occu(~1 ~PercForMix, coug_w1820_UMF))
-  occ_mods <- fitList(coug_w1820_null, coug_w1820_occ1)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  sub-model selection process (Morin et al. 2020)
-  (coug_w1820_full1 <- occu(~Trail ~PercForMix, coug_w1820_UMF))
-  (coug_w1820_full2 <- occu(~1 ~PercForMix, coug_w1820_UMF))
-  mods <- fitList(coug_w1820_null, coug_w1820_full1, coug_w1820_full2)
-  modSel(mods)
-  
+  (coug_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coug_w1820_UMF))
   
   ####  COYOTE MODELS  ####
   #'  SUMMERS 2018 & 2019
-  #'  Null
-  (coy_s1819_null <- occu(~1 ~1, coy_s1819_UMF))
-  backTransform(coy_s1819_null, 'det')
-  backTransform(coy_s1819_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (coy_s1819_det <- occu(~Trail + Height ~1, coy_s1819_UMF))
-  # (coy_s1819_det <- occu(~Trail + Distance ~1, coy_s1819_UMF))
-  # (coy_s1819_det <- occu(~Trail + Height*Distance ~1, coy_s1819_UMF))
-  # (coy_s1819_det <- occu(~Trail + Year ~1, coy_s1819_UMF))
-  (coy_s1819_det1 <- occu(~Trail ~1, coy_s1819_UMF))
-  det_mods <- fitList(coy_s1819_null, coy_s1819_det1)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (coy_s1819_occ <- occu(~1 ~Elev + I(Elev^2), coy_s1819_UMF))
-  # (coy_s1819_occ <- occu(~1 ~Elev + Aspect, coy_s1819_UMF))
-  # (coy_s1819_occ <- occu(~1 ~Elev + Slope + PercForMix + PercXGrass, coy_s1819_UMF))
-  # (coy_s1819_occ <- occu(~1 ~Elev + Slope + PercForMix + PercXShrub, coy_s1819_UMF))
-  # (coy_s1819_occ <- occu(~1 ~Elev + Slope + PercForMix + HumanMod, coy_s1819_UMF))
-  (coy_s1819_occ1 <- occu(~1 ~Elev, coy_s1819_UMF))
-  (coy_s1819_occ2 <- occu(~1 ~Elev + Slope, coy_s1819_UMF))
-  (coy_s1819_occ3 <- occu(~1 ~Elev + Slope + PercForMix, coy_s1819_UMF))
-  (coy_s1819_occ4 <- occu(~1 ~Elev + Slope + PercForMix + NearestRd, coy_s1819_UMF))
-  (coy_s1819_occ5 <- occu(~1 ~Elev + Slope + PercForMix + NearestRd + Area, coy_s1819_UMF))
-  occ_mods <- fitList(coy_s1819_null, coy_s1819_occ1, coy_s1819_occ2, coy_s1819_occ3, 
-                      coy_s1819_occ4, coy_s1819_occ5)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  sub-model selection process (Morin et al. 2020)
-  (coy_s1819_full1 <- occu(~Trail ~Elev + Slope + PercForMix + NearestRd + Area, coy_s1819_UMF))
-  (coy_s1819_full2 <- occu(~Trail ~Elev + Slope + PercForMix + NearestRd, coy_s1819_UMF))
-  mods <- fitList(coy_s1819_null, coy_s1819_full1, coy_s1819_full2)
-  modSel(mods)
-  
-  
+  (coy_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_s1819_UMF))
   #'  WINTERS 2018-2019 & 2019-2020              
-  #'  Null
-  (coy_w1820_null <- occu(~1 ~1, coy_w1820_UMF))
-  backTransform(coy_w1820_null, 'det')
-  backTransform(coy_w1820_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (coy_w1820_det <- occu(~Trail + Height + Distance ~1, coy_w1820_UMF))
-  (coy_w1820_det1 <- occu(~Trail ~1, coy_w1820_UMF))
-  (coy_w1820_det2 <- occu(~Trail + Height ~1, coy_w1820_UMF))
-  (coy_w1820_det3 <- occu(~Trail + Height*Distance ~1, coy_w1820_UMF))
-  (coy_w1820_det4 <- occu(~Trail + Height*Distance + Year ~1, coy_w1820_UMF))
-  det_mods <- fitList(coy_w1820_null, coy_w1820_det1, coy_w1820_det2, coy_w1820_det3,
-                      coy_w1820_det4)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (coy_w1820_occ <- occu(~1 ~Elev + I(Elev^2), coy_w1820_UMF))
-  # (coy_w1820_occ <- occu(~1 ~Elev + Slope, coy_w1820_UMF))
-  # (coy_w1820_occ <- occu(~1 ~Elev + Aspect, coy_w1820_UMF))
-  # (coy_w1820_occ <- occu(~1 ~Elev + PercForMix, coy_w1820_UMF))
-  # (coy_w1820_occ <- occu(~1 ~Elev + PercXGrass, coy_w1820_UMF))
-  # (coy_w1820_occ <- occu(~1 ~Elev + PercXShrub, coy_w1820_UMF))
-  # (coy_w1820_occ <- occu(~1 ~Elev + NearestRd, coy_w1820_UMF))
-  # (coy_w1820_occ <- occu(~1 ~Elev + HumanMod, coy_w1820_UMF))
-  # (coy_w1820_occ <- occu(~1 ~Elev + Area, coy_w1820_UMF))
-  (coy_w1820_occ1 <- occu(~1 ~Elev, coy_w1820_UMF))
-  occ_mods <- fitList(coy_w1820_null, coy_w1820_occ1)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  sub-model selection process (Morin et al. 2020)
-  # (coy_w1820_global <- occu(~Trail + Year + Height*Distance ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, coy_w1820_UMF))
-  (coy_w1820_full1 <- occu(~Trail + Height*Distance + Year ~Elev, coy_w1820_UMF))
-  mods <- fitList(coy_w1820_null, coy_w1820_full1)
-  modSel(mods)
- 
-  
-  ####  WOLF MODELS  ####
-  #'  SUMMERS 2018 & 2019                      
-  #'  Null
-  (wolf_s1819_null <- occu(~1 ~1, wolf_s1819_UMF))
-  backTransform(wolf_s1819_null, 'det')
-  backTransform(wolf_s1819_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (wolf_s1819_det <- occu(~Trail + Height ~1, wolf_s1819_UMF))
-  # (wolf_s1819_det <- occu(~Trail + Distance ~1, wolf_s1819_UMF))
-  # (wolf_s1819_det <- occu(~Trail + Height*Distance ~1, wolf_s1819_UMF))
-  # (wolf_s1819_det <- occu(~Trail + Year ~1, wolf_s1819_UMF))
-  (wolf_s1819_det1 <- occu(~Trail ~1, wolf_s1819_UMF))
-  det_mods <- fitList(wolf_s1819_null, wolf_s1819_det1)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (wolf_s1819_occ <- occu(~1 ~Elev + I(Elev^2), wolf_s1819_UMF))
-  # (wolf_s1819_occ <- occu(~1 ~Elev + Slope, wolf_s1819_UMF))
-  # (wolf_s1819_occ <- occu(~1 ~Elev + Aspect, wolf_s1819_UMF))
-  # (wolf_s1819_occ <- occu(~1 ~Elev + PercForMix + PercXGrass, wolf_s1819_UMF))
-  # (wolf_s1819_occ <- occu(~1 ~Elev + PercForMix + PercXShrub, wolf_s1819_UMF))  # FAILS to converge
-  # (wolf_s1819_occ <- occu(~1 ~Elev + PercForMix + NearestRd, wolf_s1819_UMF))
-  # (wolf_s1819_occ <- occu(~1 ~Elev + PercForMix + HumanMod, wolf_s1819_UMF))
-  (wolf_s1819_occ1 <- occu(~1 ~Elev, wolf_s1819_UMF))
-  (wolf_s1819_occ2 <- occu(~1 ~Elev + PercForMix, wolf_s1819_UMF))
-  (wolf_s1819_occ3 <- occu(~1 ~Elev + PercForMix + Area, wolf_s1819_UMF))
-  occ_mods <- fitList(wolf_s1819_null, wolf_s1819_occ1, wolf_s1819_occ2, wolf_s1819_occ3)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  sub-model selection process (Morin et al. 2020)
-  (wolf_s1819_full1 <- occu(~Trail ~Elev + PercForMix + Area, wolf_s1819_UMF))
-  (wolf_s1819_full2 <- occu(~Trail ~Elev + PercForMix, wolf_s1819_UMF))
-  mods <- fitList(wolf_s1819_null, wolf_s1819_full1, wolf_s1819_full2)
-  modSel(mods)
-  
-  
-  #'  WINTERS 2018-2019 & 2019-2020            
-  #'  Null
-  (wolf_w1820_null <- occu(~1 ~1, wolf_w1820_UMF))
-  backTransform(wolf_w1820_null, 'det')
-  backTransform(wolf_w1820_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (wolf_w1820_det <- occu(~Trail + Height ~1, wolf_w1820_UMF))
-  # (wolf_w1820_det <- occu(~Trail + Distance ~1, wolf_w1820_UMF))
-  # (wolf_w1820_det <- occu(~Trail + Height*Distance ~1, wolf_w1820_UMF))
-  # (wolf_w1820_det <- occu(~Trail + Year ~1, wolf_w1820_UMF))
-  (wolf_w1820_det1 <- occu(~Trail ~1, wolf_w1820_UMF))
-  det_mods <- fitList(wolf_w1820_null, wolf_w1820_det1)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (wolf_w1820_occ <- occu(~1 ~Elev, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~Elev + I(Elev^2) + Slope, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~Elev + I(Elev^2) + Aspect, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~Elev + I(Elev^2) + PercForMix, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~Elev + I(Elev^2) + PercXGrass, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~Elev + I(Elev^2) + PercXShrub, wolf_w1820_UMF))   # FAILS to converge
-  # (wolf_w1820_occ <- occu(~1 ~Elev + I(Elev^2) + NearestRd, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~Elev + I(Elev^2) + HumanMod, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~Slope, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~Aspect, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~PercForMix, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~PercXGrass, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~PercXShrub, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~NearestRd, wolf_w1820_UMF))
-  # (wolf_w1820_occ <- occu(~1 ~HumanMod, wolf_w1820_UMF))  
-  (wolf_w1820_occ1 <- occu(~1 ~Elev + I(Elev^2), wolf_w1820_UMF))
-  (wolf_w1820_occ2 <- occu(~1 ~Elev + I(Elev^2) + Area, wolf_w1820_UMF))
-  (wolf_w1820_occ3 <- occu(~1 ~Area, wolf_w1820_UMF))
-  occ_mods <- fitList(wolf_w1820_null, wolf_w1820_occ1, wolf_w1820_occ2,wolf_w1820_occ3)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  sub-model selection process (Morin et al. 2020)
-  # (wolf_w1820_full3 <- occu(~Trail ~Elev + I(Elev^2) + Area, wolf_w1820_UMF))  # FAILS to converge
-  (wolf_w1820_full1 <- occu(~Trail ~Area, wolf_w1820_UMF))
-  (wolf_w1820_full2 <- occu(~Trail ~Elev + I(Elev^2), wolf_w1820_UMF))
-  mods <- fitList(wolf_w1820_null, wolf_w1820_full1, wolf_w1820_full2)
-  modSel(mods)
+  (coy_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_w1820_UMF))
 
-  
+  ####  WOLF MODELS  ####
+  #'  SUMMERS 2018 & 2019    
+  #'  Removed PercXShrub in global2 models due to poor convergence, esp. summer model                 
+  (wolf_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, wolf_s1819_UMF))
+  (wolf_s1819_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_s1819_UMF))
+      #'  WINTERS 2018-2019 & 2019-2020            
+  (wolf_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, wolf_w1820_UMF))
+  (wolf_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_w1820_UMF))
   
   ####  ELK MODELS ####                          
-  #'  SUMMERS 2018 & 2019, NE study area only so no Area effect                             
-  #'  Null
-  (elk_s1819_null <- occu(~1 ~1, elk_s1819_UMF))
-  backTransform(elk_s1819_null, 'det')
-  backTransform(elk_s1819_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (elk_s1819_det <- occu(~Trail ~1, elk_s1819_UMF))
-  # (elk_s1819_det <- occu(~Height + Distance ~1, elk_s1819_UMF))
-  # (elk_s1819_det <- occu(~Height*Distance ~1, elk_s1819_UMF))
-  # (elk_s1819_det <- occu(~Height + Year ~1, elk_s1819_UMF))
-  (elk_s1819_det1 <- occu(~Height ~1, elk_s1819_UMF))
-  det_mods <- fitList(elk_s1819_null, elk_s1819_det1)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (elk_s1819_occ <- occu(~1 ~Elev, elk_s1819_UMF))
-  # (elk_s1819_occ <- occu(~1 ~Elev + I(Elev^2), elk_s1819_UMF))
-  # (elk_s1819_occ <- occu(~1 ~Slope, elk_s1819_UMF))
-  # (elk_s1819_occ <- occu(~1 ~Aspect, elk_s1819_UMF))
-  # (elk_s1819_occ <- occu(~1 ~PercForMix, elk_s1819_UMF))
-  # (elk_s1819_occ <- occu(~1 ~PercXGrass, elk_s1819_UMF))
-  # (elk_s1819_occ <- occu(~1 ~PercXShrub, elk_s1819_UMF))
-  # (elk_s1819_occ <- occu(~1 ~NearestRd, elk_s1819_UMF))
-  # (elk_s1819_occ <- occu(~1 ~HumanMod, elk_s1819_UMF))
-  occ_mods <- fitList(elk_s1819_null)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  sub-model selection process (Morin et al. 2020)
-  #'  !No significant variables on occupancy so final model suite based on
-  #'  detection sub-models only!
-  mods <- fitList(elk_s1819_null, elk_s1819_det1)
-  modSel(mods)
-  
+  #'  SUMMERS 2018 & 2019
+  #'  NE study area only so no Area effect 
+  #'  Removed PercXShrub in global2 models due to poor convergence                             
+  (elk_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, elk_s1819_UMF))
+  (elk_s1819_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, elk_s1819_UMF))
   #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect                
-  #'  Null                                         
-  (elk_w1820_null <- occu(~1 ~1, elk_w1820_UMF))
-  backTransform(elk_w1820_null, 'det')
-  backTransform(elk_w1820_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (elk_w1820_det <- occu(~Trail ~1, elk_w1820_UMF))
-  # (elk_w1820_det <- occu(~Height ~1, elk_w1820_UMF))
-  # (elk_w1820_det <- occu(~Distance ~1, elk_w1820_UMF))
-  # (elk_w1820_det <- occu(~Height*Distance ~1, elk_w1820_UMF))
-  # (elk_w1820_det <- occu(~Year ~1, elk_w1820_UMF))
-  det_mods <- fitList(elk_w1820_null)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (elk_w1820_occ <- occu(~1 ~Elev, elk_w1820_UMF))
-  # (elk_w1820_occ <- occu(~1 ~Elev + I(Elev62), elk_w1820_UMF))
-  # (elk_w1820_occ <- occu(~1 ~Slope, elk_w1820_UMF))
-  # (elk_w1820_occ <- occu(~1 ~Aspect, elk_w1820_UMF))
-  # (elk_w1820_occ <- occu(~1 ~PercForMix, elk_w1820_UMF))
-  # (elk_w1820_occ <- occu(~1 ~PercXGrass, elk_w1820_UMF))
-  # (elk_w1820_occ <- occu(~1 ~PercXShrub, elk_w1820_UMF))
-  # (elk_w1820_occ <- occu(~1 ~NearestRd, elk_w1820_UMF))
-  # (elk_w1820_occ <- occu(~1 ~HumanMod, elk_w1820_UMF))
-  occ_mods <- fitList(elk_w1820_null)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  sub-model selection process (Morin et al. 2020)
-  #'  !No significant variables on occupancy or detection so final model is null
-  mods <- fitList(elk_w1820_null)
-  modSel(mods)
-  
-
+  (elk_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, elk_w1820_UMF))
+  (elk_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, elk_w1820_UMF))
   
   ####  MULE DEER MODELS  ####
-  #'  SUMMERS 2018 & 2019, OK study area only so no Area effect
-  #'  Null
-  (md_s1819_null <- occu(~1 ~1, md_s1819_UMF))
-  backTransform(md_s1819_null, 'det')
-  backTransform(md_s1819_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (md_s1819_det <- occu(~Trail ~1, md_s1819_UMF))
-  # (md_s1819_det <- occu(~Height ~1, md_s1819_UMF))
-  # (md_s1819_det <- occu(~Height*Distance + Year ~1, md_s1819_UMF))
-  (md_s1819_det1 <- occu(~Distance ~1, md_s1819_UMF))
-  (md_s1819_det2 <- occu(~Height*Distance ~1, md_s1819_UMF))
-  det_mods <- fitList(md_s1819_null, md_s1819_det1, md_s1819_det2)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (md_s1819_occ <- occu(~1 ~Elev, md_s1819_UMF))
-  # (md_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + Slope, md_s1819_UMF))
-  # (md_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + Aspect, md_s1819_UMF))
-  # (md_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + PercForMix, md_s1819_UMF))
-  # (md_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + PercXGrass, md_s1819_UMF))
-  # (md_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + PercXShrub, md_s1819_UMF))
-  # (md_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + NearestRd, md_s1819_UMF))
-  # (md_s1819_occ <- occu(~1 ~Elev + I(Elev^2) + HumanMod, md_s1819_UMF))
-  (md_s1819_occ1 <- occu(~1 ~Elev + I(Elev^2), md_s1819_UMF))
-  occ_mods <- fitList(md_s1819_null, md_s1819_occ1)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  (md_s1819_full1 <- occu(~Height*Distance ~Elev + I(Elev^2), md_s1819_UMF))
-  (md_s1819_full2 <- occu(~Distance ~Elev + I(Elev^2), md_s1819_UMF))
-  mods <- fitList(md_s1819_null, md_s1819_full1, md_s1819_full2)
-  modSel(mods)
-  
-  
+  #'  SUMMERS 2018 & 2019
+  #'  OK study area only so no Area effect
+  (md_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_s1819_UMF))
   #'  WINTERS 2018-2019 & 2019-2020, OK study area only so no Area effect                    
-  #'  Null
-  (md_w1820_null <- occu(~1 ~1, md_w1820_UMF))
-  backTransform(md_w1820_null, 'det')
-  backTransform(md_w1820_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (md_w1820_det <- occu(~Trail + Height ~1, md_w1820_UMF))
-  (md_w1820_det1 <- occu(~Trail ~1, md_w1820_UMF))
-  (md_w1820_det2 <- occu(~Trail + Distance ~1, md_w1820_UMF))
-  (md_w1820_det3 <- occu(~Trail + Height*Distance ~1, md_w1820_UMF))
-  (md_w1820_det4 <- occu(~Trail + Height*Distance + Year ~1, md_w1820_UMF))
-  det_mods <- fitList(md_w1820_null, md_w1820_det1, md_w1820_det2, md_w1820_det3, 
-                      md_w1820_det4)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (md_w1820_occ <- occu(~1 ~Elev + I(Elev^2), md_w1820_UMF))
-  # (md_w1820_occ <- occu(~1 ~Elev + Slope, md_w1820_UMF))
-  # (md_w1820_occ <- occu(~1 ~Elev + Aspect, md_w1820_UMF))
-  # (md_w1820_occ <- occu(~1 ~Elev + PercForMix, md_w1820_UMF))
-  # (md_w1820_occ <- occu(~1 ~Elev + PercXGrass, md_w1820_UMF))
-  # (md_w1820_occ <- occu(~1 ~Elev + PercXShrub, md_w1820_UMF))
-  # (md_w1820_occ <- occu(~1 ~Elev + NearestRd, md_w1820_UMF))
-  # (md_w1820_occ <- occu(~1 ~Elev + HumanMod, md_w1820_UMF))
-  (md_w1820_occ1 <- occu(~1 ~Elev, md_w1820_UMF))
-  occ_mods <- fitList(md_w1820_null, md_w1820_occ1)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  (md_w1820_full1 <- occu(~Trail + Height*Distance + Year ~Elev, md_w1820_UMF))
-  (md_w1820_full2 <- occu(~Trail + Height*Distance ~Elev, md_w1820_UMF))
-  mods <- fitList(md_w1820_null, md_w1820_full1, md_w1820_full2)
-  modSel(mods)
-  
-  #  Ugh but shrub habitat IS important in winter for these guys!
-  #(md_w1820_occ10 <- occu(~1 ~PercForMix + PercXGrass + PercXShrub, md_w1820_UMF))
+  (md_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_w1820_UMF))
 
-  
   ####  WHITE-TAILED DEER MODELS  ####
-  #'  SUMMERS 2018 & 2019, NE study area only so no Area effect 
-  #'  Null
-  (wtd_s1819_null <- occu(~1 ~1, wtd_s1819_UMF))
-  backTransform(wtd_s1819_null, 'det')
-  backTransform(wtd_s1819_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  # (wtd_s1819_det <- occu(~Trail + Height ~1, wtd_s1819_UMF))
-  # (wtd_s1819_det <- occu(~Trail + Distance ~1, wtd_s1819_UMF))
-  # (wtd_s1819_det <- occu(~Trail + Height*Distance ~1, wtd_s1819_UMF))
-  # (wtd_s1819_det <- occu(~Trail + Year ~1, wtd_s1819_UMF))
-  (wtd_s1819_det1 <- occu(~Trail ~1, wtd_s1819_UMF))
-  det_mods <- fitList(wtd_s1819_null, wtd_s1819_det1)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (wtd_s1819_occ <- occu(~1 ~Elev, wtd_s1819_UMF))
-  # (wtd_s1819_occ <- occu(~1 ~Elev + I(Elev^2), wtd_s1819_UMF))
-  # (wtd_s1819_occ <- occu(~1 ~Slope, wtd_s1819_UMF))
-  # (wtd_s1819_occ <- occu(~1 ~Aspect, wtd_s1819_UMF))
-  # (wtd_s1819_occ <- occu(~1 ~PercForMix, wtd_s1819_UMF))
-  # (wtd_s1819_occ <- occu(~1 ~PercXGrass, wtd_s1819_UMF))
-  # (wtd_s1819_occ <- occu(~1 ~PercXShrub, wtd_s1819_UMF))
-  # (wtd_s1819_occ <- occu(~1 ~NearestRd, wtd_s1819_UMF))
-  # (wtd_s1819_occ <- occu(~1 ~HumanMod, wtd_s1819_UMF))
-  occ_mods <- fitList(wtd_s1819_null)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of 
-  #'  !No significant variables on occupancy so final model suite is based on
-  #'  detection sub-models only!
-  mods <- fitList(wtd_s1819_null, wtd_s1819_det1)
-  modSel(mods)
-  
-  
-  ####  NEED TO RUN THIS AS A LOGISTIC REGRESSION NOW SINCE OCCUPANCY IS SO HIGH
-  
-  
+  #'  SUMMERS 2018 & 2019
+  #'  NE study area only so no Area effect 
+  #'  Removed PercXShrub in global2 models due to poor convergence, esp. on winter model
+  (wtd_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, wtd_s1819_UMF))
+  (wtd_s1819_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_s1819_UMF))
+  ####  PROBABLY NEED TO RUN THIS AS A LOGISTIC REGRESSION SINCE OCCUPANCY IS SO HIGH
   #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect              
-  #'  Null
-  (wtd_w1820_null <- occu(~1 ~1, wtd_w1820_UMF))
-  backTransform(wtd_w1820_null, 'det')
-  backTransform(wtd_w1820_null, 'state')
-  #'  DETECTION sub-model forward-selection
-  #'  Retaining only variables with p-value <= 0.05 during forward selection process
-  #'  YEAR included no matter what to account for data being collected across 2 diff yrs
-  # (wtd_w1820_det <- occu(~Trail + Height ~1, wtd_w1820_UMF))
-  # (wtd_w1820_det <- occu(~Trail + Distance ~1, wtd_w1820_UMF))
-  # (wtd_w1820_det <- occu(~Trail + Height*Distance ~1, wtd_w1820_UMF))
-  # (wtd_w1820_det1 <- occu(~Trail + Year ~1, wtd_w1820_UMF))
-  (wtd_w1820_det1 <- occu(~Trail ~1, wtd_w1820_UMF))
-  det_mods <- fitList(wtd_w1820_null, wtd_w1820_det1)
-  modSel(det_mods)
-  #'  OCCUPANCY sub-model forward selection
-  #'  Retaining any variables with p-value < 0.05 during forward selection process
-  # (wtd_w1820_occ <- occu(~1 ~Elev + I(Elev^2), wtd_w1820_UMF))
-  # (wtd_w1820_occ <- occu(~1 ~Elev + Slope, wtd_w1820_UMF))
-  # (wtd_w1820_occ <- occu(~1 ~Elev + Aspect, wtd_w1820_UMF))
-  # (wtd_w1820_occ <- occu(~1 ~Elev + PercForMix, wtd_w1820_UMF))
-  # (wtd_w1820_occ <- occu(~1 ~Elev + PercXGrass, wtd_w1820_UMF))
-  # (wtd_w1820_occ <- occu(~1 ~Elev + PercXShrub, wtd_w1820_UMF))   #  FAILS to converge
-  # (wtd_w1820_occ <- occu(~1 ~Elev + NearestRd, wtd_w1820_UMF))
-  # (wtd_w1820_occ <- occu(~1 ~Elev + HumanMod, wtd_w1820_UMF))
-  (wtd_w1820_occ1 <- occu(~1 ~Elev, wtd_w1820_UMF))
-  occ_mods <- fitList(wtd_w1820_null, wtd_w1820_occ1)
-  modSel(occ_mods)
-  #'  FULL model
-  #'  Combine any detection & occupancy sub-models within 5 delta AIC of
-  (wtd_w1820_full1 <- occu(~Trail ~Elev, wtd_w1820_UMF))
-  mods <- fitList(wtd_w1820_null, wtd_w1820_full1)
-  modSel(mods)
+  (wtd_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, wtd_w1820_UMF))
+  (wtd_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_w1820_UMF))
   
 
-  ####  Goodness of Fit Test  ####
-  #'  Checking model fit: Chi^2 test for binary data (1 df)
-  #'  Chi^2 GOF is a one-sided test used to determine if a sample matches the 
-  #'   population & asks what's the probability that the test statistic is greater  
-  #'   than (falls above) the critical value on the tail of the Chi^2 distribution.
-  #'  H0: there is no significant difference between the observed and the expected value
-  #'  Ha: there is a significant difference between the observed and the expected value
-  #'  If the Chi^2 test statistic is greater than the critical value derived from
-  #'   the Chi^2 distribution (determined by degrees of freedom), then reject
-  #'   the null & conclude there is a significant difference btwn observed & expected. 
-  #'  If test statistic is less than the critical value then fail to reject & 
-  #'   conclude there is no significant difference btwn observed & expected frequencies.
-  #'  Use p-value with alpha-level 0.05 to reject/fail to reject the null hypothesis.
-  #'  Failing to reject the null (p-value > 0.05) indicates adequate model fit.
-  #'  
-  #'  Code from unmarked vignette
-  #'  Parametric Bootstrap Statistics:
-  #'  t0 = Original statistic computed from data
-  #'  t_B = Vector of bootstrap samples
-  #'  If Pr(t_B > t0) is > 0.05 then fail to reject null & conclude model fit is adequate
-  chisq <- function(fm) {
-    umf <- getData(fm)
-    y <- getY(umf)
-    y[y>1] <- 1
-    sr <- fm@sitesRemoved
-    if(length(sr)>0)
-      y <- y[-sr,,drop=FALSE]
-    fv <- fitted(fm, na.rm=TRUE)
-    y[is.na(fv)] <- NA
-    sum((y-fv)^2/(fv*(1-fv)), na.rm=TRUE)
-    #  fv expect to observe a cougar at site on that survey- covers occupancy and detection
-  }
-  
-  #'  Chi^2 test for models within 2 delta AIC for each species and season-- RUN WITH nsim = 10000 FOR FINAL ANALYSES
-  (pb_bob_s1819 <- parboot(bob_s1819_full1, statistic = chisq, nsim = 100, parallel = FALSE))         
-  (pb_bob_w1820 <- parboot(bob_w1820_occ1, statistic = chisq, nsim = 100, parallel = FALSE))          
-  (pb_coug_s1819 <- parboot(coug_s1819_full1, statistic = chisq, nsim = 100, parallel = FALSE))         
-  (pb_coug_w1820 <- parboot(coug_w1820_full2, statistic = chisq, nsim = 100, parallel = FALSE))    
-  (pb_coy_s1819 <- parboot(coy_s1819_full1, statistic = chisq, nsim = 100, parallel = FALSE))   
-  (pb_coy_w1820 <- parboot(coy_w1820_full1, statistic = chisq, nsim = 100, parallel = FALSE))   
-  (pb_wolf_s1819 <- parboot(wolf_s1819_full1, statistic = chisq, nsim = 100, parallel = FALSE))      
-  (pb_wolf_w1820 <- parboot(wolf_w1820_full1, statistic = chisq, nsim = 100, parallel = FALSE))       
-  (pb_elk_s1819 <- parboot(elk_s1819_det1, statistic = chisq, nsim = 100, parallel = FALSE))         
-  (pb_elk_w1820 <- parboot(elk_w1820_null, statistic = chisq, nsim = 100, parallel = FALSE))          
-  (pb_md_s1819 <- parboot(md_s1819_full1, statistic = chisq, nsim = 100, parallel = FALSE))    #  DOESN'T FIT WELL! null occupancy = 0.841... high but not that high; null detection = 0.477        
-  (pb_md_w1820 <- parboot(md_w1820_full1, statistic = chisq, nsim = 100, parallel = FALSE))             
-  (pb_wtd_s1819 <- parboot(wtd_s1819_det1, statistic = chisq, nsim = 100, parallel = FALSE))          
-  (pb_wtd_w1820 <- parboot(wtd_w1820_full1, statistic = chisq, nsim = 100, parallel = FALSE))        
-  
-  
   ####  Summary tables  ####
   #'  Save model outputs in table format 
   #'  Functions extract outputs for each sub-model and appends species/season info
@@ -1399,20 +859,20 @@
   }
   
   #'  Run each model through function
-  bob_s1819_occ <- occ_out(bob_s1819_full1, "Bobcat", "Summer")
-  bob_w1820_occ <- occ_out(bob_w1820_occ1, "Bobcat", "Winter")
-  coug_s1819_occ <- occ_out(coug_s1819_full1, "Cougar", "Summer")
-  coug_w1820_occ <- occ_out(coug_w1820_full2, "Cougar", "Winter")
-  coy_s1819_occ <- occ_out(coy_s1819_full1, "Coyote", "Summer")
-  coy_w1820_occ <- occ_out(coy_w1820_full1, "Coyote", "Winter")
-  wolf_s1819_occ <- occ_out(wolf_s1819_full1, "Wolf", "Summer")
-  wolf_w1820_occ <- occ_out(wolf_w1820_full1, "Wolf", "Winter")
-  elk_s1819_occ <- occ_out(elk_s1819_det1, "Elk", "Summer")
-  elk_w1820_occ <- occ_out(elk_w1820_null, "Elk", "Winter")
-  md_s1819_occ <- occ_out(md_s1819_full1, "Mule Deer", "Summer")
-  md_w1820_occ <- occ_out(md_w1820_full1, "Mule Deer", "Winter")
-  wtd_s1819_occ <- occ_out(wtd_s1819_det1, "White-tailed Deer", "Summer")
-  wtd_w1820_occ <- occ_out(wtd_w1820_full1, "White-tailed Deer", "Winter")
+  bob_s1819_occ <- occ_out(bob_s1819_global, "Bobcat", "Summer")
+  bob_w1820_occ <- occ_out(bob_w1820_global, "Bobcat", "Winter")
+  coug_s1819_occ <- occ_out(coug_s1819_global, "Cougar", "Summer")
+  coug_w1820_occ <- occ_out(coug_w1820_global, "Cougar", "Winter")
+  coy_s1819_occ <- occ_out(coy_s1819_global, "Coyote", "Summer")
+  coy_w1820_occ <- occ_out(coy_w1820_global, "Coyote", "Winter")
+  wolf_s1819_occ <- occ_out(wolf_s1819_global2, "Wolf", "Summer")
+  wolf_w1820_occ <- occ_out(wolf_w1820_global2, "Wolf", "Winter")
+  elk_s1819_occ <- occ_out(elk_s1819_global2, "Elk", "Summer")
+  elk_w1820_occ <- occ_out(elk_w1820_global2, "Elk", "Winter")
+  md_s1819_occ <- occ_out(md_s1819_global, "Mule Deer", "Summer")
+  md_w1820_occ <- occ_out(md_w1820_global, "Mule Deer", "Winter")
+  wtd_s1819_occ <- occ_out(wtd_s1819_global2, "White-tailed Deer", "Summer")
+  wtd_w1820_occ <- occ_out(wtd_w1820_global2, "White-tailed Deer", "Winter")
   
   #'  Merge into larger data frames for easy comparison
   summer_occ <- rbind(bob_s1819_occ, coug_s1819_occ, coy_s1819_occ, wolf_s1819_occ,
@@ -1450,20 +910,20 @@
   }
   
   #'  Run each model through detection function
-  bob_s1819_det <- det_out(bob_s1819_full1, "Bobcat", "Summer")
-  bob_w1820_det <- det_out(bob_w1820_occ1, "Bobcat", "Winter")
-  coug_s1819_det <- det_out(coug_s1819_full1, "Cougar", "Summer")
-  coug_w1820_det <- det_out(coug_w1820_full2, "Cougar", "Winter")
-  coy_s1819_det <- det_out(coy_s1819_full1, "Coyote", "Summer")
-  coy_w1820_det <- det_out(coy_w1820_full1, "Coyote", "Winter")
-  wolf_s1819_det <- det_out(wolf_s1819_full1, "Wolf", "Summer")
-  wolf_w1820_det <- det_out(wolf_w1820_full1, "Wolf", "Winter")
-  elk_s1819_det <- det_out(elk_s1819_det1, "Elk", "Summer")
-  elk_w1820_det <- det_out(elk_w1820_null, "Elk", "Winter")
-  md_s1819_det <- det_out(md_s1819_full1, "Mule Deer", "Summer")
-  md_w1820_det <- det_out(md_w1820_full1, "Mule Deer", "Winter")
-  wtd_s1819_det <- det_out(wtd_s1819_det1, "White-tailed Deer", "Summer")
-  wtd_w1820_det <- det_out(wtd_w1820_full1, "White-tailed Deer", "Winter")
+  bob_s1819_det <- det_out(bob_s1819_global, "Bobcat", "Summer")
+  bob_w1820_det <- det_out(bob_w1820_global, "Bobcat", "Winter")
+  coug_s1819_det <- det_out(coug_s1819_global, "Cougar", "Summer")
+  coug_w1820_det <- det_out(coug_w1820_global, "Cougar", "Winter")
+  coy_s1819_det <- det_out(coy_s1819_global, "Coyote", "Summer")
+  coy_w1820_det <- det_out(coy_w1820_global, "Coyote", "Winter")
+  wolf_s1819_det <- det_out(wolf_s1819_global2, "Wolf", "Summer")
+  wolf_w1820_det <- det_out(wolf_w1820_global2, "Wolf", "Winter")
+  elk_s1819_det <- det_out(elk_s1819_global2, "Elk", "Summer")
+  elk_w1820_det <- det_out(elk_w1820_global2, "Elk", "Winter")
+  md_s1819_det <- det_out(md_s1819_global, "Mule Deer", "Summer")
+  md_w1820_det <- det_out(md_w1820_global, "Mule Deer", "Winter")
+  wtd_s1819_det <- det_out(wtd_s1819_global2, "White-tailed Deer", "Summer")
+  wtd_w1820_det <- det_out(wtd_w1820_global2, "White-tailed Deer", "Winter")
   
   #'  Merge into larger data frames for easy comparison
   summer_det <- rbind(bob_s1819_det, coug_s1819_det, coy_s1819_det, wolf_s1819_det,
