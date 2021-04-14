@@ -891,8 +891,31 @@
       z = round(z, 3),
       Pval = round(Pval, 3)
     )
+  
+  #'  Spread this out so the coefficient effects are easier to compare across species
+  results_psi_wide <- results_psi %>%
+    dplyr::select(-z) %>%
+    mutate(
+      SE = round(SE, 2),
+      SE = paste0("(", SE, ")")
+    ) %>%
+    unite(Est_SE, Estimate, SE, sep = " ") %>%
+    unite(Est_SE_Pval, Est_SE, Pval, sep = "_") %>%
+    spread(Parameter, Est_SE_Pval) %>%
+    separate("(Intercept)", c("Intercept (SE)", "Intercept Pval"), sep = "_") %>%
+    separate("AreaOK", c("AreaOK (SE)", "AreaOK Pval"), sep = "_") %>%
+    separate("Elev", c("Elev (SE)", "Elev Pval"), sep = "_") %>%
+    separate("Slope", c("Slope (SE)", "Slope Pval"), sep = "_") %>%
+    separate("PercForMix", c("PercForMix (SE)", "PercForMix Pval"), sep = "_") %>%
+    separate("PercXGrass", c("PercXGrass (SE)", "PercXGrass Pval"), sep = "_") %>%
+    separate("PercXShrub", c("PercXShrub (SE)", "PercXShrub Pval"), sep = "_") %>%
+    separate("NearestRd", c("NearestRd (SE)", "NearestRd Pval"), sep = "_") %>%
+    separate("HumanMod", c("HumanMod (SE)", "HumanMod Pval"), sep = "_") %>%
+    arrange(match(Species, c("Bobcat", "Cougar", "Wolf", "Coyote", "Mule Deer", "Elk", "White-tailed Deer")))
+
   #'  Save!
   # write.csv(results_psi, paste0("./Outputs/OccMod_OccProb_Results_", Sys.Date(), ".csv"))
+  # write.csv(results_psi_wide, paste0("./Outputs/OccMod_OccProb_Results_wide_", Sys.Date(), ".csv"))
   
  
   #'  Function to save detection results
@@ -943,8 +966,28 @@
       Pval = round(Pval, 3)
     )
   
+  #'  Spread this out so the coefficient effects are easier to compare across species
+  results_det_wide <- results_det %>%
+    dplyr::select(-z) %>%
+    mutate(
+      SE = round(SE, 2),
+      SE = paste0("(", SE, ")")
+    ) %>%
+    unite(Est_SE, Estimate, SE, sep = " ") %>%
+    unite(Est_SE_Pval, Est_SE, Pval, sep = "_") %>%
+    spread(Parameter, Est_SE_Pval) %>%
+    separate("(Intercept)", c("Intercept (SE)", "Intercept Pval"), sep = "_") %>%
+    separate("TrailDirt road", c("Road (SE)", "Road Pval"), sep = "_") %>%
+    separate("TrailDecommissioned road", c("Decom Road (SE)", "Decom Road Pval"), sep = "_") %>%
+    separate("Height", c("Height (SE)", "Height Pval"), sep = "_") %>%
+    separate("Distance", c("Distance (SE)", "Distance Pval"), sep = "_") %>%
+    separate("Height:Distance", c("Height*Distance (SE)", "Height*Distance Pval"), sep = "_") %>%
+    separate("YearYear2", c("Year2 (SE)", "Year2 Pval"), sep = "_") %>%
+    arrange(match(Species, c("Bobcat", "Cougar", "Wolf", "Coyote", "Mule Deer", "Elk", "White-tailed Deer")))
+
   #'  Save!
   # write.csv(results_det, paste0("./Outputs/OccMod_DetProb_Results_", Sys.Date(), ".csv"))
+  # write.csv(results_det_wide, paste0("./Outputs/OccMod_DetProb_Results_wide", Sys.Date(), ".csv"))
 
   #'  Save workspace
   # save.image(file = "CamvCollar_OccMods.RData")
