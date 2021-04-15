@@ -20,6 +20,7 @@
   rm(list = ls())
   
   library(unmarked)
+  library(MuMIn)
   library(tidyverse)
 
   #'  Source script that generates detection histories
@@ -778,38 +779,116 @@
   #'  unmarked formula: ~detection ~occupancy
   #'  ~1 for intercept only
   #'  
-  #'  Running global model for all species and seasons.
+  #'  1) Run GLOBAL MODEL for all species and seasons.
   #'  Only removed Study Area covariate if data only collected in one area.
   #'  Only removed PercXShrub if converged poorly (usually due to no/few 
-  #'  detections in areas with shrubland). 
+  #'  detections in areas with shrubland).
+  #'  2) DREDGE global model to identify "best" model for each species & season.
+  #'  Goal is to identify which covariates are important in "best" model & compare 
+  #'  that to covariates that were significant in the global model. What am I
+  #'  missing when I use the global model? Use this to help determine a reasonable
+  #'  cutoff when interpreting p-values. Consider anything p < 0.1 to have trend
+  #'  worth interpreting given so many non-significant variables in the model 
+  #'  can drag down the certainty around more important covariates.
+  #'  NOTE: dredging with this many variables TAKES FOREVER so only do once!!!
   #'  =============================
 
   ####  BOBCAT MODELS  ####                   
   #'  SUMMERS 2018 & 2019
   (bob_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_s1819_UMF))
-    #'  WINTERS 2018-2019 & 2019-2020           
+  #' #'  Dredge the global model for all possible combinations 
+  #' bob_s1819_dd <- dredge(bob_s1819_global, rank = "AIC")
+  #' print(bob_s1819_dd[1:5,])
+  #' #'  Keep top models (within 2 deltaAIC) & review the top model
+  #' bob_s1819_all <- get.models(bob_s1819_dd, subset = delta < 2,)
+  #' bob_s1819_all[[1]]
+  #'  Dredge identified top model
+  (bob_s1819_top <- occu(formula = ~Distance + Height + Trail + Year + Distance:Height ~ Area + HumanMod + PercXGrass, data = bob_s1819_UMF))
+  
+  #'  WINTERS 2018-2019 & 2019-2020           
   (bob_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_w1820_UMF))
+  #' #'  Dredge the global model for all possible combinations 
+  #' bob_w1820_dd <- dredge(bob_w1820_global, rank = "AIC")   
+  #' print(bob_w1820_dd[1:5,])
+  #' #'  Keep top models (within 2 deltaAIC) & review the top model
+  #' bob_w1820_all <- get.models(bob_w1820_dd, subset = delta < 2,)
+  #' bob_w1820_all[[1]]
+  #'  Dredge identified top model
+  (bob_w1820_top <- occu(formula = ~Distance ~ Elev + HumanMod + PercForMix, data = bob_w1820_UMF))
 
+  
   ####  COUGAR MODELS  ####
   #'  SUMMERS 2018 & 2019
   (coug_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coug_s1819_UMF))
+  #'  Dredge the global model for all possible combinations 
+  coug_s1819_dd <- dredge(coug_s1819_global, rank = "AIC")   
+  print(coug_s1819_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  coug_s1819_all <- get.models(coug_s1819_dd, subset = delta < 2,)
+  coug_s1819_all[[1]]
+  #'  Dredge identified top model
+  # (coug_s1819_top <- )
+  
   #'  WINTERS 2018-2019 & 2019-2020           
   (coug_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coug_w1820_UMF))
+  #'  Dredge the global model for all possible combinations 
+  coug_w1820_dd <- dredge(coug_w1820_global, rank = "AIC")   
+  print(coug_w1820_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  coug_w1820_all <- get.models(coug_w1820_dd, subset = delta < 2,)
+  coug_w1820_all[[1]]
+  #'  Dredge identified top model
+  # (coug_w1820_top <- )
   
   ####  COYOTE MODELS  ####
   #'  SUMMERS 2018 & 2019
   (coy_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_s1819_UMF))
-  #'  WINTERS 2018-2019 & 2019-2020              
+  #'  Dredge the global model for all possible combinations 
+  coy_s1819_dd <- dredge(coy_s1819_global, rank = "AIC")   
+  print(coy_s1819_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  coy_s1819_all <- get.models(coy_s1819_dd, subset = delta < 2,)
+  coy_s1819_all[[1]]
+  #'  Dredge identified top model 
+  # (coy_s1819_top <- )
+   
+  #'  #'  WINTERS 2018-2019 & 2019-2020              
   (coy_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_w1820_UMF))
-
+  #'  Dredge the global model for all possible combinations 
+  coy_w1820_dd <- dredge(coy_w1820_global, rank = "AIC")   
+  print(coy_w1820_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  coy_w1820_all <- get.models(coy_w1820_dd, subset = delta < 2,)
+  coy_w1820_all[[1]]
+  #'  Dredge identified top model
+  # (coy_w1820_top <- )
+  
   ####  WOLF MODELS  ####
   #'  SUMMERS 2018 & 2019    
   #'  Removed PercXShrub in global2 models due to poor convergence, esp. summer model                 
   (wolf_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, wolf_s1819_UMF))
   (wolf_s1819_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_s1819_UMF))
-      #'  WINTERS 2018-2019 & 2019-2020            
+  #'  Dredge the global2 model for all possible combinations 
+  wolf_s1819_dd <- dredge(wolf_s1819_global2, rank = "AIC")   
+  print(wolf_s1819_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  wolf_s1819_all <- get.models(wolf_s1819_dd, subset = delta < 2,)
+  wolf_s1819_all[[1]]
+  #'  Dredge identified top model
+  # (wolf_s1819_top <- )
+  
+  #'  WINTERS 2018-2019 & 2019-2020            
   (wolf_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, wolf_w1820_UMF))
   (wolf_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_w1820_UMF))
+  #'  Dredge the global model for all possible combinations 
+  wolf_w1820_dd <- dredge(wolf_w1820_global2, rank = "AIC")   
+  print(wolf_w1820_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  wolf_w1820_all <- get.models(wolf_w1820_dd, subset = delta < 2,)
+  wolf_w1820_all[[1]]
+  #'  Dredge identified top model
+  # (wolf_w1820_top <- )
+  
   
   ####  ELK MODELS ####                          
   #'  SUMMERS 2018 & 2019
@@ -817,27 +896,81 @@
   #'  Removed PercXShrub in global2 models due to poor convergence                             
   (elk_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, elk_s1819_UMF))
   (elk_s1819_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, elk_s1819_UMF))
+  #'  Dredge the global model for all possible combinations 
+  elk_s1819_dd <- dredge(elk_s1819_global2, rank = "AIC")   
+  print(elk_s1819_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  elk_s1819_all <- get.models(elk_s1819_dd, subset = delta < 2,)
+  elk_s1819_all[[1]]
+  #'  Dredge identified top model
+  # (elk_s1819_top <- )
+  
   #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect                
   (elk_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, elk_w1820_UMF))
   (elk_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, elk_w1820_UMF))
+  #'  Dredge the global model for all possible combinations 
+  elk_w1820_dd <- dredge(elk_w1820_global2, rank = "AIC")   
+  print(elk_w1820_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  elk_w1820_all <- get.models(elk_w1820_dd, subset = delta < 2,)
+  elk_w1820_all[[1]]
+  #'  Dredge identified top model
+  # (elk_w1820_top <- )
+  
   
   ####  MULE DEER MODELS  ####
   #'  SUMMERS 2018 & 2019
   #'  OK study area only so no Area effect
   (md_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_s1819_UMF))
+  #'  Dredge the global model for all possible combinations 
+  md_s1819_dd <- dredge(md_s1819_global, rank = "AIC")   
+  print(md_s1819_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  md_s1819_all <- get.models(md_s1819_dd, subset = delta < 2,)
+  md_s1819_all[[1]]
+  #'  Dredge identified top model
+  # (md_s1819_top <- )
+  
   #'  WINTERS 2018-2019 & 2019-2020, OK study area only so no Area effect                    
   (md_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_w1820_UMF))
-
+  #'  Dredge the global model for all possible combinations 
+  md_w1820_dd <- dredge(md_w1820_global, rank = "AIC")   
+  print(md_w1820_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  md_w1820_all <- get.models(md_w1820_dd, subset = delta < 2,)
+  md_w1820_all[[1]]
+  #'  Dredge identified top model
+  # (md_w1820_top <- )
+  
+  
   ####  WHITE-TAILED DEER MODELS  ####
   #'  SUMMERS 2018 & 2019
   #'  NE study area only so no Area effect 
   #'  Removed PercXShrub in global2 models due to poor convergence, esp. on winter model
   (wtd_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, wtd_s1819_UMF))
   (wtd_s1819_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_s1819_UMF))
+  #'  Dredge the global model for all possible combinations 
+  wtd_s1819_dd <- dredge(wtd_s1819_global2, rank = "AIC")   
+  print(wtd_s1819_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  wtd_s1819_all <- get.models(wtd_s1819_dd, subset = delta < 2,)
+  wtd_s1819_all[[1]]
+  #'  Dredge identified top model
+  # (wtd_s1819_top <- )
+  
   ####  PROBABLY NEED TO RUN THIS AS A LOGISTIC REGRESSION SINCE OCCUPANCY IS SO HIGH
+  
   #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect              
   (wtd_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, wtd_w1820_UMF))
   (wtd_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_w1820_UMF))
+  #'  Dredge the global model for all possible combinations 
+  wtd_w1820_dd <- dredge(wtd_w1820_global2, rank = "AIC")   
+  print(wtd_w1820_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  wtd_w1820_all <- get.models(wtd_w1820_dd, subset = delta < 2,)
+  wtd_w1820_all[[1]]
+  #'  Dredge identified top model
+  # (wtd_w1820_top <- )
   
 
   ####  Summary tables  ####
