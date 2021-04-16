@@ -48,7 +48,7 @@
   #  Add column that converts times to Pacific Standard Time (add 8 hours), ignoring daylight savings
   #  Note: Etc/GMT+8 is UTC -8 and outputs in Pacific standard time only (so no daylight savings time)
   #  Add column that floors the time to the nearest hour not ahead
-  meso_tel <- read.csv("./Data/MesocarnivoreData_AllLocations.csv") %>%    
+  meso_tel <- read.csv("./Data/MesocarnivoreData_AllLocations_041521.csv") %>%    
     mutate(daytime = as.POSIXct(Acquisition.Time, format = "%Y.%m.%d %H:%M:%S", tz = "UTC"),
            UTCdt = daytime,
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
@@ -163,6 +163,7 @@
       UTM.Northing = GPS.UTM.Northing,
       UTM.Easting = GPS.UTM.Easting,
       Species = Species,
+      Sex = str_sub(ID, -1),
       Fix.Quality = GPS.Fix.Attempt,
       GPS.Altitude = GPS.Altitude,
       GPS.Horizontal.Error = GPS.Horizontal.Error,
@@ -275,6 +276,13 @@
   # write.csv(meso_skinny, paste0('meso_skinny ', Sys.Date(), '.csv'))
 
   
+  
+  
+  ####  STILL NEED TO DROP A FEW SUSPICIOUS LOCATIONS & FIGURE OUT DISPERSAL EVENTS!  ####
+
+  
+  
+  
   ####  ============================================
   ####  Review individual collars for oddities  ####
   
@@ -309,7 +317,7 @@
   ggplot() +
     geom_sf(data = NE_SA, fill = NA) +
     geom_sf(data = OK_SA, fill = NA) +
-    geom_sf(data = ind_animal[[5]], aes(color = badAlt))
+    geom_sf(data = ind_animal[[5]], aes(color = ID))
   
   #  Plotting by study area with study area boundary for context
   #  Function to plot locations from individual animals in the NORTHEAST study area
@@ -379,7 +387,7 @@
     for(i in 1:length(unique(ind_animal))) {
       names <- c(names, unique(as.character(ind_animal[[i]]$ID)))
       plot <- ggplot() +
-        geom_sf(data = ind_animal[[i]], aes(color = badAlt)) +  #Floordt
+        geom_sf(data = ind_animal[[i]], aes(color = Floordt)) +  #badAlt
         labs(title = paste(names[i], "Locations", sep = " "), x = "Longitude",
              y = "Latitude") +
         #  Keep the legend but drop the title
@@ -395,24 +403,25 @@
   
   print(meso_maps[[5]])
   
-  # #  Save individual plots in a single pdf for each species
-  # #  With NE or OK study area boundary for context
-  # pdf("./Outputs/meso_NE_maps2.pdf")
-  # for (i in 1:length(unique(meso_NE_maps))) {
-  #   print(elk_NE_maps[[i]])
-  # }
-  # pdf("./Outputs/meso_OK_maps2.pdf")
-  # for (i in 1:length(unique(meso_OK_maps))) {
-  #   print(md_OK_maps[[i]])
-  # }
-  # dev.off()
-  # 
-  # #  Without study area boundary for context
-  # pdf("./Outputs/meso_maps2.pdf")
-  # for (i in 1:length(unique(meso_maps))) {
-  #   print(meso_maps[[i]])
-  # }
-  # dev.off()
+  #  Save individual plots in a single pdf for each species
+  #  With NE or OK study area boundary for context
+  pdf("./Outputs/meso_NE_maps2.pdf")
+  for (i in 1:length(unique(meso_NE_maps))) {
+    print(meso_NE_maps[[i]])
+  }
+  dev.off()
+  pdf("./Outputs/meso_OK_maps2.pdf")
+  for (i in 1:length(unique(meso_OK_maps))) {
+    print(meso_OK_maps[[i]])
+  }
+  dev.off()
+
+  #  Without study area boundary for context
+  pdf("./Outputs/meso_maps2.pdf")
+  for (i in 1:length(unique(meso_maps))) {
+    print(meso_maps[[i]])
+  }
+  dev.off()
  
 
   #  Fin
