@@ -84,51 +84,58 @@
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
-    select(-X)
+    dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
+                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt", "AnimalID")
   #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
   elk_skinny <- read.csv("elk_skinny 2020-11-17.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
-    select(-X)
+    dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
+                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt", "AnimalID")
   #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
   wtd_skinny <- read.csv("wtd_skinny 2020-11-17.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
-    select(-X)
+    dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
+                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt", "AnimalID")
   #  Note: data in UTC timezone to begin with
-  meso_skinny <- read.csv("meso_skinny 2021-04-09.csv") %>%
+  meso_skinny <- read.csv("meso_skinny 2021-04-16.csv") %>%
     mutate(
       daytime = as.POSIXct(daytime, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
       UTCdt = with_tz(daytime, "UTC"),
       Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
       Floordt = floor_date(Finaldt, unit = "hour")) %>%
-    select(-X)
+    dplyr::select("ID", "CollarID", "Species", "Sex", "StudyArea", "Latitude", "Longitude", 
+                  "Acquisition.Time.UTC", "daytime", "UTCdt", "Finaldt", "Floordt", "AnimalID")
   #  Note: already thinned, floored, tz adjusted & AnimalID attached by L.Satterfield
   coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_4hrs.csv") %>%
     mutate(ID = as.factor(as.character(ID)),
            CollarID = Collar,
+           Sex = str_sub(ID, -1),
            Latitude = Lat,
            Longitude = Long,
            daytime = as.POSIXct(LMT_DateTime, format = "%Y-%m-%d %H:%M:%S", tz = "Etc/GMT+8"),
            Finaldt = daytime,
-           Floordt = daytime,
-           AnimalID = ID) %>%
-    dplyr::select(-c(Collar, Lat, Long))
+           Floordt = daytime) %>%
+    dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
+                "daytime", "Finaldt", "Floordt", "AnimalID")
+  
   #  Note: already thinned, floored, tz adjusted & AnimalID attached by L.Satterfield
   wolf_skinny <- read.csv("./Data/Wolf_Vectronic_Spring2021_4hrs.csv") %>%
     mutate(ID = as.factor(as.character(ID)),
            CollarID = Collar,
+           Sex = str_sub(ID, -1),
            Latitude = Lat,
            Longitude = Long,
            daytime = as.POSIXct(LMT_DateTime, format = "%Y-%m-%d %H:%M:%S", tz = "Etc/GMT+8"),
            Finaldt = daytime,
-           Floordt = daytime,
-           AnimalID = ID) %>%
-    dplyr::select(-c(Collar, Lat, Long))
+           Floordt = daytime) %>%
+    dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
+            "daytime", "Finaldt", "Floordt", "AnimalID")
 
   #  Function to truncate & thin telemetry data for a final data set appropriate 
   #  for HMM analyses.
@@ -214,7 +221,8 @@
       filter(Floordt < "2018-09-30 00:00:00") %>%
       mutate(
         Season = "Summer18",
-        Year = "Year1"
+        Year = "Year1",
+        FullID = paste0(ID, "_", Year)
       )
     #  Summer 2019: 07/01/2019 - 09/29/2019 
     telem_summer19 <- telem %>%
@@ -222,7 +230,8 @@
       filter(Floordt < "2019-09-30 00:00:00") %>%
       mutate(
         Season = "Summer19",
-        Year = "Year2"
+        Year = "Year2",
+        FullID = paste0(ID, "_", Year)
       )
     # #  Summer 2020: 07/01/2020 - 10/31/2020
     # #  For Beth only
@@ -231,7 +240,8 @@
     #   filter(Floordt < "2019-11-01 00:00:00") %>%
     #   mutate(
     #     Season = "Summer20",
-    #     Year = "Year2"
+    #     Year = "Year2",
+    #     FullID = paste0(ID, "_", Year)
     #   )
     #  Winter 2018-2019: 12/1/2018 - 03/1/2019
     telem_winter1819 <- telem %>%
@@ -239,7 +249,8 @@
       filter(Floordt < "2019-03-02 00:00:00") %>%
       mutate(
         Season = "Winter1819",
-        Year = "Year1"
+        Year = "Year1",
+        FullID = paste0(ID, "_", Year)
       )
     #  Winter 2019-2020: 12/1/2019 - 02/29/2020 
     telem_winter1920 <- telem %>%
@@ -247,7 +258,8 @@
       filter(Floordt < "2020-03-01 00:00:00")  %>%
       mutate(
         Season = "Winter1920",
-        Year = "Year2"
+        Year = "Year2",
+        FullID = paste0(ID, "_", Year)
       )
     #  Combine into single file
     telem_smwtr <- rbind(telem_summer18, telem_winter1819, telem_summer19, telem_winter1920) #, telem_summer20
@@ -395,6 +407,6 @@
   coy_gtg <- filter(meso_gtg, Species == "Coyote")
   bob_gtg <- filter(meso_gtg, Species == "Bobcat")
   
-  
+  #  Species_gtg are final datasets for HMM analyses
 
   
