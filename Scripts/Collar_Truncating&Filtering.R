@@ -85,7 +85,7 @@
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
-                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt", "AnimalID")
+                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
   elk_skinny <- read.csv("elk_skinny 2020-11-17.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
@@ -93,7 +93,7 @@
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
-                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt", "AnimalID")
+                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
   wtd_skinny <- read.csv("wtd_skinny 2020-11-17.csv") %>%
     mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
@@ -101,7 +101,7 @@
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
-                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt", "AnimalID")
+                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: data in UTC timezone to begin with
   meso_skinny <- read.csv("meso_skinny 2021-04-16.csv") %>%
     mutate(
@@ -110,7 +110,7 @@
       Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
       Floordt = floor_date(Finaldt, unit = "hour")) %>%
     dplyr::select("ID", "CollarID", "Species", "Sex", "StudyArea", "Latitude", "Longitude", 
-                  "Acquisition.Time.UTC", "daytime", "UTCdt", "Finaldt", "Floordt", "AnimalID")
+                  "Acquisition.Time.UTC", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: already thinned, floored, tz adjusted & AnimalID attached by L.Satterfield
   coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_4hrs.csv") %>%
     mutate(ID = as.factor(as.character(ID)),
@@ -122,8 +122,7 @@
            Finaldt = daytime,
            Floordt = daytime) %>%
     dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
-                "daytime", "Finaldt", "Floordt", "AnimalID")
-  
+                "daytime", "Finaldt", "Floordt")
   #  Note: already thinned, floored, tz adjusted & AnimalID attached by L.Satterfield
   wolf_skinny <- read.csv("./Data/Wolf_Vectronic_Spring2021_4hrs.csv") %>%
     mutate(ID = as.factor(as.character(ID)),
@@ -135,7 +134,7 @@
            Finaldt = daytime,
            Floordt = daytime) %>%
     dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
-            "daytime", "Finaldt", "Floordt", "AnimalID")
+            "daytime", "Finaldt", "Floordt")
 
   #  Function to truncate & thin telemetry data for a final data set appropriate 
   #  for HMM analyses.
