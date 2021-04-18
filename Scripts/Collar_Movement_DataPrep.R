@@ -124,7 +124,7 @@
     #'  Loop through all animals one at a time to create maps of their locations
     for(i in 1:length(unique(ind_animal))) {
       names <- c(names, unique(as.character(ind_animal[[i]]$ID)))
-      plot <- ggplot(ind_animal[[i]], aes(x = Long, y = Lat)) + 
+      plot <- ggplot(ind_animal[[i]], aes(x = Long, y = Lat, color = time)) + 
         geom_point() + 
         geom_path() + 
         #'  Nifty side-by-side plots
@@ -145,29 +145,29 @@
   rawCOY_maps <- plot_telem(rawCOY)
   
   #'  Save plots as PDF to review and look for evidence of migration or dispersal
-  pdf("./Outputs/GPSlocs_byseason_maps.pdf")
-  for (i in 1:length(unique(rawMD_maps))) {
-    print(rawMD_maps[[i]])
-  }
-  for (i in 1:length(unique(rawELK_maps))) {
-    print(rawELK_maps[[i]])
-  }
-  for (i in 1:length(unique(rawWTD_maps))) {
-    print(rawWTD_maps[[i]])
-  }
-  for (i in 1:length(unique(rawCOUG_maps))) {
-    print(rawCOUG_maps[[i]])
-  }
-  for (i in 1:length(unique(rawWOLF_maps))) {
-    print(rawWOLF_maps[[i]])
-  }
-  for (i in 1:length(unique(rawBOB_maps))) {
-    print(rawBOB_maps[[i]])
-  }
-  for (i in 1:length(unique(rawCOY_maps))) {
-    print(rawCOY_maps[[i]])
-  }
-  dev.off()
+  # pdf("./Outputs/GPSlocs_byseason_maps.pdf")
+  # for (i in 1:length(unique(rawMD_maps))) {
+  #   print(rawMD_maps[[i]])
+  # }
+  # for (i in 1:length(unique(rawELK_maps))) {
+  #   print(rawELK_maps[[i]])
+  # }
+  # for (i in 1:length(unique(rawWTD_maps))) {
+  #   print(rawWTD_maps[[i]])
+  # }
+  # for (i in 1:length(unique(rawCOUG_maps))) {
+  #   print(rawCOUG_maps[[i]])
+  # }
+  # for (i in 1:length(unique(rawWOLF_maps))) {
+  #   print(rawWOLF_maps[[i]])
+  # }
+  # for (i in 1:length(unique(rawBOB_maps))) {
+  #   print(rawBOB_maps[[i]])
+  # }
+  # for (i in 1:length(unique(rawCOY_maps))) {
+  #   print(rawCOY_maps[[i]])
+  # }
+  # dev.off()
     
   
   #'  Identify bursts of sequential locations & where there are prolonged gaps
@@ -232,7 +232,7 @@
                         theta = theta, fixPar = fixPar, attempts = 100, 
                         Time.name = "time", timeStep = "4 hours", coord = c("x", "y"))
     
-    return(crwOUT) 
+    return(crwOUT) # LOOK INTO RUNNING THIS IN PARALLEL
   }
   #'  Interpolate missing locations for each species
   crwOut_MD <- crwWrp(MD_track)
@@ -252,7 +252,18 @@
   # bob_move <- crwOut_BOB[[2]]
   # coy_move <- crwOut_COY[[2]]
   
+  #'  Save individual crwOut datasets
+  save(crwOut_MD, file = "./Outputs/crwOut_MD.RData")
+  save(crwOut_ELK, file = "./Outputs/crwOut_ELK.RData")
+  save(crwOut_WTD, file = "./Outputs/crwOut_WTD.RData")
+  save(crwOut_COUG, file = "./Outputs/crwOut_COUG.RData")
+  save(crwOut_WOLF, file = "./Outputs/crwOut_WOLF.RData")
+  # save(crwOut_BOB, file = "./Outputs/crwOut_BOB.RData")
+  # save(crwOut_COY, file = "./Outputs/crwOut_COY.RData")
   
+  
+  #'  Save workspace so I never need to rerun crawlWrap function again
+  # save.image(paste0("Collar_Movement_DataPrep_", Sys.Date(), ".RData"))
   
   
   ####  Run one species through without function  ####
