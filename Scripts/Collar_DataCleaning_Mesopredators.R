@@ -120,7 +120,7 @@
   #  (or today's locations) are excluded from the data set. Further truncating 
   #  can happen for individual analyses.
   
-    #  Create empty data frame to fill iteratively
+  #  Create empty data frame to fill iteratively
   clean <- data.frame()
   #  How many individuals are looped over?
   nrow(meso_info)
