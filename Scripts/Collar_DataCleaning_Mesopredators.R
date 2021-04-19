@@ -39,7 +39,7 @@
   ####  Read in Capture, Mortality, and Telemetry data  ####
   
   #  B.Windell combined capture & mortality data (provided Nov. 16 2020)
-  meso_capmort <- read.csv("./Data/MesocarnivoreOverview_11162020.csv", stringsAsFactors = FALSE)
+  meso_capmort <- read.csv("./Data/MesocarnivoreOverview_04192021.csv", stringsAsFactors = FALSE)
   
   #  Telemetry data (provided Nov. 16 2020)
   #  NOTE: Acquisition time is UTC time without daylight savings!!!
@@ -194,7 +194,7 @@
   #               Succeeded is a regular GPS with associated Horizontal Error- unusable
   #               ---> Retaining ONLY Resolved QFP locations
   #  GPS Altitude: geometric altitude above mean sea level (meters); generally accurate to 10-20m
-  #               ---> Excluding locations with GPS Altitude < 0
+  #               ---> Excluding locations with GPS Altitude < 0 or > 3000
   #  GPS Horizontal Error: error metric for Succeeded points (meters)
   #               ---> Excluding locations with any GPS Horizontal error
   #  GPS Horizontal Dilution: error metric for QFP (meters), similar to Vectronic DOP???
@@ -204,11 +204,11 @@
     filter(!is.na(Longitude)) %>%
     filter(Fix.Quality == "Resolved QFP") %>%
     filter(GPS.Horizontal.Dilution < 8) %>%
-    filter(GPS.Altitude > 0 | GPS.Altitude > 3000)
+    filter(GPS.Altitude > 0) %>%
+    filter(GPS.Altitude < 3000)
   
-  #  Altitude & Horizontal Dilution are associated with accuracy so need to see 
-  #  if there are any outliers that should be excluded due to low accuracy fixes
-  
+  # #  Altitude & Horizontal Dilution are associated with accuracy so need to see 
+  # #  if there are any outliers that should be excluded due to low accuracy fixes
   # hist(meso_clean$GPS.Altitude, breaks = c(100), main = "Meso locations (ALL GPS.Altitude values)")
   # plot(meso_clean$GPS.Altitude)  # takes awhile
   # oddball <- meso_clean[meso_clean$GPS.Altitude >= 3000,] %>%
@@ -272,6 +272,22 @@
   #     StudyArea = ifelse(grepl("NE", ID), "NE", "OK")
   #   )
   
+  #  Drop oddball location that's  clearly outside NEBOB33M home range
+  meso_skinny <- meso_skinny[!(meso_skinny$ID == "NEBOB33M" & meso_skinny$Longitude > -117.4),]
+  #  Exclude locations associated with translocation, dispersal, extra-territorial forays
+  #  NEBOB13F: Translocation (3/28/19 - 8/8/19)
+  meso_skinny <- meso_skinny[!(meso_skinny$ID == "NEBOB13F" & meso_skinny$Floordt < "2019-10-12 00:00:00"),]
+  # #  MVBOB71M: Dispersal (9/22/19 - 10/11/19)
+  # meso_skinny <- meso_skinny[!(meso_skinny$ID == "MVBOB71M" & meso_skinny$Floordt > "2019-09-22 00:00:00" & meso_skinny$Floordt < "2019-10-12 00:00:00"),]
+  # #  MVBOB66M: Extra-territorial foray (11/28/19 - 3/6/20)
+  # #  Appears to be transient in general (used different home ranges each season & year)
+  # meso_skinny <- meso_skinny[!(meso_skinny$ID == "MVBOB66M" & meso_skinny$Floordt > "2019-11-28 00:00:00" & meso_skinny$Floordt < "2020-03-21 00:00:00"),]
+  # #  NEBOB6F: Extra-territorial foray (3/8/19 - 3/31/19 & 1/15/20 - 3/5/20)
+  # #  She does it both winters so I'm not sure it should be excluded- maybe normal extension of winter home range
+  # meso_skinny <- meso_skinny[!(meso_skinny$ID == "NEBOB6F" & meso_skinny$Floordt > "2019-03-08 00:00:00" & meso_skinny$Floordt < "2019-04-01 00:00:00"),]
+  # meso_skinny <- meso_skinny[!(meso_skinny$ID == "NEBOB6F" & meso_skinny$Floordt > "2020-01-15 00:00:00" & meso_skinny$Floordt < "2020-03-06 00:00:00"),]
+  # #  Others to consider: MVBOB69F, NECOY20F, NECOY12F, MVBOB80M, MVBOB54F
+  
   #  Save locations thinned to correct fix schedule
   # write.csv(meso_skinny, paste0('meso_skinny ', Sys.Date(), '.csv'))
 
@@ -317,7 +333,7 @@
   ggplot() +
     geom_sf(data = NE_SA, fill = NA) +
     geom_sf(data = OK_SA, fill = NA) +
-    geom_sf(data = ind_animal[[5]], aes(color = ID))
+    geom_sf(data = ind_animal[[24]], aes(color = ID))
   
   #  Plotting by study area with study area boundary for context
   #  Function to plot locations from individual animals in the NORTHEAST study area
@@ -367,7 +383,7 @@
   #  Feed meso data through function to map individual telemetry data in NE
   #  Plot an example map
   meso_NE_maps <- plot_telem_NE(meso_spdf[meso_spdf$StudyArea == "NE",])
-  plot(meso_NE_maps[[6]])
+  plot(meso_NE_maps[[24]])
   
   #  Feed meso through function to map individual telemetry data in OK
   #  Plot an example map
@@ -401,7 +417,7 @@
   #  Feed all species through function to map zoomed in telemetry data
   meso_maps <- plot_telem(meso_spdf)
   
-  print(meso_maps[[5]])
+  print(meso_maps[[24]])
   
   #  Save individual plots in a single pdf for each species
   #  With NE or OK study area boundary for context
