@@ -70,7 +70,7 @@
     #  Remove wolf with no telemetry data
     filter(IndividualIdentifier != "W110M")
   #  Created based on data provided by B.Windell
-  meso_info <- read.csv("meso_info 2021-04-09.csv") %>%
+  meso_info <- read.csv("meso_info 2021-04-19.csv") %>%
     mutate(
       IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
       CaptureDate = as_date(CaptureDate),
@@ -103,7 +103,7 @@
     dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
                   "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: data in UTC timezone to begin with
-  meso_skinny <- read.csv("meso_skinny 2021-04-16.csv") %>%
+  meso_skinny <- read.csv("meso_skinny 2021-04-19.csv") %>%
     mutate(
       daytime = as.POSIXct(daytime, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
       UTCdt = with_tz(daytime, "UTC"),
@@ -136,15 +136,14 @@
     dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
             "daytime", "Finaldt", "Floordt")
 
-  #  Function to truncate & thin telemetry data for a final data set appropriate 
-  #  for HMM analyses.
-  Final_telem <- function(info, telem) {
+
+  #  Function to truncate telemetry data by excluding first 2 weeks after capture
+  #  And removes extra locations that arise when collars go into mortality mode
+  Trunk_telem <- function(info, telem) {
     
-    #  1. Truncate telemetry data
+    #  Truncate telemetry data
     #  Create empty data frame to fill iteratively
     trunk <- data.frame()
-    #  How many individuals are looped over?
-    nrow(info)
     #  Loop over every unique individual animal and...
     for(i in 1:nrow(info)){
       #  Take the individual animal ID
@@ -152,52 +151,46 @@
       #  Take the animal's GPS collar serial number 
       SN <- info$GPSCollarSerialNumber[i]
       #  Buffer capture date to remove locations affected by capture event
-      #  Suggested to only use data from 2 weeks after the capture data
+      #  Suggested to only use data starting 2 weeks after the capture data
       start <- info$CaptureDate[i] + 13
-      #  Exclude locations 1 day before estimated mortality date
+      #  Identify last day of locations per collar
       end <- info$EndDate[i]
-      
       #  Subset telemetry data to the specific individual
       collar <- subset(telem, CollarID == SN)
       #  Add a new column to the telemetry data with the animal's individual ID
       collar$ID <- ID
       #  truncate telemetry data by new start and end dates for that individual
       collartrunk <- subset(collar, Finaldt >= start & Finaldt <= end) 
-      
       #  Append each unique animal's locations to a clean dataframe
       trunk <- rbind(trunk, collartrunk)
     }
-
-    #  2. Thin truncated data to only include locations on correct fix schedule
-    thin_trunk <- with(trunk, trunk[hour(Floordt) == 2 | hour(Floordt) == 6 |
-                                      hour(Floordt) == 10 | hour(Floordt) == 14 |
-                                      hour(Floordt) == 18 | hour(Floordt) == 22,])
-    thin_fix <- as.data.frame(thin_trunk) %>%
+    #  Format data in chronological order by individual & make lat/long numeric
+    thin_trunk <- as.data.frame(trunk) %>%
       arrange(ID, Floordt) %>%
       #  Make sure lat/long are in a numeric format
       mutate(
         Latitude = as.numeric(Latitude),
         Longitude = as.numeric(Longitude)
       ) %>%
-
-      #  3. Thin data to retain only the 1st location on the hour
+      
+      #  Thin data to retain only the 1st location on the hour
       #  Important when collar goes into mortality mode but animal is still alive-
       #  Fix rate increases but flooring process puts all those times on the hour
       group_by(ID) %>%
       distinct(Floordt, .keep_all = TRUE) %>%   # .keep_all = TRUE saves all columns
       ungroup()
-
-    return(thin_fix)
+    
+    return(thin_trunk)
   }
   
   #  Run species-specific ID and telemetry data through the function
   #  Don't forget that all meso data were collected on the "wrong" fix schedule
-  md_final <- Final_telem(md_info, md_skinny)
-  elk_final <- Final_telem(elk_info, elk_skinny)
-  wtd_final <- Final_telem(wtd_info, wtd_skinny) 
-  meso_final <- Final_telem(meso_info, meso_skinny)
-  coug_final <- Final_telem(coug_info, coug_skinny)
-  wolf_final <- Final_telem(wolf_info, wolf_skinny)
+  md_trunk <- Trunk_telem(md_info, md_skinny)
+  elk_trunk <- Trunk_telem(elk_info, elk_skinny)
+  wtd_trunk <- Trunk_telem(wtd_info, wtd_skinny) 
+  coug_trunk <- Trunk_telem(coug_info, coug_skinny)
+  wolf_trunk <- Trunk_telem(wolf_info, wolf_skinny)
+  meso_trunk <- Trunk_telem(meso_info, meso_skinny)
   
   # #  Function not working? 
   # #  Probably have a mismatched number of unique IDs in telem vs info data
@@ -208,9 +201,25 @@
   #   mutate(d = "capture data")
   # colnames(i) <- c("UniqueID", "data source")
   # diff <- full_join(t, i, by = "UniqueID")
+  
+  
+  #  Thin data to correct fix schedule only
+  Thin_telem <- function(trunk) {
+    #  Thin truncated data to only include locations on correct fix schedule
+    thin_trunk <- with(trunk, trunk[hour(Floordt) == 2 | hour(Floordt) == 6 |
+                                      hour(Floordt) == 10 | hour(Floordt) == 14 |
+                                      hour(Floordt) == 18 | hour(Floordt) == 22,])
+    return(thin_trunk)
+  }
+  
+  #  Run ungulate data through function to thin locations to "correct" schedule
+  #  L.Satterfield thinned wolf & cougar data to this schedule already
+  #  All meso data collected on "wrong" fix schedule so this drops ALL meso data
+  md_thin <- Thin_telem(md_trunk)
+  elk_thin <- Thin_telem(elk_trunk)
+  wtd_thin <- Thin_telem(wtd_trunk) 
 
-  
-  
+
   #  Filter data to desired date ranges that match occupancy models' primary 
   #  sampling occasion (91 days; 13 weeks)
   Seasonal_telem <- function(telem) {
@@ -266,20 +275,18 @@
   }
 
   #  Run species-specific telemetry data through function to filter by data range
-  md_season <- Seasonal_telem(md_final)
-  elk_season <- Seasonal_telem(elk_final)
-  wtd_season <- Seasonal_telem(wtd_final)
-  meso_season <- Seasonal_telem(meso_final)
-  coug_season <- Seasonal_telem(coug_final)
-  wolf_season <- Seasonal_telem(wolf_final)
+  md_season <- Seasonal_telem(md_trunk)
+  elk_season <- Seasonal_telem(elk_trunk)
+  wtd_season <- Seasonal_telem(wtd_trunk)
+  coug_season <- Seasonal_telem(coug_trunk)
+  wolf_season <- Seasonal_telem(wolf_trunk)
+  meso_season <- Seasonal_telem(meso_trunk)
   
-  #  Same thing but include data from both fix schedules
-  md_season2 <- Seasonal_telem(md_skinny)
-  elk_season2 <- Seasonal_telem(elk_skinny)
-  wtd_season2 <- Seasonal_telem(wtd_skinny)
-  meso_season2 <- Seasonal_telem(meso_skinny)
-  coug_season2 <- Seasonal_telem(coug_skinny)
-  wolf_season2 <- Seasonal_telem(wolf_skinny)
+  #  Same thing but with fully thinned ungulate data
+  md_season2 <- Seasonal_telem(md_thin)
+  elk_season2 <- Seasonal_telem(elk_thin)
+  wtd_season2 <- Seasonal_telem(wtd_thin)
+
   
   ####  Summary Stats on Fix Success & Accuracy  ####
   
@@ -298,17 +305,14 @@
   md_counts <- sum_locs(md_season) 
   elk_counts <- sum_locs(elk_season) 
   wtd_counts <- sum_locs(wtd_season) 
-  meso_counts <- sum_locs(meso_season)
   coug_counts <- sum_locs(coug_season) 
   wolf_counts <- sum_locs(wolf_season) 
-  
-  #  How much data am I losing if I stick to only 1 fix schedule?
+  meso_counts <- sum_locs(meso_season)
+  #  How much data am I losing if I stick to only 1 fix schedule for ungulates?
   md_counts2 <- sum_locs(md_season2) 
   elk_counts2 <- sum_locs(elk_season2) 
   wtd_counts2 <- sum_locs(wtd_season2)
-  meso_counts2 <- sum_locs(meso_season2)
-  coug_counts2 <- sum_locs(coug_season2)
-  wolf_counts2 <- sum_locs(wolf_season2)
+
   
   #  Visually inspect counts
   #  Looking for time periods with many missing fixes (< 400/season) &
@@ -316,26 +320,27 @@
   md_cnt <- full_join(md_counts, md_counts2, by = c("ID", "Season"))
   elk_cnt <- full_join(elk_counts, elk_counts2, by = c("ID", "Season"))
   wtd_cnt <- full_join(wtd_counts, wtd_counts2, by = c("ID", "Season"))
-  meso_cnt <- full_join(meso_counts, meso_counts2, by = c("ID", "Season"))
-  coug_cnt <- full_join(coug_counts, coug_counts2, by = c("ID", "Season"))
-  wolf_cnt <- full_join(wolf_counts, wolf_counts2, by = c("ID", "Season"))
+  #  Rename predator info for consistency
+  coug_cnt <- coug_counts
+  wolf_cnt <- wolf_counts
+  meso_cnt <- meso_counts
 
   #  Pull out collars with lots of missing fixes (< 400/season)
   md_400 <- md_cnt[md_cnt$count.x < 401 & md_cnt$count.y < 401 | is.na(md_cnt$count.x) & md_cnt$count.y < 401,]
   elk_400 <- elk_cnt[elk_cnt$count.x < 401 & elk_cnt$count.y < 401 | is.na(elk_cnt$count.x) & elk_cnt$count.y < 401,]
   wtd_400 <- wtd_cnt[wtd_cnt$count.x < 401 & wtd_cnt$count.y < 401 | is.na(wtd_cnt$count.x) & wtd_cnt$count.y < 401,]
-  meso_400 <- meso_cnt[meso_cnt$count.x < 401 & meso_cnt$count.y < 401 | is.na(meso_cnt$count.x) & meso_cnt$count.y < 401,]
-  coug_400 <- coug_cnt[coug_cnt$count.x < 401 & coug_cnt$count.y < 401 | is.na(coug_cnt$count.x) & coug_cnt$count.y < 401,]
-  wolf_400 <- wolf_cnt[wolf_cnt$count.x < 401 & wolf_cnt$count.y < 401 | is.na(wolf_cnt$count.x) & wolf_cnt$count.y < 401,]
+  coug_400 <- coug_cnt[coug_cnt$count < 401,]
+  wolf_400 <- wolf_cnt[wolf_cnt$count < 401,]
+  meso_400 <- meso_cnt[meso_cnt$count < 401,]
   
   #  Are these missing fixes randomly distributed across the season or are there 
   #  large blocks of missing time (e.g., at beginning or end of time period?)
-  md_locs <- inner_join(md_season2, md_400, by = c("ID", "Season"))
-  elk_locs <- inner_join(elk_season2, elk_400, by = c("ID", "Season"))
-  wtd_locs <- inner_join(wtd_season2, wtd_400, by = c("ID", "Season"))
-  meso_locs <- inner_join(meso_season2, meso_400, by = c("ID", "Season"))
-  coug_locs <- inner_join(coug_season2, coug_400, by = c("ID", "Season"))
-  wolf_locs <- inner_join(wolf_season2, wolf_400, by = c("ID", "Season"))
+  md_locs <- inner_join(md_season, md_400, by = c("ID", "Season"))
+  elk_locs <- inner_join(elk_season, elk_400, by = c("ID", "Season"))
+  wtd_locs <- inner_join(wtd_season, wtd_400, by = c("ID", "Season"))
+  coug_locs <- inner_join(coug_season, coug_400, by = c("ID", "Season"))
+  wolf_locs <- inner_join(wolf_season, wolf_400, by = c("ID", "Season"))
+  meso_locs <- inner_join(meso_season, meso_400, by = c("ID", "Season"))
   
   #  Calculate the number of hours between subsequent locations
   #  How often are there big gaps and when are those gaps occurring?
@@ -369,15 +374,15 @@
   #  WHITE-TAILED DEER: many collars have delayed start in winter season
   #  Some with large sporadic gaps missing
   #  Many collars don't last a full month during a season
-  meso_gaps <- as.data.frame(diftime(meso_locs))
-  #  MESO: many bobcat collars have delayed start in winter, coyotes in summer
-  #  Some with large gaps missing, many with frequent small gaps
   coug_gaps <- as.data.frame(diftime(coug_locs))
   #  COUGAR: Some delayed starts in winter, some sporadic big gaps
   wolf_gaps <- as.data.frame(diftime(wolf_locs))
   #  WOLF: Some delayed starts in winter and summer
   #  Mostly some HUG gaps reduce number of locations to very few sequential points
   #  Not sure how much I'm going to get out of the wolf data... :(
+  meso_gaps <- as.data.frame(diftime(meso_locs))
+  #  MESO: many bobcat collars have delayed start in winter, coyotes in summer
+  #  Some with large gaps missing, many with frequent small gaps
 
 
   #  Exclude collars with too few locations in a given season
@@ -392,20 +397,20 @@
   tf_md <- md_gaps[md_gaps$count.y < 90 | md_gaps$date_range < 20,]
   tf_elk <- elk_gaps[elk_gaps$count.y < 90 | elk_gaps$date_range < 20,]
   tf_wtd <- wtd_gaps[wtd_gaps$count.y < 90 | wtd_gaps$date_range < 20,]
-  tf_meso <- meso_gaps[meso_gaps$count.y < 90 | meso_gaps$date_range < 20,]
-  tf_coug <- coug_gaps[coug_gaps$count.y < 90 | coug_gaps$date_range < 20,]
-  tf_wolf <- wolf_gaps[wolf_gaps$count.y < 90 | wolf_gaps$date_range < 20,]
+  tf_coug <- coug_gaps[coug_gaps$count < 90 | coug_gaps$date_range < 20,]
+  tf_wolf <- wolf_gaps[wolf_gaps$count < 90 | wolf_gaps$date_range < 20,]
+  tf_meso <- meso_gaps[meso_gaps$count < 90 | meso_gaps$date_range < 20,]
   #  2. Exclude these locations from telemetry data so data are good-to-go for analyses
-  md_gtg <- anti_join(md_season2, tf_md, by = c("ID", "Season"))
-  elk_gtg <- anti_join(elk_season2, tf_elk, by = c("ID", "Season"))
-  wtd_gtg <- anti_join(wtd_season2, tf_wtd, by = c("ID", "Season"))
-  meso_gtg <- anti_join(meso_season2, tf_meso, by = c("ID", "Season"))
-  coug_gtg <- anti_join(coug_season2, tf_coug, by = c("ID", "Season"))
-  wolf_gtg <- anti_join(wolf_season2, tf_wolf, by = c("ID", "Season"))
+  md_gtg <- anti_join(md_season, tf_md, by = c("ID", "Season"))
+  elk_gtg <- anti_join(elk_season, tf_elk, by = c("ID", "Season"))
+  wtd_gtg <- anti_join(wtd_season, tf_wtd, by = c("ID", "Season"))
+  coug_gtg <- anti_join(coug_season, tf_coug, by = c("ID", "Season"))
+  wolf_gtg <- anti_join(wolf_season, tf_wolf, by = c("ID", "Season"))
+  meso_gtg <- anti_join(meso_season, tf_meso, by = c("ID", "Season"))
   #  Don't forget to separate out bobcats from coyotes for actual analyses
   coy_gtg <- filter(meso_gtg, Species == "Coyote")
   bob_gtg <- filter(meso_gtg, Species == "Bobcat")
   
-  #  Species_gtg are final datasets for HMM analyses
+  #  Species_gtg are final data sets for HMM analyses
 
   
