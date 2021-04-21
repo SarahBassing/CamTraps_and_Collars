@@ -820,8 +820,15 @@
   ####  COUGAR MODELS  ####
   #'  SUMMERS 2018 & 2019
   (coug_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coug_s1819_UMF))
+  (coug_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, coug_s1819_UMF))
+  (coug_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXShrub + NearestRd + HumanMod + Area, coug_s1819_UMF))
+  (coug_s1819_global <- occu(~Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coug_s1819_UMF))
+
+  
   #'  Dredge the global model for all possible combinations 
   coug_s1819_dd <- dredge(coug_s1819_global, rank = "AIC")
+  #' #'  Limit the number of terms in a single model... trying to diagnose where the breakdown is for dredge models
+  #' coug_s1819_dd <- dredge(coug_s1819_global, rank = "AIC", m.lim = c(NA, 6))
   print(coug_s1819_dd[1:5,])
   #'  Keep top models (within 2 deltaAIC) & review the top model
   coug_s1819_all <- get.models(coug_s1819_dd, subset = delta < 2,)
@@ -893,11 +900,11 @@
   ####  ELK MODELS ####                          
   #'  SUMMERS 2018 & 2019
   #'  NE study area only so no Area effect 
-  #'  Removed PercXShrub in global2 models due to poor convergence                             
+  #'  Removed PercXGrass and PercXShrub in global2 models due to poor convergence                             
   # (elk_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, elk_s1819_UMF))
-  (elk_s1819_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, elk_s1819_UMF))
-  #' #'  Dredge the global model for all possible combinations 
-  #' elk_s1819_dd <- dredge(elk_s1819_global2, rank = "AIC")   
+  (elk_s1819_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + NearestRd + HumanMod, elk_s1819_UMF))
+  #' #'  Dredge the global model for all possible combinations
+  #' elk_s1819_dd <- dredge(elk_s1819_global2, rank = "AIC")
   #' print(elk_s1819_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' elk_s1819_all <- get.models(elk_s1819_dd, subset = delta < 2,)
@@ -905,17 +912,22 @@
   #'  Dredge identified top model
   (elk_s1819_top <- occu(formula = ~Distance + Height + Trail ~1, data = elk_s1819_UMF))
   
-  #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect                
+  #'  WINTERS 2018-2019 & 2019-2020
+  #'  NE study area only so no Area effect 
+  #'  Removed PercXGrass and PercXShrub in global2 models due to poor convergence               
   # (elk_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, elk_w1820_UMF))
-  (elk_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, elk_w1820_UMF))
-  #' #'  Dredge the global model for all possible combinations 
-  #' elk_w1820_dd <- dredge(elk_w1820_global2, rank = "AIC")   
+  (elk_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + NearestRd + HumanMod, elk_w1820_UMF))
+  #' #'  Dredge the global model for all possible combinations
+  #' elk_w1820_dd <- dredge(elk_w1820_global2, rank = "AIC")
   #' print(elk_w1820_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' elk_w1820_all <- get.models(elk_w1820_dd, subset = delta < 2,)
-  #' elk_w1820_all[[1]]
+  #' elk_w1820_all[[3]]
   #'  Dredge identified top model
-  (elk_w1820_top <- occu(formula = ~1 ~PercXGrass, data = elk_w1820_UMF))
+  #'  Technically null model and one with Height on detection had lower AIC values
+  #'  But this model was competitive (within 2 deltaAIC) and had variables that,
+  #'  when in the right combination, were significant or tending towards signif.
+  (elk_w1820_top <- occu(formula = ~Trail ~Elev + NearestRd + Slope, data = elk_w1820_UMF))
   
   
   ####  MULE DEER MODELS  ####
