@@ -272,7 +272,7 @@
   #     StudyArea = ifelse(grepl("NE", ID), "NE", "OK")
   #   )
   
-  #  Drop oddball location that's  clearly outside NEBOB33M home range
+  #  Drop oddball location that's clearly outside NEBOB33M home range
   meso_skinny <- meso_skinny[!(meso_skinny$ID == "NEBOB33M" & meso_skinny$Longitude > -117.4),]
   #  Exclude locations associated with translocation, dispersal, extra-territorial forays
   #  NEBOB13F: Translocation (3/28/19 - 8/8/19)
@@ -291,12 +291,7 @@
   #  Save locations thinned to correct fix schedule
   # write.csv(meso_skinny, paste0('meso_skinny ', Sys.Date(), '.csv'))
 
-  
-  
-  
-  ####  STILL NEED TO DROP A FEW SUSPICIOUS LOCATIONS & FIGURE OUT DISPERSAL EVENTS!  ####
 
-  
   
   
   ####  ============================================
