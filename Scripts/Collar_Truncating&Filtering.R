@@ -420,6 +420,8 @@
   bob_gtg <- filter(meso_gtg, Species == "Bobcat")
   
   #  Species_gtg are final data sets for HMM analyses
+  #  Save RData for easy transfer to other computers
+  save.image(paste0("./Data/Collar_Truncating&Filtering_", Sys.Date(), ".RData"))
   #  Next step is Collar_Movement_DataPrep.R script
 
   
