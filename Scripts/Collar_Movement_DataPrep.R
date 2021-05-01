@@ -24,6 +24,7 @@
   #'  Load libraries
   library(momentuHMM)
   library(rgdal)
+  library(lubridate)
   library(tidyverse)
   
   #'  Source cleaned telemetry data
@@ -199,13 +200,13 @@
     return(loc_burst)
   }
   #'  Run each species through the function that identifies bursts in the data
-  MD_track <- bursts(rawMD)
-  ELK_track <- bursts(rawELK)
-  WTD_track <- bursts(rawWTD)
-  COUG_track <- bursts(rawCOUG)
-  WOLF_track <- bursts(rawWOLF)
-  BOB_track <- bursts(rawBOB)
-  COY_track <- bursts(rawCOY)
+  # MD_track <- bursts(rawMD)
+  # ELK_track <- bursts(rawELK)
+  # WTD_track <- bursts(rawWTD)
+  # COUG_track <- bursts(rawCOUG)
+  # WOLF_track <- bursts(rawWOLF)
+  # BOB_track <- bursts(rawBOB)
+  # COY_track <- bursts(rawCOY)
   
   #'  Save track data sets
   save(MD_track, file = "./Outputs/Telemetry_tracks/MD_track.RData")
@@ -241,13 +242,13 @@
     # LOOK INTO RUNNING THIS IN PARALLEL
   }
   #'  Interpolate missing locations for each species
-  crwOut_MD <- crwWrp(MD_track)
-  crwOut_ELK <- crwWrp(ELK_track)
-  crwOut_WTD <- crwWrp(WTD_track)
-  crwOut_COUG <- crwWrp(COUG_track)
-  crwOut_WOLF <- crwWrp(WOLF_track)
-  crwOut_BOB <- crwWrp(BOB_track)
-  crwOut_COY <- crwWrp(COY_track)
+  # crwOut_MD <- crwWrp(MD_track)
+  # crwOut_ELK <- crwWrp(ELK_track)
+  # crwOut_WTD <- crwWrp(WTD_track)
+  # crwOut_COUG <- crwWrp(COUG_track)
+  # crwOut_WOLF <- crwWrp(WOLF_track)
+  # crwOut_BOB <- crwWrp(BOB_track)
+  # crwOut_COY <- crwWrp(COY_track)
   
   #'  View interpolated data and new data (step length and turning angle)
   md_move <- crwOut_MD[[2]]
@@ -278,6 +279,70 @@
   load("./Outputs/Telemetry_crwOut/crwOut_WOLF.RData")
   load("./Outputs/Telemetry_crwOut/crwOut_BOB.RData")
   load("./Outputs/Telemetry_crwOut/crwOut_COY.RData")
+  
+  
+  #'  Load covaraite data and attach to crwOut data
+  load("./Outputs/Telemetry_covs/spp_extract.RData")
+  load("./Outputs/Telemetry_covs/wolf_rd.RData")
+  load("./Outputs/Telemetry_covs/wolf_percHab.RData")
+  wolf_percHab <- as.data.frame(wolf_percHab) %>%
+    select(-geometry) 
+  
+  #'  Merge all covariate data together
+  wolf_extract <- spp_extract[[5]]
+  wolfcovs <- wolf_rd %>%
+    full_join(wolf_extract, by = "ID") %>%
+    select(-c("ID", "time")) #%>%
+  ### UPDATE THIS ONCE I UPDATE EXTRACT FUNCTIONS TO RETAIN ID AND TIME DATA 
+    # full_join(wolf_percHab, by = "time")
+  wolf_covs <- cbind(wolfcovs, wolf_percHab) %>%
+    relocate(ID, .before = AnimalID) %>%
+    relocate(time, .after = AnimalID) %>%
+    relocate(dist2road, .after = Slope)
+  #' #'  Don't use full_join for this next step b/c things get jumbled
+  #' #'  cbind keeps everything in order
+  #' wolf_covs <- cbind(wolf_move, wolfcovs) %>%
+  #'   select(ID, time, Elev, Slope, HumanMod, dist2road, PercForestMix2.18, PercXericGrass.18, PercXericShrub.18)
+  wolfMerge <- crawlMerge(crwOut_WOLF, wolf_covs, Time.name = "time")
+  #'  Make Sex and Season factors
+  wolfMerge$crwPredict$Sex <- as.factor(wolfMerge$crwPredict$Sex)
+  wolfMerge$crwPredict$Season <- as.factor(wolfMerge$crwPredict$Season)
+  ###  WHY is W87M missing elevation, slope, & HumMod data?
+  
+  
+  
+  #'  Merge all covariate data together
+  md_extract <- spp_extract[[1]] %>%
+    select(-ID)
+  md_covs <- cbind(md_move, md_extract) %>%
+    select(ID, time, Elev, Slope, HumanMod)
+  mdMerge <- crawlMerge(crwOut_MD, md_covs, Time.name = "time")
+  #'  Make Sex and Season factors
+  mdMerge$crwPredict$Sex <- as.factor(mdMerge$crwPredict$Sex)
+  mdMerge$crwPredict$Season <- as.factor(mdMerge$crwPredict$Season)
+  
+  
+  
+  
+  #'  NEED TO BREAK DATA UP BY SUMMER VS WINTER BUT I THINK I HAVE TO DO THIS 
+  #'  BEFORE RUNNING THE CRAWLWRAP FUNCTION AND RUN IT ON EACH SEASON SEPARATELY
+
+  #'  Be sure to break up data by season (summer vs winter) before fitting to models
+  #'  Must retain these as lists though!
+
+  
+
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  
   
   
   ####  Run one species through without function  ####
