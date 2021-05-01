@@ -68,7 +68,15 @@
       IndividualIdentifier = as.factor(as.character(paste0("W", IndividualIdentifier)))
     ) %>%
     #  Remove wolf with no telemetry data
-    filter(IndividualIdentifier != "W110M")
+    filter(IndividualIdentifier != "W110M") %>%
+    #'  Remove wolves on very different fix schedule (6hr & 8hr fix schedules)
+    #'  L.Satterfield removed these from telemetry data
+    filter(IndividualIdentifier != "W51F") %>%
+    filter(IndividualIdentifier != "W68M") %>%
+    filter(IndividualIdentifier != "W81M") %>%
+    filter(IndividualIdentifier != "W85M") %>%
+    filter(IndividualIdentifier != "W98F") %>%
+    filter(GPSCollarSerialNumber != "12438")
   #  Created based on data provided by B.Windell
   meso_info <- read.csv("meso_info 2021-04-19.csv") %>%
     mutate(
@@ -192,12 +200,12 @@
   wolf_trunk <- Trunk_telem(wolf_info, wolf_skinny)
   meso_trunk <- Trunk_telem(meso_info, meso_skinny)
   
-  # #  Function not working? 
+  # #  Function not working?
   # #  Probably have a mismatched number of unique IDs in telem vs info data
-  # t <- as.data.frame(unique(coug_skinny$ID)) %>%
+  # t <- as.data.frame(unique(wolf_skinny$ID)) %>%
   #   mutate(d = "telemetry data")
   # colnames(t) <- c("UniqueID", "data source")
-  # i <- as.data.frame(unique(coug_info$IndividualIdentifier)) %>%
+  # i <- as.data.frame(unique(wolf_info$IndividualIdentifier)) %>%
   #   mutate(d = "capture data")
   # colnames(i) <- c("UniqueID", "data source")
   # diff <- full_join(t, i, by = "UniqueID")
@@ -412,5 +420,6 @@
   bob_gtg <- filter(meso_gtg, Species == "Bobcat")
   
   #  Species_gtg are final data sets for HMM analyses
+  #  Next step is Collar_Movement_DataPrep.R script
 
   
