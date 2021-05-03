@@ -24,12 +24,12 @@
   #'  Load libraries
   library(momentuHMM)
   library(rgdal)
-  library(lubridate)
   library(tidyverse)
   
   #'  Source cleaned telemetry data
-  source("./Scripts/Collar_Truncating&Filtering.R")
-  
+  # source("./Scripts/Collar_Truncating&Filtering.R")
+  load("./Data/Collar_Truncating&Filtering_2021-05-01.RData")
+
   ####  Data preparation  ####
   #'  Select relevant columns
   #'  Keeping version of datetime that have been floored to beginning of hour
@@ -63,22 +63,24 @@
     dplyr::select(ID, FullID, Sex, Season, Longitude, Latitude, Floordt)%>%
     arrange(ID, Floordt)
   colnames(rawCOY) <- c("ID", "FullID", "Sex", "Season", "Long", "Lat", "time")
-  
+
+
+
 
   #'  Function to covert times to POSIX & make locations spatial for each species
   prep_raw <- function(raw, plotit = TRUE) {
     raw$time <- as.POSIXct(raw$time, format = "%Y-%m-%d %H:%M:%S", tz = "America/Los_Angeles")
-    
+
     #'  Make locations spatial and project to UTM coordinates with study area projection
     llcoord <- SpatialPoints(raw[,5:6], proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
     utmcoord <- spTransform(llcoord, CRS("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs "))
     #'  Add UTM locations to data frame
     raw$x <- attr(utmcoord, "coords")[,1]
     raw$y <- attr(utmcoord, "coords")[,2]
-    
+
     return(raw)
   }
-  
+
   #'  Run data from each species through data prep function
   rawMD <- as.data.frame(prep_raw(rawMD))
   rawELK <- as.data.frame(prep_raw(rawELK))
@@ -87,7 +89,7 @@
   rawWOLF <- as.data.frame(prep_raw(rawWOLF))
   rawBOB <- as.data.frame(prep_raw(rawBOB))
   rawCOY <- as.data.frame(prep_raw(rawCOY))
-  
+
   #'  Quick peak at example data for each species
   plot_collar <- function(raw) {
     #'  Pull out data from first collar only
@@ -96,9 +98,9 @@
       dplyr::select(ID)
     animal1 <- raw[raw$ID == first$ID,]
     #'  Plot the first individual in data set
-    ggplot(animal1, aes(x = Long, y = Lat)) + 
-      geom_point() + 
-      geom_path() + 
+    ggplot(animal1, aes(x = Long, y = Lat)) +
+      geom_point() +
+      geom_path() +
       facet_wrap(FullID~Season)
   }
   #'  Plot seasonal locations for one individual
@@ -109,7 +111,7 @@
   plot_collar(rawWOLF)
   plot_collar(rawBOB)
   plot_collar(rawCOY)
-  
+
   #'  Take a closer look at those seasonal locations, esp. the mule deer
   #'  Are they migrating halfway through a season? Any dispersal?
   #'  Function to plot locations from individual animals
@@ -123,9 +125,9 @@
     #'  Loop through all animals one at a time to create maps of their locations
     for(i in 1:length(unique(ind_animal))) {
       names <- c(names, unique(as.character(ind_animal[[i]]$ID)))
-      plot <- ggplot(ind_animal[[i]], aes(x = Long, y = Lat, color = time)) + 
-        geom_point() + 
-        geom_path() + 
+      plot <- ggplot(ind_animal[[i]], aes(x = Long, y = Lat, color = time)) +
+        geom_point() +
+        geom_path() +
         #'  Nifty side-by-side plots
         facet_wrap(FullID~Season)
       plot_list[[i]] <- plot
@@ -133,7 +135,7 @@
     return(plot_list)
   }
   #'  Run data from each species through
-  #'  Looking for obvious movement from summer to winter range (or vice verse) 
+  #'  Looking for obvious movement from summer to winter range (or vice verse)
   #'  within a single season's worth of locations, suggesting migration or dispersal
   rawMD_maps <- plot_telem(rawMD)
   rawELK_maps <- plot_telem(rawELK)
@@ -142,7 +144,7 @@
   rawWOLF_maps <- plot_telem(rawWOLF)
   rawBOB_maps <- plot_telem(rawBOB)
   rawCOY_maps <- plot_telem(rawCOY)
-  
+
   #'  Save plots as PDF to review and look for evidence of migration or dispersal
   # pdf("./Outputs/GPSlocs_byseason_maps.pdf")
   # for (i in 1:length(unique(rawMD_maps))) {
@@ -167,24 +169,25 @@
   #   print(rawCOY_maps[[i]])
   # }
   # dev.off()
-    
-  
+
+
   #'  Identify bursts of sequential locations & where there are prolonged gaps
   #'  Source creat.burst.R function to identify bursts
   #'  Requires location data be ordered by ID and time (do this above)
   #'  Script written by J.Merkle & provided at Movement Workshop
-  source("./Scripts/creat.burst.R")
-  
+  # source("./Scripts/creat.burst.R")
+  source("creat.burst.R")
+
   #'  Function to run locations for each species through the creat.burst function
   bursts <- function(rawloc) {
-    #'  Tmax = 28.25 hours (in seconds) so that locations are still grouped in a 
-    #'  single burst if there's a gap of 24hr or less in the data (up to 6 sequential   
+    #'  Tmax = 28.25 hours (in seconds) so that locations are still grouped in a
+    #'  single burst if there's a gap of 24hr or less in the data (up to 6 sequential
     #'  fixes missed with 4 hours on each end) but a new burst if gap is >24 hrs.
-    rawloc$burst <- creat.burst(data = rawloc, id = TRUE, id_name = "ID", date_name = "time", Tmax = 87300)   
-    #'  Exclude super short bursts (where burst length is 3 or less locations) 
-    #'  because need at least 3 points to get a turning angle 
+    rawloc$burst <- creat.burst(data = rawloc, id = TRUE, id_name = "ID", date_name = "time", Tmax = 87300)
+    #'  Exclude super short bursts (where burst length is 3 or less locations)
+    #'  because need at least 3 points to get a turning angle
     loc_burst <- rawloc[rawloc$burst %in% names(table(rawloc$burst))[table(rawloc$burst) >=3],]
-    length(unique(loc_burst$burst)) 
+    length(unique(loc_burst$burst))
     head(loc_burst)
     #'  Add burst value ids to Unique ID column to create unique IDs for each track
     loc_burst$UniqueID <- with(loc_burst, paste0(ID, "_", burst))
@@ -200,13 +203,13 @@
     return(loc_burst)
   }
   #'  Run each species through the function that identifies bursts in the data
-  # MD_track <- bursts(rawMD)
-  # ELK_track <- bursts(rawELK)
-  # WTD_track <- bursts(rawWTD)
-  # COUG_track <- bursts(rawCOUG)
-  # WOLF_track <- bursts(rawWOLF)
-  # BOB_track <- bursts(rawBOB)
-  # COY_track <- bursts(rawCOY)
+  MD_track <- bursts(rawMD)
+  ELK_track <- bursts(rawELK)
+  WTD_track <- bursts(rawWTD)
+  COUG_track <- bursts(rawCOUG)
+  WOLF_track <- bursts(rawWOLF)
+  BOB_track <- bursts(rawBOB)
+  COY_track <- bursts(rawCOY)
   
   #'  Save track data sets
   save(MD_track, file = "./Outputs/Telemetry_tracks/MD_track.RData")
@@ -216,6 +219,64 @@
   save(WOLF_track, file = "./Outputs/Telemetry_tracks/WOLF_track.RData")
   save(BOB_track, file = "./Outputs/Telemetry_tracks/BOB_track.RData")
   save(COY_track, file = "./Outputs/Telemetry_tracks/COY_track.RData")
+  
+  #'  Create season-specific data sets for crawlWrap function
+  MD_smr_track <- MD_track[MD_track$Season == "Summer18" | MD_track$Season == "Summer19", ]
+  MD_wtr_track <- MD_track[MD_track$Season == "Winter1819" | MD_track$Season == "Winter1920", ]
+  ELK_smr_track <- ELK_track[ELK_track$Season == "Summer18" | ELK_track$Season == "Summer19", ]
+  ELK_wtr_track <- ELK_track[ELK_track$Season == "Winter1819" | ELK_track$Season == "Winter1920", ]
+  WTD_smr_track <- WTD_track[WTD_track$Season == "Summer18" | WTD_track$Season == "Summer19", ]
+  WTD_wtr_track <- WTD_track[WTD_track$Season == "Winter1819" | WTD_track$Season == "Winter1920", ]
+  COUG_smr_track <- COUG_track[COUG_track$Season == "Summer18" | COUG_track$Season == "Summer19", ]
+  COUG_wtr_track <- COUG_track[COUG_track$Season == "Winter1819" | COUG_track$Season == "Winter1920", ]
+  WOLF_smr_track <- WOLF_track[WOLF_track$Season == "Summer18" | WOLF_track$Season == "Summer19", ]
+  WOLF_wtr_track <- WOLF_track[WOLF_track$Season == "Winter1819" | WOLF_track$Season == "Winter1920", ]
+  BOB_smr_track <- BOB_track[BOB_track$Season == "Summer18" | BOB_track$Season == "Summer19", ]
+  BOB_wtr_track <- BOB_track[BOB_track$Season == "Winter1819" | BOB_track$Season == "Winter1920", ]
+  COY_smr_track <- COY_track[COY_track$Season == "Summer18" | COY_track$Season == "Summer19", ]
+  COY_wtr_track <- COY_track[COY_track$Season == "Winter1819" | COY_track$Season == "Winter1920", ]
+  
+  #'  Save seasonal tracks
+  save(MD_smr_track, file = "./Outputs/Telemetry_tracks/MD_smr_track.RData")
+  save(MD_wtr_track, file = "./Outputs/Telemetry_tracks/MD_wtr_track.RData")
+  save(ELK_smr_track, file = "./Outputs/Telemetry_tracks/ELK_smr_track.RData")
+  save(ELK_wtr_track, file = "./Outputs/Telemetry_tracks/ELK_wtr_track.RData")
+  save(WTD_smr_track, file = "./Outputs/Telemetry_tracks/WTD_smr_track.RData")
+  save(WTD_wtr_track, file = "./Outputs/Telemetry_tracks/WTD_wtr_track.RData")
+  save(COUG_smr_track, file = "./Outputs/Telemetry_tracks/COUG_smr_track.RData")
+  save(COUG_wtr_track, file = "./Outputs/Telemetry_tracks/COUG_wtr_track.RData")
+  save(WOLF_smr_track, file = "./Outputs/Telemetry_tracks/WOLF_smr_track.RData")
+  save(WOLF_wtr_track, file = "./Outputs/Telemetry_tracks/WOLF_wtr_track.RData")
+  save(BOB_smr_track, file = "./Outputs/Telemetry_tracks/BOB_smr_track.RData")
+  save(BOB_wtr_track, file = "./Outputs/Telemetry_tracks/BOB_wtr_track.RData")
+  save(COY_smr_track, file = "./Outputs/Telemetry_tracks/COY_smr_track.RData")
+  save(COY_wtr_track, file = "./Outputs/Telemetry_tracks/COY_wtr_track.RData")
+
+  #'  Load tracks
+  # setwd("C:/Users/sb89/Desktop/CamTrap_and_Collars")
+  # load("./Outputs/Telemetry_tracks/MD_track.RData")
+  # load("./Outputs/Telemetry_tracks/ELK_track.RData")
+  # load("./Outputs/Telemetry_tracks/WTD_track.RData")
+  # load("./Outputs/Telemetry_tracks/COUG_track.RData")
+  # load("./Outputs/Telemetry_tracks/WOLF_track.RData")
+  # load("./Outputs/Telemetry_tracks/BOB_track.RData")
+  # load("./Outputs/Telemetry_tracks/COY_track.RData")
+  
+  # load("./Outputs/Telemetry_tracks/MD_smr_track.RData")
+  # load("./Outputs/Telemetry_tracks/MD_wtr_track.RData")
+  # load("./Outputs/Telemetry_tracks/ELK_smr_track.RData")
+  # load("./Outputs/Telemetry_tracks/ELK_wtr_track.RData")
+  # load("./Outputs/Telemetry_tracks/WTD_smr_track.RData")
+  # load("./Outputs/Telemetry_tracks/WTD_wtr_track.RData")
+  # load("./Outputs/Telemetry_tracks/COUG_smr_track.RData")
+  # load("./Outputs/Telemetry_tracks/COUG_wtr_track.RData")
+  # load("./Outputs/Telemetry_tracks/WOLF_smr_track.RData")
+  # load("./Outputs/Telemetry_tracks/WOLF_wtr_track.RData")
+  # load("./Outputs/Telemetry_tracks/BOB_smr_track.RData")
+  # load("./Outputs/Telemetry_tracks/BOB_wtr_track.RData")
+  # load("./Outputs/Telemetry_tracks/COY_smr_track.RData")
+  # load("./Outputs/Telemetry_tracks/COY_wtr_track.RData")
+  
   
   #'  Function to interpolate missing fixes based on regular time intervals (4hr)
   #'  Interpolating up to 6 missed fixes (24 hr gaps) within each track/animal
@@ -239,110 +300,66 @@
                         theta = theta, fixPar = fixPar, attempts = 100, 
                         Time.name = "time", timeStep = "4 hours", coord = c("x", "y"))
     
-    # LOOK INTO RUNNING THIS IN PARALLEL
+    # return(crwOUT) # LOOK INTO RUNNING THIS IN PARALLEL
   }
   #'  Interpolate missing locations for each species
-  # crwOut_MD <- crwWrp(MD_track)
-  # crwOut_ELK <- crwWrp(ELK_track)
-  # crwOut_WTD <- crwWrp(WTD_track)
-  # crwOut_COUG <- crwWrp(COUG_track)
-  # crwOut_WOLF <- crwWrp(WOLF_track)
-  # crwOut_BOB <- crwWrp(BOB_track)
-  # crwOut_COY <- crwWrp(COY_track)
+  crwOut_MD_smr <- crwWrp(MD_smr_track)
+  crwOut_MD_wtr <- crwWrp(MD_wtr_track)
+  crwOut_ELK_smr <- crwWrp(ELK_smr_track)
+  crwOut_ELK_wtr <- crwWrp(ELK_wtr_track)
+  crwOut_WTD_smr <- crwWrp(WTD_smr_track)
+  crwOut_WTD_wtr <- crwWrp(WTD_wtr_track)
+  crwOut_COUG_smr <- crwWrp(COUG_smr_track)
+  crwOut_COUG_wtr <- crwWrp(COUG_wtr_track)
+  crwOut_WOLF_smr <- crwWrp(WOLF_smr_track)
+  crwOut_WOLF_wtr <- crwWrp(WOLF_wtr_track)
+  crwOut_BOB_smr <- crwWrp(BOB_smr_track)
+  crwOut_BOB_wtr <- crwWrp(BOB_wtr_track)
+  crwOut_COY_smr <- crwWrp(COY_smr_track)
+  crwOut_COY_wtr <- crwWrp(COY_wtr_track)
   
   #'  View interpolated data and new data (step length and turning angle)
-  md_move <- crwOut_MD[[2]]
-  elk_move <- crwOut_ELK[[2]]
-  wtd_move <- crwOut_WTD[[2]]
-  coug_move <- crwOut_COUG[[2]]
-  wolf_move <- crwOut_WOLF[[2]]
-  bob_move <- crwOut_BOB[[2]]
-  coy_move <- crwOut_COY[[2]]
+  md_move_smr <- crwOut_MD_smr[[2]]
+  md_move_wtr <- crwOut_MD_wtr[[2]]
+  elk_move_smr <- crwOut_ELK_smr[[2]]
+  elk_move_wtr <- crwOut_ELK_wtr[[2]]
+  wtd_move_smr <- crwOut_WTD_smr[[2]]
+  wtd_move_wtr <- crwOut_WTD_wtr[[2]]
+  coug_move_smr <- crwOut_COUG_smr[[2]]
+  coug_move_wtr <- crwOut_COUG_wtr[[2]]
+  wolf_move_smr <- crwOut_WOLF_smr[[2]]
+  wolf_move_wtr <- crwOut_WOLF_wtr[[2]]
+  bob_move_smr <- crwOut_BOB_smr[[2]]
+  bob_move_wtr <- crwOut_BOB_wtr[[2]]
+  coy_move_smr <- crwOut_COY_smr[[2]]
+  coy_move_wtr <- crwOut_COY_wtr[[2]]
   
-  #'  Save individual crwOut data sets
-  save(crwOut_MD, file = "./Outputs/Telemetry_crwOut/crwOut_MD.RData")
-  save(crwOut_ELK, file = "./Outputs/Telemetry_crwOut/crwOut_ELK.RData")
-  save(crwOut_WTD, file = "./Outputs/Telemetry_crwOut/crwOut_WTD.RData")
-  save(crwOut_COUG, file = "./Outputs/Telemetry_crwOut/crwOut_COUG.RData")
-  save(crwOut_WOLF, file = "./Outputs/Telemetry_crwOut/crwOut_WOLF.RData")
-  save(crwOut_BOB, file = "./Outputs/Telemetry_crwOut/crwOut_BOB.RData")
-  save(crwOut_COY, file = "./Outputs/Telemetry_crwOut/crwOut_COY.RData")
+  #'  Save individual crwOut datasets
+  save(crwOut_MD_smr, file = "./Outputs/Telemetry_crwOut/crwOut_MD_smr.RData")
+  save(crwOut_MD_wtr, file = "./Outputs/Telemetry_crwOut/crwOut_MD_wtr.RData")
+  save(crwOut_ELK_smr, file = "./Outputs/Telemetry_crwOut/crwOut_ELK_smr.RData")
+  save(crwOut_ELK_wtr, file = "./Outputs/Telemetry_crwOut/crwOut_ELK_wtr.RData")
+  save(crwOut_WTD_smr, file = "./Outputs/Telemetry_crwOut/crwOut_WTD_smr.RData")
+  save(crwOut_WTD_wtr, file = "./Outputs/Telemetry_crwOut/crwOut_WTD_wtr.RData")
+  save(crwOut_COUG_smr, file = "./Outputs/Telemetry_crwOut/crwOut_COUG_smr.RData")
+  save(crwOut_COUG_wtr, file = "./Outputs/Telemetry_crwOut/crwOut_COUG_wtr.RData")
+  save(crwOut_WOLF_smr, file = "./Outputs/Telemetry_crwOut/crwOut_WOLF_smr.RData")
+  save(crwOut_WOLF_wtr, file = "./Outputs/Telemetry_crwOut/crwOut_WOLF_wtr.RData")
+  save(crwOut_BOB_smr, file = "./Outputs/Telemetry_crwOut/crwOut_BOB_smr.RData")
+  save(crwOut_BOB_wtr, file = "./Outputs/Telemetry_crwOut/crwOut_BOB_wtr.RData")
+  save(crwOut_COY_smr, file = "./Outputs/Telemetry_crwOut/crwOut_COY_smr.RData")
+  save(crwOut_COY_wtr, file = "./Outputs/Telemetry_crwOut/crwOut_COY_wtr.RData")
+  
+  #'  List all crwOut datasets together
+  crwOut_ALL <- list(crwOut_MD_smr, crwOut_MD_wtr, crwOut_ELK_smr, crwOut_ELK_wtr,
+                     crwOut_WTD_smr, crwOut_WTD_wtr, crwOut_COUG_smr, crwOut_COUG_wtr, 
+                     crwOut_WOLF_smr, crwOut_WOLF_wtr, crwOut_BOB_smr, crwOut_BOB_wtr,
+                     crwOut_COY_smr, crwOut_COY_wtr)
+  #'  Save list of crwOut datasets
+  save(crwOut_ALL, file  = paste0("./Outputs/Telemetry_crwOut/crwOut_ALL_", Sys.Date(), ".RData"))
   
   #'  Save workspace so I never need to rerun crawlWrap function again
-  # save.image(paste0("Collar_Movement_DataPrep_", Sys.Date(), ".RData"))
-  
-  #'  Load crwOut data sets
-  load("./Outputs/Telemetry_crwOut/crwOut_MD.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_ELK.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_WTD.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_COUG.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_WOLF.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_BOB.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_COY.RData")
-  
-  
-  #'  Load covaraite data and attach to crwOut data
-  load("./Outputs/Telemetry_covs/spp_extract.RData")
-  load("./Outputs/Telemetry_covs/wolf_rd.RData")
-  load("./Outputs/Telemetry_covs/wolf_percHab.RData")
-  wolf_percHab <- as.data.frame(wolf_percHab) %>%
-    select(-geometry) 
-  
-  #'  Merge all covariate data together
-  wolf_extract <- spp_extract[[5]]
-  wolfcovs <- wolf_rd %>%
-    full_join(wolf_extract, by = "ID") %>%
-    select(-c("ID", "time")) #%>%
-  ### UPDATE THIS ONCE I UPDATE EXTRACT FUNCTIONS TO RETAIN ID AND TIME DATA 
-    # full_join(wolf_percHab, by = "time")
-  wolf_covs <- cbind(wolfcovs, wolf_percHab) %>%
-    relocate(ID, .before = AnimalID) %>%
-    relocate(time, .after = AnimalID) %>%
-    relocate(dist2road, .after = Slope)
-  #' #'  Don't use full_join for this next step b/c things get jumbled
-  #' #'  cbind keeps everything in order
-  #' wolf_covs <- cbind(wolf_move, wolfcovs) %>%
-  #'   select(ID, time, Elev, Slope, HumanMod, dist2road, PercForestMix2.18, PercXericGrass.18, PercXericShrub.18)
-  wolfMerge <- crawlMerge(crwOut_WOLF, wolf_covs, Time.name = "time")
-  #'  Make Sex and Season factors
-  wolfMerge$crwPredict$Sex <- as.factor(wolfMerge$crwPredict$Sex)
-  wolfMerge$crwPredict$Season <- as.factor(wolfMerge$crwPredict$Season)
-  ###  WHY is W87M missing elevation, slope, & HumMod data?
-  
-  
-  
-  #'  Merge all covariate data together
-  md_extract <- spp_extract[[1]] %>%
-    select(-ID)
-  md_covs <- cbind(md_move, md_extract) %>%
-    select(ID, time, Elev, Slope, HumanMod)
-  mdMerge <- crawlMerge(crwOut_MD, md_covs, Time.name = "time")
-  #'  Make Sex and Season factors
-  mdMerge$crwPredict$Sex <- as.factor(mdMerge$crwPredict$Sex)
-  mdMerge$crwPredict$Season <- as.factor(mdMerge$crwPredict$Season)
-  
-  
-  
-  
-  #'  NEED TO BREAK DATA UP BY SUMMER VS WINTER BUT I THINK I HAVE TO DO THIS 
-  #'  BEFORE RUNNING THE CRAWLWRAP FUNCTION AND RUN IT ON EACH SEASON SEPARATELY
-
-  #'  Be sure to break up data by season (summer vs winter) before fitting to models
-  #'  Must retain these as lists though!
-
-  
-
-  
-  
-  
-  
-
-  
-  
-  
-  
-  
-  
+  # save.image(paste0("./Data/Collar_Movement_DataPrep_", Sys.Date(), ".RData"))
   
   
   ####  Run one species through without function  ####
@@ -424,6 +441,19 @@
   #' 
   #' head(crwOut_ELK1[[1]])
   #' cW_ELK1 <- crwOut_ELK1[[2]]
+   
   
-  
+  #' tracks <- 1:length(unique(WOLF_track$ID))
+  #' #'  Create list of crawlWrap arguments for each track
+  #' #'  Remember: ID is a unique identifier for animal ID & track number
+  #' theta <- fixPar <- list()
+  #' for(i in unique(WOLF_track$ID)) {
+  #'   theta[[i]] <- c(0, 0)
+  #'   fixPar[[i]] <- c(NA, NA)
+  #' }
+  #' #'  Interpolate missing locations within each track
+  #' crwOut <- crawlWrap(obsData = WOLF_track[which(WOLF_track$ID %in% unique(WOLF_track$ID)[tracks]),], 
+  #'                     theta = theta, fixPar = fixPar, attempts = 100, 
+  #'                     Time.name = "time", timeStep = "4 hours", coord = c("x", "y"))
+  #' tst <- crwOut[[2]]  
   
