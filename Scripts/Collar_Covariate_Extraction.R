@@ -29,13 +29,6 @@
   library(raster)
   library(tidyverse)
   
-  #' #'  Read in covariate data extracted from other sources
-  #' dist2road <- read.csv("./Output/dist2road18-20.csv") %>%   ### NEED TO GENERATE THIS ON LAB COMPUTER
-  #'   mutate(
-  #'     km2road = dist2road/1000
-  #'   ) %>%
-  #'   dplyr::select(-X)
-  
   #'  Read in spatial data
   wppp_bound <- st_read("./Shapefiles/WPPP_CovariateBoundary", layer = "WPPP_CovariateBoundary")
   #'  Terrain rasters
@@ -67,34 +60,58 @@
   res(HM)
 
   #'  Load animal location data for each species
-  load("./Outputs/Telemetry_crwOut/crwOut_MD.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_ELK.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_WTD.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_COUG.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_WOLF.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_BOB.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_COY.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_MD_smr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_MD_wtr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_ELK_smr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_ELK_wtr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_WTD_smr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_WTD_wtr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_COUG_smr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_COUG_wtr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_WOLF_smr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_WOLF_wtr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_BOB_smr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_BOB_wtr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_COY_smr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_COY_wtr.RData")
   
   #'  Pull out locations and interpolated data
-  md_move <- crwOut_MD[[2]]
-  elk_move <- crwOut_ELK[[2]]
-  wtd_move <- crwOut_WTD[[2]]
-  coug_move <- crwOut_COUG[[2]]
-  wolf_move <- crwOut_WOLF[[2]]
-  bob_move <- crwOut_BOB[[2]]
-  coy_move <- crwOut_COY[[2]]
+  md_move_smr <- crwOut_MD_smr[[2]]
+  md_move_wtr <- crwOut_MD_wtr[[2]]
+  elk_move_smr <- crwOut_ELK_smr[[2]]
+  elk_move_wtr <- crwOut_ELK_wtr[[2]]
+  wtd_move_smr <- crwOut_WTD_smr[[2]]
+  wtd_move_wtr <- crwOut_WTD_wtr[[2]]
+  coug_move_smr <- crwOut_COUG_smr[[2]]
+  coug_move_wtr <- crwOut_COUG_wtr[[2]]
+  wolf_move_smr <- crwOut_WOLF_smr[[2]]
+  wolf_move_wtr <- crwOut_WOLF_wtr[[2]]
+  bob_move_smr <- crwOut_BOB_smr[[2]]
+  bob_move_wtr <- crwOut_BOB_wtr[[2]]
+  coy_move_smr <- crwOut_COY_smr[[2]]
+  coy_move_wtr <- crwOut_COY_wtr[[2]]
   
   #'  Make location data spatial----- UPDATE EXACT COLUMNS
-  md_locs <- st_as_sf(md_move, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  elk_locs <- st_as_sf(elk_move, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  wtd_locs <- st_as_sf(wtd_move, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  coug_locs <- st_as_sf(coug_move, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  wolf_locs <- st_as_sf(wolf_move, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  bob_locs <- st_as_sf(bob_move, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  coy_locs <- st_as_sf(coy_move, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  md_locs_smr <- st_as_sf(md_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  md_locs_wtr <- st_as_sf(md_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  elk_locs_smr <- st_as_sf(elk_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  elk_locs_wtr <- st_as_sf(elk_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  wtd_locs_smr <- st_as_sf(wtd_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  wtd_locs_wtr <- st_as_sf(wtd_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  coug_locs_smr <- st_as_sf(coug_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  coug_locs_wtr <- st_as_sf(coug_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  wolf_locs_smr <- st_as_sf(wolf_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  wolf_locs_wtr <- st_as_sf(wolf_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  bob_locs_smr <- st_as_sf(bob_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  bob_locs_wtr <- st_as_sf(bob_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  coy_locs_smr <- st_as_sf(coy_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  coy_locs_wtr <- st_as_sf(coy_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
   
 
+  ####  COVARIATE EXTRACTION & CALCULATIONS  ####
   
+  #'  Distance to nearest road
+  #'  ------------------------------
   #'  Calculate distance from each animal location to nearest road and take the 
   #'  minimum value -- default units of measurement are in METERS
   #'  Make sure features are in either Equidistant or State-specific projection
@@ -105,13 +122,13 @@
   road_reproj <- st_transform(roads, crs = st_crs(sa_proj))
   projection(road_reproj)
   
-  #'  Calculate distance to nearest road feature
-  #'  Test with one location
-  dist2road <- min(st_distance(road_reproj, wolf_locs[1,]))
-  dist2road <- as.data.frame(dist2road)
-  dist2road$ID <- wolf_locs$ID[1]
+  #' #'  Calculate distance to nearest road feature
+  #' #'  Test with one location
+  #' dist2road <- min(st_distance(road_reproj, wolf_locs[1,]))
+  #' dist2road <- as.data.frame(dist2road)
+  #' dist2road$ID <- wolf_locs$ID[1]
   
-  #'  Function to iterate over all points per species (this will take awhile!)
+  #'  Function to iterate over all points per species (this takes FOREVER!)
   RoadDist <- function(locs) {
     dist2road <- sapply(1:nrow(locs), function(x) min(st_distance(road_reproj, locs[x, ])))
     dist2road <- as.data.frame(dist2road)
@@ -120,38 +137,53 @@
     dist2road$obs <- c(1:nrow(locs))
     return(dist2road)
   }
+  
   #'  Run each species through function to calculate distance to nearest road
-  #'  THIS WILL TAKE FOREVER!!! Started 4/24/21 1230
+  #'  THIS WILL TAKE FOREVER!!! 
   # locs <- list(md_locs, elk_locs, wtd_locs, coug_locs, wolf_locs, bob_locs, coy_locs)
   # spp_nearestRd <- lapply(locs, RoadDist)
   
-  md_tst <- md_locs[md_locs$ID == "3959MD17_1" | md_locs$ID == "96MD18_279",]
-  md_rd_tst <- RoadDist(md_tst)
+  # md_tst <- md_locs[md_locs$ID == "3959MD17_1" | md_locs$ID == "96MD18_279",]
+  # md_rd_tst <- RoadDist(md_tst)
   
-  
-  md_rd <- RoadDist(md_locs)
-  elk_rd <- RoadDist(elk_locs)
-  wtd_rd <- RoadDist(wtd_locs)
-  coug_rd <- RoadDist(coug_locs)
-  wolf_rd <- RoadDist(wolf_locs)
-  bob_rd <- RoadDist(bob_locs)
-  coy_rd <- RoadDist(coy_locs)
+  md_rd_smr <- RoadDist(md_locs_smr)
+  md_rd_wtr <- RoadDist(md_locs_wtr)
+  elk_rd_smr <- RoadDist(elk_locs_smr)
+  elk_rd_wtr <- RoadDist(elk_locs_wtr)
+  wtd_rd_smr <- RoadDist(wtd_locs_smr)
+  wtd_rd_wtr <- RoadDist(wtd_locs_wtr)
+  coug_rd_smr <- RoadDist(coug_locs_smr)
+  coug_rd_wtr <- RoadDist(coug_locs_wtr)
+  wolf_rd_smr <- RoadDist(wolf_locs_smr)
+  wolf_rd_wtr <- RoadDist(wolf_locs_wtr)
+  bob_rd_smr <- RoadDist(bob_locs_smr)
+  bob_rd_wtr <- RoadDist(bob_locs_wtr)
+  coy_rd_smr <- RoadDist(coy_locs_smr)
+  coy_rd_wtr <- RoadDist(coy_locs_wtr)
 
-  save(wolf_rd, file = "./Outputs/Telemetry_covs/wolf_rd.RData")
+  # save(wolf_rd, file = "./Outputs/Telemetry_covs/wolf_rd.RData")
   
   
 
   
-  
-  #'  Extract covariate data from rasters
+  #'  Terrain & Human Modified covariates
+  #'  -----------------------------------
+
   #'  Reproject to match rasters in wgs84
-  reproj_md <- st_transform(md_locs, crs = st_crs(wgs84))
-  reproj_elk <- st_transform(elk_locs, crs = st_crs(wgs84))
-  reproj_wtd <- st_transform(wtd_locs, crs = st_crs(wgs84))
-  reproj_coug <- st_transform(coug_locs, crs = st_crs(wgs84))
-  reproj_wolf <- st_transform(wolf_locs, crs = st_crs(wgs84))
-  reproj_bob <- st_transform(bob_locs, crs = st_crs(wgs84))
-  reproj_coy <- st_transform(coy_locs, crs = st_crs(wgs84))
+  reproj_md_smr <- st_transform(md_locs_smr, crs = st_crs(wgs84))
+  reproj_md_wtr <- st_transform(md_locs_wtr, crs = st_crs(wgs84))
+  reproj_elk_smr <- st_transform(elk_locs_smr, crs = st_crs(wgs84))
+  reproj_elk_wtr <- st_transform(elk_locs_wtr, crs = st_crs(wgs84))
+  reproj_wtd_smr <- st_transform(wtd_locs_smr, crs = st_crs(wgs84))
+  reproj_wtd_wtr <- st_transform(wtd_locs_wtr, crs = st_crs(wgs84))
+  reproj_coug_smr <- st_transform(coug_locs_smr, crs = st_crs(wgs84))
+  reproj_coug_wtr <- st_transform(coug_locs_wtr, crs = st_crs(wgs84))
+  reproj_wolf_smr <- st_transform(wolf_locs_smr, crs = st_crs(wgs84))
+  reproj_wolf_wtr <- st_transform(wolf_locs_wtr, crs = st_crs(wgs84))
+  reproj_bob_smr <- st_transform(bob_locs_smr, crs = st_crs(wgs84))
+  reproj_bob_wtr <- st_transform(bob_locs_wtr, crs = st_crs(wgs84))
+  reproj_coy_smr <- st_transform(coy_locs_smr, crs = st_crs(wgs84))
+  reproj_coy_wtr <- st_transform(coy_locs_wtr, crs = st_crs(wgs84))
   
   #'  Function to extract covariates from raster data for each species
   rast_extract <- function(locs) {
@@ -176,20 +208,30 @@
   }
   
   #'  Run each species through raster extract function
-  locs <- list(reproj_md, reproj_elk, reproj_wtd, reproj_coug, reproj_wolf, reproj_bob, reproj_coy)
+  locs <- list(reproj_md_smr, reproj_elk_smr, reproj_wtd_smr, reproj_coug_smr, 
+               reproj_wolf_smr, reproj_bob_smr, reproj_coy_smr, reproj_md_wtr, 
+               reproj_elk_wtr, reproj_wtd_wtr, reproj_coug_wtr, reproj_wolf_wtr, 
+               reproj_bob_wtr, reproj_coy_wtr)
   spp_extract <- lapply(locs, rast_extract)
   
   #'  Unlist extracted data into separate data frames for each species
-  names(spp_extract) <- c("md_extract", "elk_extract", "wtd_extract", "coug_extract", "wolf_extract", "bob_extract", "coy_extract")
+  names(spp_extract) <- c("md_extract_smr", "elk_extract_smr", "wtd_extract_smr", 
+                          "coug_extract_smr", "wolf_extract_smr", "bob_extract_smr", 
+                          "coy_extract_smr", "md_extract_wtr", "elk_extract_wtr", 
+                          "wtd_extract_wtr", "coug_extract_wtr", "wolf_extract_wtr", 
+                          "bob_extract_wtr", "coy_extract_wtr")
   invisible(lapply(names(spp_extract),function(x) assign(x,spp_extract[[x]],.GlobalEnv)))
-  # save(spp_extract, file = "./Outputs/Telemetry_covs/spp_extract.RData")  
   
-  md_tst <- reproj_md[reproj_md$ID == "3959MD17_1",]
-  md_cov_tst <- spp_extract(md_tst)
+  #'  Save
+  save(spp_extract, file = "./Outputs/Telemetry_covs/spp_extract.RData")  
+  
+  # md_tst <- reproj_md[reproj_md$ID == "3959MD17_1",]
+  # md_cov_tst <- spp_extract(md_tst)
   
  
   
-  
+  #'  Percent Land Cover
+  #'  ------------------------
   #'  Function to extract landcover value from each pixel within 250m radius of 
   #'  animal locations using interpolated landcover rasters derived from 
   #'  Cascadia landcover
@@ -235,17 +277,30 @@
     
     return(landcover_250m)
   }
- 
+  
+  #'  Run each species through function to extract land cover values within
+  #'  250 m of each location. FYI, this takes a long time...
   # wolf_tst <- wolf_locs[wolf_locs$ID == "W61M_1" | wolf_locs$ID == "W48F_12",]
   # tst <- landcov250(wolf_tst)
-  wolf_landcov <- landcov250(wolf_locs)
-  save(wolf_landcov, file = "./Outputs/Telemetry_covs/wolf_landcov.RData")
+  # wolf_landcov <- landcov250(wolf_locs)
+  # save(wolf_landcov, file = "./Outputs/Telemetry_covs/wolf_landcov.RData")
+  # md_landcov_tst <- landcov250(md_tst)
+  # unique(md_landcov_tst$landcover_2018); unique(md_landcov_tst$landcover_2019)
   
-  md_landcov_tst <- landcov250(md_tst)
-  unique(md_landcov_tst$landcover_2018); unique(md_landcov_tst$landcover_2019)
-  
-  
-  
+  md_landcov_smr <- landcov250(md_locs_smr)
+  md_landcov_wtr <- landcov250(md_locs_wtr)
+  elk_landcov_smr <- landcov250(elk_locs_smr)
+  elk_landcov_wtr <- landcov250(elk_locs_wtr)
+  wtd_landcov_smr <- landcov250(wtd_locs_smr)
+  wtd_landcov_wtr <- landcov250(wtd_locs_wtr)
+  coug_landcov_smr <- landcov250(coug_locs_smr)
+  coug_landcov_wtr <- landcov250(coug_locs_wtr)
+  wolf_landcov_smr <- landcov250(wolf_locs_smr)
+  wolf_landcov_wtr <- landcov250(wolf_locs_wtr)
+  bob_landcov_smr <- landcov250(bob_locs_smr)
+  bob_landcov_wtr <- landcov250(bob_locs_wtr)
+  coy_landcov_smr <- landcov250(coy_locs_smr)
+  coy_landcov_wtr <- landcov250(coy_locs_wtr)
   
   
   #'  Function to calculate the percent of each landcover type within 250m of 
@@ -380,166 +435,205 @@
   #'  through function to calculate percent habitat type at each location
   # wolf_percHab <- perc_landcov(wolf_landcov, wolf_locs)
   # save(wolf_percHab, file = "./Outputs/Telemetry_covs/wolf_percHab.RData")
+  # md_percHab_tst <- perc_landcov(md_landcov_tst, md_tst)
   
-  md_percHab_tst <- perc_landcov(md_landcov_tst, md_tst)
+  md_percHab_smr <- perc_landcov(md_landcov_smr, md_locs_smr)
+  md_percHab_wtr <- perc_landcov(md_landcov_wtr, md_locs_wtr)
+  elk_percHab_smr <- perc_landcov(elk_landcov_smr, elk_locs_smr)
+  elk_percHab_wtr <- perc_landcov(elk_landcov_wtr, elk_locs_wtr)
+  wtd_percHab_smr <- perc_landcov(wtd_landcov_smr, wtd_locs_smr)
+  wtd_percHab_wtr <- perc_landcov(wtd_landcov_wtr, wtd_locs_wtr)
+  coug_percHab_smr <- perc_landcov(coug_landcov_smr, coug_locs_smr)
+  coug_percHab_wtr <- perc_landcov(coug_landcov_wtr, coug_locs_wtr)
+  wolf_percHab_smr <- perc_landcov(wolf_landcov_smr, wolf_locs_smr)
+  wolf_percHab_wtr <- perc_landcov(wolf_landcov_wtr, wolf_locs_wtr)
+  bob_percHab_smr <- perc_landcov(bob_landcov_smr, bob_locs_smr)
+  bob_percHab_wtr <- perc_landcov(bob_landcov_wtr, bob_locs_wtr)
+  coy_percHab_smr <- perc_landcov(coy_landcov_smr, coy_locs_smr)
+  coy_percHab_wtr <- perc_landcov(coy_landcov_wtr, coy_locs_wtr)
 
   
   
   #'  Combine all covariate data together and save for HMM analyses
-  full_cov <- md_tst %>%
-    select(c(ID, time)) %>%
-    full_join(md_cov_tst, by = c("ID", "time")) %>%
-    full_join(md_rd_tst, by = c("ID", "time")) %>%
-    full_join(md_perHab_tst, by = c("ID", "time")) %>%
-    transmute(
-      ID = ID,
-      AnimalID = AnimalID,
-      time = time,
-      Season = Season,
-      Elev = Elev,
-      Slope = Slope,
-      NearstRd = dist2road, 
-      PercForMix = PercForestMix2,
-      PercXGrass = PercXericGrass,
-      PercXShrub = PercXericShrub,
-      obs = obs
-    )
-  
-  
-  
-  
-  
-  animal <- as.data.frame(md_tst) %>%
-    select(c(ID, time)) %>%
-    mutate(
-      obs = 1:nrow(.)
-    )
-    #'  Count the number of cells in each landcover category by CameraLocation
-    tbl_landcover18 <- as.data.frame(md_landcov_tst) %>%
-      select(-geometry) %>%
-      group_by(obs) %>%
-      count(landcover_2018) %>%
-      ungroup() %>%
-      pivot_wider(names_from = landcover_2018, values_from = n) %>%
-      replace(is.na(.), 0) %>% 
-      mutate(
-        #'  Count number of pixels within 250m of each location
-        sumPixels = rowSums(.[2:ncol(.)]),
-        #'  Combine similar habitat types
-        # Forest =  Forest + WoodyWetland + EmergentWetland,
-        Forest =  Forest,
-        MesicGrass = MesicGrass + Barren,
-        MesicMix = MesicShrub + MesicGrass,
-        ForestMix = Forest + MesicMix,
-        ForestMix2 = Forest + MesicShrub
-      ) %>%
-      #'  Calculate percent landcover type within 250m of each camera site
-      mutate(
-        PercForest = round(Forest/sumPixels, 2),
-        PercForestMix = round(ForestMix/sumPixels,2),     # Cannot be used in conjunction with Forest or any Mesic landcover types
-        PercForestMix2 = round(ForestMix2/sumPixels, 2),
-        # PercXericShrub = round(XericShrub/sumPixels, 2),
-        # PercMesicShrub = round(MesicShrub/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
-        # PercXericGrass = round(XericGrass/sumPixels, 2),
-        PercMesicGrass = round(MesicGrass/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
-        PercMesicMix = round(MesicMix/sumPixels, 2)      # Cannot be used in conjunction with other Mesic landcover types
-      ) %>%
-      #'  Only retain relevent columns
-      # select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub, 
-      #        PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix)
-      select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, 
-             PercMesicGrass, PercMesicMix) %>%
-      full_join(animal, by = "obs") %>%
-       #'  Drop data for year camera was NOT present
-      mutate(
-        Year = lubridate::year(time),
-        Month = lubridate::month(time),
-        Season = ifelse(Year == 2018 & Month < 10, "Summer18", NA),
-        Season = ifelse(Year == 2018 & Month > 11, "Winter1819", Season),
-        Season = ifelse(Year == 2019 & Month < 4, "Winter1819", Season),
-        Season = ifelse(Year == 2019 & Month > 6 & Month < 10, "Summer19", Season),
-        Season = ifelse(Year == 2019 & Month > 11, "Winter1920", Season),
-        Season = ifelse(Year == 2020 & Month < 4, "Winter1920", Season),
-        PercForest = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForest),
-        PercForestMix = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForestMix),
-        PercForestMix2 = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForestMix2),
-        # PercXericShrub = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercXericShrub),
-        # PercMesicShrub = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicShrub),
-        # PercXericGrass = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercXericGrass),
-        PercMesicGrass = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicGrass),
-        PercMesicMix = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicMix) 
-      )  %>%
-      filter(!is.na(PercForest))
-     # colnames(tbl_landcover18) <- c("obs", "sumPixels", "PercForest.18", 
-    #                                "PercForestMix.18", "PercForestMix2.18", 
-    #                                "PercXericShrub.18", "PercMesicShrub.18", 
-    #                                "PercXericGrass.18", "PercMesicGrass.18", 
-    #                                "PercMesicMix.18")
+  all_covs <- function(locs, elev_etc, rd, percHab) {
+    telem_covs <- locs %>%
+      select(c(ID, time)) %>%
+      full_join(elev_etc, by = c("ID", "time")) %>%
+      full_join(rd, by = c("ID", "time")) %>%
+      full_join(percHab, by = c("ID", "time")) %>%
+      transmute(
+        ID = ID,
+        time = time,
+        Season = Season,
+        Year = ifelse(Season == "Summer18" | Season == "Winter1819", "Year1", "Year2"),
+        Elev = Elev,
+        Slope = Slope,
+        HumanMod = HumanMod,
+        NearstRd = dist2road, 
+        PercForMix = PercForestMix2,
+        PercXGrass = PercXericGrass,
+        PercXShrub = PercXericShrub,
+        obs = obs
+      )
+  }
     
-    tbl_landcover19 <- as.data.frame(md_landcov_tst) %>%
-      select(-geometry) %>%
-      group_by(obs) %>%
-      count(landcover_2019) %>%
-      ungroup() %>%
-      pivot_wider(names_from = landcover_2019, values_from = n) %>%
-      replace(is.na(.), 0) %>% 
-      mutate(
-        #'  Count number of pixels within 250m of each location
-        sumPixels = rowSums(.[2:ncol(.)]),
-        #'  Combine similar habitat types
-        # Forest =  Forest + WoodyWetland + EmergentWetland,
-        Forest =  Forest,
-        MesicGrass = MesicGrass + Barren,
-        MesicMix = MesicShrub + MesicGrass,
-        ForestMix = Forest + MesicMix,
-        ForestMix2 = Forest + MesicShrub
-      ) %>%
-      #'  Calculate percent landcover type within 250m of each camera site
-      mutate(
-        PercForest = round(Forest/sumPixels, 2),
-        PercForestMix = round(ForestMix/sumPixels,2),     # Cannot be used in conjunction with Forest or any Mesic landcover types
-        PercForestMix2 = round(ForestMix2/sumPixels, 2),
-        # PercXericShrub = round(XericShrub/sumPixels, 2),
-        # PercMesicShrub = round(MesicShrub/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
-        # PercXericGrass = round(XericGrass/sumPixels, 2),
-        PercMesicGrass = round(MesicGrass/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
-        PercMesicMix = round(MesicMix/sumPixels, 2)      # Cannot be used in conjunction with other Mesic landcover types
-      ) %>%
-      #'  Only retain relevent columns
-      # select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub, 
-      #        PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix)
-      select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, 
-             PercMesicGrass, PercMesicMix) %>%
-      full_join(animal, by = "obs") %>%
-      #'  Drop data for year camera was NOT present
-      mutate(
-        Year = lubridate::year(time),
-        Month = lubridate::month(time),
-        Season = ifelse(Year == 2018 & Month < 10, "Summer18", NA),
-        Season = ifelse(Year == 2018 & Month > 11, "Winter1819", Season),
-        Season = ifelse(Year == 2019 & Month < 4, "Winter1819", Season),
-        Season = ifelse(Year == 2019 & Month > 6 & Month < 10, "Summer19", Season),
-        Season = ifelse(Year == 2019 & Month > 11, "Winter1920", Season),
-        Season = ifelse(Year == 2020 & Month < 4, "Winter1920", Season),
-        PercForest = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForest),
-        PercForestMix = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForestMix),
-        PercForestMix2 = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForestMix2),
-        # PercXericShrub = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercXericShrub),
-        # PercMesicShrub = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicShrub),
-        # PercXericGrass = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercXericGrass),
-        PercMesicGrass = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicGrass),
-        PercMesicMix = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicMix)
-      ) %>%
-      filter(!is.na(PercForest))
-    # colnames(tbl_landcover19) <- c("obs", "sumPixels", "PercForest.19", 
-    #                                "PercForestMix.19", "PercForestMix2.19", 
-    #                                "PercXericShrub.19", "PercMesicShrub.19", 
-    #                                "PercXericGrass.19", "PercMesicGrass.19", 
-    #                                "PercMesicMix.19")
+      # DON'T FORGET TO ADD STUDY AREA & SEX TO THESE
   
-    
-    #'  Merge landcover and animal ID info
-    tbl_landcover <- rbind(tbl_landcover18, tbl_landcover19) 
+  #'  Merge all covariates together
+  md_telem_covs_smr <- all_covs(md_locs_smr, md_extract_smr, md_rd_smr, md_percHab_smr)
+  md_telem_covs_wtr <- all_covs(md_locs_wtr, md_extract_wtr, md_rd_wtr, md_percHab_wtr)
+  elk_telem_covs_smr <- all_covs(elk_locs_smr, elk_extract_smr, elk_rd_smr, elk_percHab_smr)
+  elk_telem_covs_wtr <- all_covs(elk_locs_wtr, elk_extract_wtr, elk_rd_wtr, elk_percHab_wtr)
+  wtd_telem_covs_smr <- all_covs(wtd_locs_smr, wtd_extract_smr, wtd_rd_smr, wtd_percHab_smr)
+  wtd_telem_covs_wtr <- all_covs(wtd_locs_wtr, wtd_extract_wtr, wtd_rd_wtr, wtd_percHab_wtr)
+  coug_telem_covs_smr <- all_covs(coug_locs_smr, coug_extract_smr, coug_rd_smr, coug_percHab_smr)
+  coug_telem_covs_wtr <- all_covs(coug_locs_wtr, coug_extract_wtr, coug_rd_wtr, coug_percHab_wtr)
+  wolf_telem_covs_smr <- all_covs(wolf_locs_smr, wolf_extract_smr, wolf_rd_smr, wolf_percHab_smr)
+  wolf_telem_covs_wtr <- all_covs(wolf_locs_wtr, wolf_extract_wtr, wolf_rd_wtr, wolf_percHab_wtr)
+  bob_telem_covs_smr <- all_covs(bob_locs_smr, bob_extract_smr, bob_rd_smr, bob_percHab_smr)
+  bob_telem_covs_wtr <- all_covs(bob_locs_wtr, bob_extract_wtr, bob_rd_wtr, bob_percHab_wtr)
+  coy_telem_covs_smr <- all_covs(coy_locs_smr, coy_extract_smr, coy_rd_smr, coy_percHab_smr)
+  coy_telem_covs_wtr <- all_covs(coy_locs_wtr, coy_extract_wtr, coy_rd_wtr, coy_percHab_wtr)
+  
+  
+  #'  Save final covariates
+  all_telem_covs_list <- list(coy_telem_covs_smr, coy_telem_covs_wtr)
+  save(all_telem_covs_list, file = "./Outputs/Telemetry_covs/all_telem_covs_list.RData")
+  save(coy_telem_covs_smr, file = "./Outputs/Telemetry_covs/coy_telem_covs_smr.RData")
+  save(coy_telem_covs_wtr, file = "./Outputs/Telemetry_covs/coy_telem_covs_wtr.RData")
+  
+  
+  #' animal <- as.data.frame(md_tst) %>%
+  #'   select(c(ID, time)) %>%
+  #'   mutate(
+  #'     obs = 1:nrow(.)
+  #'   )
+  #'   #'  Count the number of cells in each landcover category by CameraLocation
+  #'   tbl_landcover18 <- as.data.frame(md_landcov_tst) %>%
+  #'     select(-geometry) %>%
+  #'     group_by(obs) %>%
+  #'     count(landcover_2018) %>%
+  #'     ungroup() %>%
+  #'     pivot_wider(names_from = landcover_2018, values_from = n) %>%
+  #'     replace(is.na(.), 0) %>% 
+  #'     mutate(
+  #'       #'  Count number of pixels within 250m of each location
+  #'       sumPixels = rowSums(.[2:ncol(.)]),
+  #'       #'  Combine similar habitat types
+  #'       # Forest =  Forest + WoodyWetland + EmergentWetland,
+  #'       Forest =  Forest,
+  #'       MesicGrass = MesicGrass + Barren,
+  #'       MesicMix = MesicShrub + MesicGrass,
+  #'       ForestMix = Forest + MesicMix,
+  #'       ForestMix2 = Forest + MesicShrub
+  #'     ) %>%
+  #'     #'  Calculate percent landcover type within 250m of each camera site
+  #'     mutate(
+  #'       PercForest = round(Forest/sumPixels, 2),
+  #'       PercForestMix = round(ForestMix/sumPixels,2),     # Cannot be used in conjunction with Forest or any Mesic landcover types
+  #'       PercForestMix2 = round(ForestMix2/sumPixels, 2),
+  #'       # PercXericShrub = round(XericShrub/sumPixels, 2),
+  #'       # PercMesicShrub = round(MesicShrub/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
+  #'       # PercXericGrass = round(XericGrass/sumPixels, 2),
+  #'       PercMesicGrass = round(MesicGrass/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
+  #'       PercMesicMix = round(MesicMix/sumPixels, 2)      # Cannot be used in conjunction with other Mesic landcover types
+  #'     ) %>%
+  #'     #'  Only retain relevent columns
+  #'     # select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub, 
+  #'     #        PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix)
+  #'     select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, 
+  #'            PercMesicGrass, PercMesicMix) %>%
+  #'     full_join(animal, by = "obs") %>%
+  #'      #'  Drop data for year camera was NOT present
+  #'     mutate(
+  #'       Year = lubridate::year(time),
+  #'       Month = lubridate::month(time),
+  #'       Season = ifelse(Year == 2018 & Month < 10, "Summer18", NA),
+  #'       Season = ifelse(Year == 2018 & Month > 11, "Winter1819", Season),
+  #'       Season = ifelse(Year == 2019 & Month < 4, "Winter1819", Season),
+  #'       Season = ifelse(Year == 2019 & Month > 6 & Month < 10, "Summer19", Season),
+  #'       Season = ifelse(Year == 2019 & Month > 11, "Winter1920", Season),
+  #'       Season = ifelse(Year == 2020 & Month < 4, "Winter1920", Season),
+  #'       PercForest = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForest),
+  #'       PercForestMix = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForestMix),
+  #'       PercForestMix2 = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForestMix2),
+  #'       # PercXericShrub = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercXericShrub),
+  #'       # PercMesicShrub = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicShrub),
+  #'       # PercXericGrass = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercXericGrass),
+  #'       PercMesicGrass = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicGrass),
+  #'       PercMesicMix = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicMix) 
+  #'     )  %>%
+  #'     filter(!is.na(PercForest))
+  #'    # colnames(tbl_landcover18) <- c("obs", "sumPixels", "PercForest.18", 
+  #'   #                                "PercForestMix.18", "PercForestMix2.18", 
+  #'   #                                "PercXericShrub.18", "PercMesicShrub.18", 
+  #'   #                                "PercXericGrass.18", "PercMesicGrass.18", 
+  #'   #                                "PercMesicMix.18")
+  #'   
+  #'   tbl_landcover19 <- as.data.frame(md_landcov_tst) %>%
+  #'     select(-geometry) %>%
+  #'     group_by(obs) %>%
+  #'     count(landcover_2019) %>%
+  #'     ungroup() %>%
+  #'     pivot_wider(names_from = landcover_2019, values_from = n) %>%
+  #'     replace(is.na(.), 0) %>% 
+  #'     mutate(
+  #'       #'  Count number of pixels within 250m of each location
+  #'       sumPixels = rowSums(.[2:ncol(.)]),
+  #'       #'  Combine similar habitat types
+  #'       # Forest =  Forest + WoodyWetland + EmergentWetland,
+  #'       Forest =  Forest,
+  #'       MesicGrass = MesicGrass + Barren,
+  #'       MesicMix = MesicShrub + MesicGrass,
+  #'       ForestMix = Forest + MesicMix,
+  #'       ForestMix2 = Forest + MesicShrub
+  #'     ) %>%
+  #'     #'  Calculate percent landcover type within 250m of each camera site
+  #'     mutate(
+  #'       PercForest = round(Forest/sumPixels, 2),
+  #'       PercForestMix = round(ForestMix/sumPixels,2),     # Cannot be used in conjunction with Forest or any Mesic landcover types
+  #'       PercForestMix2 = round(ForestMix2/sumPixels, 2),
+  #'       # PercXericShrub = round(XericShrub/sumPixels, 2),
+  #'       # PercMesicShrub = round(MesicShrub/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
+  #'       # PercXericGrass = round(XericGrass/sumPixels, 2),
+  #'       PercMesicGrass = round(MesicGrass/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
+  #'       PercMesicMix = round(MesicMix/sumPixels, 2)      # Cannot be used in conjunction with other Mesic landcover types
+  #'     ) %>%
+  #'     #'  Only retain relevent columns
+  #'     # select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub, 
+  #'     #        PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix)
+  #'     select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, 
+  #'            PercMesicGrass, PercMesicMix) %>%
+  #'     full_join(animal, by = "obs") %>%
+  #'     #'  Drop data for year camera was NOT present
+  #'     mutate(
+  #'       Year = lubridate::year(time),
+  #'       Month = lubridate::month(time),
+  #'       Season = ifelse(Year == 2018 & Month < 10, "Summer18", NA),
+  #'       Season = ifelse(Year == 2018 & Month > 11, "Winter1819", Season),
+  #'       Season = ifelse(Year == 2019 & Month < 4, "Winter1819", Season),
+  #'       Season = ifelse(Year == 2019 & Month > 6 & Month < 10, "Summer19", Season),
+  #'       Season = ifelse(Year == 2019 & Month > 11, "Winter1920", Season),
+  #'       Season = ifelse(Year == 2020 & Month < 4, "Winter1920", Season),
+  #'       PercForest = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForest),
+  #'       PercForestMix = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForestMix),
+  #'       PercForestMix2 = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForestMix2),
+  #'       # PercXericShrub = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercXericShrub),
+  #'       # PercMesicShrub = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicShrub),
+  #'       # PercXericGrass = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercXericGrass),
+  #'       PercMesicGrass = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicGrass),
+  #'       PercMesicMix = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicMix)
+  #'     ) %>%
+  #'     filter(!is.na(PercForest))
+  #'   # colnames(tbl_landcover19) <- c("obs", "sumPixels", "PercForest.19", 
+  #'   #                                "PercForestMix.19", "PercForestMix2.19", 
+  #'   #                                "PercXericShrub.19", "PercMesicShrub.19", 
+  #'   #                                "PercXericGrass.19", "PercMesicGrass.19", 
+  #'   #                                "PercMesicMix.19")
+  #' 
+  #'   
+  #'   #'  Merge landcover and animal ID info
+  #'   tbl_landcover <- rbind(tbl_landcover18, tbl_landcover19) 
   
   
   
