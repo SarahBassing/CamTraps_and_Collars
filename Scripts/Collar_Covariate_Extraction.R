@@ -162,6 +162,9 @@
   coy_rd_wtr <- RoadDist(coy_locs_wtr)
 
   # save(wolf_rd, file = "./Outputs/Telemetry_covs/wolf_rd.RData")
+  # save(elk_rd_smr, file = "./Outputs/Telemetry_covs/elk_rd_smr.RData")
+  # save(elk_rd_wtr, file = "./Outputs/Telemetry_covs/elk_rd_wtr.RData")
+  
   
   
 
@@ -469,15 +472,18 @@
         Elev = Elev,
         Slope = Slope,
         HumanMod = HumanMod,
-        NearstRd = dist2road, 
+        NearestRd = dist2road, 
         PercForMix = PercForestMix2,
         PercXGrass = PercXericGrass,
         PercXShrub = PercXericShrub,
-        obs = obs
-      )
+        obs = obs) %>%
+      mutate(
+        Area = ifelse(grepl("NE", ID), "NE", "OK"),
+        Area = ifelse(grepl("MD", ID), "OK", Area),
+        Area = ifelse(grepl("EA", ID), "NE", Area),
+        Area = ifelse(grepl("ELK", ID), "NE", Area),
+        Area = ifelse(grepl("WTD", ID), "NE", Area))
   }
-    
-      # DON'T FORGET TO ADD STUDY AREA & SEX TO THESE
   
   #'  Merge all covariates together
   md_telem_covs_smr <- all_covs(md_locs_smr, md_extract_smr, md_rd_smr, md_percHab_smr)
@@ -495,6 +501,21 @@
   coy_telem_covs_smr <- all_covs(coy_locs_smr, coy_extract_smr, coy_rd_smr, coy_percHab_smr)
   coy_telem_covs_wtr <- all_covs(coy_locs_wtr, coy_extract_wtr, coy_rd_wtr, coy_percHab_wtr)
   
+  #'  Add study area to wolf data (no easy way of doing this b/c ID not associated with WPPP)
+  wolf_telem_covs_smr <- wolf_telem_covs_smr %>%
+    mutate(
+      Area = ifelse(grepl("W61M", ID), "OK", "NE"),  #double check no "W71F" in here
+      Area = ifelse(grepl("W88M", ID), "OK", Area),  
+      Area = ifelse(grepl("W93M", ID), "OK", Area),
+      Area = ifelse(grepl("W94M", ID), "OK", Area),
+    )
+  wolf_telem_covs_wtr <- wolf_telem_covs_wtr %>%
+    mutate(
+      Area = ifelse(grepl("W61M", ID), "OK", "NE"),
+      Area = ifelse(grepl("W88M", ID), "OK", Area),
+      Area = ifelse(grepl("W93M", ID), "OK", Area),
+      Area = ifelse(grepl("W94M", ID), "OK", Area),
+    )
   
   #'  Save final covariates
   all_telem_covs_list <- list(coy_telem_covs_smr, coy_telem_covs_wtr)
