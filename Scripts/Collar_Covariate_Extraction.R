@@ -27,6 +27,10 @@
   library(stars)
   library(rgeos)
   library(raster)
+  library(parallel)
+  library(doParallel)
+  library(foreach)
+  library(future.apply)
   library(tidyverse)
   
   #'  Read in spatial data
@@ -75,40 +79,116 @@
   load("./Outputs/Telemetry_crwOut/crwOut_COY_smr.RData")
   load("./Outputs/Telemetry_crwOut/crwOut_COY_wtr.RData")
   
-  #'  Pull out locations and interpolated data
-  md_move_smr <- crwOut_MD_smr[[2]]
-  md_move_wtr <- crwOut_MD_wtr[[2]]
-  elk_move_smr <- crwOut_ELK_smr[[2]]
-  elk_move_wtr <- crwOut_ELK_wtr[[2]]
-  wtd_move_smr <- crwOut_WTD_smr[[2]]
-  wtd_move_wtr <- crwOut_WTD_wtr[[2]]
-  coug_move_smr <- crwOut_COUG_smr[[2]]
-  coug_move_wtr <- crwOut_COUG_wtr[[2]]
-  wolf_move_smr <- crwOut_WOLF_smr[[2]]
-  wolf_move_wtr <- crwOut_WOLF_wtr[[2]]
-  bob_move_smr <- crwOut_BOB_smr[[2]]
-  bob_move_wtr <- crwOut_BOB_wtr[[2]]
-  coy_move_smr <- crwOut_COY_smr[[2]]
-  coy_move_wtr <- crwOut_COY_wtr[[2]]
+  #'  Function to make data spatial
+  spatial_locs <- function(locs) {
+    move <- locs[[2]]
+    sf_locs <- st_as_sf(move, coords = c("mu.x", "mu.y"), crs = sa_proj)
+    return(sf_locs)
+  }
+  crwOut <- list(crwOut_COY_smr, crwOut_COY_wtr) 
+  sf_locs <- lapply(crwOut, spatial_locs)
   
-  #'  Make location data spatial----- UPDATE EXACT COLUMNS
-  md_locs_smr <- st_as_sf(md_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  md_locs_wtr <- st_as_sf(md_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  elk_locs_smr <- st_as_sf(elk_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  elk_locs_wtr <- st_as_sf(elk_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  wtd_locs_smr <- st_as_sf(wtd_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  wtd_locs_wtr <- st_as_sf(wtd_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  coug_locs_smr <- st_as_sf(coug_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  coug_locs_wtr <- st_as_sf(coug_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  wolf_locs_smr <- st_as_sf(wolf_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  wolf_locs_wtr <- st_as_sf(wolf_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  bob_locs_smr <- st_as_sf(bob_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  bob_locs_wtr <- st_as_sf(bob_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  coy_locs_smr <- st_as_sf(coy_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
-  coy_locs_wtr <- st_as_sf(coy_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' #'  Pull out locations and interpolated data
+  #' md_move_smr <- crwOut_MD_smr[[2]]
+  #' md_move_wtr <- crwOut_MD_wtr[[2]]
+  #' elk_move_smr <- crwOut_ELK_smr[[2]]
+  #' elk_move_wtr <- crwOut_ELK_wtr[[2]]
+  #' wtd_move_smr <- crwOut_WTD_smr[[2]]
+  #' wtd_move_wtr <- crwOut_WTD_wtr[[2]]
+  #' coug_move_smr <- crwOut_COUG_smr[[2]]
+  #' coug_move_wtr <- crwOut_COUG_wtr[[2]]
+  #' wolf_move_smr <- crwOut_WOLF_smr[[2]]
+  #' wolf_move_wtr <- crwOut_WOLF_wtr[[2]]
+  #' bob_move_smr <- crwOut_BOB_smr[[2]]
+  #' bob_move_wtr <- crwOut_BOB_wtr[[2]]
+  #' coy_move_smr <- crwOut_COY_smr[[2]]
+  #' coy_move_wtr <- crwOut_COY_wtr[[2]]
+  #' 
+  #' #'  Make location data spatial----- UPDATE EXACT COLUMNS
+  #' md_locs_smr <- st_as_sf(md_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' md_locs_wtr <- st_as_sf(md_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' elk_locs_smr <- st_as_sf(elk_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' elk_locs_wtr <- st_as_sf(elk_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' wtd_locs_smr <- st_as_sf(wtd_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' wtd_locs_wtr <- st_as_sf(wtd_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' coug_locs_smr <- st_as_sf(coug_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' coug_locs_wtr <- st_as_sf(coug_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' wolf_locs_smr <- st_as_sf(wolf_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' wolf_locs_wtr <- st_as_sf(wolf_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' bob_locs_smr <- st_as_sf(bob_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' bob_locs_wtr <- st_as_sf(bob_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' coy_locs_smr <- st_as_sf(coy_move_smr, coords = c("mu.x", "mu.y"), crs = sa_proj)
+  #' coy_locs_wtr <- st_as_sf(coy_move_wtr, coords = c("mu.x", "mu.y"), crs = sa_proj)
   
-
+  # coy_locs_smr$Spp_Ssn <- "Coyote_summer"
+  # coy_locs_wtr$Spp_Ssn <- "Coyote_winter"
+  
+  #' #'  Reproject to match elevation, slope, & human mod rasters in wgs84
+  #' reproj_md_smr <- st_transform(md_locs_smr, crs = st_crs(wgs84))
+  #' reproj_md_wtr <- st_transform(md_locs_wtr, crs = st_crs(wgs84))
+  #' reproj_elk_smr <- st_transform(elk_locs_smr, crs = st_crs(wgs84))
+  #' reproj_elk_wtr <- st_transform(elk_locs_wtr, crs = st_crs(wgs84))
+  #' reproj_wtd_smr <- st_transform(wtd_locs_smr, crs = st_crs(wgs84))
+  #' reproj_wtd_wtr <- st_transform(wtd_locs_wtr, crs = st_crs(wgs84))
+  #' reproj_coug_smr <- st_transform(coug_locs_smr, crs = st_crs(wgs84))
+  #' reproj_coug_wtr <- st_transform(coug_locs_wtr, crs = st_crs(wgs84))
+  #' reproj_wolf_smr <- st_transform(wolf_locs_smr, crs = st_crs(wgs84))
+  #' reproj_wolf_wtr <- st_transform(wolf_locs_wtr, crs = st_crs(wgs84))
+  #' reproj_bob_smr <- st_transform(bob_locs_smr, crs = st_crs(wgs84))
+  #' reproj_bob_wtr <- st_transform(bob_locs_wtr, crs = st_crs(wgs84))
+  #' reproj_coy_smr <- st_transform(coy_locs_smr, crs = st_crs(wgs84))
+  #' reproj_coy_wtr <- st_transform(coy_locs_wtr, crs = st_crs(wgs84))
+  
+  
   ####  COVARIATE EXTRACTION & CALCULATIONS  ####
+  
+  #'  List spatial data frames
+  # locs <- list(coy_locs_smr, coy_locs_wtr)
+
+  #'  Setup script to run in parallel so covariates can be extracted for all 
+  #'  species at once
+  start.time <- Sys.time()
+  
+  cl <- parallel::makeCluster(4)  #change to 14 when this is working correctly
+  plan(cluster, workers = cl)
+  # plan(multisession) ## Run in parallel on local computer
+
+    #'  Function to extract covariates from raster data for each species
+    rast_extract <- function(locs) {
+      #'  Reproject to match rasters projections (WGS84)
+      reproj_locs <- st_transform(locs, crs = st_crs(wgs84))
+      #'  Extract covariates that share same projection
+      elevation <- raster::extract(dem, reproj_locs, df = TRUE)
+      slope <- raster::extract(Slope, reproj_locs, df = TRUE)
+      modified <- raster::extract(HM, reproj_locs, df = TRUE)
+      join_covs <- full_join(elevation, slope, by = "ID") %>%
+        full_join(modified, by = "ID") %>%
+        transmute(
+          obs = ID,
+          Elev = WPPP_DEM_30m,
+          Slope = round(WPPP_slope_aspect, digits = 2),
+          HumanMod = WPPP_gHM
+        )
+      #'  Pull out unique animal/time information
+      animal <- as.data.frame(reproj_locs) %>%
+        select(c(ID, time))
+      #'  Merge animal/time information with covariates
+      covs <- as.data.frame(cbind(animal, join_covs))
+      return(covs)
+    }
+    
+    #'  Run each species through raster extract function
+    # locs <- list(reproj_coy_smr, reproj_coy_wtr)
+    # spp_extract <- lapply(sf_locs, rast_extract)
+    spp_extract <- future_lapply(sf_locs, rast_extract)
+    save(spp_extract, file = paste0("./Telemetry_covs/spp_extract_", Sys.Date(), ".RData"))
+    
+  # }
+  
+  
+  end.time <- Sys.time()
+  parallel::stopCluster(cl)
+  difftime(end.time, start.time, units = "hours")
   
   #'  Distance to nearest road
   #'  ------------------------------
@@ -171,29 +251,15 @@
   
   #'  Terrain & Human Modified covariates
   #'  -----------------------------------
-
-  #'  Reproject to match rasters in wgs84
-  reproj_md_smr <- st_transform(md_locs_smr, crs = st_crs(wgs84))
-  reproj_md_wtr <- st_transform(md_locs_wtr, crs = st_crs(wgs84))
-  reproj_elk_smr <- st_transform(elk_locs_smr, crs = st_crs(wgs84))
-  reproj_elk_wtr <- st_transform(elk_locs_wtr, crs = st_crs(wgs84))
-  reproj_wtd_smr <- st_transform(wtd_locs_smr, crs = st_crs(wgs84))
-  reproj_wtd_wtr <- st_transform(wtd_locs_wtr, crs = st_crs(wgs84))
-  reproj_coug_smr <- st_transform(coug_locs_smr, crs = st_crs(wgs84))
-  reproj_coug_wtr <- st_transform(coug_locs_wtr, crs = st_crs(wgs84))
-  reproj_wolf_smr <- st_transform(wolf_locs_smr, crs = st_crs(wgs84))
-  reproj_wolf_wtr <- st_transform(wolf_locs_wtr, crs = st_crs(wgs84))
-  reproj_bob_smr <- st_transform(bob_locs_smr, crs = st_crs(wgs84))
-  reproj_bob_wtr <- st_transform(bob_locs_wtr, crs = st_crs(wgs84))
-  reproj_coy_smr <- st_transform(coy_locs_smr, crs = st_crs(wgs84))
-  reproj_coy_wtr <- st_transform(coy_locs_wtr, crs = st_crs(wgs84))
   
   #'  Function to extract covariates from raster data for each species
   rast_extract <- function(locs) {
+    #'  Reproject to match rasters projections (WGS84)
+    reproj_locs <- st_transform(locs, crs = st_crs(wgs84))
     #'  Extract covariates that share same projection
-    elevation <- raster::extract(dem, locs, df = TRUE)
-    slope <- raster::extract(Slope, locs, df = TRUE)
-    modified <- raster::extract(HM, locs, df = TRUE)
+    elevation <- raster::extract(dem, reproj_locs, df = TRUE)
+    slope <- raster::extract(Slope, reproj_locs, df = TRUE)
+    modified <- raster::extract(HM, reproj_locs, df = TRUE)
     join_covs <- full_join(elevation, slope, by = "ID") %>%
       full_join(modified, by = "ID") %>%
       transmute(
@@ -203,7 +269,7 @@
         HumanMod = WPPP_gHM
       )
     #'  Pull out unique animal/time information
-    animal <- as.data.frame(locs) %>%
+    animal <- as.data.frame(reproj_locs) %>%
       select(c(ID, time))
     #'  Merge animal/time information with covariates
     covs <- as.data.frame(cbind(animal, join_covs))
