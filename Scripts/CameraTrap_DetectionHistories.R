@@ -53,7 +53,7 @@
    
   # megadata <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/full_camdata_2021-01-21.csv") %>%
   # megadata <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/full_camdataYr2_2021-03-02.csv") %>%
-  megadata <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/full_camdata18-20_2021-03-16.csv") %>%
+  megadata <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/full_camdata18-20_2021-05-06.csv") %>%
     dplyr::select("File", "DateTime", "Date", "Time", "CameraLocation", 
                   "Camera_Lat", "Camera_Long", "Animal", "Human", "Vehicle", 
                   "Species", "HumanActivity", "Count") %>%
@@ -163,10 +163,12 @@
   min(images_summer19$Date); max(images_summer19$Date)
   min(images_winter1920$Date); max(images_winter1920$Date)
   
+  
   #'  Calculate number of trap nights per camera
-  #'  Doesn't work unless dates are formatted correctly above- they're not
-  # trapnights <- as.numeric(cam_stations$Pull_date - cam_stations$Set_date) 
-  # hist(trapnights)
+  #'  Length of deployment
+  trapnights_full <- as.numeric(as.Date(cam_stations$Retrieval_date, format = "%m/%d/%Y") - as.Date(cam_stations$Setup_date, format = "%m/%d/%Y"))
+  hist(trapnights_full)
+
   
   ####  Camera Operation Table  ####
   #'  ------------------------------ 
@@ -329,6 +331,8 @@
   DH_bob_wtr1820 <- rbind(DH_bob_wtr1819, DH_bob_wtr1920)
 
   
+  ####  SAMPLING EFFORT  ####
+  #'  -------------------
   #'  Save sampling effort for each camera and season
   #'  This is the same for all species so only need to do this once
   Effort_smr18 <- bob_smr18[[2]][1:125,1:13]
@@ -339,16 +343,40 @@
   Effort_smr1819 <- rbind(Effort_smr18, Effort_smr19)
   Effort_wtr1820 <- rbind(Effort_wtr1819, Effort_wtr1920)
   
-  #'  How many sampling occasions had incomplete sampling effort (ignoring NAs)
-  loweff <- sum(Effort_smr1819 < 7, na.rm = TRUE)
+  #'  Summary states on trap nights (active sites only)
+  #'  Remove rows of all NAs (inactive camera stations)
+  eff_smr1819 <- Effort_smr1819[rowSums(is.na(Effort_smr1819)) != ncol(Effort_smr1819), ]
+  eff_wtr1820 <- Effort_wtr1820[rowSums(is.na(Effort_wtr1820)) != ncol(Effort_wtr1820), ]
+  #'  Average number of trap nights per sampling occasion & SE 
+  mean(eff_smr1819, na.rm = TRUE); sd(eff_smr1819, na.rm = TRUE)/length(eff_smr1819)
+  mean(eff_wtr1820, na.rm = TRUE); sd(eff_wtr1820, na.rm = TRUE)/length(eff_wtr1820)
+  #'  Average number, range, & SE of trap nights per season
+  summary(rowSums(eff_smr1819, na.rm = TRUE)); sd(rowSums(eff_smr1819, na.rm = TRUE))/length(eff_smr1819)
+  summary(rowSums(eff_wtr1820, na.rm = TRUE)); sd(rowSums(eff_wtr1820, na.rm = TRUE))/length(eff_wtr1820)
+  #'  Plot and visualize distribution vs mean (red, dashed) and median (blue, solid)
+  hist(rowSums(eff_smr1819, na.rm = TRUE), breaks = 50, xlim = c(0, 100), xlab = "Number of Trap Nights", main = "Number of trap nights across camera sites, \nSummer 2018 & 2019")
+  abline(v = mean(rowSums(eff_smr1819, na.rm = TRUE)), col = "red", lty = 2)
+  abline(v = median(rowSums(eff_smr1819, na.rm = TRUE)), col = "blue", lty = 1, lwd = 2)
+  hist(rowSums(eff_wtr1820, na.rm = TRUE), breaks = 50, xlim = c(0, 100), xlab = "Number of Trap Nights", main = "Number of trap nights across camera sites, \nWinter 2018/2019 & 2019/2020")
+  abline(v = mean(rowSums(eff_wtr1820, na.rm = TRUE)), col = "red", lty = 2)
+  abline(v = median(rowSums(eff_wtr1820, na.rm = TRUE)), col = "blue", lty = 1, lwd = 2)
+  #'  Total number of trap nights & active cameras per season
+  sum(rowSums(eff_smr1819, na.rm = TRUE)); nrow(eff_smr1819)
+  sum(rowSums(eff_wtr1820, na.rm = TRUE)); nrow(eff_wtr1820)
+  
+  #'  How many sampling occasions had incomplete sampling effort
+  #'  Ignoring sampling occasions when camera was inactive
+  loweff_smr <- sum(Effort_smr1819 < 7, na.rm = TRUE)
+  loweff_wtr <- sum(Effort_wtr1820 < 7, na.rm = TRUE)
   #'  Number of sampling occasions total
-  dim(Effort_smr1819)
-  nocc1819 <- 242*13
+  nocc_smr <- length(Effort_smr1819[!is.na(Effort_smr1819)])
+  nocc_wtr <- length(Effort_wtr1820[!is.na(Effort_wtr1820)])
   #'  What percent of sampling occasions had incomplete sampling effort?
   #'  If less than 5%, no going to worry about accounting for sampling effort
   #'  in detection process
-  loweff/nocc1819
-
+  loweff_smr/nocc_smr
+  loweff_wtr/nocc_wtr
+  
   
   ####  COUGARS  ####
   DH_coug_smr18 <- detectionHistory(recordTable = images_summer18,
