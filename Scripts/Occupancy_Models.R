@@ -788,23 +788,27 @@
   (bob_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' bob_s1819_dd <- dredge(bob_s1819_global, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_bob_smr_dd <- nrow(bob_s1819_dd)
   #' print(bob_s1819_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' bob_s1819_all <- get.models(bob_s1819_dd, subset = delta < 2,)
   #' bob_s1819_all[[1]]
   #'  Dredge identified top model
-  (bob_s1819_top <- occu(formula = ~Distance + Height + Trail + Year + Distance:Height  ~Area + HumanMod + PercXGrass, data = bob_s1819_UMF))
+  (bob_s1819_top <- occu(formula = ~Distance + Height + Trail + Distance:Height  ~Area + HumanMod + PercXGrass, data = bob_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020           
   (bob_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' bob_w1820_dd <- dredge(bob_w1820_global, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_bob_wtr_dd <- nrow(bob_w1820_dd)
   #' print(bob_w1820_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' bob_w1820_all <- get.models(bob_w1820_dd, subset = delta < 2,)
   #' bob_w1820_all[[1]]
   #'  Dredge identified top model
-  (bob_w1820_top <- occu(formula = ~Distance ~ Elev + HumanMod + PercForMix, data = bob_w1820_UMF))
+  (bob_w1820_top <- occu(formula = ~Distance ~Elev + HumanMod + PercForMix, data = bob_w1820_UMF))
 
   
   ####  COUGAR MODELS  ####
@@ -816,8 +820,8 @@
   (coug_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coug_s1819_dd <- dredge(coug_s1819_global, rank = "AIC")
-  #' #' #'  Limit the number of terms in a single model... trying to diagnose where the breakdown is for dredge models
-  #' #' coug_s1819_dd <- dredge(coug_s1819_global, rank = "AIC", m.lim = c(NA, 6))
+  #' #'  Count the number of dredged models
+  #' tot_cg_smr_dd <- nrow(coug_s1819_dd)
   #' print(coug_s1819_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' coug_s1819_all <- get.models(coug_s1819_dd, subset = delta < 2,)
@@ -830,6 +834,8 @@
   (coug_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coug_w1820_dd <- dredge(coug_w1820_global, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_cg_wtr_dd <- nrow(coug_w1820_dd)
   #' print(coug_w1820_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' coug_w1820_all <- get.models(coug_w1820_dd, subset = delta < 2,)
@@ -842,17 +848,21 @@
   (coy_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coy_s1819_dd <- dredge(coy_s1819_global, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_cy_smr_dd <- nrow(coy_s1819_dd)
   #' print(coy_s1819_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' coy_s1819_all <- get.models(coy_s1819_dd, subset = delta < 2,)
   #' coy_s1819_all[[1]]
   #'  Dredge identified top model 
-  (coy_s1819_top <- occu(formula = ~Distance + Height + Trail + Distance:Height ~Area + Elev + NearestRd + PercForMix + Slope, data = coy_s1819_UMF))
+  (coy_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + NearestRd + PercForMix + Slope, data = coy_s1819_UMF))
    
   #'  #'  WINTERS 2018-2019 & 2019-2020              
   (coy_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coy_w1820_dd <- dredge(coy_w1820_global, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_cy_wtr_dd <- nrow(coy_w1820_dd)
   #' print(coy_w1820_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' coy_w1820_all <- get.models(coy_w1820_dd, subset = delta < 2,)
@@ -867,12 +877,14 @@
   (wolf_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_s1819_UMF))
   #' #'  Dredge the global2 model for all possible combinations
   #' wolf_s1819_dd <- dredge(wolf_s1819_global2, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_wf_smr_dd <- nrow(wolf_s1819_dd)
   #' print(wolf_s1819_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' wolf_s1819_all <- get.models(wolf_s1819_dd, subset = delta < 2,)
   #' wolf_s1819_all[[1]]
   #'  Dredge identified top model
-  (wolf_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + HumanMod, data = wolf_s1819_UMF))
+  (wolf_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + HumanMod + NearestRd, data = wolf_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020     
   #'  Dropped Elevation from global model due to problems with dredge (seemed to
@@ -883,6 +895,8 @@
   (wolf_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wolf_w1820_dd <- dredge(wolf_w1820_global2, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_wf_wtr_dd <- nrow(wolf_w1820_dd)
   #' print(wolf_w1820_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' wolf_w1820_all <- get.models(wolf_w1820_dd, subset = delta < 2,)
@@ -899,6 +913,8 @@
   (elk_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + NearestRd + HumanMod, elk_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' elk_s1819_dd <- dredge(elk_s1819_global2, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_ek_smr_dd <- nrow(elk_s1819_dd)
   #' print(elk_s1819_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' elk_s1819_all <- get.models(elk_s1819_dd, subset = delta < 2,)
@@ -913,6 +929,8 @@
   (elk_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + NearestRd + HumanMod, elk_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' elk_w1820_dd <- dredge(elk_w1820_global2, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_ek_wtr_dd <- nrow(elk_w1820_dd)
   #' print(elk_w1820_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' elk_w1820_all <- get.models(elk_w1820_dd, subset = delta < 2,)
@@ -930,6 +948,8 @@
   (md_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' md_s1819_dd <- dredge(md_s1819_global, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_md_smr_dd <- nrow(md_s1819_dd)
   #' print(md_s1819_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' md_s1819_all <- get.models(md_s1819_dd, subset = delta < 2,)
@@ -941,6 +961,8 @@
   (md_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' md_w1820_dd <- dredge(md_w1820_global, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_md_wtr_dd <- nrow(md_w1820_dd)
   #' print(md_w1820_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' md_w1820_all <- get.models(md_w1820_dd, subset = delta < 2,)
@@ -957,6 +979,8 @@
   (wtd_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wtd_s1819_dd <- dredge(wtd_s1819_global2, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_wt_smr_dd <- nrow(wtd_s1819_dd)
   #' print(wtd_s1819_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' wtd_s1819_all <- get.models(wtd_s1819_dd, subset = delta < 2,)
@@ -969,6 +993,8 @@
   (wtd_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wtd_w1820_dd <- dredge(wtd_w1820_global2, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_wt_wtr_dd <- nrow(wtd_w1820_dd)
   #' print(wtd_w1820_dd[1:5,])
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' wtd_w1820_all <- get.models(wtd_w1820_dd, subset = delta < 2,)
@@ -977,6 +1003,21 @@
   (wtd_w1820_top <- occu(formula = ~Distance + Height + Temp_wtr + Trail + Distance:Height ~Elev + HumanMod + PercForMix + PercXGrass, data = wtd_w1820_UMF))
   
 
+  #' #'  Average number of dredged models
+  #' ndd <- sum(tot_bob_smr_dd, tot_bob_wtr_dd, tot_cg_smr_dd, tot_cg_wtr_dd, tot_cy_smr_dd, 
+  #'   tot_cy_wtr_dd, tot_ek_smr_dd, tot_ek_wtr_dd, tot_md_smr_dd, tot_md_wtr_dd, 
+  #'   tot_wf_smr_dd, tot_wf_wtr_dd, tot_wt_smr_dd, tot_wt_wtr_dd)
+  #' meandd <- sum(tot_bob_smr_dd, tot_bob_wtr_dd, tot_cg_smr_dd, tot_cg_wtr_dd, tot_cy_smr_dd, 
+  #'   tot_cy_wtr_dd, tot_ek_smr_dd, tot_ek_wtr_dd, tot_md_smr_dd, tot_md_wtr_dd, 
+  #'   tot_wf_smr_dd, tot_wf_wtr_dd, tot_wt_smr_dd, tot_wt_wtr_dd)/14
+  #' mindd <- min(tot_bob_smr_dd, tot_bob_wtr_dd, tot_cg_smr_dd, tot_cg_wtr_dd, tot_cy_smr_dd, 
+  #'   tot_cy_wtr_dd, tot_ek_smr_dd, tot_ek_wtr_dd, tot_md_smr_dd, tot_md_wtr_dd, 
+  #'   tot_wf_smr_dd, tot_wf_wtr_dd, tot_wt_smr_dd, tot_wt_wtr_dd)
+  #' maxdd <- max(tot_bob_smr_dd, tot_bob_wtr_dd, tot_cg_smr_dd, tot_cg_wtr_dd, tot_cy_smr_dd, 
+  #'   tot_cy_wtr_dd, tot_ek_smr_dd, tot_ek_wtr_dd, tot_md_smr_dd, tot_md_wtr_dd, 
+  #'   tot_wf_smr_dd, tot_wf_wtr_dd, tot_wt_smr_dd, tot_wt_wtr_dd)
+  
+  
   ####  Summary tables  ####
   #'  Save model outputs in table format 
   #'  Functions extract outputs for each sub-model and appends species/season info
@@ -1108,8 +1149,8 @@
     arrange(match(Season, c("Summer", "Winter")))
   
   #'  Save!
-  # write.csv(results_psi, paste0("./Outputs/OccMod_OccProb_Results_", Sys.Date(), ".csv"))
-  # write.csv(results_psi_wide, paste0("./Outputs/OccMod_OccProb_Results_wide_", Sys.Date(), ".csv"))
+  write.csv(results_psi, paste0("./Outputs/OccMod_OccProb_Results_", Sys.Date(), ".csv"))
+  write.csv(results_psi_wide, paste0("./Outputs/OccMod_OccProb_Results_wide_", Sys.Date(), ".csv"))
   
  
   #'  Function to save detection results
@@ -1237,8 +1278,8 @@
     arrange(match(Season, c("Summer", "Winter")))
 
   #'  Save!
-  # write.csv(results_det, paste0("./Outputs/OccMod_DetProb_Results_", Sys.Date(), ".csv"))
-  # write.csv(results_det_wide, paste0("./Outputs/OccMod_DetProb_Results_wide", Sys.Date(), ".csv"))
+  write.csv(results_det, paste0("./Outputs/OccMod_DetProb_Results_", Sys.Date(), ".csv"))
+  write.csv(results_det_wide, paste0("./Outputs/OccMod_DetProb_Results_wide", Sys.Date(), ".csv"))
 
   #'  Save workspace
   # save.image(file = "CamvCollar_OccMods.RData")
