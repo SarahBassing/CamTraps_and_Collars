@@ -347,12 +347,12 @@
   #'  Remove rows of all NAs (inactive camera stations)
   eff_smr1819 <- Effort_smr1819[rowSums(is.na(Effort_smr1819)) != ncol(Effort_smr1819), ]
   eff_wtr1820 <- Effort_wtr1820[rowSums(is.na(Effort_wtr1820)) != ncol(Effort_wtr1820), ]
-  #'  Average number of trap nights per sampling occasion & SE 
+  #'  Average number of trap nights per sampling occasion & SE
   mean(eff_smr1819, na.rm = TRUE); sd(eff_smr1819, na.rm = TRUE)/length(eff_smr1819)
   mean(eff_wtr1820, na.rm = TRUE); sd(eff_wtr1820, na.rm = TRUE)/length(eff_wtr1820)
   #'  Average number, range, & SE of trap nights per season
-  summary(rowSums(eff_smr1819, na.rm = TRUE)); sd(rowSums(eff_smr1819, na.rm = TRUE))/length(eff_smr1819)
-  summary(rowSums(eff_wtr1820, na.rm = TRUE)); sd(rowSums(eff_wtr1820, na.rm = TRUE))/length(eff_wtr1820)
+  summary(rowSums(eff_smr1819, na.rm = TRUE)); sd(rowSums(eff_smr1819, na.rm = TRUE))/nrow(eff_smr1819) #length(eff_smr1819)
+  summary(rowSums(eff_wtr1820, na.rm = TRUE)); sd(rowSums(eff_wtr1820, na.rm = TRUE))/nrow(eff_wtr1820) #length(eff_wtr1820)
   #'  Plot and visualize distribution vs mean (red, dashed) and median (blue, solid)
   hist(rowSums(eff_smr1819, na.rm = TRUE), breaks = 50, xlim = c(0, 100), xlab = "Number of Trap Nights", main = "Number of trap nights across camera sites, \nSummer 2018 & 2019")
   abline(v = mean(rowSums(eff_smr1819, na.rm = TRUE)), col = "red", lty = 2)
@@ -363,7 +363,7 @@
   #'  Total number of trap nights & active cameras per season
   sum(rowSums(eff_smr1819, na.rm = TRUE)); nrow(eff_smr1819)
   sum(rowSums(eff_wtr1820, na.rm = TRUE)); nrow(eff_wtr1820)
-  
+
   #'  How many sampling occasions had incomplete sampling effort
   #'  Ignoring sampling occasions when camera was inactive
   loweff_smr <- sum(Effort_smr1819 < 7, na.rm = TRUE)
@@ -376,7 +376,7 @@
   #'  in detection process
   loweff_smr/nocc_smr
   loweff_wtr/nocc_wtr
-  
+
   
   ####  COUGARS  ####
   DH_coug_smr18 <- detectionHistory(recordTable = images_summer18,
