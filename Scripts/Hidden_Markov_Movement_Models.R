@@ -229,6 +229,12 @@
   coy_HMM_smr <- HMM_fit(coyData_smr, Par0_m1_coy, pred_formula, prey_DM) #pred_DM
   coy_HMM_wtr <- HMM_fit(coyData_wtr, Par0_m1_coy, pred_formula, prey_DM) #pred_DM
   
+  #'  Save model results
+  spp_HMM_output <- list(md_HMM_smr, md_HMM_wtr, elk_HMM_smr, elk_HMM_wtr, wtd_HMM_smr, 
+                         wtd_HMM_wtr, coug_HMM_smr, coug_HMM_wtr, wolf_HMM_smr, 
+                         wolf_HMM_wtr, bob_HMM_smr, bob_HMM_wtr, coy_HMM_smr, coy_HMM_wtr)
+  save(spp_HMM_output, file = paste0("./Outputs/spp_HMM_output_", Sys.Date(), ".RData"))
+  
   #'  Calculate transition probabilities
   # md_trProbs_smr <- getTrProbs(md_HMM_smr, getCI=TRUE)
   # md_trProbs_wtr <- getTrProbs(md_HMM_wtr, getCI=TRUE)
@@ -355,7 +361,7 @@
     # condformat(.) %>%
     # rule_text_bold(c(Estimate, SE, Pval), expression = Pval <= 0.05) %>%
     unite(Est_SE, Estimate, SE, sep = " ") %>%
-    unite(CI95, Lower, Upper, sep = " - ") %>%
+    unite(CI95, Lower, Upper, sep = " , ") %>%
     unite(Est_SE_CI, Est_SE, CI95, sep = "_") %>%
     spread(Parameter, Est_SE_CI) %>%
     separate("(Intercept)", c("Intercept (SE)", "Intercept 95% CI"), sep = "_") %>%
