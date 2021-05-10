@@ -785,7 +785,7 @@
 
   ####  BOBCAT MODELS  ####                   
   #'  SUMMERS 2018 & 2019
-  (bob_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_s1819_UMF))
+  (bob_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' bob_s1819_dd <- dredge(bob_s1819_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -798,7 +798,7 @@
   (bob_s1819_top <- occu(formula = ~Distance + Height + Trail + Distance:Height  ~Area + HumanMod + PercXGrass, data = bob_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020           
-  (bob_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_w1820_UMF))
+  (bob_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' bob_w1820_dd <- dredge(bob_w1820_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -817,7 +817,7 @@
   #'  in the hessian matrix?)
   #'  SUMMERS 2018 & 2019
   # (coug_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coug_s1819_UMF))
-  (coug_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_s1819_UMF))
+  (coug_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coug_s1819_dd <- dredge(coug_s1819_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -831,7 +831,7 @@
   
   #'  WINTERS 2018-2019 & 2019-2020           
   # (coug_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coug_w1820_UMF))
-  (coug_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_w1820_UMF))
+  (coug_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coug_w1820_dd <- dredge(coug_w1820_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -845,7 +845,7 @@
   
   ####  COYOTE MODELS  ####
   #'  SUMMERS 2018 & 2019
-  (coy_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_s1819_UMF))
+  (coy_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coy_s1819_dd <- dredge(coy_s1819_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -858,7 +858,7 @@
   (coy_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + NearestRd + PercForMix + Slope, data = coy_s1819_UMF))
    
   #'  #'  WINTERS 2018-2019 & 2019-2020              
-  (coy_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_w1820_UMF))
+  (coy_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coy_w1820_dd <- dredge(coy_w1820_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -874,7 +874,7 @@
   #'  SUMMERS 2018 & 2019    
   #'  Removed PercXShrub in global2 models due to poor convergence, esp. summer model                 
   # (wolf_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, wolf_s1819_UMF))
-  (wolf_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_s1819_UMF))
+  (wolf_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_s1819_UMF))
   #' #'  Dredge the global2 model for all possible combinations
   #' wolf_s1819_dd <- dredge(wolf_s1819_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -892,7 +892,7 @@
   #'  significant in global or dredged models but Area was)       
   # (wolf_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, wolf_w1820_UMF))
   # (wolf_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wolf_w1820_UMF)) # works with dredge but Elev not significant
-  (wolf_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_w1820_UMF))
+  (wolf_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wolf_w1820_dd <- dredge(wolf_w1820_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -910,7 +910,7 @@
   #'  NE study area only so no Area effect 
   #'  Removed PercXGrass and PercXShrub in global2 models due to poor convergence                             
   # (elk_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, elk_s1819_UMF))
-  (elk_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + NearestRd + HumanMod, elk_s1819_UMF))
+  (elk_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + NearestRd + HumanMod, elk_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' elk_s1819_dd <- dredge(elk_s1819_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -926,7 +926,7 @@
   #'  NE study area only so no Area effect 
   #'  Removed PercXGrass and PercXShrub in global2 models due to poor convergence               
   # (elk_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, elk_w1820_UMF))
-  (elk_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + NearestRd + HumanMod, elk_w1820_UMF))
+  (elk_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + NearestRd + HumanMod, elk_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' elk_w1820_dd <- dredge(elk_w1820_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -945,7 +945,7 @@
   ####  MULE DEER MODELS  ####
   #'  SUMMERS 2018 & 2019
   #'  OK study area only so no Area effect
-  (md_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_s1819_UMF))
+  (md_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' md_s1819_dd <- dredge(md_s1819_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -958,7 +958,7 @@
   (md_s1819_top <- occu(formula = ~Distance + Height + Temp_smr + Distance:Height ~HumanMod, data = md_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020, OK study area only so no Area effect                    
-  (md_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_w1820_UMF))
+  (md_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' md_w1820_dd <- dredge(md_w1820_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -976,7 +976,7 @@
   #'  NE study area only so no Area effect 
   #'  Removed PercXShrub in global2 models due to poor convergence, esp. on winter model
   # (wtd_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, wtd_s1819_UMF))
-  (wtd_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_s1819_UMF))
+  (wtd_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wtd_s1819_dd <- dredge(wtd_s1819_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -990,7 +990,7 @@
   
   #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect              
   # (wtd_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, wtd_w1820_UMF))
-  (wtd_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_w1820_UMF))
+  (wtd_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wtd_w1820_dd <- dredge(wtd_w1820_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -1101,26 +1101,27 @@
   colnames(occ_results_combo) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
 
   #'  Round so numbers are easier to look at
+  rounddig <- 3
   results_psi <- occ_results %>%
     mutate(
-      Estimate = round(Estimate, 3),
-      SE = round(SE, 3),
-      z = round(z, 3),
-      Pval = round(Pval, 3)
+      Estimate = round(Estimate, rounddig),
+      SE = round(SE, rounddig),
+      z = round(z, rounddig),
+      Pval = round(Pval, rounddig)
     )
   results_psi_top <- occ_results_top %>%
     mutate(
-      Estimate = round(Estimate, 3),
-      SE = round(SE, 3),
-      z = round(z, 3),
-      Pval = round(Pval, 3)
+      Estimate = round(Estimate, rounddig),
+      SE = round(SE, rounddig),
+      z = round(z, rounddig),
+      Pval = round(Pval, rounddig)
     )
   results_psi_combo <- occ_results_combo %>%
     mutate(
-      Estimate = round(Estimate, 3),
-      SE = round(SE, 3),
-      z = round(z, 3),
-      Pval = round(Pval, 3)
+      Estimate = round(Estimate, rounddig),
+      SE = round(SE, rounddig),
+      z = round(z, rounddig),
+      Pval = round(Pval, rounddig)
     )
   
   #'  Spread this out so the coefficient effects are easier to compare across species
@@ -1242,14 +1243,16 @@
       Estimate = round(Estimate, 3),
       SE = round(SE, 3),
       z = round(z, 3),
-      Pval = round(Pval, 3)
+      Pval = round(Pval, 3),
+      Parameter = ifelse(Parameter == "Distance:Height", "Height:Distance", Parameter)
     )
   results_det_combo <- det_results_combo %>%
     mutate(
       Estimate = round(Estimate, 3),
       SE = round(SE, 3),
       z = round(z, 3),
-      Pval = round(Pval, 3)
+      Pval = round(Pval, 3),
+      Parameter = ifelse(Parameter == "Distance:Height", "Height:Distance", Parameter)
     )
   
   #'  Spread this out so the coefficient effects are easier to compare across species
