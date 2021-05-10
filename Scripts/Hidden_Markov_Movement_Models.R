@@ -112,7 +112,7 @@
   Par0_m1_md <- list(step = c(250, 500, 250, 500, 0.01, 0.005), angle = c(0.3, 0.7))  #zero-mass params needed
   Par0_m1_elk <- list(step = c(500, 1000, 500, 1000, 0.01, 0.005), angle = c(0.3, 0.7))  #zero-mass params needed
   Par0_m1_wtd <- list(step = c(100, 500, 100, 500, 0.01, 0.005), angle = c(0.3, 0.7))  #zero-mass params needed
-  Par0_m1_coug <- list(step = c(500, 1500, 500, 1500), angle = c(0.3, 0.7))  
+  Par0_m1_coug <- list(step = c(500, 1500, 500, 1500, 0.01, 0.005), angle = c(0.3, 0.7))  #zero-mass params needed
   Par0_m1_wolf <- list(step = c(500, 3000, 500, 3000), angle = c(0.3, 0.7))  
   Par0_m1_bob <- list(step = c(500, 1000, 500, 1000), angle = c(0.3, 0.7))  
   Par0_m1_coy <- list(step = c(500, 2000, 500, 2000), angle = c(0.3, 0.7))  
@@ -216,6 +216,8 @@
   md_HMM_wtr <- HMM_fit(mdData_wtr, Par0_m1_md, prey_formula, prey_DM) 
   elk_HMM_smr <- HMM_fit(elkData_smr, Par0_m1_elk, prey_formula, prey_DM) 
   elk_HMM_wtr <- HMM_fit(elkData_wtr, Par0_m1_elk, prey_formula, prey_DM) 
+  # In fitHMM.momentuHMMData(data = Data, nbStates = 2, dist = dist,  :
+  #                            ginv of the hessian failed -- Error in svd(X): infinite or missing values in 'x'
   wtd_HMM_smr <- HMM_fit(wtdData_smr, Par0_m1_wtd, prey_formula, prey_DM) 
   wtd_HMM_wtr <- HMM_fit(wtdData_wtr, Par0_m1_wtd, prey_formula, prey_DM) 
   coug_HMM_smr <- HMM_fit(cougData_smr, Par0_m1_coug, pred_formula, prey_DM) #pred_DM
@@ -243,19 +245,20 @@
   # coy_trProbs_smr <- getTrProbs(coy_HMM_smr, getCI=TRUE)
   # coy_trProbs_wtr <- getTrProbs(coy_HMM_wtr, getCI=TRUE)
   
-  rounddig <- 3
+  #'  Function to extract model outputs
+  rounddig <- 2
   hmm_out <- function(mod, spp, season) {
     #'  Extract estimates, standard error, and 95% Confidence Intervals for effect
     #'  of each covariate on transition probabilities
     est_out <- CIbeta(mod, alpha = 0.95)
-    beta1.2 <- round(est_out[[3]]$est[,1], rounddig)
-    beta2.1 <- round(est_out[[3]]$est[,2], rounddig)
-    se1.2 <- round(est_out[[3]]$se[,1], rounddig)
-    se2.1 <- round(est_out[[3]]$se[,2], rounddig)
-    lci1.2 <- round(est_out[[3]]$lower[,1], rounddig)
-    lci2.1 <- round(est_out[[3]]$lower[,2], rounddig)
-    uci1.2 <- round(est_out[[3]]$upper[,1], rounddig)
-    uci2.1 <- round(est_out[[3]]$upper[,2], rounddig)
+    beta1.2 <- formatC(round(est_out[[3]]$est[,1], rounddig), rounddig, format="f")
+    beta2.1 <- formatC(round(est_out[[3]]$est[,2], rounddig), rounddig, format="f")
+    se1.2 <- formatC(round(est_out[[3]]$se[,1], rounddig), rounddig, format="f")
+    se2.1 <- formatC(round(est_out[[3]]$se[,2], rounddig), rounddig, format="f")
+    lci1.2 <- formatC(round(est_out[[3]]$lower[,1], rounddig), rounddig, format="f")
+    lci2.1 <- formatC(round(est_out[[3]]$lower[,2], rounddig), rounddig, format="f")
+    uci1.2 <- formatC(round(est_out[[3]]$upper[,1], rounddig), rounddig, format="f")
+    uci2.1 <- formatC(round(est_out[[3]]$upper[,2], rounddig), rounddig, format="f")
     #'  Merge into a data frame and organize
     out1.2 <- as.data.frame(cbind(beta1.2, se1.2, lci1.2, uci1.2)) %>%
       mutate(
@@ -284,19 +287,35 @@
     out <- as.data.frame(rbind(out1.2, out2.1))
     return(out)
   }
-  
+  #'  Run each season and species-specific model through function
   md_s1819_hmm <- hmm_out(md_HMM_smr, "Mule Deer", "Summer")
   md_w1820_hmm <- hmm_out(md_HMM_wtr, "Mule Deer", "Winter")
+  elk_s1819_hmm <- hmm_out(elk_HMM_smr, "Elk", "Summer")
+  elk_w1820_hmm <- hmm_out(elk_HMM_wtr, "Elk", "Winter")
+  wtd_s1819_hmm <- hmm_out(wtd_HMM_smr, "White-tailed Deer", "Summer")
+  wtd_w1820_hmm <- hmm_out(wtd_HMM_wtr, "White-tailed Deer", "Winter")
+  coug_s1819_hmm <- hmm_out(coug_HMM_smr, "Cougar", "Summer")
+  coug_w1820_hmm <- hmm_out(coug_HMM_wtr, "Cougar", "Winter")
+  wolf_s1819_hmm <- hmm_out(wolf_HMM_smr, "Wolf", "Summer")
+  wolf_w1820_hmm <- hmm_out(wolf_HMM_wtr, "Wolf", "Winter")
+  bob_s1819_hmm <- hmm_out(bob_HMM_smr, "Bobcat", "Summer")
+  bob_w1820_hmm <- hmm_out(bob_HMM_wtr, "Bobcat", "Winter")
+  coy_s1819_hmm <- hmm_out(coy_HMM_smr, "Coyote", "Summer")
+  coy_w1820_hmm <- hmm_out(coy_HMM_wtr, "Coyote", "Winter")
   
-  results_hmm_prey <- rbind(md_s1819_hmm, md_w1820_hmm)
-  results_hmm_pred <- rbind()
+  #'  Gather prey and predator results to put into a single results table
+  results_hmm_prey <- rbind(md_s1819_hmm, md_w1820_hmm, elk_s1819_hmm, elk_w1820_hmm, 
+                            wtd_s1819_hmm, wtd_w1820_hmm)
+  results_hmm_pred <- rbind(bob_s1819_hmm, bob_w1820_hmm, coug_s1819_hmm, coug_w1820_hmm, 
+                            coy_s1819_hmm, coy_w1820_hmm, wolf_s1819_hmm, wolf_w1820_hmm)
   
-  #'  Spread this out so the coefficient effects are easier to compare across species
+  #'  Spread results so the coefficient effects are easier to compare between 
+  #'  transition probabilities and across species
   #'  Ungulates (no study area covariate included)
   results_hmm_wide_prey <- results_hmm_prey %>% 
     # dplyr::select(-z) %>%
     mutate(
-      SE = round(SE, 2),
+      # SE = round(SE, 2),
       SE = paste0("(", SE, ")"),
     ) %>%
     #'  Bold significant variables- doesn't work if continue manipulating data frame
@@ -314,14 +333,22 @@
     separate("PercXGrass", c("PercXGrass (SE)", "PercXGrass 95% CI"), sep = "_") %>%
     separate("PercXShrub", c("PercXShrub (SE)", "PercXShrub 95% CI"), sep = "_") %>%
     separate("NearestRd", c("NearestRd (SE)", "NearestRd 95% CI"), sep = "_") %>%
-    separate("HumanMod", c("HumanMod (SE)", "HumanMod 95% CI"), sep = "_") 
-    # arrange(match(Species, c("Mule Deer", "Elk", "White-tailed Deer"))) %>%
-    # arrange(match(Season, c("Summer", "Winter")))
+    separate("HumanMod", c("HumanMod (SE)", "HumanMod 95% CI"), sep = "_") %>%
+    mutate(
+      AreaOK = rep("NA", nrow(.)),
+      AreaCI = rep("NA", nrow(.))
+    ) %>%
+    relocate(AreaOK, .before = "Elev (SE)") %>%
+    relocate(AreaCI, .before = "Elev (SE)") %>%
+    arrange(match(Species, c("Mule Deer", "Elk", "White-tailed Deer")))
+  names(results_hmm_wide_prey)[names(results_hmm_wide_prey) == "AreaOK"] <- "AreaOK (SE)"
+  names(results_hmm_wide_prey)[names(results_hmm_wide_prey) == "AreaCI"] <- "AreaOK 95% CI"
+
   #'  Predators (study area covariate included)
   results_hmm_wide_pred <- results_hmm_pred %>% 
     # dplyr::select(-z) %>%
     mutate(
-      SE = round(SE, 2),
+      # SE = round(SE, 2),
       SE = paste0("(", SE, ")"),
     ) %>%
     #'  Bold significant variables- doesn't work if continue manipulating data frame
@@ -339,8 +366,8 @@
     separate("PercXGrass", c("PercXGrass (SE)", "PercXGrass 95% CI"), sep = "_") %>%
     separate("PercXShrub", c("PercXShrub (SE)", "PercXShrub 95% CI"), sep = "_") %>%
     separate("NearestRd", c("NearestRd (SE)", "NearestRd 95% CI"), sep = "_") %>%
-    separate("HumanMod", c("HumanMod (SE)", "HumanMod 95% CI"), sep = "_") 
-  # arrange(match(Species, c("Bobcat", "Cougar", "Coyote", "Wolf"))) %>%
+    separate("HumanMod", c("HumanMod (SE)", "HumanMod 95% CI"), sep = "_") %>%
+    arrange(match(Species, c("Bobcat", "Cougar", "Coyote", "Wolf"))) 
   # arrange(match(Season, c("Summer", "Winter")))
   
   results_hmm_wide <- rbind(results_hmm_wide_pred, results_hmm_wide_prey)
