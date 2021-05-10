@@ -16,7 +16,7 @@
   #'    -Percent Xeric Shrub (within 205m of point)
   #'    -Distance to nearest road
   #'    -Season
-  #'    -Study Area... not yet actually
+  #'    -Study Area
   #'  ============================================
   
   #'  Clean workspace
@@ -29,7 +29,6 @@
   library(raster)
   library(parallel)
   library(doParallel)
-  library(foreach)
   library(future.apply)
   library(tidyverse)
   
@@ -68,50 +67,50 @@
   projection(road_reproj)
 
   #'  Load animal location data for each species
-  load("./Outputs/Telemetry_crwOut/crwOut_MD_smr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_MD_wtr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_ELK_smr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_ELK_wtr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_WTD_smr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_WTD_wtr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_COUG_smr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_COUG_wtr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_WOLF_smr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_WOLF_wtr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_BOB_smr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_BOB_wtr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_COY_smr.RData")
-  load("./Outputs/Telemetry_crwOut/crwOut_COY_wtr.RData")
+  load("./Outputs/Telemetry_crwOut/crwOut_ALL_2021-05-03.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_MD_smr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_MD_wtr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_ELK_smr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_ELK_wtr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_WTD_smr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_WTD_wtr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_COUG_smr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_COUG_wtr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_WOLF_smr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_WOLF_wtr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_BOB_smr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_BOB_wtr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_COY_smr.RData")
+  # load("./Outputs/Telemetry_crwOut/crwOut_COY_wtr.RData")
   
   
-  #'  Function to make data a spatial sf object
+  #'  Function to make crwOut data a spatial sf object
   spatial_locs <- function(locs) {
     move <- locs[[2]]
     sf_locs <- st_as_sf(move, coords = c("mu.x", "mu.y"), crs = sa_proj)
     return(sf_locs)
   }
-  crwOut <- list(crwOut_COY_smr, crwOut_COY_wtr) 
-  sf_locs <- lapply(crwOut, spatial_locs)
+  sf_locs <- lapply(crwOut_ALL, spatial_locs)
   
   #'  Extract a few individuals to practice with
   # coy_a <- sf_locs[[1]][sf_locs[[1]]$ID == "NECOY4M_2",]
   # coy_b <- sf_locs[[2]][sf_locs[[2]]$ID == "MVCOY63M_37",]
-  # sf_locs_tst <- list(coy_a, coy_b)
+  # sf_locs <- list(coy_a, coy_b)
+
   
   
   
   ####  COVARIATE EXTRACTION & CALCULATIONS  ####
-  #'  Takes forever but running in parallel helps
+  #'  Takes forever but running in parallel helps 
+  #'  51.49 hrs on lab computer with 30 cores!
   
   #'  Monitor time
   start.time <- Sys.time()
-  
-  #'  List spatial data frames
-  # locs <- list(coy_locs_smr, coy_locs_wtr)
 
   #'  Setup script to run in parallel
   #'  Extract covariates for each species at once
   #'  Identify how many cores I want to use
+  detectCores(logical = FALSE)
   cl <- parallel::makeCluster(4)  # change to 14 when working correctly on lab computer
   #'  Run in parallel on local computer with specified number of cores
   plan(cluster, workers = cl)
@@ -138,7 +137,7 @@
       )
     #'  Pull out unique animal/time information
     animal <- as.data.frame(reproj_locs) %>%
-      select(c(ID, time))
+      dplyr::select(c(ID, time))
     #'  Merge animal/time information with covariates
     covs <- as.data.frame(cbind(animal, join_covs))
     
@@ -251,8 +250,8 @@
         PercMesicMix = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicMix) 
       ) %>%
       #'  Only retain relevant columns
-      select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub,
-             PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix, ID, time, Season) %>%
+      dplyr::select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub,
+                    PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix, ID, time, Season) %>%
       #'  Filter out rows with NAs
       filter(!is.na(PercForest))
     #'  Repeat for 2019 landcover data and telemetry locations
@@ -306,8 +305,8 @@
         PercMesicMix = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicMix)
       ) %>%
       #'  Only retain relevant columns
-      select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub,
-             PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix, ID, time, Season) %>%
+      dplyr::select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub,
+                    PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix, ID, time, Season) %>%
       #'  Filter out rows with NAs
       filter(!is.na(PercForest))
     #'  Merge annual landcover data together so no duplicates
@@ -342,7 +341,7 @@
   
   #'  Run list of species location data through function in parallel
   #'  This will take AWHILE even in parallel
-  # spp_telem_covs <- lapply(sf_locs_tst, cov_extract)
+  # spp_telem_covs <- lapply(sf_locs, cov_extract) # non-parallel approach
   spp_telem_covs <- future_lapply(sf_locs, cov_extract)
   
   
@@ -369,10 +368,8 @@
                                 Area = ifelse(grepl("W93M", ID), "OK", Area),
                                 Area = ifelse(grepl("W94M", ID), "OK", Area))
 
-  #'  Save!
-  save(all_telem_covs_list, file = paste0("./Outputs/Telemetry_covs/all_telem_covs_list_", Sys.Date(), ".RData"))
-  # save(coy_telem_covs_smr, file = "./Outputs/Telemetry_covs/coy_telem_covs_smr.RData")
-  # save(coy_telem_covs_wtr, file = "./Outputs/Telemetry_covs/coy_telem_covs_wtr.RData")
+  #'  Save and hope you never have to run this again!
+  save(spp_telem_covs, file = paste0("./Outputs/Telemetry_covs/spp_telem_covs_", Sys.Date(), ".RData"))
 
 
   
