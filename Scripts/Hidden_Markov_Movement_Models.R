@@ -71,28 +71,6 @@
   coyData_wtr <- spp_dataPrep(crwOut_ALL[[14]], spp_telem_covs[[14]])
   # tst <- mapply(spp_dataPrep, crwOut_ALL, spp_telem_covs)
   
-  #' coyMerge_smr <- crawlMerge(crwOut_ALL[[13]], coy_telem_covs_smr, Time.name = "time")
-  #' coyMerge_wtr <- crawlMerge(crwOut_ALL[[14]], coy_telem_covs_wtr, Time.name = "time")
-  #' #'  Make Sex and Year factors
-  #' coyMerge_smr$crwPredict$Area <- as.factor(coyMerge_smr$crwPredict$Area)
-  #' coyMerge_smr$crwPredict$Sex <- as.factor(coyMerge_smr$crwPredict$Sex)
-  #' coyMerge_smr$crwPredict$Year <- as.factor(coyMerge_smr$crwPredict$Year)
-  #' coyMerge_wtr$crwPredict$Area <- as.factor(coyMerge_wtr$crwPredict$Area)
-  #' coyMerge_wtr$crwPredict$Sex <- as.factor(coyMerge_wtr$crwPredict$Sex)
-  #' coyMerge_wtr$crwPredict$Year <- as.factor(coyMerge_wtr$crwPredict$Year)
-  
-  #' #'  Function to create momentuHMMData object from crwData object and covariates
-  #' data_prep <- function(sppMerge) {
-  #'   Data <- prepData(data = sppMerge, covNames = c("Elev", "Slope", "HumanMod", "NearstRd", 
-  #'                                                  "PercForMix", "PercXGrass", "PercXShrub", 
-  #'                                                  "Year", "Sex", "Area"))
-  #'   return(Data)
-  #' }
-  #' 
-  #' #'  Run season & species-specific data through prep function
-  #' spp_list <- list(coyMerge_smr, coyMerge_wtr)
-  #' sppData <- lapply(spp_list, data_prep)
-
   
   #'  Visualize data to inform initial parameter specifications
   # plot(mdData_smr)  #250, 500, 250, 500
@@ -101,7 +79,7 @@
   # plot(cougData_smr)  #500, 1500, 500, 1500
   # plot(wolfData_smr)  #500, 3000, 500, 3000
   # plot(bobData_smr)  #500, 1000, 500, 1000
-  plot(coyData_smr)  #500, 2000, 500, 2000
+  # plot(coyData_smr)  #500, 2000, 500, 2000
   
   
   
@@ -130,8 +108,8 @@
   stateNames <- c("encamped", "exploratory")
   
   #' Distributions for observation processes
-  dist <- list(step = "gamma", angle = "wrpcauchy")  
-  dist2 <- list(step = "weibull", angle = "wrpcauchy")
+  dists <- list(step = "gamma", angle = "wrpcauchy")  
+  # dist2 <- list(step = "weibull", angle = "wrpcauchy")
   #' Can test out different distributions 
   #' Step length: gamma or Weibull; Turning angle: von Mises or wrapped Cauchy
   #' State dwell time: geometric distribution
@@ -178,7 +156,7 @@
   HMM_fit <- function(Data, Par0_m1, pformula, dm) {
     
     #' Fit basic model with no covariates
-    m1 <- fitHMM(data = Data, nbStates = 2, dist = dist, Par0 = Par0_m1,
+    m1 <- fitHMM(data = Data, nbStates = 2, dist = dists, Par0 = Par0_m1,
                  estAngleMean = list(angle = FALSE), stateNames = stateNames)
 
     #'  Compute the most likely state sequence
@@ -190,7 +168,7 @@
     Par0_m2 <- getPar0(model = m1, formula = pformula)  
     
     #'  Fit model with sex covariate on transition probability
-    m2 <- fitHMM(data = Data, nbStates = 2, dist = dist, Par0 = Par0_m2$Par,
+    m2 <- fitHMM(data = Data, nbStates = 2, dist = dists, Par0 = Par0_m2$Par,
                  beta0 = Par0_m2$beta, stateNames = stateNames, formula = pformula, 
                  DM = dm)
     
@@ -328,7 +306,7 @@
     # condformat(.) %>%
     # rule_text_bold(c(Estimate, SE, Pval), expression = Pval <= 0.05) %>%
     unite(Est_SE, Estimate, SE, sep = " ") %>%
-    unite(CI95, Lower, Upper, sep = " - ") %>%
+    unite(CI95, Lower, Upper, sep = ", ") %>%
     unite(Est_SE_CI, Est_SE, CI95, sep = "_") %>%
     spread(Parameter, Est_SE_CI) %>%
     separate("(Intercept)", c("Intercept (SE)", "Intercept 95% CI"), sep = "_") %>%
@@ -361,7 +339,7 @@
     # condformat(.) %>%
     # rule_text_bold(c(Estimate, SE, Pval), expression = Pval <= 0.05) %>%
     unite(Est_SE, Estimate, SE, sep = " ") %>%
-    unite(CI95, Lower, Upper, sep = " , ") %>%
+    unite(CI95, Lower, Upper, sep = ", ") %>%
     unite(Est_SE_CI, Est_SE, CI95, sep = "_") %>%
     spread(Parameter, Est_SE_CI) %>%
     separate("(Intercept)", c("Intercept (SE)", "Intercept 95% CI"), sep = "_") %>%
