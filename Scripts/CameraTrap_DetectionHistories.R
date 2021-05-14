@@ -155,13 +155,26 @@
   OK_wtr1920 <- filter(images_winter1920, grepl("OK", CameraLocation))
   
   
-  
   #'  Double check these were truncated correctly
   min(images_summer18$Date); max(images_summer18$Date)
   min(images_winter1819$Date); max(images_winter1819$Date)
   
   min(images_summer19$Date); max(images_summer19$Date)
   min(images_winter1920$Date); max(images_winter1920$Date)
+  
+  
+  #'  Save for data summary and making data available for publication
+  CamTrap_Detections <- as.data.frame(rbind(images_summer18, images_winter1819, 
+                                            images_summer19, images_winter1920)) %>%
+    mutate(
+      Season = ifelse(Date < "2018-09-30", "Summer18", "Summer19"),
+      Season = ifelse(Date > "2018-11-30" & Date < "2019-03-02", "Winter1819", Season),
+      Season = ifelse(Date > "2019-11-30", "Winter1920", Season)
+    ) %>%
+    filter(Species == "Mule Deer" | Species == "Elk" | Species == "White-tailed Deer" | 
+             Species == "Cougar" | Species == "Wolf" | Species == "Bobcat" | Species == "Coyote")
+  
+  # write.csv(CamTrap_Detections, paste0("./Outputs/CamTrap_Detections_", Sys.Date(), ".csv"))
   
   
   #'  Calculate number of trap nights per camera
