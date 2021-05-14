@@ -120,7 +120,7 @@
     dplyr::select("ID", "CollarID", "Species", "Sex", "StudyArea", "Latitude", "Longitude", 
                   "Acquisition.Time.UTC", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: already thinned, floored, tz adjusted & AnimalID attached by L.Satterfield
-  coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_4hrs.csv") %>%
+  coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_4hrs_wDispersal.csv") %>%
     mutate(ID = as.factor(as.character(ID)),
            CollarID = Collar,
            Sex = str_sub(ID, -1),
@@ -420,8 +420,10 @@
   bob_gtg <- filter(meso_gtg, Species == "Bobcat")
   
   #  Species_gtg are final data sets for HMM analyses
+  
   #  Save RData for easy transfer to other computers
-  save.image(paste0("./Data/Collar_Truncating&Filtering_", Sys.Date(), ".RData"))
+  # save.image(paste0("./Data/Collar_Truncating&Filtering_", Sys.Date(), ".RData"))
+  
   #  Next step is Collar_Movement_DataPrep.R script
 
   
