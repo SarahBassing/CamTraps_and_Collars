@@ -84,7 +84,7 @@
   
   
   ####  Initial model set up  ####
-  
+  #'  ============================
   #'  Define initial parameters associated with each distribution & each state
   #'  Species-specific parameters based on viewing plotted data
   Par0_m1_md <- list(step = c(250, 500, 250, 500, 0.01, 0.005), angle = c(0.3, 0.7))  #zero-mass params needed
@@ -100,48 +100,57 @@
   #'  Wrapped Cauchy distribution: concentration of turning angles for each state
   #'  Include zero-mass parameters when there are 0s in the data w/gamma, Weibull, etc. distributions
   #'  e.g., zeromass0 <- c(0.1,0.05) # step zero-mass
-  # For md:Par0_m1_md <- list(step = c(250, 1000, 250, 500, 0.01, 0.005), angle = c(0.3, 0.7))  # Last 2 parameters are for zero-mass
-  # For wolf:Par0_m1 <- list(step = c(1000, 3000, 1000, 3000), angle = c(0.3, 0.7))  #  No zero-mass parameters needed
-  # For elk: Par0_m1 <- list(step = c(250, 1000, 250, 500, 0.01, 0.005), angle = c(0.3, 0.7)) 
   
   #'  Label states
   stateNames <- c("encamped", "exploratory")
   
   #' Distributions for observation processes
-  dists <- list(step = "gamma", angle = "wrpcauchy")  
-  # dist2 <- list(step = "weibull", angle = "wrpcauchy")
+  dists_wc <- list(step = "gamma", angle = "wrpcauchy")  
+  dists_vm <- list(step = "gamma", angle = "vm")
   #' Can test out different distributions 
   #' Step length: gamma or Weibull; Turning angle: von Mises or wrapped Cauchy
   #' State dwell time: geometric distribution
   #' Weibull = "weibull"; von Mises = "vm"
   
   #'  Define formula to be applied to transition probabilities
-  pred_formula <- ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area
-  prey_formula <- ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod
-  #'  Covariates affecting probability of transitioning from one state to the other
-  #'  Same covariates as on psi in occupancy models
-  #'  Predators have study area included since these vary by individual
-  #'  Prey lack study area b/c ungulate collars restricted to 1 study area and all female
+  #'  Covariates affecting probability of transitioning from one state to another
+  trans_formula_null <- ~1
+  trans_formula <- ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod
   
-  #'  Include sex on the state-dependent distributions for predators only
-  #'  Males tend to have larger home ranges than females (at least felids) and 
-  #'  this likely influences their movement behavior
-  #'  Only female ungulates collared so not necessary for prey models
-  #'  Add zeromass = ~Sex if needed
-  pred_DM <- list(step = list(mean = ~Sex, sd = ~Sex), angle = list(concentration = ~1)) 
-  # pred_DM <- list(step = list(mean = ~Sex, sd = ~Sex))
-  # pred_DM <- list(step = list(mean = ~Sex, sd = ~1))
-  # pred_DM <- list(step = matrix(c(1,0,0,0,"Sex",0,0,0,0,1,0,0,0,"Sex",0,0,0,0,1,0,0,0,0,1), 4, 6))
+  #'  Define formula(s) to be applied to state-dependent distributions
+  #'  Apply habitat covariates here since these distributions describe the different
+  #'  movement behaviors and goal is to evaluate whether behavior varies by habitat
+  #'  Add zeromass = formula for species that need zeromass parameters above
+  DM_formula_null <- ~1
+  DM_formula_sexSA <- ~Area + Sex
+  DM_formula_pred <- ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area + Sex
+  DM_formula_prey <- ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod
+  #'  Create pseudo-design matices for state-dependent distributions
+  #'  Null DM (predators & prey) and DM with sex & study area (predators only)
+  DM_nullpred <- list(step = list(mean = ~1, sd = ~1), angle = list(concentration = ~1))
+  DM_nullprey <- list(step = list(mean = ~1, sd = ~1, zeromass = ~1), angle = list(concentration = ~1)) # includes zeromass parameters
+  DM_pred <- list(step = list(mean = DM_formula_sexSA, sd = DM_formula_sexSA), angle = list(concentration = ~1))
+  DM_coug <- list(step = list(mean = DM_formula_sexSA, sd = DM_formula_sexSA, zeromass = DM_formula_sexSA), angle = list(concentration = ~1)) # includes zeromass parameters
+  #'  DM with habitat covariates
+  pred_DM <- list(step = list(mean = DM_formula_pred, sd = DM_formula_pred), angle = list(concentration = ~1))
+  coug_DM <- list(step = list(mean = DM_formula_pred, sd = DM_formula_pred, zeromass = DM_formula_pred), angle = list(concentration = ~1))
+  prey_DM <- list(step = list(mean = DM_formula_prey, sd = DM_formula_prey, zeromass = DM_formula_prey), angle = list(concentration = ~1))
+  #'  Formula notes:
+  #'  Differences btwn predator & prey models due to collaring effort
+  #'  -Sex on predator models: M tend to have larger home ranges than F, likely 
+  #'   influences movement (only F ungulates collared so no need on prey models)
+  #'  -Include study area for predator models
+  #'  Could also create a psuedo-design matrix for this part of the model
   #'  Matrix format: repeat mean1, mean2, sd1, sd2 minimum of 4 times if using
   #'  intercept-only (intercept = 1); add rows for each additional covariate 
   #'  where covariates are placed in columns corresponding to each parameter
-  
-  prey_DM <- NULL
+  #'  Note that factor-level covariates must be individually specified 
+  #'  (e.g., 'sexF', 'sexM') when using pseudo-design matrix (harbourSealExample)
 
   
   
   ####  It's H[a]MM[er] time!  ####
-  
+  #'  =============================
   #'  Keep in mind I can fit covariates on the state transition probabilities, 
   #'  meaning the variables that influence whether an animal will transition from
   #'  one state to the other, or on the state-dependent observation distributions,
@@ -153,24 +162,23 @@
   #'  estimates at the current minimum- helps ensure convergence
   
   #'  Function to run data through null and global HMM for each species
-  HMM_fit <- function(Data, Par0_m1, pformula, dm) {
+  HMM_fit <- function(Data, dists, Par0_m1, dm, tformula) { 
     
     #' Fit basic model with no covariates
     m1 <- fitHMM(data = Data, nbStates = 2, dist = dists, Par0 = Par0_m1,
                  estAngleMean = list(angle = FALSE), stateNames = stateNames)
 
-    #'  Compute the most likely state sequence
-    states <- viterbi(m1)
-    #'  Derive percentage of time spent in each state
-    table(states)/nrow(Data)
+    #' #'  Compute the most likely state sequence
+    #' states <- viterbi(m1)
+    #' #'  Derive percentage of time spent in each state
+    #' table(states)/nrow(Data)
     
     #'  Get new initial parameter values for global model based on nested m1 model
-    Par0_m2 <- getPar0(model = m1, formula = pformula)  
+    Par0_m2 <- getPar0(model = m1, DM = dm, formula = tformula)   
     
     #'  Fit model with sex covariate on transition probability
     m2 <- fitHMM(data = Data, nbStates = 2, dist = dists, Par0 = Par0_m2$Par,
-                 beta0 = Par0_m2$beta, stateNames = stateNames, formula = pformula, 
-                 DM = dm)
+                 stateNames = stateNames, DM = dm, beta0 = Par0_m2$beta, formula = tformula) 
     
     #'  What proportion of the locations fall within each state?
     states <- viterbi(m2)
@@ -190,22 +198,23 @@
   }
   
   #'  Run species-specific data through function
-  md_HMM_smr <- HMM_fit(mdData_smr, Par0_m1_md, prey_formula, prey_DM) 
-  md_HMM_wtr <- HMM_fit(mdData_wtr, Par0_m1_md, prey_formula, prey_DM) 
-  elk_HMM_smr <- HMM_fit(elkData_smr, Par0_m1_elk, prey_formula, prey_DM) 
-  elk_HMM_wtr <- HMM_fit(elkData_wtr, Par0_m1_elk, prey_formula, prey_DM) 
-  # In fitHMM.momentuHMMData(data = Data, nbStates = 2, dist = dist,  :
-  #                            ginv of the hessian failed -- Error in svd(X): infinite or missing values in 'x'
-  wtd_HMM_smr <- HMM_fit(wtdData_smr, Par0_m1_wtd, prey_formula, prey_DM) 
-  wtd_HMM_wtr <- HMM_fit(wtdData_wtr, Par0_m1_wtd, prey_formula, prey_DM) 
-  coug_HMM_smr <- HMM_fit(cougData_smr, Par0_m1_coug, pred_formula, prey_DM) #pred_DM
-  coug_HMM_wtr <- HMM_fit(cougData_wtr, Par0_m1_coug, pred_formula, prey_DM) #pred_DM
-  wolf_HMM_smr <- HMM_fit(wolfData_smr, Par0_m1_wolf, pred_formula, prey_DM) #pred_DM
-  wolf_HMM_wtr <- HMM_fit(wolfData_wtr, Par0_m1_wolf, pred_formula, prey_DM) #pred_DM
-  bob_HMM_smr <- HMM_fit(bobData_smr, Par0_m1_bob, pred_formula, prey_DM) #pred_DM
-  bob_HMM_wtr <- HMM_fit(bobData_wtr, Par0_m1_bob, pred_formula, prey_DM) #pred_DM
-  coy_HMM_smr <- HMM_fit(coyData_smr, Par0_m1_coy, pred_formula, prey_DM) #pred_DM
-  coy_HMM_wtr <- HMM_fit(coyData_wtr, Par0_m1_coy, pred_formula, prey_DM) #pred_DM
+  md_HMM_smr <- HMM_fit(mdData_smr, dists_wc, Par0_m1_md, DM_nullprey, trans_formula) 
+  md_HMM_wtr <- HMM_fit(mdData_wtr, dists_wc, Par0_m1_md, DM_nullprey, trans_formula) 
+  elk_HMM_smr <- HMM_fit(elkData_smr, dists_wc, Par0_m1_elk, DM_nullprey, trans_formula) 
+  elk_HMM_wtr <- HMM_fit(elkData_wtr, dists_wc, Par0_m1_elk, DM_nullprey, trans_formula) 
+  wtd_HMM_smr <- HMM_fit(wtdData_smr, dists_wc, Par0_m1_wtd, prey_DM, trans_formula) 
+  wtd_HMM_wtr <- HMM_fit(wtdData_wtr, dists_wc, Par0_m1_wtd, prey_DM, trans_formula) 
+  coug_HMM_smr <- HMM_fit(cougData_smr, dists_wc, Par0_m1_coug, DM_coug, trans_formula) 
+  coug_HMM_wtr <- HMM_fit(cougData_wtr, dists_wc, Par0_m1_coug, DM_coug, trans_formula) 
+  wolf_HMM_smr <- HMM_fit(wolfData_smr, dists_wc, Par0_m1_wolf, DM_pred, trans_formula) 
+  wolf_HMM_wtr <- HMM_fit(wolfData_wtr, dists_wc, Par0_m1_wolf, DM_pred, trans_formula) 
+  bob_HMM_smr <- HMM_fit(bobData_smr, dists_wc, Par0_m1_bob, DM_pred, trans_formula) 
+  bob_HMM_wtr <- HMM_fit(bobData_wtr, dists_wc, Par0_m1_bob, DM_pred, trans_formula) 
+  coy_HMM_smr <- HMM_fit(coyData_smr, dists_wc, Par0_m1_coy, DM_pred, trans_formula)  
+  coy_HMM_wtr <- HMM_fit(coyData_wtr, dists_wc, Par0_m1_coy, DM_pred, trans_formula) 
+  
+  
+  coy_HMM_smr <- HMM_fit(coyData_smr, dists_wc, Par0_m1_coy, DM_pred, trans_formula)
   
   #'  Save model results
   spp_HMM_output <- list(md_HMM_smr, md_HMM_wtr, elk_HMM_smr, elk_HMM_wtr, wtd_HMM_smr, 
@@ -228,6 +237,37 @@
   # bob_trProbs_wtr <- getTrProbs(bob_HMM_wtr, getCI=TRUE)
   # coy_trProbs_smr <- getTrProbs(coy_HMM_smr, getCI=TRUE)
   # coy_trProbs_wtr <- getTrProbs(coy_HMM_wtr, getCI=TRUE)
+  
+  
+  #'  Get 95%CI for covariate effects on state-dependent distributions
+  global_est <- CIbeta(coy_HMM_smr, alpha = 0.95)
+  rnames <- colnames(global_est[[1]][[1]])
+  step_out <- as.data.frame(matrix(unlist(global_est[[1]]), ncol = 4))
+  colnames(step_out) <- c("est", "se", "lower", "upper")
+  row.names(step_out) <- rnames
+  vrbls <- c("Intercept", "AreaOK", "SexM") #"Elev", "Slope", "PercForMix", "PercXGrass", "PercXShrub", "NearestRd", "HumanMod", 
+  params <- rep(vrbls, 4)
+  distp <- c("Mean1", "Mean2", "SD1", "SD2")
+  dist_params <- rep(distp, each = 3)
+  step_out <- cbind(step_out, params)
+  step_out <- cbind(step_out, dist_params)
+  step_out <- step_out %>%
+    mutate(
+      params = as.factor(as.character(params)),
+      dist_params = as.factor(as.character(dist_params))) %>%
+    arrange(match(params, vrbls)) 
+  
+  #'  Calculate stationary state probabilities 
+  ssp <- stationary(coy_HMM_smr, covs = data.frame(Elev = 0, Slope = 0, HumanMod = 0,
+                                                   NearestRd = 0, PercForMix = 0, 
+                                                   PercXGrass = 0, PercXShrub = 0))
+  
+  #'  Plot stationary state probabilities
+  plotStationary(coy_HMM_smr, covs = data.frame(Elev = 0, Slope = 0, HumanMod = 0,
+                                                NearestRd = 0, PercForMix = 0, 
+                                                PercXGrass = 0, PercXShrub = 0),
+                 col = c("red", "blue"), plotCI = TRUE, alpha = 0.95)
+  
   
   #'  Function to extract model outputs
   rounddig <- 2
