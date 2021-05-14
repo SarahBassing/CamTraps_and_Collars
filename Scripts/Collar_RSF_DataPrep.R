@@ -1,5 +1,5 @@
   #'  ============================================
-  #'  Resource Selection Functions (cam vs collar analysis)
+  #'  Data prep for RSF models (cam vs collar analysis)
   #'  Washington Predator-Prey Project
   #'  Sarah Bassing
   #'  May 2021
@@ -10,15 +10,12 @@
   #'  habitat associations derived from different types of data and whether those
   #'  associations vary with animal behavior.
   #'  
-  #'  Cleaned telemetry and covariate data were prepared for with the
-  #'  Collar_Movement_DataPrep.R and Collar_Covariate_Extraction.R scripts 
-  #'  which take FOREVER to run. 
+  #'  Cleaned telemetry data prepared with the Collar_Movement_DataPrep.R script.
   #'  ============================================
   
   #'  Load packages for selecting available points
   library(tidyverse)
   library(sp)
-  library(lme4)
   library(adehabitatHR)
   
   #'  Load telemetry data
@@ -115,8 +112,11 @@
     rndpts_df <- as.data.frame(rndpts_sp) 
     ID <- unique(droplevels(locs$AnimalID))
     Season <- unique(locs$Season)
+    Sex <- unique(locs$Sex)
     rndpts_df$ID <- ID
     rndpts_df$Season <- Season
+    rndpts_df$Sex <- Sex
+    rndpts_df$use <- 0
     
     return(rndpts_df)
 
