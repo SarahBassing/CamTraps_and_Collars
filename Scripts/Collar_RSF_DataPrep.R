@@ -1,5 +1,5 @@
   #'  ============================================
-  #'  Data prep for RSF models (cam vs collar analysis)
+  #'  Resource Selection Functions (cam vs collar analysis)
   #'  Washington Predator-Prey Project
   #'  Sarah Bassing
   #'  May 2021
@@ -10,12 +10,15 @@
   #'  habitat associations derived from different types of data and whether those
   #'  associations vary with animal behavior.
   #'  
-  #'  Cleaned telemetry data prepared with the Collar_Movement_DataPrep.R script.
+  #'  Cleaned telemetry and covariate data were prepared for with the
+  #'  Collar_Movement_DataPrep.R and Collar_Covariate_Extraction.R scripts 
+  #'  which take FOREVER to run. 
   #'  ============================================
   
   #'  Load packages for selecting available points
   library(tidyverse)
   library(sp)
+  library(lme4)
   library(adehabitatHR)
   
   #'  Load telemetry data
@@ -112,11 +115,8 @@
     rndpts_df <- as.data.frame(rndpts_sp) 
     ID <- unique(droplevels(locs$AnimalID))
     Season <- unique(locs$Season)
-    Sex <- unique(locs$Sex)
     rndpts_df$ID <- ID
     rndpts_df$Season <- Season
-    rndpts_df$Sex <- Sex
-    rndpts_df$use <- 0
     
     return(rndpts_df)
 
@@ -139,8 +139,8 @@
   
   #'  Extract covariate data for each available location
   #'  ==================================================
-  #'  This will take FOREVER!
-  
+  #'  This will take awhile!
+
   #'  Load packages for covariate extraction
   library(sf)
   library(stars)
@@ -164,9 +164,19 @@
   landcov19 <- raster("./Shapefiles/Cascadia_layers/landcover_2019.tif")
   interp_landcov18 <- raster("./Shapefiles/Cascadia_layers/interpolated_landcover_2018.tif")
   interp_landcov19 <- raster("./Shapefiles/Cascadia_layers/interpolated_landcover_2019.tif")
+  formix2prop18 <- raster("./Shapefiles/Cascadia_layers/forestmix2prop_18.tif")
+  formix2prop19 <- raster("./Shapefiles/Cascadia_layers/forestmix2prop_19.tif")
+  xgrassprop18 <- raster("./Shapefiles/Cascadia_layers/xgrassprop_18.tif")
+  xgrassprop19 <- raster("./Shapefiles/Cascadia_layers/xgrassprop_19.tif")
+  xshrubprop18 <- raster("./Shapefiles/Cascadia_layers/xshrubprop_18.tif")
+  xshrubprop19 <- raster("./Shapefiles/Cascadia_layers/xshrubprop_19.tif")
   roads <- st_read("./Shapefiles/Cascadia_layers/roadsForTaylor", layer = "roadsForTaylor")
   #'  Human density and human modified landscapes
   HM <- raster("./Shapefiles/Additional_WPPP_Layers/WPPP_gHM.tif")
+  
+  #'  Create raster stacks of 2018 and  2019 data
+  perc_stack18 <- stack(formix2prop18, xgrassprop18, xshrubprop18)
+  perc_stack19 <- stack(formix2prop19, xgrassprop19, xshrubprop19)
   
   #'  Identify projections & resolutions of relevant features
   sa_proj <- projection("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
@@ -175,6 +185,7 @@
   #'  Reproject road shapefile to match animal location projection
   road_reproj <- st_transform(roads, crs = st_crs(sa_proj))
   projection(road_reproj)
+
   
   #'  Function to make available points data a spatial sf object
   spatial_locs <- function(locs) {
@@ -182,9 +193,10 @@
     return(sf_locs)
   }
   sf_locs <- lapply(coy_available, spatial_locs)
-  coy_smr_locs <- spatial_locs(coy_smr_df)
-  coy_wrt_locs <- spatial_locs(coy_wtr_df)
+  # coy_smr_locs <- spatial_locs(coy_smr_df)
+  # coy_wrt_locs <- spatial_locs(coy_wtr_df)
   
+
   
   #'  COVARIATE EXTRACTION & CALCULATIONS  
   #'  ===========================================
@@ -197,7 +209,7 @@
   #'  Extract covariates for each species at once
   #'  Identify how many cores I want to use
   detectCores(logical = FALSE)
-  cl <- parallel::makeCluster(2)
+  cl <- parallel::makeCluster(20)
   #'  Run in parallel on local computer with specified number of cores
   plan(cluster, workers = cl)
   
@@ -228,178 +240,199 @@
     covs <- as.data.frame(cbind(animal, join_covs))
 
     
-    #' #'  2. Extract data from roads shapefile & calculate distance to nearest road
-    #' #'     for each location
-    #' #'  ------------------------------------------------------------------------
-    #' dist2road <- sapply(1:nrow(locs), function(x) min(st_distance(road_reproj, locs[x, ])))
-    #' dist2road <- as.data.frame(dist2road)
-    #' dist2road$ID <- locs$ID
-    #' dist2road$obs <- c(1:nrow(locs))
-    #' #'  Append to covariate data frame
-    #' covs <- covs %>%
-    #'   full_join(dist2road, by = "ID")
+    #'  2. Extract data from roads shapefile & calculate distance to nearest road
+    #'     for each location
+    #'  ------------------------------------------------------------------------
+    dist2road <- sapply(1:nrow(locs), function(x) min(st_distance(road_reproj, locs[x, ])))
+    dist2road <- as.data.frame(dist2road)
+    dist2road$ID <- locs$ID
+    dist2road$obs <- c(1:nrow(locs))
+    #'  Append to covariate data frame
+    covs <- covs %>%
+      full_join(dist2road, by = c("obs", "ID"))
     
     
     #'  3. Extract landcover data from within 250m of each location & calculate
     #'     percent habitat type within that buffer
     #'  ------------------------------------------------------------------------
-    #'  Extract landcover value from each pixel within 250m radius of locations
-    #'  using interpolated landcover rasters derived from Cascadia landcover
-    pixvals18 <- raster::extract(interp_landcov18, locs, factors = TRUE, buffer = 250, df = TRUE)
-    pixvals_df18 <- as.data.frame(pixvals18)
-    pixvals19 <- raster::extract(interp_landcov19, locs, factors = TRUE, buffer = 250, df = TRUE)
-    pixvals_df19 <- as.data.frame(pixvals19)
-    #'  Merge together and rename variables
-    landcov <- cbind(pixvals_df18, pixvals_df19$interpolated_landcover_2019) 
-    colnames(landcov) <- c("obs", "landcover_2018", "landcover_2019")
-    #'  Rename categories so they're easier to work with
-    landcover <- landcov %>%
-      mutate(
-        landcover_2018 = ifelse(landcover_2018 == "101", "Water", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "121", "Barren", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "201", "EmergentWetland", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "202", "WoodyWetland", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "211", "MesicGrass", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "212", "XericGrass", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "221", "MesicShrub", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "222", "XericShrub", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "230", "Forest", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "310", "Agriculture", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "331", "Commercial", landcover_2018),
-        landcover_2018 = ifelse(landcover_2018 == "332", "Residential", landcover_2018),
-        landcover_2019 = ifelse(landcover_2019 == "101", "Water", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "121", "Barren", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "201", "EmergentWetland", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "202", "WoodyWetland", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "211", "MesicGrass", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "212", "XericGrass", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "221", "MesicShrub", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "222", "XericShrub", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "230", "Forest", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "310", "Agriculture", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "331", "Commercial", landcover_2019),
-        landcover_2019 = ifelse(landcover_2019 == "332", "Residential", landcover_2019),
-      )
-    #'  Add animal ID info to landcover data for further manipulation
-    animal <- mutate(animal, obs = 1:nrow(.))
-    landcover_250m <- full_join(animal, landcover, by = "obs")
-    #'  Count the number of cells in each landcover category per location
-    #'  2018 landcover and telemetry locations only
-    tbl_landcover18 <- as.data.frame(landcover_250m) %>%
-      # select(-geometry) %>%
-      group_by(obs) %>%
-      count(landcover_2018) %>%
-      ungroup() %>%
-      pivot_wider(names_from = landcover_2018, values_from = n) %>%
-      replace(is.na(.), 0) %>% 
-      mutate(
-        #'  Count number of pixels within 250m of each location
-        sumPixels = rowSums(.[2:ncol(.)]),
-        #'  Combine similar habitat types
-        Forest =  Forest + WoodyWetland + EmergentWetland,
-        MesicGrass = MesicGrass,# + Barren,
-        MesicMix = MesicShrub + MesicGrass,
-        ForestMix = Forest + MesicMix,
-        ForestMix2 = Forest + MesicShrub
+    animal$obs <- as.numeric(seq(1:nrow(animal)))
+    #'  Extract percent landcover type using 250m moving window at each camera site
+    perc_landcover18 <- raster::extract(perc_stack18, locs, df = TRUE) %>%
+      transmute(
+        obs = ID,
+        PercForestMix2 = round(forestmix2prop_18, 2),
+        PercXericGrass = round(xgrassprop_18, 2),
+        PercXericShrub = round(xshrubprop_18, 2)
       ) %>%
-      #'  Calculate percent landcover type within 250m of each camera site
-      mutate(
-        PercForest = round(Forest/sumPixels, 2),
-        PercForestMix = round(ForestMix/sumPixels,2),     # Cannot be used in conjunction with Forest or any Mesic landcover types
-        PercForestMix2 = round(ForestMix2/sumPixels, 2),
-        PercXericShrub = round(XericShrub/sumPixels, 2),
-        PercMesicShrub = round(MesicShrub/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
-        PercXericGrass = round(XericGrass/sumPixels, 2),
-        PercMesicGrass = round(MesicGrass/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
-        PercMesicMix = round(MesicMix/sumPixels, 2)      # Cannot be used in conjunction with other Mesic landcover types
-      ) %>%
-      #'  Join % habitat data to animal location data
       full_join(animal, by = "obs") %>%
-      #'  Drop data for year camera was NOT present
-      mutate(
-        Year = lubridate::year(time),
-        Month = lubridate::month(time),
-        Season = ifelse(Year == 2018 & Month < 10, "Summer18", NA),
-        Season = ifelse(Year == 2018 & Month > 11, "Winter1819", Season),
-        Season = ifelse(Year == 2019 & Month < 4, "Winter1819", Season),
-        Season = ifelse(Year == 2019 & Month > 6 & Month < 10, "Summer19", Season),
-        Season = ifelse(Year == 2019 & Month > 11, "Winter1920", Season),
-        Season = ifelse(Year == 2020 & Month < 4, "Winter1920", Season),
-        PercForest = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForest),
-        PercForestMix = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForestMix),
-        PercForestMix2 = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForestMix2),
-        PercXericShrub = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercXericShrub),
-        PercMesicShrub = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicShrub),
-        PercXericGrass = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercXericGrass),
-        PercMesicGrass = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicGrass),
-        PercMesicMix = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicMix) 
+      filter(Season == "Summer18" | Season == "Winter1819")
+    perc_landcover19 <- raster::extract(perc_stack19, locs, df = TRUE) %>%
+      transmute(
+        obs = ID,
+        PercForestMix2 = round(forestmix2prop_19, 2),
+        PercXericGrass = round(xgrassprop_19, 2),
+        PercXericShrub = round(xshrubprop_19, 2)
       ) %>%
-      #'  Only retain relevant columns
-      dplyr::select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub,
-                    PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix, ID, Season) %>%
-      #'  Filter out rows with NAs
-      filter(!is.na(PercForest))
-    #'  Repeat for 2019 landcover data and telemetry locations
-    tbl_landcover19 <- as.data.frame(landcover_250m) %>%
-      # select(-geometry) %>%
-      group_by(obs) %>%
-      count(landcover_2019) %>%
-      ungroup() %>%
-      pivot_wider(names_from = landcover_2019, values_from = n) %>%
-      replace(is.na(.), 0) %>% 
-      mutate(
-        #'  Count number of pixels within 250m of each location
-        sumPixels = rowSums(.[2:ncol(.)]),
-        #'  Combine similar habitat types
-        Forest =  Forest + WoodyWetland + EmergentWetland,
-        MesicGrass = MesicGrass, # + Barren,
-        MesicMix = MesicShrub + MesicGrass,
-        ForestMix = Forest + MesicMix,
-        ForestMix2 = Forest + MesicShrub
-      ) %>%
-      #'  Calculate percent landcover type within 250m of each camera site
-      mutate(
-        PercForest = round(Forest/sumPixels, 2),
-        PercForestMix = round(ForestMix/sumPixels,2),     # Cannot be used in conjunction with Forest or any Mesic landcover types
-        PercForestMix2 = round(ForestMix2/sumPixels, 2),
-        PercXericShrub = round(XericShrub/sumPixels, 2),
-        PercMesicShrub = round(MesicShrub/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
-        PercXericGrass = round(XericGrass/sumPixels, 2),
-        PercMesicGrass = round(MesicGrass/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
-        PercMesicMix = round(MesicMix/sumPixels, 2)      # Cannot be used in conjunction with other Mesic landcover types
-      ) %>%
-      #'  Join % habitat data to animal location data
       full_join(animal, by = "obs") %>%
-      #'  Drop data for year camera was NOT present
-      mutate(
-        Year = lubridate::year(time),
-        Month = lubridate::month(time),
-        Season = ifelse(Year == 2018 & Month < 10, "Summer18", NA),
-        Season = ifelse(Year == 2018 & Month > 11, "Winter1819", Season),
-        Season = ifelse(Year == 2019 & Month < 4, "Winter1819", Season),
-        Season = ifelse(Year == 2019 & Month > 6 & Month < 10, "Summer19", Season),
-        Season = ifelse(Year == 2019 & Month > 11, "Winter1920", Season),
-        Season = ifelse(Year == 2020 & Month < 4, "Winter1920", Season),
-        PercForest = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForest),
-        PercForestMix = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForestMix),
-        PercForestMix2 = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForestMix2),
-        PercXericShrub = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercXericShrub),
-        PercMesicShrub = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicShrub),
-        PercXericGrass = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercXericGrass),
-        PercMesicGrass = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicGrass),
-        PercMesicMix = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicMix)
-      ) %>%
-      #'  Only retain relevant columns
-      dplyr::select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub,
-                    PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix, ID, Season) %>%
-      #'  Filter out rows with NAs
-      filter(!is.na(PercForest))
-    #'  Merge annual landcover data together so no duplicates
-    percHab <- rbind(tbl_landcover18, tbl_landcover19)
+      filter(Season == "Summer19" | Season == "Winter1920")
+    percHab <- rbind(perc_landcover18, perc_landcover19)
+    #' #'  Extract landcover value from each pixel within 250m radius of locations
+    #' #'  using interpolated landcover rasters derived from Cascadia landcover
+    #' pixvals18 <- raster::extract(interp_landcov18, locs, factors = TRUE, buffer = 250, df = TRUE)
+    #' pixvals_df18 <- as.data.frame(pixvals18)
+    #' pixvals19 <- raster::extract(interp_landcov19, locs, factors = TRUE, buffer = 250, df = TRUE)
+    #' pixvals_df19 <- as.data.frame(pixvals19)
+    #' #'  Merge together and rename variables
+    #' landcov <- cbind(pixvals_df18, pixvals_df19$interpolated_landcover_2019) 
+    #' colnames(landcov) <- c("obs", "landcover_2018", "landcover_2019")
+    #' #'  Rename categories so they're easier to work with
+    #' landcover <- landcov %>%
+    #'   mutate(
+    #'     landcover_2018 = ifelse(landcover_2018 == "101", "Water", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "121", "Barren", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "201", "EmergentWetland", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "202", "WoodyWetland", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "211", "MesicGrass", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "212", "XericGrass", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "221", "MesicShrub", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "222", "XericShrub", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "230", "Forest", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "310", "Agriculture", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "331", "Commercial", landcover_2018),
+    #'     landcover_2018 = ifelse(landcover_2018 == "332", "Residential", landcover_2018),
+    #'     landcover_2019 = ifelse(landcover_2019 == "101", "Water", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "121", "Barren", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "201", "EmergentWetland", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "202", "WoodyWetland", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "211", "MesicGrass", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "212", "XericGrass", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "221", "MesicShrub", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "222", "XericShrub", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "230", "Forest", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "310", "Agriculture", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "331", "Commercial", landcover_2019),
+    #'     landcover_2019 = ifelse(landcover_2019 == "332", "Residential", landcover_2019),
+    #'   )
+    #' #'  Add animal ID info to landcover data for further manipulation
+    #' animal <- mutate(animal, obs = 1:nrow(.))
+    #' landcover_250m <- full_join(animal, landcover, by = "obs")
+    #' #'  Count the number of cells in each landcover category per location
+    #' #'  2018 landcover and telemetry locations only
+    #' tbl_landcover18 <- as.data.frame(landcover_250m) %>%
+    #'   # select(-geometry) %>%
+    #'   group_by(obs) %>%
+    #'   count(landcover_2018) %>%
+    #'   ungroup() %>%
+    #'   pivot_wider(names_from = landcover_2018, values_from = n) %>%
+    #'   replace(is.na(.), 0) %>% 
+    #'   mutate(
+    #'     #'  Count number of pixels within 250m of each location
+    #'     sumPixels = rowSums(.[2:ncol(.)]),
+    #'     #'  Combine similar habitat types
+    #'     Forest =  Forest + WoodyWetland + EmergentWetland,
+    #'     MesicGrass = MesicGrass,# + Barren,
+    #'     MesicMix = MesicShrub + MesicGrass,
+    #'     ForestMix = Forest + MesicMix,
+    #'     ForestMix2 = Forest + MesicShrub
+    #'   ) %>%
+    #'   #'  Calculate percent landcover type within 250m of each camera site
+    #'   mutate(
+    #'     PercForest = round(Forest/sumPixels, 2),
+    #'     PercForestMix = round(ForestMix/sumPixels,2),     # Cannot be used in conjunction with Forest or any Mesic landcover types
+    #'     PercForestMix2 = round(ForestMix2/sumPixels, 2),
+    #'     PercXericShrub = round(XericShrub/sumPixels, 2),
+    #'     PercMesicShrub = round(MesicShrub/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
+    #'     PercXericGrass = round(XericGrass/sumPixels, 2),
+    #'     PercMesicGrass = round(MesicGrass/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
+    #'     PercMesicMix = round(MesicMix/sumPixels, 2)      # Cannot be used in conjunction with other Mesic landcover types
+    #'   ) %>%
+    #'   #'  Join % habitat data to animal location data
+    #'   full_join(animal, by = "obs") %>%
+    #'   #'  Drop data for year camera was NOT present
+    #'   mutate(
+    #'     Year = lubridate::year(time),
+    #'     Month = lubridate::month(time),
+    #'     Season = ifelse(Year == 2018 & Month < 10, "Summer18", NA),
+    #'     Season = ifelse(Year == 2018 & Month > 11, "Winter1819", Season),
+    #'     Season = ifelse(Year == 2019 & Month < 4, "Winter1819", Season),
+    #'     Season = ifelse(Year == 2019 & Month > 6 & Month < 10, "Summer19", Season),
+    #'     Season = ifelse(Year == 2019 & Month > 11, "Winter1920", Season),
+    #'     Season = ifelse(Year == 2020 & Month < 4, "Winter1920", Season),
+    #'     PercForest = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForest),
+    #'     PercForestMix = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForestMix),
+    #'     PercForestMix2 = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercForestMix2),
+    #'     PercXericShrub = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercXericShrub),
+    #'     PercMesicShrub = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicShrub),
+    #'     PercXericGrass = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercXericGrass),
+    #'     PercMesicGrass = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicGrass),
+    #'     PercMesicMix = ifelse(Season == "Summer19" | Season == "Winter1920", NA, PercMesicMix) 
+    #'   ) %>%
+    #'   #'  Only retain relevant columns
+    #'   dplyr::select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub,
+    #'                 PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix, ID, Season) %>%
+    #'   #'  Filter out rows with NAs
+    #'   filter(!is.na(PercForest))
+    #' #'  Repeat for 2019 landcover data and telemetry locations
+    #' tbl_landcover19 <- as.data.frame(landcover_250m) %>%
+    #'   # select(-geometry) %>%
+    #'   group_by(obs) %>%
+    #'   count(landcover_2019) %>%
+    #'   ungroup() %>%
+    #'   pivot_wider(names_from = landcover_2019, values_from = n) %>%
+    #'   replace(is.na(.), 0) %>% 
+    #'   mutate(
+    #'     #'  Count number of pixels within 250m of each location
+    #'     sumPixels = rowSums(.[2:ncol(.)]),
+    #'     #'  Combine similar habitat types
+    #'     Forest =  Forest + WoodyWetland + EmergentWetland,
+    #'     MesicGrass = MesicGrass, # + Barren,
+    #'     MesicMix = MesicShrub + MesicGrass,
+    #'     ForestMix = Forest + MesicMix,
+    #'     ForestMix2 = Forest + MesicShrub
+    #'   ) %>%
+    #'   #'  Calculate percent landcover type within 250m of each camera site
+    #'   mutate(
+    #'     PercForest = round(Forest/sumPixels, 2),
+    #'     PercForestMix = round(ForestMix/sumPixels,2),     # Cannot be used in conjunction with Forest or any Mesic landcover types
+    #'     PercForestMix2 = round(ForestMix2/sumPixels, 2),
+    #'     PercXericShrub = round(XericShrub/sumPixels, 2),
+    #'     PercMesicShrub = round(MesicShrub/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
+    #'     PercXericGrass = round(XericGrass/sumPixels, 2),
+    #'     PercMesicGrass = round(MesicGrass/sumPixels, 2),  # Cannot be used in conjunction with MesicMix
+    #'     PercMesicMix = round(MesicMix/sumPixels, 2)      # Cannot be used in conjunction with other Mesic landcover types
+    #'   ) %>%
+    #'   #'  Join % habitat data to animal location data
+    #'   full_join(animal, by = "obs") %>%
+    #'   #'  Drop data for year camera was NOT present
+    #'   mutate(
+    #'     Year = lubridate::year(time),
+    #'     Month = lubridate::month(time),
+    #'     Season = ifelse(Year == 2018 & Month < 10, "Summer18", NA),
+    #'     Season = ifelse(Year == 2018 & Month > 11, "Winter1819", Season),
+    #'     Season = ifelse(Year == 2019 & Month < 4, "Winter1819", Season),
+    #'     Season = ifelse(Year == 2019 & Month > 6 & Month < 10, "Summer19", Season),
+    #'     Season = ifelse(Year == 2019 & Month > 11, "Winter1920", Season),
+    #'     Season = ifelse(Year == 2020 & Month < 4, "Winter1920", Season),
+    #'     PercForest = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForest),
+    #'     PercForestMix = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForestMix),
+    #'     PercForestMix2 = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercForestMix2),
+    #'     PercXericShrub = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercXericShrub),
+    #'     PercMesicShrub = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicShrub),
+    #'     PercXericGrass = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercXericGrass),
+    #'     PercMesicGrass = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicGrass),
+    #'     PercMesicMix = ifelse(Season == "Summer18" | Season == "Winter1819", NA, PercMesicMix)
+    #'   ) %>%
+    #'   #'  Only retain relevant columns
+    #'   dplyr::select(obs, sumPixels, PercForest, PercForestMix, PercForestMix2, PercXericShrub,
+    #'                 PercMesicShrub, PercXericGrass, PercMesicGrass, PercMesicMix, ID, Season) %>%
+    #'   #'  Filter out rows with NAs
+    #'   filter(!is.na(PercForest))
+    #' #'  Merge annual landcover data together so no duplicates
+    #' percHab <- rbind(tbl_landcover18, tbl_landcover19)
     
     #'  4. Join all covatiates together & clean up for inclusion in HMM
     telem_covs <- covs %>%
-      full_join(percHab, by = c("ID", "time")) %>%
+      full_join(percHab, by = c("obs", "ID", "Season")) %>%
       transmute(
         ID = ID,
         Season = Season,
@@ -425,7 +458,6 @@
   
   #'  Run list of species location data through function in parallel
   #'  This will take AWHILE even in parallel
-  # tst <- cov_extract(coy_smr_locs)
   # spp_avail_covs <- lapply(sf_locs, cov_extract) # non-parallel approach
   # spp_avail_covs <- future_lapply(sf_locs, cov_extract)
   coy_avail_covs <- future_lapply(sf_locs, cov_extract)
