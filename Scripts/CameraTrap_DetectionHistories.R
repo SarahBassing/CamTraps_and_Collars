@@ -356,7 +356,7 @@
   Effort_smr1819 <- rbind(Effort_smr18, Effort_smr19)
   Effort_wtr1820 <- rbind(Effort_wtr1819, Effort_wtr1920)
   
-  #'  Summary states on trap nights (active sites only)
+  #'  Summary stats on trap nights (active sites only)
   #'  Remove rows of all NAs (inactive camera stations)
   eff_smr1819 <- Effort_smr1819[rowSums(is.na(Effort_smr1819)) != ncol(Effort_smr1819), ]
   eff_wtr1820 <- Effort_wtr1820[rowSums(is.na(Effort_wtr1820)) != ncol(Effort_wtr1820), ]
@@ -373,9 +373,24 @@
   hist(rowSums(eff_wtr1820, na.rm = TRUE), breaks = 50, xlim = c(0, 100), xlab = "Number of Trap Nights", main = "Number of trap nights across camera sites, \nWinter 2018/2019 & 2019/2020")
   abline(v = mean(rowSums(eff_wtr1820, na.rm = TRUE)), col = "red", lty = 2)
   abline(v = median(rowSums(eff_wtr1820, na.rm = TRUE)), col = "blue", lty = 1, lwd = 2)
-  #'  Total number of trap nights & active cameras per season
-  sum(rowSums(eff_smr1819, na.rm = TRUE)); nrow(eff_smr1819)
-  sum(rowSums(eff_wtr1820, na.rm = TRUE)); nrow(eff_wtr1820)
+  #'  Total number of trap nights 
+  sum(rowSums(eff_smr1819, na.rm = TRUE)) 
+  sum(rowSums(eff_wtr1820, na.rm = TRUE))
+  #'  Total number of active cameras per season and by study area
+  CameraLocation <- rownames(eff_smr1819)
+  eff_smr1819 <- as.data.frame(cbind(CameraLocation, eff_smr1819))
+  nrow(eff_smr1819)
+  nrow(eff_smr1819[grepl("NE", CameraLocation),])
+  nrow(eff_smr1819[grepl("OK", CameraLocation),])
+  CameraLocation <- rownames(eff_wtr1820)
+  eff_wtr1820 <- as.data.frame(cbind(CameraLocation, eff_wtr1820))
+  nrow(eff_wtr1820)
+  nrow(eff_wtr1820[grepl("NE", CameraLocation),])
+  nrow(eff_wtr1820[grepl("OK", CameraLocation),])
+  
+  
+  
+  
 
   #'  How many sampling occasions had incomplete sampling effort
   #'  Ignoring sampling occasions when camera was inactive
