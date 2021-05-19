@@ -19,6 +19,7 @@
   rm(list=ls())
 
   #'  Load libraries
+  # remotes::install_github('bmcclintock/momentuHMM@develop') # latest version, unstable
   library(momentuHMM)
   library(rgdal)
   library(tidyverse)
@@ -69,7 +70,6 @@
   bobData_wtr <- spp_dataPrep(crwOut_ALL[[12]], spp_telem_covs[[12]])
   coyData_smr <- spp_dataPrep(crwOut_ALL[[13]], spp_telem_covs[[13]])
   coyData_wtr <- spp_dataPrep(crwOut_ALL[[14]], spp_telem_covs[[14]])
-  # tst <- mapply(spp_dataPrep, crwOut_ALL, spp_telem_covs)
   
   
   #'  Visualize data to inform initial parameter specifications
@@ -213,63 +213,49 @@
   coy_HMM_smr <- HMM_fit(coyData_smr, dists_wc, Par0_m1_coy, DM_pred, trans_formula)  
   coy_HMM_wtr <- HMM_fit(coyData_wtr, dists_wc, Par0_m1_coy, DM_pred, trans_formula) 
   
-  
-  coy_HMM_smr <- HMM_fit(coyData_smr, dists_wc, Par0_m1_coy, DM_pred, trans_formula)
-  
   #'  Save model results
   spp_HMM_output <- list(md_HMM_smr, md_HMM_wtr, elk_HMM_smr, elk_HMM_wtr, wtd_HMM_smr, 
                          wtd_HMM_wtr, coug_HMM_smr, coug_HMM_wtr, wolf_HMM_smr, 
                          wolf_HMM_wtr, bob_HMM_smr, bob_HMM_wtr, coy_HMM_smr, coy_HMM_wtr)
   save(spp_HMM_output, file = paste0("./Outputs/spp_HMM_output_", Sys.Date(), ".RData"))
   
-  #'  Calculate transition probabilities
-  # md_trProbs_smr <- getTrProbs(md_HMM_smr, getCI=TRUE)
-  # md_trProbs_wtr <- getTrProbs(md_HMM_wtr, getCI=TRUE)
-  # elk_trProbs_smr <- getTrProbs(elk_HMM_smr, getCI=TRUE)
-  # elk_trProbs_wtr <- getTrProbs(elk_HMM_wtr, getCI=TRUE)
-  # wtd_trProbs_smr <- getTrProbs(wtd_HMM_smr, getCI=TRUE)
-  # wtd_trProbs_wtr <- getTrProbs(wtd_HMM_wtr, getCI=TRUE)
-  # coug_trProbs_smr <- getTrProbs(coug_HMM_smr, getCI=TRUE)
-  # coug_trProbs_wtr <- getTrProbs(coug_HMM_wtr, getCI=TRUE)
-  # wolf_trProbs_smr <- getTrProbs(wolf_HMM_smr, getCI=TRUE)
-  # wolf_trProbs_wtr <- getTrProbs(wolf_HMM_wtr, getCI=TRUE)
-  # bob_trProbs_smr <- getTrProbs(bob_HMM_smr, getCI=TRUE)
-  # bob_trProbs_wtr <- getTrProbs(bob_HMM_wtr, getCI=TRUE)
-  # coy_trProbs_smr <- getTrProbs(coy_HMM_smr, getCI=TRUE)
-  # coy_trProbs_wtr <- getTrProbs(coy_HMM_wtr, getCI=TRUE)
+  
+  #'  Function to extract stationary state probabilities & plot predicted responses
+  stay_probs <- function(hmmm) {
+    stay_pr <- stationary(hmmm)
+    stay_pr <- stay_pr[[1]]
+    stay_mu0 <- stationary(hmmm, covs = data.frame(Elev = 0, Slope = 0, HumanMod = 0,
+                                                  NearestRd = 0, PercForMix = 0, 
+                                                  PercXGrass = 0, PercXShrub = 0))
+    print(stay_mu0)
+    
+    #'  Plot stationary state probabilities and extract predicted estimates
+    fig <- plotStationary(hmmm, covs = data.frame(Elev = 0, Slope = 0, HumanMod = 0,
+                                                  NearestRd = 0, PercForMix = 0,
+                                                  PercXGrass = 0, PercXShrub = 0),
+                          col = c("red", "blue"), plotCI = TRUE, alpha = 0.95, return =  TRUE)
+    stationary_probs <- list(stay_pr, fig)
+    
+    return(stationary_probs)
+  }
+  #'  Extract stationary state probabilities
+  stay_md_smr <- stay_probs(md_HMM_smr)
+  stay_md_wtr <- stay_probs(md_HMM_wtr)
+  stay_elk_smr <- stay_probs(elk_HMM_smr)
+  stay_elk_wtr <- stay_probs(elk_HMM_wtr)
+  stay_wtd_smr <- stay_probs(wtd_HMM_smr)
+  stay_wtd_wtr <- stay_probs(wtd_HMM_wtr)
+  stay_coug_smr <- stay_probs(coug_HMM_smr)
+  stay_coug_wtr <- stay_probs(coug_HMM_wtr)
+  stay_wolf_smr <- stay_probs(wolf_HMM_smr)
+  stay_wolf_wtr <- stay_probs(wolf_HMM_wtr)
+  stay_bob_smr <- stay_probs(bob_HMM_smr)
+  stay_bob_wtr <- stay_probs(bob_HMM_wtr)
+  stay_coy_smr <- stay_probs(coy_HMM_smr)
+  stay_coy_wtr <- stay_probs(coy_HMM_wtr)
   
   
-  #'  Get 95%CI for covariate effects on state-dependent distributions
-  global_est <- CIbeta(coy_HMM_smr, alpha = 0.95)
-  rnames <- colnames(global_est[[1]][[1]])
-  step_out <- as.data.frame(matrix(unlist(global_est[[1]]), ncol = 4))
-  colnames(step_out) <- c("est", "se", "lower", "upper")
-  row.names(step_out) <- rnames
-  vrbls <- c("Intercept", "AreaOK", "SexM") #"Elev", "Slope", "PercForMix", "PercXGrass", "PercXShrub", "NearestRd", "HumanMod", 
-  params <- rep(vrbls, 4)
-  distp <- c("Mean1", "Mean2", "SD1", "SD2")
-  dist_params <- rep(distp, each = 3)
-  step_out <- cbind(step_out, params)
-  step_out <- cbind(step_out, dist_params)
-  step_out <- step_out %>%
-    mutate(
-      params = as.factor(as.character(params)),
-      dist_params = as.factor(as.character(dist_params))) %>%
-    arrange(match(params, vrbls)) 
-  
-  #'  Calculate stationary state probabilities 
-  ssp <- stationary(coy_HMM_smr, covs = data.frame(Elev = 0, Slope = 0, HumanMod = 0,
-                                                   NearestRd = 0, PercForMix = 0, 
-                                                   PercXGrass = 0, PercXShrub = 0))
-  
-  #'  Plot stationary state probabilities
-  plotStationary(coy_HMM_smr, covs = data.frame(Elev = 0, Slope = 0, HumanMod = 0,
-                                                NearestRd = 0, PercForMix = 0, 
-                                                PercXGrass = 0, PercXShrub = 0),
-                 col = c("red", "blue"), plotCI = TRUE, alpha = 0.95)
-  
-  
-  #'  Function to extract model outputs
+  #'  Function to extract covariate effects on transition-probabilities
   rounddig <- 2
   hmm_out <- function(mod, spp, season) {
     #'  Extract estimates, standard error, and 95% Confidence Intervals for effect
@@ -328,15 +314,19 @@
   coy_w1820_hmm <- hmm_out(coy_HMM_wtr, "Coyote", "Winter")
   
   #'  Gather prey and predator results to put into a single results table
-  results_hmm_prey <- rbind(md_s1819_hmm, md_w1820_hmm, elk_s1819_hmm, elk_w1820_hmm, 
+  results_hmm_trpr <- rbind(bob_s1819_hmm, bob_w1820_hmm, coug_s1819_hmm, coug_w1820_hmm, 
+                              coy_s1819_hmm, coy_w1820_hmm, md_s1819_hmm, md_w1820_hmm, 
+                              elk_s1819_hmm, elk_w1820_hmm, wtd_s1819_hmm, wtd_w1820_hmm,
+                              wolf_s1819_hmm, wolf_w1820_hmm)
+  results_hmm_trpr_prey <- rbind(md_s1819_hmm, md_w1820_hmm, elk_s1819_hmm, elk_w1820_hmm, 
                             wtd_s1819_hmm, wtd_w1820_hmm)
-  results_hmm_pred <- rbind(bob_s1819_hmm, bob_w1820_hmm, coug_s1819_hmm, coug_w1820_hmm, 
+  results_hmm_trpr_pred <- rbind(bob_s1819_hmm, bob_w1820_hmm, coug_s1819_hmm, coug_w1820_hmm, 
                             coy_s1819_hmm, coy_w1820_hmm, wolf_s1819_hmm, wolf_w1820_hmm)
   
   #'  Spread results so the coefficient effects are easier to compare between 
   #'  transition probabilities and across species
   #'  Ungulates (no study area covariate included)
-  results_hmm_wide_prey <- results_hmm_prey %>% 
+  results_hmm_wide_trpr <- results_hmm_trpr %>%  #results_hmm_prey
     # dplyr::select(-z) %>%
     mutate(
       # SE = round(SE, 2),
@@ -350,7 +340,6 @@
     unite(Est_SE_CI, Est_SE, CI95, sep = "_") %>%
     spread(Parameter, Est_SE_CI) %>%
     separate("(Intercept)", c("Intercept (SE)", "Intercept 95% CI"), sep = "_") %>%
-    # separate("AreaOK", c("AreaOK (SE)", "AreaOK 95% CI"), sep = "_") %>%
     separate("Elev", c("Elev (SE)", "Elev 95% CI"), sep = "_") %>%
     separate("Slope", c("Slope (SE)", "Slope 95% CI"), sep = "_") %>%
     separate("PercForMix", c("PercForMix (SE)", "PercForMix 95% CI"), sep = "_") %>%
@@ -358,15 +347,15 @@
     separate("PercXShrub", c("PercXShrub (SE)", "PercXShrub 95% CI"), sep = "_") %>%
     separate("NearestRd", c("NearestRd (SE)", "NearestRd 95% CI"), sep = "_") %>%
     separate("HumanMod", c("HumanMod (SE)", "HumanMod 95% CI"), sep = "_") %>%
-    mutate(
-      AreaOK = rep("NA", nrow(.)),
-      AreaCI = rep("NA", nrow(.))
-    ) %>%
-    relocate(AreaOK, .before = "Elev (SE)") %>%
-    relocate(AreaCI, .before = "Elev (SE)") %>%
+    # mutate(
+    #   AreaOK = rep("NA", nrow(.)),
+    #   AreaCI = rep("NA", nrow(.))
+    # ) %>%
+    # relocate(AreaOK, .before = "Elev (SE)") %>%
+    # relocate(AreaCI, .before = "Elev (SE)") %>%
     arrange(match(Species, c("Mule Deer", "Elk", "White-tailed Deer")))
-  names(results_hmm_wide_prey)[names(results_hmm_wide_prey) == "AreaOK"] <- "AreaOK (SE)"
-  names(results_hmm_wide_prey)[names(results_hmm_wide_prey) == "AreaCI"] <- "AreaOK 95% CI"
+  # names(results_hmm_wide)[names(results_hmm_wide) == "AreaOK"] <- "AreaOK (SE)"
+  # names(results_hmm_wide)[names(results_hmm_wide) == "AreaCI"] <- "AreaOK 95% CI"
 
   #'  Predators (study area covariate included)
   results_hmm_wide_pred <- results_hmm_pred %>% 
@@ -396,7 +385,41 @@
   
   results_hmm_wide <- rbind(results_hmm_wide_pred, results_hmm_wide_prey)
   
-  write.csv(results_hmm_wide, paste0("./Outputs/HMM_Results_wide", Sys.Date(), ".csv"))
+  write.csv(results_hmm_wide_trpr, paste0("./Outputs/HMM_Results_TrnsPrb_wide", Sys.Date(), ".csv"))
+  
+  #'  THIS ISN'T WORKING- CAN'T FIGURE OUT HOW TO EXTRACT BETA EFFECTS OF STUDY AREA & SEX ON STEP LENGTH
+  #'  Function to extract 95%CI for covariate effects on state-dependent distributions
+  #'  For species with ZeroMass functions (ungulates and cougars)
+  #' state_dist_zm <- function(hmmm) {
+  #'   #'  Calculate 95%CI on beta coefficients
+  #'   global_est <- CIbeta(hmmm, alpha = 0.95)
+  #'   #'  Grab names of each parameter
+  #'   rnames <- colnames(global_est[[1]][[1]])
+  #'   #'  Organize into a dataframe
+  #'   step_out <- as.data.frame(matrix(unlist(global_est[[1]]), ncol = 4))
+  #'   colnames(step_out) <- c("est", "se", "lower", "upper")
+  #'   row.names(step_out) <- rnames
+  #'   vrbls <- c("Intercept", "AreaOK", "SexM")  
+  #'   params <- rep(vrbls, 4)
+  #'   distp <- c("Mean1", "Mean2", "SD1", "SD2", "ZeroMass1", "ZeroMass2")
+  #'   dist_params <- rep(distp, each = 3) 
+  #'   step_out <- cbind(step_out, params)
+  #'   step_out <- cbind(step_out, dist_params)
+  #'   step_out <- step_out %>%
+  #'     mutate(
+  #'       params = as.factor(as.character(params)),
+  #'       dist_params = as.factor(as.character(dist_params))) %>%
+  #'     arrange(match(params, vrbls))
+  #'   
+  #'   return(step_out)
+  #' }
+  #' #'  Run each season and species-specific model through function
+  #' md_s1819_hmm <- state_dist_zm(md_HMM_smr)
+ 
+  
+  
+  
+  
   
   #' #' Plot estimates and CIs for Pr(exploratory) at each time step
   #' plot(trProbs$est[1,2,], type="l", ylim=c(0,1), ylab="Pr(exploratory)", xlab="t", col=c("#E69F00", "#56B4E9")[coy_HMM_smr$miSum$Par$states])
@@ -419,13 +442,7 @@
   #'  1. make sure I don't need to consolidate bursts in any way (I think each new
   #'  burst should be assigned a new starting parameter and movement of each track 
   #'  is estimated from there, but not 100% sure)
-  #'  2. do I add a random effect for individual? Seems like that might be difficult
-  #'  in momentuHMM and the discrete-random effects seem weird to me unless it's 
-  #'  just random effect for sex or year but not sure if that's how the discrete
-  #'  rnd eff works
-  #'  3. do I move sex covariate to the state-dependent distributions instead of
-  #'  on transition probabilities... I think that makes more sense but having 
-  #'  trouble with design matrix on state-dep. distributions
+
   
   
   
