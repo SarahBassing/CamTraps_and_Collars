@@ -84,7 +84,8 @@
   megadata <- dplyr::select(megadata, -ID)
   #'  Not sure this step was actually needed anymore but oh well
   
-  
+  #'  Total number of images
+  npix <- nrow(megadata)
    
   #'  CONSIDER RARIFYING BY INDEPENDENT DETECTION EVENTS 
   #'  SHOULD I GENERATE INDEPENDENT DETECTION EVENTS FOR MULTIPLE TIME PERIODS 
