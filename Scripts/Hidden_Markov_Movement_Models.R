@@ -19,7 +19,9 @@
   rm(list=ls())
 
   #'  Load libraries
-  # remotes::install_github('bmcclintock/momentuHMM@develop') # latest version, unstable
+  # remotes::install_github('bmcclintock/momentuHMM@develop') # development version, unstable
+  # remotes::install_github("bmcclintock/momentuHMM@fitCTHMM") # version w/ ctmc model, unstable
+  # install.packages("xfun", INSTALL_opts = '--no-lock') # if xfun fails to install
   library(momentuHMM)
   library(rgdal)
   library(tidyverse)
@@ -219,6 +221,27 @@
                          wolf_HMM_wtr, bob_HMM_smr, bob_HMM_wtr, coy_HMM_smr, coy_HMM_wtr)
   save(spp_HMM_output, file = paste0("./Outputs/spp_HMM_output_", Sys.Date(), ".RData"))
   
+  load("./Outputs/spp_HMM_output_2021-05-18.RData")
+  
+  
+  
+  
+  #'  Testing out the continusous-time multivariate HMM 
+  m1 <- fitCTHMM(data = mdData_smr, nbStates = 2, dist = list(step = "gamma", angle = "wrpcauchy"), 
+                 formula = ~1, Par0 = Par0_m1_md, stateNames = stateNames, 
+                 estAngleMean = NULL, Time.name = "time", Time.unit = "hours")
+  Par0_m2 <- getPar0(model = m1, DM = DM_nullprey, formula = trans_formula) 
+  m2 <- fitCTHMM(data = mdData_smr, nbStates = 2, dist = dists_wc, Par0 = Par0_m2$Par,
+                 stateNames = stateNames, DM = DM_nullprey, beta0 = Par0_m2$beta, 
+                 formula = trans_formula, Time.name = "time", Time.unit = "hours")
+  
+  
+  
+  
+  
+  
+  
+  
   
   #'  Function to extract stationary state probabilities & plot predicted responses
   stay_probs <- function(hmmm) {
@@ -254,6 +277,24 @@
   stay_coy_smr <- stay_probs(coy_HMM_smr)
   stay_coy_wtr <- stay_probs(coy_HMM_wtr)
   
+  #'  Make panel of figures
+  #'  https://www.benjaminbell.co.uk/2018/02/creating-multi-panel-plots-and-figures.html
+  layout(matrix(1:8, ncol=2, byrow=TRUE))
+  #'  Adjusts the margins
+  par(oma=c(4, 4, 4, 4), mar=c(4, 4, 4, 4))
+  stay_md_smr <- stay_probs(spp_HMM_output[[1]])
+  
+  layout(matrix(1:8, ncol=2, byrow=TRUE))
+  par(oma=c(4, 4, 4, 4), mar=c(4, 4, 4, 4))
+  stay_md_wtr <- stay_probs(spp_HMM_output[[2]])
+  
+  layout(matrix(1:8, ncol=2, byrow=TRUE))
+  par(oma=c(4, 4, 4, 4), mar=c(4, 4, 4, 4))
+  stay_coug_smr <- stay_probs(spp_HMM_output[[7]])
+  
+  layout(matrix(1:8, ncol=2, byrow=TRUE))
+  par(oma=c(4, 4, 4, 4), mar=c(4, 4, 4, 4))
+  stay_coug_wtr <- stay_probs(spp_HMM_output[[8]])
   
   #'  Function to extract covariate effects on transition-probabilities
   rounddig <- 2
