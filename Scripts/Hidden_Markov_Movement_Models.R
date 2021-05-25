@@ -133,10 +133,10 @@
   DM_nullprey <- list(step = list(mean = ~1, sd = ~1, zeromass = ~1), angle = list(concentration = ~1)) # includes zeromass parameters
   DM_pred <- list(step = list(mean = DM_formula_sexSA, sd = DM_formula_sexSA), angle = list(concentration = ~1))
   DM_coug <- list(step = list(mean = DM_formula_sexSA, sd = DM_formula_sexSA, zeromass = DM_formula_sexSA), angle = list(concentration = ~1)) # includes zeromass parameters
-  #'  DM with habitat covariates
-  pred_DM <- list(step = list(mean = DM_formula_pred, sd = DM_formula_pred), angle = list(concentration = ~1))
-  coug_DM <- list(step = list(mean = DM_formula_pred, sd = DM_formula_pred, zeromass = DM_formula_pred), angle = list(concentration = ~1))
-  prey_DM <- list(step = list(mean = DM_formula_prey, sd = DM_formula_prey, zeromass = DM_formula_prey), angle = list(concentration = ~1))
+  #'  DM with habitat covariates- don't use
+  # pred_DM <- list(step = list(mean = DM_formula_pred, sd = DM_formula_pred), angle = list(concentration = ~1))
+  # coug_DM <- list(step = list(mean = DM_formula_pred, sd = DM_formula_pred, zeromass = DM_formula_pred), angle = list(concentration = ~1))
+  # prey_DM <- list(step = list(mean = DM_formula_prey, sd = DM_formula_prey, zeromass = DM_formula_prey), angle = list(concentration = ~1))
   #'  Formula notes:
   #'  Differences btwn predator & prey models due to collaring effort
   #'  -Sex on predator models: M tend to have larger home ranges than F, likely 
@@ -200,28 +200,72 @@
   }
   
   #'  Run species-specific data through function
-  md_HMM_smr <- HMM_fit(mdData_smr, dists_wc, Par0_m1_md, DM_nullprey, trans_formula) 
-  md_HMM_wtr <- HMM_fit(mdData_wtr, dists_wc, Par0_m1_md, DM_nullprey, trans_formula) 
-  elk_HMM_smr <- HMM_fit(elkData_smr, dists_wc, Par0_m1_elk, DM_nullprey, trans_formula) 
-  elk_HMM_wtr <- HMM_fit(elkData_wtr, dists_wc, Par0_m1_elk, DM_nullprey, trans_formula) 
-  wtd_HMM_smr <- HMM_fit(wtdData_smr, dists_wc, Par0_m1_wtd, prey_DM, trans_formula) 
-  wtd_HMM_wtr <- HMM_fit(wtdData_wtr, dists_wc, Par0_m1_wtd, prey_DM, trans_formula) 
-  coug_HMM_smr <- HMM_fit(cougData_smr, dists_wc, Par0_m1_coug, DM_coug, trans_formula) 
-  coug_HMM_wtr <- HMM_fit(cougData_wtr, dists_wc, Par0_m1_coug, DM_coug, trans_formula) 
-  wolf_HMM_smr <- HMM_fit(wolfData_smr, dists_wc, Par0_m1_wolf, DM_pred, trans_formula) 
-  wolf_HMM_wtr <- HMM_fit(wolfData_wtr, dists_wc, Par0_m1_wolf, DM_pred, trans_formula) 
-  bob_HMM_smr <- HMM_fit(bobData_smr, dists_wc, Par0_m1_bob, DM_pred, trans_formula) 
-  bob_HMM_wtr <- HMM_fit(bobData_wtr, dists_wc, Par0_m1_bob, DM_pred, trans_formula) 
-  coy_HMM_smr <- HMM_fit(coyData_smr, dists_wc, Par0_m1_coy, DM_pred, trans_formula)  
-  coy_HMM_wtr <- HMM_fit(coyData_wtr, dists_wc, Par0_m1_coy, DM_pred, trans_formula) 
+  #'  Switch between trans_formula & trans_formula_NULL for covariates on or off 
+  #'  transition probabilities
+  md_HMM_smr <- HMM_fit(mdData_smr, dists_wc, Par0_m1_md, DM_nullprey, trans_formula_null)  
+  md_HMM_wtr <- HMM_fit(mdData_wtr, dists_wc, Par0_m1_md, DM_nullprey, trans_formula_null) 
+  elk_HMM_smr <- HMM_fit(elkData_smr, dists_wc, Par0_m1_elk, DM_nullprey, trans_formula_null) 
+  elk_HMM_wtr <- HMM_fit(elkData_wtr, dists_wc, Par0_m1_elk, DM_nullprey, trans_formula_null) 
+  wtd_HMM_smr <- HMM_fit(wtdData_smr, dists_wc, Par0_m1_wtd, DM_nullprey, trans_formula_null) 
+  wtd_HMM_wtr <- HMM_fit(wtdData_wtr, dists_wc, Par0_m1_wtd, DM_nullprey, trans_formula_null) 
+  coug_HMM_smr <- HMM_fit(cougData_smr, dists_wc, Par0_m1_coug, DM_coug, trans_formula_null) 
+  coug_HMM_wtr <- HMM_fit(cougData_wtr, dists_wc, Par0_m1_coug, DM_coug, trans_formula_null) 
+  wolf_HMM_smr <- HMM_fit(wolfData_smr, dists_wc, Par0_m1_wolf, DM_pred, trans_formula_null) 
+  wolf_HMM_wtr <- HMM_fit(wolfData_wtr, dists_wc, Par0_m1_wolf, DM_pred, trans_formula_null) 
+  bob_HMM_smr <- HMM_fit(bobData_smr, dists_wc, Par0_m1_bob, DM_pred, trans_formula_null) 
+  bob_HMM_wtr <- HMM_fit(bobData_wtr, dists_wc, Par0_m1_bob, DM_pred, trans_formula_null) 
+  coy_HMM_smr <- HMM_fit(coyData_smr, dists_wc, Par0_m1_coy, DM_pred, trans_formula_null)  
+  coy_HMM_wtr <- HMM_fit(coyData_wtr, dists_wc, Par0_m1_coy, DM_pred, trans_formula_null) 
   
   #'  Save model results
   spp_HMM_output <- list(md_HMM_smr, md_HMM_wtr, elk_HMM_smr, elk_HMM_wtr, wtd_HMM_smr, 
                          wtd_HMM_wtr, coug_HMM_smr, coug_HMM_wtr, wolf_HMM_smr, 
                          wolf_HMM_wtr, bob_HMM_smr, bob_HMM_wtr, coy_HMM_smr, coy_HMM_wtr)
-  save(spp_HMM_output, file = paste0("./Outputs/spp_HMM_output_", Sys.Date(), ".RData"))
+  #'  Make sure to note whether covariates were included on transition probabilities
+  # save(spp_HMM_output, file = paste0("./Outputs/spp_HMM_output_", Sys.Date(), ".RData"))
+  save(spp_HMM_output, file = paste0("./Outputs/spp_HMM_output_NULLtrans_", Sys.Date(), ".RData"))
   
   load("./Outputs/spp_HMM_output_2021-05-18.RData")
+  
+  
+  #'  Function to extract most likely state sequence for all locations based on
+  #'  the Viterbi algorithm and the fitted HMM
+  #'  MAKE SURE YOU KNOW WHICH TRANSITION FORMULAR INFORMED THESE CLASSIFICATIONS
+  loc_states <- function(mod, locs) {
+    #'  Decode most likely state for each observation
+    states <- viterbi(mod)
+    #'  Append state classification to location data
+    dat <- cbind(locs, states)
+    
+    #'  Print derived percentage of time spent in each state
+    print(table(states)/nrow(locs))
+    
+    return(dat)
+  }
+  #'  Run fitted HMMs and location data through function
+  md_state_smr <- loc_states(md_HMM_smr, mdData_smr)
+  md_state_wtr <- loc_states(md_HMM_wtr, mdData_wtr)
+  elk_state_smr <- loc_states(elk_HMM_smr, elkData_smr)
+  elk_state_wtr <- loc_states(elk_HMM_wtr, elkData_wtr)
+  wtd_state_smr <- loc_states(wtd_HMM_smr, wtdData_smr)
+  wtd_state_wtr <- loc_states(wtd_HMM_wtr, wtdData_wtr)
+  coug_state_smr <- loc_states(coug_HMM_smr, cougData_smr)
+  coug_state_wtr <- loc_states(coug_HMM_wtr, cougData_wtr)
+  wolf_state_smr <- loc_states(wolf_HMM_smr, wolfData_smr)
+  wolf_state_wtr <- loc_states(wolf_HMM_wtr, wolfData_wtr)
+  bob_state_smr <- loc_states(bob_HMM_smr, bobData_smr)
+  bob_state_wtr <- loc_states(bob_HMM_wtr, bobData_wtr)
+  coy_state_smr <- loc_states(coy_HMM_smr, coyData_smr)
+  coy_state_wtr <- loc_states(coy_HMM_wtr, coyData_wtr)
+  
+  #'  Save state sequences for external analyses
+  spp_state_output <- list(md_state_smr, md_state_wtr, elk_state_smr, elk_state_wtr, 
+                           wtd_state_smr, wtd_state_wtr, coug_state_smr, coug_state_wtr, 
+                           wolf_state_smr, wolf_state_wtr, bob_state_smr, 
+                           bob_state_wtr, coy_state_smr, coy_state_wtr)
+  #'  Make sure to note whether covariates were included on transition probabilities
+  # save(spp_state_output, file = paste0("./Outputs/spp_state_output_", Sys.Date(), ".RData"))
+  save(spp_state_output, file = paste0("./Outputs/spp_state_output_NULLtrans_", Sys.Date(), ".RData"))
   
   
   
