@@ -175,8 +175,7 @@
   #'  Source creat.burst.R function to identify bursts
   #'  Requires location data be ordered by ID and time (do this above)
   #'  Script written by J.Merkle & provided at Movement Workshop
-  # source("./Scripts/creat.burst.R")
-  source("creat.burst.R")
+  source("./Scripts/creat.burst.R")
 
   #'  Function to run locations for each species through the creat.burst function
   bursts <- function(rawloc) {
@@ -252,6 +251,14 @@
   save(COY_smr_track, file = "./Outputs/Telemetry_tracks/COY_smr_track.RData")
   save(COY_wtr_track, file = "./Outputs/Telemetry_tracks/COY_wtr_track.RData")
 
+  
+  #'  Save a giant list of all seasonal tracks
+  spp_all_tracks <- list(MD_smr_track, MD_wtr_track, ELK_smr_track, ELK_wtr_track,
+                     WTD_smr_track, WTD_wtr_track, COUG_smr_track, COUG_wtr_track,
+                     WOLF_smr_track, WOLF_wtr_track, BOB_smr_track, BOB_wtr_track,
+                     COY_smr_track, COY_wtr_track)
+  save(spp_all_tracks, file = "./Outputs/Telemetry_tracks/spp_all_tracks.RData")
+  
   #'  Load tracks
   # setwd("C:/Users/sb89/Desktop/CamTrap_and_Collars")
   # load("./Outputs/Telemetry_tracks/MD_track.RData")
