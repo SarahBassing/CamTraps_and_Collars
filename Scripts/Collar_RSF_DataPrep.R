@@ -18,10 +18,12 @@
   #'  Load packages for selecting available points
   library(tidyverse)
   library(sp)
+  library(raster)
   library(lme4)
   library(adehabitatHR)
   
   #'  Load telemetry data
+  load("./Outputs/Telemetry_tracks/spp_all_tracks.RData")
   # load("./Outputs/Telemetry_tracks/MD_smr_track.RData")
   # load("./Outputs/Telemetry_tracks/MD_wtr_track.RData")
   # load("./Outputs/Telemetry_tracks/ELK_smr_track.RData")
@@ -34,9 +36,8 @@
   # load("./Outputs/Telemetry_tracks/WOLF_wtr_track.RData")
   # load("./Outputs/Telemetry_tracks/BOB_smr_track.RData")
   # load("./Outputs/Telemetry_tracks/BOB_wtr_track.RData")
-  load("./Outputs/Telemetry_tracks/COY_smr_track.RData")
-  load("./Outputs/Telemetry_tracks/COY_wtr_track.RData")
-  
+  # load("./Outputs/Telemetry_tracks/COY_smr_track.RData")
+  # load("./Outputs/Telemetry_tracks/COY_wtr_track.RData")
   
   #'  Generate random "Available" locations for each individual
   #'  =========================================================
@@ -47,8 +48,9 @@
     colnames(animal) <- "AnimalID"
     return(animal)
   }
-  coy_ID_smr <- unq_id(COY_smr_track)
-  coy_ID_wtr <- unq_id(COY_wtr_track)
+  animal_ID <- lapply(spp_all_tracks, unq_id)
+  # coy_ID_smr <- unq_id(COY_smr_track)
+  # coy_ID_wtr <- unq_id(COY_wtr_track)
   
   #'  Function to split data into list of dataframes by unique animal ID and year
   #'  (Use AnimalID if ignoring year aspect of data)
@@ -56,8 +58,9 @@
     ind_animal <- group_split(locs, locs$FullID) #FullID so it's by year too (important for landcover data extraction)
     return(ind_animal)
   }
-  coy_split_smr <- split_animal(COY_smr_track)
-  coy_split_wtr <- split_animal(COY_wtr_track)
+  animal_split <- lapply(spp_all_tracks, split_animal)
+  # coy_split_smr <- split_animal(COY_smr_track)
+  # coy_split_wtr <- split_animal(COY_wtr_track)
   
   #'  Function to calculate mean number of observations per species
   #'  Used to decide how many "available" points to draw for each individual
@@ -69,15 +72,40 @@
     avg_locs <- c(avg_locs, mean_locs)
     return(avg_locs)
   }
-  spp_list <- list(COY_smr_track, COY_wtr_track)
-  mean_locs <- lapply(spp_list, mean_obs)
+  mean_locs <- lapply(spp_all_tracks, mean_obs)
+  # spp_list <- list(COY_smr_track, COY_wtr_track)
+  # mean_locs <- lapply(spp_list, mean_obs)
   #'  Calculate mean number of used locations for all species
-  mean_used <- mean(unlist(mean_locs))
+  mean_used <- mean(unlist(mean_locs)); sd_used <- sd(unlist(mean_locs))
   #'  RSF literature suggests 1:20 ration used:available
   navailable <- mean_used*20
+
   
   #'  Set projection for spatial analyses
-  sa_proj <- crs("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
+  sa_proj <- CRS("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
+  
+  # dem <- raster("./Shapefiles/WA DEM rasters/WPPP_DEM_30m_reproj.tif") #%>%
+  # domain <- raster("./Shapefiles/ref_grid_1k.img") %>%
+  #   projectRaster(crs = sa_proj) %>%
+    # as("SpatialPixels")
+  # class(domain)
+  
+  # landco <- raster("./Shapefiles/Cascadia_layers/Perc_Landcover_reproj/forestmix2prop_18.tif") 
+  # (bb <- extent(landco))
+  # x <- seq(bb[1], bb[2], by = 30) # resolution is the pixel size you desire ==> 30m
+  # y <- seq(bb[3], bb[4], by = 30)
+  # xy <- expand.grid(x = x, y = y)
+  # coordinates(xy) <- ~x+y
+  # gridded(xy) <- TRUE
+  # class(xy)
+  
+  # load("./Shapefiles/xy.RData") # Takes awhile to load due to massive size
+  # xy30m <- xy
+  # load("./Shapefiles/xy1k.RData")
+  # xy1k <- xy
+  
+  
+  
   
   #'  Function to randomly select "Available" points within each animal's home
   #'  range per season. 
@@ -92,7 +120,10 @@
     
     #'  2. Create KUDs for each animal following Bivariate normal utilization distributions
     #'  ----------------------------------------------------------
-    UD <- kernelUD(locs_sp, kern = "bivnorm")
+    #'  Estimate KDEs for each home range, extend the spatial extent by 1.5 
+    #'  when estimating UDs (throws an error about grid being too small to 
+    #'  estimate home range otherwise)
+    UD <- kernelUD(locs_sp, kern = "bivnorm", extent = 1.5) 
     UD95 <- getverticeshr(UD, 95)
     #'  Plot to make sure step 2 worked
     if(plotit) {
@@ -123,8 +154,26 @@
   }
     
   #'  Call function
-  coy_smr_df <- lapply(coy_split_smr, avail_pts, F)
-  coy_wtr_df <- lapply(coy_split_wtr, avail_pts, F)
+  #'  Run list of lists together
+  spp_pts <- lapply(animal_split, lapply, avail_pts, T)
+  #'  Run lists by species and season
+  md_smr_df <- lapply(animal_split[[1]], avail_pts, T) #no workie
+  md_wtr_df <- lapply(animal_split[[2]], avail_pts, T) #works
+  elk_smr_df <- lapply(animal_split[[3]], avail_pts, T) #works
+  elk_wtr_df <- lapply(animal_split[[4]], avail_pts, T) #works
+  wtd_smr_df <- lapply(animal_split[[5]], avail_pts, T) #noworkie
+  wtd_wtr_df <- lapply(animal_split[[6]], avail_pts, T) #works
+  coug_smr_df <- lapply(animal_split[[7]], avail_pts, T) #works
+  coug_wtr_df <- lapply(animal_split[[8]], avail_pts, T) #works
+  wolf_smr_df <- lapply(animal_split[[9]], avail_pts, T) #works
+  wolf_wtr_df <- lapply(animal_split[[10]], avail_pts, T) #works
+  bob_smr_df <- lapply(animal_split[[11]], avail_pts, T) #works
+  bob_wtr_df <- lapply(animal_split[[12]], avail_pts, T) #works
+  coy_smr_df <- lapply(animal_split[[13]], avail_pts, T) #works
+  coy_wtr_df <- lapply(animal_split[[14]], avail_pts, T) #works
+  # md1 <- animal_split[[1]][[1]]
+  # tst <- avail_pts(md1, T)
+  
   #'  Convert to dataframes instead of lists
   coy_smr_df <- do.call(rbind.data.frame, coy_smr_df)
   coy_wtr_df <- do.call(rbind.data.frame, coy_wtr_df)
@@ -135,7 +184,6 @@
   #'  Save
   save(coy_available, file = paste0("./Outputs/RSF_available_pts/coy_available_", Sys.Date(), ".RData"))
  
-
   
   #'  Extract covariate data for each available location
   #'  ==================================================
@@ -157,8 +205,8 @@
   #'  Read in spatial data
   wppp_bound <- st_read("./Shapefiles/WPPP_CovariateBoundary", layer = "WPPP_CovariateBoundary")
   #'  Terrain rasters
-  dem <- raster("./Shapefiles/WA DEM rasters/WPPP_DEM_30m.tif")
-  Slope <- raster("./Shapefiles/WA DEM rasters/WPPP_slope_aspect.tif", band = 1)
+  dem <- raster("./Shapefiles/WA DEM rasters/WPPP_DEM_30m_reproj.tif")
+  Slope <- raster("./Shapefiles/WA DEM rasters/WPPP_slope_aspect_reproj.tif", band = 1)
   #'  Cascadia Biodiveristy Watch rasters & shapefiles
   landcov18 <- raster("./Shapefiles/Cascadia_layers/landcover_2018.tif")
   landcov19 <- raster("./Shapefiles/Cascadia_layers/landcover_2019.tif")
