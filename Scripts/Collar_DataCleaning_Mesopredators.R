@@ -181,7 +181,7 @@
 
   
   ####  ====================================================
-  ####  Create CLEAN data set for each ungulate species ####
+  ####  Create CLEAN data set for each meso species ####
   
   #  Further cleaning of telemetry data ready for analyses-
   #  Drop missing fixes and locations with poor accuracy
@@ -288,8 +288,12 @@
   # meso_skinny <- meso_skinny[!(meso_skinny$ID == "NEBOB6F" & meso_skinny$Floordt > "2020-01-15 00:00:00" & meso_skinny$Floordt < "2020-03-06 00:00:00"),]
   # #  Others to consider: MVBOB69F, NECOY20F, NECOY12F, MVBOB80M, MVBOB54F
   
+  # # Rename data to acknowledge dispersals were excluded from this dataset
+  # meso_skinny_noDispersal <- meso_skinny
+  
   #  Save locations thinned to correct fix schedule
   # write.csv(meso_skinny, paste0('meso_skinny ', Sys.Date(), '.csv'))
+  # write.csv(meso_skinny_noDispersal, paste0('meso_skinny_noDispersal', Sys.Date(), '.csv'))
 
 
   
