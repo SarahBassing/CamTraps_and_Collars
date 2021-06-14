@@ -4,7 +4,10 @@
   ##  Sarah Bassing
   ##  =========================================================
   ##  Script takes cleaned master GPS satellite data and takes final  steps to 
-  ##  truncate and filter telemetry data for analyses specific to my project.
+  ##  truncate and filter telemetry data for analyses specific to my project. Be
+  ##  sure to use correct track data depending on if this is an HMM analysis
+  ##  (use all locations) or an RSF (exclude dispersal movements outside of an
+  ##  established home range).
   ##     1. Truncating 2-wks after animal was captured to ensure any movements 
   ##        affected by the capture are excluded from analyses.
   ##     2. Thinning data to only include locations on the WPPP chosen 4-hr fix
@@ -34,19 +37,19 @@
       IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
       CaptureDate = as_date(CaptureDate)
       ) %>%
-    select(-X)
+    dplyr::select(-X)
   elk_info <- read.csv("elk_info 2020-11-17.csv") %>%
     mutate(
       IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
       CaptureDate = as_date(CaptureDate)
     ) %>%
-    select(-X)
+    dplyr::select(-X)
   wtd_info <- read.csv("wtd_info 2020-11-17.csv") %>%
     mutate(
       IndividualIdentifier = as.factor(as.character(IndividualIdentifier)),
       CaptureDate = as_date(CaptureDate)
     ) %>%
-    select(-X)
+    dplyr::select(-X)
   #  Created based on data provided by L.Satterfield
   cougwolf_info <- read.csv("cougwolf_info.csv") %>%
     mutate(
@@ -84,7 +87,7 @@
       CaptureDate = as_date(CaptureDate),
       EndDate = as_date(EndDate)
     ) %>%
-    select(-X)
+    dplyr::select(-X)
   
   #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
   md_skinny <- read.csv("md_skinny 2020-11-17.csv") %>%
@@ -111,7 +114,7 @@
     dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
                   "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: data in UTC timezone to begin with
-  meso_skinny <- read.csv("meso_skinny 2021-04-19.csv") %>%
+  meso_skinny <- read.csv("meso_skinny_noDispersal2021-06-14.csv") %>%  #"meso_skinny 2021-04-19.csv"
     mutate(
       daytime = as.POSIXct(daytime, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
       UTCdt = with_tz(daytime, "UTC"),
@@ -120,7 +123,7 @@
     dplyr::select("ID", "CollarID", "Species", "Sex", "StudyArea", "Latitude", "Longitude", 
                   "Acquisition.Time.UTC", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: already thinned, floored, tz adjusted & AnimalID attached by L.Satterfield
-  coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_4hrs_wDispersal.csv") %>%
+  coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_4hrs.csv") %>% #Cougar_Vectronic_ATS_Spring2021_4hrs_wDispersal.csv
     mutate(ID = as.factor(as.character(ID)),
            CollarID = Collar,
            Sex = str_sub(ID, -1),
@@ -419,10 +422,11 @@
   coy_gtg <- filter(meso_gtg, Species == "Coyote")
   bob_gtg <- filter(meso_gtg, Species == "Bobcat")
   
-  #  Species_gtg are final data sets for HMM analyses
+  #  Species_gtg are final data sets for HMM/RSF analyses
   
   #  Save RData for easy transfer to other computers
   # save.image(paste0("./Data/Collar_Truncating&Filtering_", Sys.Date(), ".RData"))
+  # save.image(paste0("./Data/Collar_Truncating&Filtering_noDispersal_", Sys.Date(), ".RData"))
   
   #  Next step is Collar_Movement_DataPrep.R script
 
