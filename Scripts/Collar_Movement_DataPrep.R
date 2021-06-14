@@ -14,6 +14,9 @@
   #'  
   #'  Telemetry data initially cleaned with Collar_DataCleaning.R script, 
   #'  Collar_Truncating&Filtering.R script, & by T.Ganz, L.Satterfield & B.Windell.
+  #'  Data from Collar_Truncating&Filtering... script will depend on whether 
+  #'  dispersal movements were included (HMM) or excluded (RSF) for further analyses.
+  #'  
   #'  Covariates based on remotely sensed data available from various sources
   #'  (noted in occupancy model script).
   #'  ============================================
@@ -28,7 +31,8 @@
   
   #'  Source cleaned telemetry data
   # source("./Scripts/Collar_Truncating&Filtering.R")
-  load("./Data/Collar_Truncating&Filtering_2021-05-01.RData")
+  # load("./Data/Collar_Truncating&Filtering_2021-05-01.RData")
+  load("./Data/Collar_Truncating&Filtering_noDispersal_2021-06-14.RData")
 
   ####  Data preparation  ####
   #'  Select relevant columns
@@ -257,7 +261,9 @@
                      WTD_smr_track, WTD_wtr_track, COUG_smr_track, COUG_wtr_track,
                      WOLF_smr_track, WOLF_wtr_track, BOB_smr_track, BOB_wtr_track,
                      COY_smr_track, COY_wtr_track)
-  save(spp_all_tracks, file = "./Outputs/Telemetry_tracks/spp_all_tracks.RData")
+  # save(spp_all_tracks, file = "./Outputs/Telemetry_tracks/spp_all_tracks.RData")
+  save(spp_all_tracks, file = "./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal.RData")
+  
   
   #'  Load tracks
   # setwd("C:/Users/sb89/Desktop/CamTrap_and_Collars")
