@@ -179,13 +179,13 @@
   coy_available <- list(coy_smr_df, coy_wtr_df)
   
   #'  Save
-  save(md_available, file = paste0("./Outputs/RSF_available_pts/md_available_", Sys.Date(), ".RData"))
-  save(elk_available, file = paste0("./Outputs/RSF_available_pts/elk_available_", Sys.Date(), ".RData"))
-  save(wtd_available, file = paste0("./Outputs/RSF_available_pts/wtd_available_", Sys.Date(), ".RData"))
-  save(coug_available, file = paste0("./Outputs/RSF_available_pts/coug_available_", Sys.Date(), ".RData"))
-  save(wolf_available, file = paste0("./Outputs/RSF_available_pts/wolf_available_", Sys.Date(), ".RData"))
-  save(bob_available, file = paste0("./Outputs/RSF_available_pts/bob_available_", Sys.Date(), ".RData"))
-  save(coy_available, file = paste0("./Outputs/RSF_available_pts/coy_available_", Sys.Date(), ".RData"))
+  save(md_available, file = paste0("./Outputs/RSF_pts/md_available_", Sys.Date(), ".RData"))
+  save(elk_available, file = paste0("./Outputs/RSF_pts/elk_available_", Sys.Date(), ".RData"))
+  save(wtd_available, file = paste0("./Outputs/RSF_pts/wtd_available_", Sys.Date(), ".RData"))
+  save(coug_available, file = paste0("./Outputs/RSF_pts/coug_available_", Sys.Date(), ".RData"))
+  save(wolf_available, file = paste0("./Outputs/RSF_pts/wolf_available_", Sys.Date(), ".RData"))
+  save(bob_available, file = paste0("./Outputs/RSF_pts/bob_available_", Sys.Date(), ".RData"))
+  save(coy_available, file = paste0("./Outputs/RSF_pts/coy_available_", Sys.Date(), ".RData"))
  
   
   #'  Extract covariate data for each available location
@@ -203,13 +203,13 @@
   library(tidyverse)
   
   #'  Load location data
-  # load("./Outputs/RSF_available_pts/md_available_2021-06-14.RData")
-  load("./Outputs/RSF_available_pts/elk_available_2021-06-14.RData")
-  # load("./Outputs/RSF_available_pts/wtd_available_2021-06-14.RData")
-  load("./Outputs/RSF_available_pts/coug_available_2021-06-14.RData")
-  load("./Outputs/RSF_available_pts/wolf_available_2021-06-14.RData")
-  load("./Outputs/RSF_available_pts/bob_available_2021-06-14.RData")
-  load("./Outputs/RSF_available_pts/coy_available_2021-06-14.RData")
+  # load("./Outputs/RSF_pts/md_available_2021-06-14.RData")
+  load("./Outputs/RSF_pts/elk_available_2021-06-14.RData")
+  # load("./Outputs/RSF_pts/wtd_available_2021-06-14.RData")
+  load("./Outputs/RSF_pts/coug_available_2021-06-14.RData")
+  load("./Outputs/RSF_pts/wolf_available_2021-06-14.RData")
+  load("./Outputs/RSF_pts/bob_available_2021-06-14.RData")
+  load("./Outputs/RSF_pts/coy_available_2021-06-14.RData")
   
   #'  Read in spatial data
   wppp_bound <- st_read("./Shapefiles/WPPP_CovariateBoundary", layer = "WPPP_CovariateBoundary")
@@ -372,7 +372,9 @@
         Area = ifelse(grepl("MD", ID), "OK", Area),
         Area = ifelse(grepl("EA", ID), "NE", Area),
         Area = ifelse(grepl("ELK", ID), "NE", Area),
-        Area = ifelse(grepl("WTD", ID), "NE", Area)
+        Area = ifelse(grepl("WTD", ID), "NE", Area),
+        #'  Indicate whether this location was used = 1 or available = 0
+        Used = 0
         )
     
     return(telem_covs)
@@ -401,25 +403,98 @@
   #'  How long did this take?
   difftime(end.time, start.time, units = "hours")
   
-  #' #'  Add study area to wolf data
-  #' #'  No easy way of doing this because ID not associated with WPPP study areas
-  #' #'  Double check lists 9 & 10 are wolf summer & winter data
-  #' spp_avail_covs[[9]]$Area <- "NE"   
-  #' spp_avail_covs[[9]] <- mutate(spp_avail_covs[[9]], 
-  #'                               Area = ifelse(grepl("W61M", ID), "OK", Area),  #double check no "W71F" in here
-  #'                               Area = ifelse(grepl("W88M", ID), "OK", Area),
-  #'                               Area = ifelse(grepl("W93M", ID), "OK", Area),
-  #'                               Area = ifelse(grepl("W94M", ID), "OK", Area))
-  #' spp_avail_covs[[10]]$Area <- "NE"   
-  #' spp_avail_covs[[10]] <- mutate(spp_avail_covs[[10]], 
-  #'                                Area = ifelse(grepl("W61M", ID), "OK", Area),
-  #'                                Area = ifelse(grepl("W88M", ID), "OK", Area),
-  #'                                Area = ifelse(grepl("W93M", ID), "OK", Area),
-  #'                                Area = ifelse(grepl("W94M", ID), "OK", Area))
+  #'  Add study area to wolf data
+  #'  No easy way of doing this because ID not associated with WPPP study areas
+  #'  Double check lists 9 & 10 are wolf summer & winter data
+  wolf_avail_covs[[1]]$Area <- "NE"
+  wolf_avail_covs[[1]] <- mutate(wolf_avail_covs[[1]],
+                                Area = ifelse(grepl("W61M", ID), "OK", Area),  #double check no "W71F" in here
+                                Area = ifelse(grepl("W88M", ID), "OK", Area),
+                                Area = ifelse(grepl("W93M", ID), "OK", Area),
+                                Area = ifelse(grepl("W94M", ID), "OK", Area))
+  wolf_avail_covs[[2]]$Area <- "NE"
+  wolf_avail_covs[[2]] <- mutate(wolf_avail_covs[[2]],
+                                 Area = ifelse(grepl("W61M", ID), "OK", Area),
+                                 Area = ifelse(grepl("W88M", ID), "OK", Area),
+                                 Area = ifelse(grepl("W93M", ID), "OK", Area),
+                                 Area = ifelse(grepl("W94M", ID), "OK", Area))
   
-  #'  Save and hope you never have to run this again!
-  # save(spp_avail_covs, file = paste0("./Outputs/RSF_available_pts/spp_avail_covs_", Sys.Date(), ".RData"))
-  save(coy_avail_covs, file = paste0("./Outputs/RSF_available_pts/coy_avail_covs_", Sys.Date(), ".RData"))
+  
+  #'  Merge lists across lists of coordinates & covariate data
+  combo_data <- function(pts, covs){
+    merged <- mapply(data.frame, pts, covs, SIMPLIFY = FALSE)
+    return(merged)
+  }
+  #'  Run used and available locations and covariates through
+  used_dat <- combo_data(used_locs, used_covs)
+  # md_avail_dat <- combo_data(md_available, md_avail_covs)
+  elk_avail_dat <- combo_data(elk_available, elk_avail_covs)
+  # wtd_avail_dat <- combo_data(wtd_available, wtd_avail_covs)
+  coug_avail_dat <- combo_data(coug_available, coug_avail_covs)
+  wolf_avail_dat <- combo_data(wolf_available, wolf_avail_covs)
+  bob_avail_dat <- combo_data(bob_available, bob_avail_covs)
+  coy_avail_dat <- combo_data(coy_available, coy_avail_covs)
+  
+  #'  Function to drop unneeded columns from list of used data sets and indicate 
+  #'  whether this location was used = 1 or available = 0
+  select_cols <- function(dat) {
+    used_skinny <- dat %>%
+      dplyr::select(x, y, AnimalID, Season, ID, Season.1, Year, Elev, Slope, RoadDen, 
+                    HumanMod, PercForMix, PercXGrass, PercXShrub, obs, Area) %>%
+      mutate(
+        Used = 1)
+    colnames(used_skinny) <-  c("x", "y", "ID", "Season", "ID.1", "Season.1", 
+                                "Year", "Elev", "Slope", "RoadDen", "HumanMod", 
+                                "PercForMix", "PercXGrass", "PercXShrub", "obs", 
+                                "Area", "Used")
+    return(used_skinny)
+  }
+  #'  Run the list of used locations through function
+  used_dat <- lapply(used_dat, select_cols)
+    
+  #'  Save used and available data separately
+  save(used_dat, file = paste0("./Outputs/RSF_pts/used_dat_", Sys.Date(), ".RData"))
+  # save(md_avail_dat, file = paste0("./Outputs/RSF_pts/md_avail_dat_", Sys.Date(), ".RData"))
+  save(elk_avail_dat, file = paste0("./Outputs/RSF_pts/elk_avail_dat_", Sys.Date(), ".RData"))
+  # save(wtd_avail_dat, file = paste0("./Outputs/RSF_pts/wtd_avail_dat_", Sys.Date(), ".RData"))
+  save(coug_avail_dat, file = paste0("./Outputs/RSF_pts/coug_avail_dat_", Sys.Date(), ".RData"))
+  save(wolf_avail_dat, file = paste0("./Outputs/RSF_pts/wolf_avail_dat_", Sys.Date(), ".RData"))
+  save(bob_avail_dat, file = paste0("./Outputs/RSF_pts/bob_avail_dat_", Sys.Date(), ".RData"))
+  save(coy_avail_dat, file = paste0("./Outputs/RSF_pts/coy_avail_dat_", Sys.Date(), ".RData"))
+  
+  
+  #'  Merge used & available data per species
+  # md_dat_all <- rbind(used_dat[[1]], md_avail_dat[[1]], used_dat[[2]], md_avail_dat[[2]])  %>%
+  #   arrange(ID, Season, Used) %>%
+  #   dplyr::select(-c("Season.1", "ID.1"))
+  elk_dat_all <- rbind(used_dat[[3]], elk_avail_dat[[1]], used_dat[[4]], elk_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  # wtd_dat_all <- rbind(used_dat[[5]], wtd_avail_dat[[1]], used_dat[[6]], wtd_avail_dat[[2]]) %>%
+  #   arrange(ID, Season, Used) %>%
+  #   dplyr::select(-c("Season.1", "ID.1"))
+  coug_dat_all <- rbind(used_dat[[7]], coug_avail_dat[[1]], used_dat[[8]], coug_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  wolf_dat_all <- rbind(used_dat[[9]], wolf_avail_dat[[1]], used_dat[[10]], wolf_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  bob_dat_all <- rbind(used_dat[[11]], bob_avail_dat[[1]], used_dat[[12]], bob_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  coy_dat_all <- rbind(used_dat[[13]], coy_avail_dat[[1]], used_dat[[14]], coy_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+
+  #'  Save combined data for final RSFs
+  # save(md_dat_all, file = paste0("./Outputs/RSF_pts/md_dat_all_", Sys.Date(), ".RData"))
+  save(elk_dat_all, file = paste0("./Outputs/RSF_pts/elk_dat_all_", Sys.Date(), ".RData"))
+  # save(wtd_avail_dat, file = paste0("./Outputs/RSF_pts/wtd_dat_all_", Sys.Date(), ".RData"))
+  save(coug_dat_all, file = paste0("./Outputs/RSF_pts/coug_dat_all_", Sys.Date(), ".RData"))
+  save(wolf_dat_all, file = paste0("./Outputs/RSF_pts/wolf_dat_all_", Sys.Date(), ".RData"))
+  save(bob_dat_all, file = paste0("./Outputs/RSF_pts/bob_dat_all_", Sys.Date(), ".RData"))
+  save(coy_dat_all, file = paste0("./Outputs/RSF_pts/coy_dat_all_", Sys.Date(), ".RData"))
+  
   
   
   
