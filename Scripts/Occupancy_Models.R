@@ -34,8 +34,8 @@
   #'  Read in covariate data collected during camera deployment & scale
   #'  Canopy cover, land management & owner, habitat type => site-level occ covs
   #'  Dist. to focal pt, height, monitoring = > survey/site-level detection covs
-  # stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18_2021-02-15.csv") %>%
-  stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-05-14.csv") %>%
+  # stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-05-14.csv") %>%
+  stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-06-22.csv") %>%
     #'  Get rid of mysterious space after one of the NEs
     mutate(
       Study_Area = ifelse(Study_Area == "NE ", "NE", as.character(Study_Area)),
@@ -60,47 +60,47 @@
     #'  NOTE: Developed includes A LOT of different habitats and seems to be more 
     #'  tied with land ownership than landcover 
     #'  I don't trust NLCD is a good metric of landcover!
-    mutate(
-      NLCD_landcov = ifelse(NLCD_landcov == "21", "Other", as.character(NLCD_landcov)), # Developed open space seems like a catch all for a mix of habitats
-      NLCD_landcov = ifelse(NLCD_landcov == "22", "Forested", as.character(NLCD_landcov)), # Developed low intensity is really forested areas
-      NLCD_landcov = ifelse(NLCD_landcov == "42", "Forested", as.character(NLCD_landcov)), 
-      NLCD_landcov = ifelse(NLCD_landcov == "90", "Forested", as.character(NLCD_landcov)), 
-      NLCD_landcov = ifelse(NLCD_landcov == "95", "Forested", as.character(NLCD_landcov)), 
-      NLCD_landcov = ifelse(NLCD_landcov == "52", "Shrub", as.character(NLCD_landcov)),
-      NLCD_landcov = ifelse(NLCD_landcov == "71", "Ag-Grassland", as.character(NLCD_landcov)), # Grassland / Agriculture
-      NLCD_landcov = ifelse(NLCD_landcov == "81", "Ag-Grassland", as.character(NLCD_landcov)), 
-      NLCD_landcov = ifelse(NLCD_landcov == "82", "Ag-Grassland", as.character(NLCD_landcov)),
-      landcov18 = ifelse(landcov18 == "201", "ForestMix", as.character(landcov18)),
-      landcov18 = ifelse(landcov18 == "230", "ForestMix", as.character(landcov18)),
-      landcov18 = ifelse(landcov18 == "211", "MesicGrass", as.character(landcov18)),
-      landcov18 = ifelse(landcov18 == "212", "XericGrass", as.character(landcov18)), 
-      landcov18 = ifelse(landcov18 == "310", "Developed", as.character(landcov18)), 
-      landcov18 = ifelse(landcov18 == "332", "Developed", as.character(landcov18)),  
-      landcov18 = ifelse(landcov18 == "221", "ForestMix", as.character(landcov18)),
-      landcov18 = ifelse(landcov18 == "222", "XericShrub", as.character(landcov18)), 
-      landcov19 = ifelse(landcov19 == "121", "MesicGrass", as.character(landcov19)), 
-      landcov19 = ifelse(landcov19 == "201", "ForestMix", as.character(landcov19)),
-      landcov19 = ifelse(landcov19 == "230", "ForestMix", as.character(landcov19)),
-      landcov19 = ifelse(landcov19 == "211", "MesicGrass", as.character(landcov19)),
-      landcov19 = ifelse(landcov19 == "212", "XericGrass", as.character(landcov19)),
-      landcov19 = ifelse(landcov19 == "310", "Developed", as.character(landcov19)), 
-      landcov19 = ifelse(landcov19 == "332", "Developed", as.character(landcov19)),  
-      landcov19 = ifelse(landcov19 == "221", "ForestMix", as.character(landcov19)),
-      landcov19 = ifelse(landcov19 == "222", "XericShrub", as.character(landcov19)),  
-      landcov = ifelse(landcov == "211", "MesicGrass", as.character(landcov)),
-      landcov = ifelse(landcov == "121", "MesicGrass", as.character(landcov)), # Barren becomes mesic grass
-      landcov = ifelse(landcov == "201", "ForestMix", as.character(landcov)),  # Emergent Wetland becomes forest
-      landcov = ifelse(landcov == "212", "XericGrass", as.character(landcov)),
-      landcov = ifelse(landcov == "310", "Developed", as.character(landcov)), # Agriculture becomes developed
-      landcov = ifelse(landcov == "332", "Developed", as.character(landcov)), # Residential becomes developed 
-      landcov = ifelse(landcov == "221", "ForestMix", as.character(landcov)), # Mesic shrub becomes forest  
-      landcov = ifelse(landcov == "222", "XericShrub", as.character(landcov)),
-      landcov = ifelse(landcov == "230", "ForestMix", as.character(landcov))
-    ) %>%
+    # mutate(
+      # NLCD_landcov = ifelse(NLCD_landcov == "21", "Other", as.character(NLCD_landcov)), # Developed open space seems like a catch all for a mix of habitats
+      # NLCD_landcov = ifelse(NLCD_landcov == "22", "Forested", as.character(NLCD_landcov)), # Developed low intensity is really forested areas
+      # NLCD_landcov = ifelse(NLCD_landcov == "42", "Forested", as.character(NLCD_landcov)), 
+      # NLCD_landcov = ifelse(NLCD_landcov == "90", "Forested", as.character(NLCD_landcov)), 
+      # NLCD_landcov = ifelse(NLCD_landcov == "95", "Forested", as.character(NLCD_landcov)), 
+      # NLCD_landcov = ifelse(NLCD_landcov == "52", "Shrub", as.character(NLCD_landcov)),
+      # NLCD_landcov = ifelse(NLCD_landcov == "71", "Ag-Grassland", as.character(NLCD_landcov)), # Grassland / Agriculture
+      # NLCD_landcov = ifelse(NLCD_landcov == "81", "Ag-Grassland", as.character(NLCD_landcov)), 
+      # NLCD_landcov = ifelse(NLCD_landcov == "82", "Ag-Grassland", as.character(NLCD_landcov)),
+    #   landcov18 = ifelse(landcov18 == "201", "ForestMix", as.character(landcov18)),
+    #   landcov18 = ifelse(landcov18 == "230", "ForestMix", as.character(landcov18)),
+    #   landcov18 = ifelse(landcov18 == "211", "MesicGrass", as.character(landcov18)),
+    #   landcov18 = ifelse(landcov18 == "212", "XericGrass", as.character(landcov18)), 
+    #   landcov18 = ifelse(landcov18 == "310", "Developed", as.character(landcov18)), 
+    #   landcov18 = ifelse(landcov18 == "332", "Developed", as.character(landcov18)),  
+    #   landcov18 = ifelse(landcov18 == "221", "ForestMix", as.character(landcov18)),
+    #   landcov18 = ifelse(landcov18 == "222", "XericShrub", as.character(landcov18)), 
+    #   landcov19 = ifelse(landcov19 == "121", "MesicGrass", as.character(landcov19)), 
+    #   landcov19 = ifelse(landcov19 == "201", "ForestMix", as.character(landcov19)),
+    #   landcov19 = ifelse(landcov19 == "230", "ForestMix", as.character(landcov19)),
+    #   landcov19 = ifelse(landcov19 == "211", "MesicGrass", as.character(landcov19)),
+    #   landcov19 = ifelse(landcov19 == "212", "XericGrass", as.character(landcov19)),
+    #   landcov19 = ifelse(landcov19 == "310", "Developed", as.character(landcov19)), 
+    #   landcov19 = ifelse(landcov19 == "332", "Developed", as.character(landcov19)),  
+    #   landcov19 = ifelse(landcov19 == "221", "ForestMix", as.character(landcov19)),
+    #   landcov19 = ifelse(landcov19 == "222", "XericShrub", as.character(landcov19)),  
+    #   landcov = ifelse(landcov == "211", "MesicGrass", as.character(landcov)),
+    #   landcov = ifelse(landcov == "121", "MesicGrass", as.character(landcov)), # Barren becomes mesic grass
+    #   landcov = ifelse(landcov == "201", "ForestMix", as.character(landcov)),  # Emergent Wetland becomes forest
+    #   landcov = ifelse(landcov == "212", "XericGrass", as.character(landcov)),
+    #   landcov = ifelse(landcov == "310", "Developed", as.character(landcov)), # Agriculture becomes developed
+    #   landcov = ifelse(landcov == "332", "Developed", as.character(landcov)), # Residential becomes developed 
+    #   landcov = ifelse(landcov == "221", "ForestMix", as.character(landcov)), # Mesic shrub becomes forest  
+    #   landcov = ifelse(landcov == "222", "XericShrub", as.character(landcov)),
+    #   landcov = ifelse(landcov == "230", "ForestMix", as.character(landcov))
+    # ) %>%
     #'  Force km2road = 0 for cameras deployed on roads (not decommissioned roads)
-    mutate(
-      km2road = ifelse(Monitoring == "Dirt road", 0, km2road)
-    ) %>%
+    # mutate(
+    #   km2road = ifelse(Monitoring == "Dirt road", 0, km2road)
+    # ) %>%
     #'  Rename, format, and scale as needed
     transmute(
       Year = as.factor(Year),
@@ -115,28 +115,28 @@
       Land_Mgnt = as.factor(Land_Mgnt),
       Land_Owner = as.factor(Land_Owner),
       Habitat_Type = as.factor(Habitat_Type),   # Fine-scale camera station
-      NDVI_sp18 = scale(ndvi_sp18),             # KEEP IN MIND:
-      NDVI_sm18 = scale(ndvi_sm18),             # Scaling annual vs all values 
-      NDVI_sp19 = scale(ndvi_sp19),             # together changes the values
-      NDVI_sm19 = scale(ndvi_sm19),
-      NDVI_sp = scale(ndvi_sp),
-      NDVI_sm = scale(ndvi_sm),
-      dNBR_sp18 = scale(dnbr_sp18),
-      dNBR_sm18 = scale(dnbr_sm18),
-      dNBR_sp19 = scale(dnbr_sp19),
-      dNBR_sm19 = scale(dnbr_sm19),
-      dNBR_sp = scale(dnbr_sp),
-      dNBR_sm = scale(dnbr_sm),
-      Disturb18 = as.factor(disturb18),
-      Disturb19 = as.factor(disturb19),
-      Disturb = as.factor(disturb),
-      Burn18 = as.factor(burnPerim18),
-      Burn19 = as.factor(burnPerim19),
-      Burn = as.factor(burnPerim),
-      Landcov18 = as.factor(landcov18),         # Courser-scale, 30m res
-      Landcov19 = as.factor(landcov19),
-      Landcov = as.factor(landcov),
-      NLCD = as.factor(NLCD_landcov),           # Courser-scale, 30m res
+      # NDVI_sp18 = scale(ndvi_sp18),             # KEEP IN MIND:
+      # NDVI_sm18 = scale(ndvi_sm18),             # Scaling annual vs all values 
+      # NDVI_sp19 = scale(ndvi_sp19),             # together changes the values
+      # NDVI_sm19 = scale(ndvi_sm19),
+      # NDVI_sp = scale(ndvi_sp),
+      # NDVI_sm = scale(ndvi_sm),
+      # dNBR_sp18 = scale(dnbr_sp18),
+      # dNBR_sm18 = scale(dnbr_sm18),
+      # dNBR_sp19 = scale(dnbr_sp19),
+      # dNBR_sm19 = scale(dnbr_sm19),
+      # dNBR_sp = scale(dnbr_sp),
+      # dNBR_sm = scale(dnbr_sm),
+      # Disturb18 = as.factor(disturb18),
+      # Disturb19 = as.factor(disturb19),
+      # Disturb = as.factor(disturb),
+      # Burn18 = as.factor(burnPerim18),
+      # Burn19 = as.factor(burnPerim19),
+      # Burn = as.factor(burnPerim),
+      # Landcov18 = as.factor(landcov18),         # Courser-scale, 30m res
+      # Landcov19 = as.factor(landcov19),
+      # Landcov = as.factor(landcov),
+      # NLCD = as.factor(NLCD_landcov),           # Courser-scale, 30m res
       # PercForest = scale(PercForest),
       PercForestMix = scale(PercForestMix2),    # Forest + Mesic Shrub mix
       # PercMesicShrub = scale(PercMesicShrub),
@@ -144,21 +144,21 @@
       PercXericShrub = scale(PercXericShrub),
       PercXericGrass = scale(PercXericGrass),
       # PercDeveloped = scale(PercDeveloped),
-      Elev = scale(elevation),
-      Slope = scale(slope), 
-      Aspect = scale(aspect), # CIRCULAR! Also, 90-degrees is used when slope = 0
-      TRI = scale(tri),
-      Roughness = scale(roughness),
-      Canopy18 = scale(canopy18),               # Courser-scale, 30m res
-      Canopy19 = scale(canopy19),
-      Canopy = scale(canopy),           # Skewed but transformations don't help
-      Landfire = scale(landfire),       # Skewed but transformations don't help
-      WaterDensity = scale(water_density), 
-      RoadDensity = scale(road_density),   
-      NearestH2o = scale(km2water),        
-      NearestRd = scale(km2road),          
-      HumanDensity = scale(human_density), 
-      HumanModified = scale(modified)      
+      Elev = scale(Elev),
+      Slope = scale(Slope), 
+      # Aspect = scale(aspect), # CIRCULAR! Also, 90-degrees is used when slope = 0
+      # TRI = scale(tri),
+      # Roughness = scale(roughness),
+      # Canopy18 = scale(canopy18),               # Courser-scale, 30m res
+      # Canopy19 = scale(canopy19),
+      # Canopy = scale(canopy),           # Skewed but transformations don't help
+      # Landfire = scale(landfire),       # Skewed but transformations don't help
+      # WaterDensity = scale(water_density), 
+      RoadDensity = scale(RoadDen),   
+      # NearestH2o = scale(km2water),        
+      # NearestRd = scale(km2road),          
+      # HumanDensity = scale(human_density), 
+      HumanModified = scale(HumanMod)      
     )
 
   #'  Adjust reference category for Trail factors
@@ -230,10 +230,10 @@
   plot(stations$Elev, stations$HumanModified) # seems to be a break point around mid-elevation
   
   #'  Study area specific correlations
-  cor(stations_NE$Elev, stations_NE$HumanModified, use = "complete.obs")  # MEH -0.567
-  cor(stations_OK$Elev, stations_OK$HumanModified, use = "complete.obs")  # YEP -0.688
+  cor(stations_NE$Elev, stations_NE$HumanModified, use = "complete.obs")  
+  cor(stations_OK$Elev, stations_OK$HumanModified, use = "complete.obs")  
   cor(stations_NE$RoadDensity, stations_NE$HumanModified, use = "complete.obs")
-  cor(stations_OK$RoadDensity, stations_OK$HumanModified, use = "complete.obs") # MEH 0.573
+  cor(stations_OK$RoadDensity, stations_OK$HumanModified, use = "complete.obs") 
   
   
   #'  Survey covariates
@@ -383,8 +383,8 @@
                                    siteCovs = data.frame(Year = stations$Year,
                                                          Area = stations$Study_Area,
                                                          Trail = stations$Trail,
-                                                         NDVI = stations$NDVI_sm, 
-                                                         Landcov = stations$Landcov,
+                                                         # NDVI = stations$NDVI_sm, 
+                                                         # Landcov = stations$Landcov,
                                                          # PercFor = stations$PercForest,
                                                          PercForMix = stations$PercForestMix,
                                                          # PercMGrass = stations$PercMesicGrass,
@@ -394,13 +394,13 @@
                                                          # PercDev = stations$PercDeveloped,
                                                          Elev = stations$Elev,
                                                          Slope = stations$Slope,
-                                                         Aspect = stations$Aspect,                             
-                                                         Landfire = stations$Landfire,
-                                                         NearestH2o = stations$NearestH2o,
-                                                         NearestRd = stations$NearestRd,
-                                                         WaterDensity = stations$WaterDensity,
+                                                         # Aspect = stations$Aspect,                             
+                                                         # Landfire = stations$Landfire,
+                                                         # NearestH2o = stations$NearestH2o,
+                                                         # NearestRd = stations$NearestRd,
+                                                         # WaterDensity = stations$WaterDensity,
                                                          RoadDensity = stations$RoadDensity,
-                                                         HumanDensity = stations$HumanDensity,
+                                                         # HumanDensity = stations$HumanDensity,
                                                          HumanMod = stations$HumanModified),
                                    obsCovs = srvy_covs)
 
@@ -413,8 +413,8 @@
                                      siteCovs = data.frame(Year = stations$Year,
                                                            Area = stations$Study_Area,
                                                            Trail = stations$Trail,
-                                                           NDVI = stations$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
-                                                           Landcov = stations$Landcov,
+                                                           # NDVI = stations$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
+                                                           # Landcov = stations$Landcov,
                                                            # PercFor = stations$PercForest,
                                                            PercForMix = stations$PercForestMix,
                                                            # PercMGrass = stations$PercMesicGrass,
@@ -424,13 +424,13 @@
                                                            # PercDev = stations$PercDeveloped,
                                                            Elev = stations$Elev,
                                                            Slope = stations$Slope,
-                                                           Aspect = stations$Aspect,                             
-                                                           Landfire = stations$Landfire,
-                                                           NearestH2o = stations$NearestH2o,
-                                                           NearestRd = stations$NearestRd,
-                                                           WaterDensity = stations$WaterDensity,
+                                                           # Aspect = stations$Aspect,                             
+                                                           # Landfire = stations$Landfire,
+                                                           # NearestH2o = stations$NearestH2o,
+                                                           # NearestRd = stations$NearestRd,
+                                                           # WaterDensity = stations$WaterDensity,
                                                            RoadDensity = stations$RoadDensity,
-                                                           HumanDensity = stations$HumanDensity,
+                                                           # HumanDensity = stations$HumanDensity,
                                                            HumanMod = stations$HumanModified),
                                      obsCovs = srvy_covs)
 
@@ -504,8 +504,8 @@
                                     siteCovs = data.frame(Year = stations$Year,
                                                           Area = stations$Study_Area,
                                                           Trail = stations$Trail,
-                                                          NDVI = stations$NDVI_sm, 
-                                                          Landcov = stations$Landcov,
+                                                          # NDVI = stations$NDVI_sm, 
+                                                          # Landcov = stations$Landcov,
                                                           # PercFor = stations$PercForest,
                                                           PercForMix = stations$PercForestMix,
                                                           # PercMGrass = stations$PercMesicGrass,
@@ -515,13 +515,13 @@
                                                           # PercDev = stations$PercDeveloped,
                                                           Elev = stations$Elev,
                                                           Slope = stations$Slope,
-                                                          Aspect = stations$Aspect,                             
-                                                          Landfire = stations$Landfire,
-                                                          NearestH2o = stations$NearestH2o,
-                                                          NearestRd = stations$NearestRd,
-                                                          WaterDensity = stations$WaterDensity,
+                                                          # Aspect = stations$Aspect,                             
+                                                          # Landfire = stations$Landfire,
+                                                          # NearestH2o = stations$NearestH2o,
+                                                          # NearestRd = stations$NearestRd,
+                                                          # WaterDensity = stations$WaterDensity,
                                                           RoadDensity = stations$RoadDensity,
-                                                          HumanDensity = stations$HumanDensity,
+                                                          # HumanDensity = stations$HumanDensity,
                                                           HumanMod = stations$HumanModified),
                                     obsCovs = srvy_covs)
   # coy_s1819_UMF <- coy_s1819_UMF[-missing_dat]
@@ -530,8 +530,8 @@
                                       siteCovs = data.frame(Year = stations$Year,
                                                             Area = stations$Study_Area,
                                                             Trail = stations$Trail,
-                                                            NDVI = stations$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
-                                                            Landcov = stations$Landcov,
+                                                            # NDVI = stations$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
+                                                            # Landcov = stations$Landcov,
                                                             # PercFor = stations$PercForest,
                                                             PercForMix = stations$PercForestMix,
                                                             # PercMGrass = stations$PercMesicGrass,
@@ -541,13 +541,13 @@
                                                             # PercDev = stations$PercDeveloped,
                                                             Elev = stations$Elev,
                                                             Slope = stations$Slope,
-                                                            Aspect = stations$Aspect,                             
-                                                            Landfire = stations$Landfire,
-                                                            NearestH2o = stations$NearestH2o,
-                                                            NearestRd = stations$NearestRd,
-                                                            WaterDensity = stations$WaterDensity,
+                                                            # Aspect = stations$Aspect,                             
+                                                            # Landfire = stations$Landfire,
+                                                            # NearestH2o = stations$NearestH2o,
+                                                            # NearestRd = stations$NearestRd,
+                                                            # WaterDensity = stations$WaterDensity,
                                                             RoadDensity = stations$RoadDensity,
-                                                            HumanDensity = stations$HumanDensity,
+                                                            # HumanDensity = stations$HumanDensity,
                                                             HumanMod = stations$HumanModified),
                                       obsCovs = srvy_covs)
   # coy_w1820_UMF <- coy_w1820_UMF[-missing_dat]
@@ -557,8 +557,8 @@
                                    siteCovs = data.frame(Year = stations$Year,
                                                          Area = stations$Study_Area,
                                                          Trail = stations$Trail,
-                                                         NDVI = stations$NDVI_sm, 
-                                                         Landcov = stations$Landcov,
+                                                         # NDVI = stations$NDVI_sm, 
+                                                         # Landcov = stations$Landcov,
                                                          # PercFor = stations$PercForest,
                                                          PercForMix = stations$PercForestMix,
                                                          # PercMGrass = stations$PercMesicGrass,
@@ -568,13 +568,13 @@
                                                          # PercDev = stations$PercDeveloped,
                                                          Elev = stations$Elev,
                                                          Slope = stations$Slope,
-                                                         Aspect = stations$Aspect,                             
-                                                         Landfire = stations$Landfire,
-                                                         NearestH2o = stations$NearestH2o,
-                                                         NearestRd = stations$NearestRd,
-                                                         WaterDensity = stations$WaterDensity,
+                                                         # Aspect = stations$Aspect,                             
+                                                         # Landfire = stations$Landfire,
+                                                         # NearestH2o = stations$NearestH2o,
+                                                         # NearestRd = stations$NearestRd,
+                                                         # WaterDensity = stations$WaterDensity,
                                                          RoadDensity = stations$RoadDensity,
-                                                         HumanDensity = stations$HumanDensity,
+                                                         # HumanDensity = stations$HumanDensity,
                                                          HumanMod = stations$HumanModified),
                                    obsCovs = srvy_covs)
   # wolf_s1819_UMF <- wolf_s1819_UMF[-missing_dat]
@@ -583,8 +583,8 @@
                                      siteCovs = data.frame(Year = stations$Year,
                                                            Area = stations$Study_Area,
                                                            Trail = stations$Trail,
-                                                           NDVI = stations$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
-                                                           Landcov = stations$Landcov,
+                                                           # NDVI = stations$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
+                                                           # Landcov = stations$Landcov,
                                                            # PercFor = stations$PercForest,
                                                            PercForMix = stations$PercForestMix,
                                                            # PercMGrass = stations$PercMesicGrass,
@@ -594,13 +594,13 @@
                                                            # PercDev = stations$PercDeveloped,
                                                            Elev = stations$Elev,
                                                            Slope = stations$Slope,
-                                                           Aspect = stations$Aspect,                             
-                                                           Landfire = stations$Landfire,
-                                                           NearestH2o = stations$NearestH2o,
-                                                           NearestRd = stations$NearestRd,
-                                                           WaterDensity = stations$WaterDensity,
+                                                           # Aspect = stations$Aspect,                             
+                                                           # Landfire = stations$Landfire,
+                                                           # NearestH2o = stations$NearestH2o,
+                                                           # NearestRd = stations$NearestRd,
+                                                           # WaterDensity = stations$WaterDensity,
                                                            RoadDensity = stations$RoadDensity,
-                                                           HumanDensity = stations$HumanDensity,
+                                                           # HumanDensity = stations$HumanDensity,
                                                            HumanMod = stations$HumanModified),
                                      obsCovs = srvy_covs)
   # wolf_w1820_UMF <- wolf_w1820_UMF[-missing_dat]
@@ -611,8 +611,8 @@
   elk_s1819_UMF <- unmarkedFrameOccu(DH_elk_smr1819,
                                     siteCovs = data.frame(Year = stations_NE$Year,
                                                           Trail = stations_NE$Trail,
-                                                          NDVI = stations_NE$NDVI_sm,
-                                                          Landcov = stations_NE$Landcov,
+                                                          # NDVI = stations_NE$NDVI_sm,
+                                                          # Landcov = stations_NE$Landcov,
                                                           # PercFor = stations_NE$PercForest,
                                                           PercForMix = stations_NE$PercForestMix,
                                                           # PercMGrass = stations_NE$PercMesicGrass,
@@ -622,13 +622,13 @@
                                                           # PercDev = stations_NE$PercDeveloped,
                                                           Elev = stations_NE$Elev,
                                                           Slope = stations_NE$Slope,
-                                                          Aspect = stations_NE$Aspect,
-                                                          Landfire = stations_NE$Landfire,
-                                                          NearestH2o = stations_NE$NearestH2o,
-                                                          NearestRd = stations_NE$NearestRd,
-                                                          WaterDensity = stations_NE$WaterDensity,
+                                                          # Aspect = stations_NE$Aspect,
+                                                          # Landfire = stations_NE$Landfire,
+                                                          # NearestH2o = stations_NE$NearestH2o,
+                                                          # NearestRd = stations_NE$NearestRd,
+                                                          # WaterDensity = stations_NE$WaterDensity,
                                                           RoadDensity = stations_NE$RoadDensity,
-                                                          HumanDensity = stations_NE$HumanDensity,
+                                                          # HumanDensity = stations_NE$HumanDensity,
                                                           HumanMod = stations_NE$HumanModified),
                                     obsCovs = srvy_covs_NE)
   # elk_s1819_UMF <- elk_s1819_UMF[-missing_dat]
@@ -636,8 +636,8 @@
   elk_w1820_UMF <- unmarkedFrameOccu(DH_elk_wtr1820,
                                       siteCovs = data.frame(Year = stations_NE$Year,
                                                             Trail = stations_NE$Trail,
-                                                            NDVI = stations_NE$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
-                                                            Landcov = stations_NE$Landcov,
+                                                            # NDVI = stations_NE$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
+                                                            # Landcov = stations_NE$Landcov,
                                                             # PercFor = stations_NE$PercForest,
                                                             PercForMix = stations_NE$PercForestMix,
                                                             # PercMGrass = stations_NE$PercMesicGrass,
@@ -647,13 +647,13 @@
                                                             # PercDev = stations_NE$PercDeveloped,
                                                             Elev = stations_NE$Elev,
                                                             Slope = stations_NE$Slope,
-                                                            Aspect = stations_NE$Aspect,
-                                                            Landfire = stations_NE$Landfire,
-                                                            NearestH2o = stations_NE$NearestH2o,
-                                                            NearestRd = stations_NE$NearestRd,
-                                                            WaterDensity = stations_NE$WaterDensity,
+                                                            # Aspect = stations_NE$Aspect,
+                                                            # Landfire = stations_NE$Landfire,
+                                                            # NearestH2o = stations_NE$NearestH2o,
+                                                            # NearestRd = stations_NE$NearestRd,
+                                                            # WaterDensity = stations_NE$WaterDensity,
                                                             RoadDensity = stations_NE$RoadDensity,
-                                                            HumanDensity = stations_NE$HumanDensity,
+                                                            # HumanDensity = stations_NE$HumanDensity,
                                                             HumanMod = stations_NE$HumanModified),
                                       obsCovs = srvy_covs_NE)
   # elk_w1820_UMF <- elk_w1820_UMF[-missing_dat]
@@ -663,8 +663,8 @@
   md_s1819_UMF <- unmarkedFrameOccu(DH_md_smr1819,
                                    siteCovs = data.frame(Year = stations_OK$Year,
                                                          Trail = stations_OK$Trail,
-                                                         NDVI = stations_OK$NDVI_sm, 
-                                                         Landcov = stations_OK$Landcov,
+                                                         # NDVI = stations_OK$NDVI_sm, 
+                                                         # Landcov = stations_OK$Landcov,
                                                          # PercFor = stations_OK$PercForest,
                                                          PercForMix = stations_OK$PercForestMix,
                                                          # PercMGrass = stations_OK$PercMesicGrass,
@@ -674,13 +674,13 @@
                                                          # PercDev = stations_OK$PercDeveloped,
                                                          Elev = stations_OK$Elev,
                                                          Slope = stations_OK$Slope,
-                                                         Aspect = stations_OK$Aspect,
-                                                         Landfire = stations_OK$Landfire,
-                                                         NearestH2o = stations_OK$NearestH2o,
-                                                         NearestRd = stations_OK$NearestRd,
-                                                         WaterDensity = stations_OK$WaterDensity,
+                                                         # Aspect = stations_OK$Aspect,
+                                                         # Landfire = stations_OK$Landfire,
+                                                         # NearestH2o = stations_OK$NearestH2o,
+                                                         # NearestRd = stations_OK$NearestRd,
+                                                         # WaterDensity = stations_OK$WaterDensity,
                                                          RoadDensity = stations_OK$RoadDensity,
-                                                         HumanDensity = stations_OK$HumanDensity,
+                                                         # HumanDensity = stations_OK$HumanDensity,
                                                          HumanMod = stations_OK$HumanModified),
                                    obsCovs = srvy_covs_OK)
   # md_s1819_UMF <- md_s1819_UMF[-missing_dat]
@@ -688,8 +688,8 @@
   md_w1820_UMF <- unmarkedFrameOccu(DH_md_wtr1820,
                                      siteCovs = data.frame(Year = stations_OK$Year,
                                                            Trail = stations_OK$Trail,
-                                                           NDVI = stations_OK$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
-                                                           Landcov = stations_OK$Landcov,
+                                                           # NDVI = stations_OK$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
+                                                           # Landcov = stations_OK$Landcov,
                                                            # PercFor = stations_OK$PercForest,
                                                            PercForMix = stations_OK$PercForestMix,
                                                            # PercMGrass = stations_OK$PercMesicGrass,
@@ -699,13 +699,13 @@
                                                            # PercDev = stations_OK$PercDeveloped,
                                                            Elev = stations_OK$Elev,
                                                            Slope = stations_OK$Slope,
-                                                           Aspect = stations_OK$Aspect,
-                                                           Landfire = stations_OK$Landfire,
-                                                           NearestH2o = stations_OK$NearestH2o,
-                                                           NearestRd = stations_OK$NearestRd,
-                                                           WaterDensity = stations_OK$WaterDensity,
+                                                           # Aspect = stations_OK$Aspect,
+                                                           # Landfire = stations_OK$Landfire,
+                                                           # NearestH2o = stations_OK$NearestH2o,
+                                                           # NearestRd = stations_OK$NearestRd,
+                                                           # WaterDensity = stations_OK$WaterDensity,
                                                            RoadDensity = stations_OK$RoadDensity,
-                                                           HumanDensity = stations_OK$HumanDensity,
+                                                           # HumanDensity = stations_OK$HumanDensity,
                                                            HumanMod = stations_OK$HumanModified),
                                      obsCovs = srvy_covs_OK)
   # md_w1820_UMF <- md_w1820_UMF[-missing_dat]
@@ -715,8 +715,8 @@
   wtd_s1819_UMF <- unmarkedFrameOccu(DH_wtd_smr1819,
                                   siteCovs = data.frame(Year = stations_NE$Year,
                                                         Trail = stations_NE$Trail,
-                                                        NDVI = stations_NE$NDVI_sm,
-                                                        Landcov = stations_NE$Landcov,
+                                                        # NDVI = stations_NE$NDVI_sm,
+                                                        # Landcov = stations_NE$Landcov,
                                                         # PercFor = stations_NE$PercForest,
                                                         PercForMix = stations_NE$PercForestMix,
                                                         # PercMGrass = stations_NE$PercMesicGrass,
@@ -726,13 +726,13 @@
                                                         # PercDev = stations_NE$PercDeveloped,
                                                         Elev = stations_NE$Elev,
                                                         Slope = stations_NE$Slope,
-                                                        Aspect = stations_NE$Aspect,
-                                                        Landfire = stations_NE$Landfire,
-                                                        NearestH2o = stations_NE$NearestH2o,
-                                                        NearestRd = stations_NE$NearestRd,
-                                                        WaterDensity = stations_NE$WaterDensity,
+                                                        # Aspect = stations_NE$Aspect,
+                                                        # Landfire = stations_NE$Landfire,
+                                                        # NearestH2o = stations_NE$NearestH2o,
+                                                        # NearestRd = stations_NE$NearestRd,
+                                                        # WaterDensity = stations_NE$WaterDensity,
                                                         RoadDensity = stations_NE$RoadDensity,
-                                                        HumanDensity = stations_NE$HumanDensity,
+                                                        # HumanDensity = stations_NE$HumanDensity,
                                                         HumanMod = stations_NE$HumanModified),
                                   obsCovs = srvy_covs_NE)
   # wtd_s1819_UMF <- wtd_s1819_UMF[-missing_dat]
@@ -740,8 +740,8 @@
   wtd_w1820_UMF <- unmarkedFrameOccu(DH_wtd_wtr1820,
                                     siteCovs = data.frame(Year = stations_NE$Year,
                                                           Trail = stations_NE$Trail,
-                                                          NDVI = stations_NE$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
-                                                          Landcov = stations_NE$Landcov,
+                                                          # NDVI = stations_NE$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
+                                                          # Landcov = stations_NE$Landcov,
                                                           # PercFor = stations_NE$PercForest,
                                                           PercForMix = stations_NE$PercForestMix,
                                                           # PercMGrass = stations_NE$PercMesicGrass,
@@ -751,13 +751,13 @@
                                                           # PercDev = stations_NE$PercDeveloped,
                                                           Elev = stations_NE$Elev,
                                                           Slope = stations_NE$Slope,
-                                                          Aspect = stations_NE$Aspect,
-                                                          Landfire = stations_NE$Landfire,
-                                                          NearestH2o = stations_NE$NearestH2o,
-                                                          NearestRd = stations_NE$NearestRd,
-                                                          WaterDensity = stations_NE$WaterDensity,
+                                                          # Aspect = stations_NE$Aspect,
+                                                          # Landfire = stations_NE$Landfire,
+                                                          # NearestH2o = stations_NE$NearestH2o,
+                                                          # NearestRd = stations_NE$NearestRd,
+                                                          # WaterDensity = stations_NE$WaterDensity,
                                                           RoadDensity = stations_NE$RoadDensity,
-                                                          HumanDensity = stations_NE$HumanDensity,
+                                                          # HumanDensity = stations_NE$HumanDensity,
                                                           HumanMod = stations_NE$HumanModified),
                                     obsCovs = srvy_covs_NE)
   # wtd_w1820_UMF <- wtd_w1820_UMF[-missing_dat]
@@ -785,30 +785,30 @@
 
   ####  BOBCAT MODELS  ####                   
   #'  SUMMERS 2018 & 2019
-  (bob_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_s1819_UMF))
+  (bob_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, bob_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
-  #' bob_s1819_dd <- dredge(bob_s1819_global, rank = "AIC")
-  #' #'  Count the number of dredged models
-  #' tot_bob_smr_dd <- nrow(bob_s1819_dd)
-  #' print(bob_s1819_dd[1:5,])
-  #' #'  Keep top models (within 2 deltaAIC) & review the top model
-  #' bob_s1819_all <- get.models(bob_s1819_dd, subset = delta < 2,)
-  #' bob_s1819_all[[1]]
+  bob_s1819_dd <- dredge(bob_s1819_global, rank = "AIC")
+  #'  Count the number of dredged models
+  tot_bob_smr_dd <- nrow(bob_s1819_dd)
+  print(bob_s1819_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  bob_s1819_all <- get.models(bob_s1819_dd, subset = delta < 2,)
+  bob_s1819_all[[1]]
   #'  Dredge identified top model
-  (bob_s1819_top <- occu(formula = ~Distance + Height + Trail + Distance:Height  ~Area + HumanMod + PercXGrass, data = bob_s1819_UMF))
+  # (bob_s1819_top <- occu(formula = ~Distance + Height + Trail + Distance:Height  ~Area + HumanMod + PercXGrass, data = bob_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020           
-  (bob_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, bob_w1820_UMF))
-  #' #'  Dredge the global model for all possible combinations
-  #' bob_w1820_dd <- dredge(bob_w1820_global, rank = "AIC")
-  #' #'  Count the number of dredged models
-  #' tot_bob_wtr_dd <- nrow(bob_w1820_dd)
-  #' print(bob_w1820_dd[1:5,])
-  #' #'  Keep top models (within 2 deltaAIC) & review the top model
-  #' bob_w1820_all <- get.models(bob_w1820_dd, subset = delta < 2,)
-  #' bob_w1820_all[[1]]
+  (bob_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, bob_w1820_UMF))
+  #'  Dredge the global model for all possible combinations
+  bob_w1820_dd <- dredge(bob_w1820_global, rank = "AIC")
+  #'  Count the number of dredged models
+  tot_bob_wtr_dd <- nrow(bob_w1820_dd)
+  print(bob_w1820_dd[1:5,])
+  #'  Keep top models (within 2 deltaAIC) & review the top model
+  bob_w1820_all <- get.models(bob_w1820_dd, subset = delta < 2,)
+  bob_w1820_all[[1]]
   #'  Dredge identified top model
-  (bob_w1820_top <- occu(formula = ~Distance ~Elev + HumanMod + PercForMix, data = bob_w1820_UMF))
+  # (bob_w1820_top <- occu(formula = ~Distance ~Elev + HumanMod + PercForMix, data = bob_w1820_UMF))
 
   
   ####  COUGAR MODELS  ####
@@ -816,7 +816,7 @@
   #'  too correlated with Road level of the Trail covariate, leading to singularity 
   #'  in the hessian matrix?)
   #'  SUMMERS 2018 & 2019
-  # (coug_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coug_s1819_UMF))
+  # (coug_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, coug_s1819_UMF))
   (coug_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coug_s1819_dd <- dredge(coug_s1819_global, rank = "AIC")
@@ -830,7 +830,7 @@
   (coug_s1819_top <- occu(formula = ~Height + Trail + Year ~Area + Elev + PercForMix, data = coug_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020           
-  # (coug_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coug_w1820_UMF))
+  # (coug_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, coug_w1820_UMF))
   (coug_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coug_w1820_dd <- dredge(coug_w1820_global, rank = "AIC")
@@ -845,7 +845,7 @@
   
   ####  COYOTE MODELS  ####
   #'  SUMMERS 2018 & 2019
-  (coy_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_s1819_UMF))
+  (coy_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, coy_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coy_s1819_dd <- dredge(coy_s1819_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -858,7 +858,7 @@
   (coy_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + NearestRd + PercForMix + Slope, data = coy_s1819_UMF))
    
   #'  #'  WINTERS 2018-2019 & 2019-2020              
-  (coy_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, coy_w1820_UMF))
+  (coy_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, coy_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coy_w1820_dd <- dredge(coy_w1820_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -873,8 +873,8 @@
   ####  WOLF MODELS  ####
   #'  SUMMERS 2018 & 2019    
   #'  Removed PercXShrub in global2 models due to poor convergence, esp. summer model                 
-  # (wolf_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, wolf_s1819_UMF))
-  (wolf_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_s1819_UMF))
+  # (wolf_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, wolf_s1819_UMF))
+  (wolf_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod + Area, wolf_s1819_UMF))
   #' #'  Dredge the global2 model for all possible combinations
   #' wolf_s1819_dd <- dredge(wolf_s1819_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -890,9 +890,9 @@
   #'  Dropped Elevation from global model due to problems with dredge (seemed to
   #'  arise when Elevation & Area were in the model; excluded Elevation b/c not
   #'  significant in global or dredged models but Area was)       
-  # (wolf_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod + Area, wolf_w1820_UMF))
-  # (wolf_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wolf_w1820_UMF)) # works with dredge but Elev not significant
-  (wolf_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Slope + PercForMix + PercXGrass + NearestRd + HumanMod + Area, wolf_w1820_UMF))
+  # (wolf_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, wolf_w1820_UMF))
+  # (wolf_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_w1820_UMF)) # works with dredge but Elev not significant
+  (wolf_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Slope + PercForMix + PercXGrass + RoadDensity + HumanMod + Area, wolf_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wolf_w1820_dd <- dredge(wolf_w1820_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -909,8 +909,8 @@
   #'  SUMMERS 2018 & 2019
   #'  NE study area only so no Area effect 
   #'  Removed PercXGrass and PercXShrub in global2 models due to poor convergence                             
-  # (elk_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, elk_s1819_UMF))
-  (elk_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + NearestRd + HumanMod, elk_s1819_UMF))
+  # (elk_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, elk_s1819_UMF))
+  (elk_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + RoadDensity + HumanMod, elk_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' elk_s1819_dd <- dredge(elk_s1819_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -925,8 +925,8 @@
   #'  WINTERS 2018-2019 & 2019-2020
   #'  NE study area only so no Area effect 
   #'  Removed PercXGrass and PercXShrub in global2 models due to poor convergence               
-  # (elk_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, elk_w1820_UMF))
-  (elk_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + NearestRd + HumanMod, elk_w1820_UMF))
+  # (elk_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, elk_w1820_UMF))
+  (elk_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + RoadDensity + HumanMod, elk_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' elk_w1820_dd <- dredge(elk_w1820_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -945,7 +945,7 @@
   ####  MULE DEER MODELS  ####
   #'  SUMMERS 2018 & 2019
   #'  OK study area only so no Area effect
-  (md_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_s1819_UMF))
+  (md_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' md_s1819_dd <- dredge(md_s1819_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -958,7 +958,7 @@
   (md_s1819_top <- occu(formula = ~Distance + Height + Temp_smr + Distance:Height ~HumanMod, data = md_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020, OK study area only so no Area effect                    
-  (md_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, md_w1820_UMF))
+  (md_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' md_w1820_dd <- dredge(md_w1820_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -975,8 +975,8 @@
   #'  SUMMERS 2018 & 2019
   #'  NE study area only so no Area effect 
   #'  Removed PercXShrub in global2 models due to poor convergence, esp. on winter model
-  # (wtd_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, wtd_s1819_UMF))
-  (wtd_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_s1819_UMF))
+  # (wtd_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, wtd_s1819_UMF))
+  (wtd_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wtd_s1819_dd <- dredge(wtd_s1819_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -989,8 +989,8 @@
   (wtd_s1819_top <- occu(formula = ~Height + Trail ~Elev + PercForMix, data = wtd_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect              
-  # (wtd_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + NearestRd + HumanMod, wtd_w1820_UMF))
-  (wtd_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + NearestRd + HumanMod, wtd_w1820_UMF))
+  # (wtd_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, wtd_w1820_UMF))
+  (wtd_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wtd_w1820_dd <- dredge(wtd_w1820_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -1144,7 +1144,7 @@
     separate("PercForMix", c("PercForMix (SE)", "PercForMix Pval"), sep = "_") %>%
     separate("PercXGrass", c("PercXGrass (SE)", "PercXGrass Pval"), sep = "_") %>%
     separate("PercXShrub", c("PercXShrub (SE)", "PercXShrub Pval"), sep = "_") %>%
-    separate("NearestRd", c("NearestRd (SE)", "NearestRd Pval"), sep = "_") %>%
+    separate("RoadDensity", c("RoadDensity (SE)", "RoadDensity Pval"), sep = "_") %>%
     separate("HumanMod", c("HumanMod (SE)", "HumanMod Pval"), sep = "_") %>%
     arrange(match(Species, c("Bobcat", "Cougar", "Coyote", "Wolf", "Mule Deer", "Elk", "White-tailed Deer"))) %>%
     arrange(match(Season, c("Summer", "Winter")))
