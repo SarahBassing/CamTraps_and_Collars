@@ -147,7 +147,16 @@
     dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
             "daytime", "Finaldt", "Floordt")
 
+  #  Migration times for Mule Deer
+  md_migtimes <- read.csv("./Data/MD_migrationtimes_to_exclude_2021-06-21.csv") %>%
+    mutate(
+      AnimalID = ID,
+      Start_mig = lubridate::as_date(Start_mig, format = "%m/%d/%Y"),
+      End_mig = lubridate::as_date(End_mig, format = "%m/%d/%Y"),
+    ) %>%
+    dplyr::select(-ID)
 
+  
   #  Function to truncate telemetry data by excluding first 2 weeks after capture
   #  And removes extra locations that arise when collars go into mortality mode
   Trunk_telem <- function(info, telem) {
@@ -422,12 +431,55 @@
   coy_gtg <- filter(meso_gtg, Species == "Coyote")
   bob_gtg <- filter(meso_gtg, Species == "Bobcat")
   
-  #  Species_gtg are final data sets for HMM/RSF analyses
+  #  Species_gtg are final data sets for HMM analyses
   
+  
+  #  Function to identify locations generated during migration for RSF analyses
+  #  Note: only identifies locations from dates that overlap summer & winter
+  #  seasons of interest for RSF study. Migrations in Oct - Nov & March - June 
+  #  are ignored & automatically excluded via filtering above.
+  md_gtg <- mutate(md_gtg, FloorDate = lubridate::as_date(Floordt))  #tz = "Etc/GMT+8"
+  #  Create empty data frame to fill with thinned location data
+  migtimes <- data.frame()
+  #  Loop over every unique individual animal and...
+  for(i in 1:nrow(md_migtimes)){
+    #  Take the individual animal ID
+    AnimalID <- md_migtimes$AnimalID[i]
+    #  Identify the start date to exclude
+    start <- md_migtimes$Start_mig[i]
+    #  Identify last date to exclude
+    end <- md_migtimes$End_mig[i]
+    #  Subset based on migration data
+    migrant <- subset(md_gtg, ID == AnimalID)
+    #  Exclude telemetry data outside start & end dates for that individual
+    migrations <- filter(migrant, FloorDate >= start & FloorDate <= end) # why is it NOT including the actual start and end dates?!!!
+    # mig_end <- filter(mig_start, FloorDate <= end)
+    # migrations <- rbind(mig_start, mig_end)
+    #  Append each animal's migration locations to a clean data frame
+    migtimes <- rbind(migtimes, migrations)
+  }
+    
+  #  Remove migration times from larger location data frame
+  md_gtg_nomig <- anti_join(md_gtg, migtimes) %>%
+    #  Format data in chronological order by individual & make lat/long numeric
+    arrange(ID, Floordt) %>%
+    #  Make sure lat/long are in a numeric format
+    mutate(
+      Latitude = as.numeric(Latitude),
+      Longitude = as.numeric(Longitude)
+    )
+  
+  #  Drop one random problematic location from 3144WTD19 summer 2019 (for RSF only!)
+  #  Not sure why this location is a problem but it prevents kernelUD() from 
+  #  estimating a 95% KDE for this individual. This is the only location well
+  #  away from an otherwise pretty tight home range.
+  wtd_gtg <- filter(wtd_gtg, wtd_gtg$ID != "3144WTD19" | wtd_gtg$Latitude != "48.04948403") # OBJECTID != "105407"
+    
   #  Save RData for easy transfer to other computers
   # save.image(paste0("./Data/Collar_Truncating&Filtering_", Sys.Date(), ".RData"))
   # save.image(paste0("./Data/Collar_Truncating&Filtering_noDispersal_", Sys.Date(), ".RData"))
+  save.image(paste0("./Data/Collar_Truncating&Filtering_noDispMig_", Sys.Date(), ".RData"))
   
-  #  Next step is Collar_Movement_DataPrep.R script
+  #  Next step is Collar_Movement_DataPrep.R script (even for RSF analyses)
 
   
