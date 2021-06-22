@@ -6,9 +6,14 @@
   #'  ============================================
   #'  Script to randomly sample "available" points from the home range of each 
   #'  collared individual and build resource selection function models for each
-  #'  species. This will be compared to the occupancy and HMM models to evaluate
+  #'  species. This will be compared to the occupancy model results to evaluate
   #'  habitat associations derived from different types of data and whether those
-  #'  associations vary with animal behavior.
+  #'  associations vary with sampling method. 
+  #'  
+  #'  Note, the track data used here exclude collars with poor fix success or were
+  #'  deployed less than 20 days within a season of interest. They also exclude 
+  #'  locations generated during obvious predator dispersal events or deer 
+  #'  migrations.
   #'  
   #'  Cleaned telemetry and covariate data were prepared for with the
   #'  Collar_Movement_DataPrep.R and Collar_Covariate_Extraction.R scripts 
@@ -23,7 +28,8 @@
   library(adehabitatHR)
   
   #'  Load telemetry data
-  load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal.RData")
+  # load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal.RData")
+  load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispMig.RData")
   # load("./Outputs/Telemetry_tracks/spp_all_tracks.RData")
   # load("./Outputs/Telemetry_tracks/MD_smr_track.RData")
   # load("./Outputs/Telemetry_tracks/MD_wtr_track.RData")
@@ -136,11 +142,11 @@
   #'  Run list of lists together
   spp_pts <- lapply(animal_split, lapply, avail_pts, T)
   #'  Run lists by species and season
-  md_smr_df <- lapply(animal_split[[1]], avail_pts, T) #no workie
+  md_smr_df <- lapply(animal_split[[1]], avail_pts, T) #works when migrations are excluded
   md_wtr_df <- lapply(animal_split[[2]], avail_pts, T) #works
   elk_smr_df <- lapply(animal_split[[3]], avail_pts, T) #works
   elk_wtr_df <- lapply(animal_split[[4]], avail_pts, T) #works
-  wtd_smr_df <- lapply(animal_split[[5]], avail_pts, T) #no workie
+  wtd_smr_df <- lapply(animal_split[[5]], avail_pts, T) #works when rando pt removed from 3144WTD18 smr19
   wtd_wtr_df <- lapply(animal_split[[6]], avail_pts, T) #works
   coug_smr_df <- lapply(animal_split[[7]], avail_pts, T) #works
   coug_wtr_df <- lapply(animal_split[[8]], avail_pts, T) #works
@@ -203,13 +209,13 @@
   library(tidyverse)
   
   #'  Load location data
-  # load("./Outputs/RSF_pts/md_available_2021-06-14.RData")
-  load("./Outputs/RSF_pts/elk_available_2021-06-14.RData")
-  # load("./Outputs/RSF_pts/wtd_available_2021-06-14.RData")
-  load("./Outputs/RSF_pts/coug_available_2021-06-14.RData")
-  load("./Outputs/RSF_pts/wolf_available_2021-06-14.RData")
-  load("./Outputs/RSF_pts/bob_available_2021-06-14.RData")
-  load("./Outputs/RSF_pts/coy_available_2021-06-14.RData")
+  load("./Outputs/RSF_pts/md_available_2021-06-22.RData")
+  load("./Outputs/RSF_pts/elk_available_2021-06-22.RData")
+  load("./Outputs/RSF_pts/wtd_available_2021-06-22.RData")
+  load("./Outputs/RSF_pts/coug_available_2021-06-22.RData")
+  load("./Outputs/RSF_pts/wolf_available_2021-06-22.RData")
+  load("./Outputs/RSF_pts/bob_available_2021-06-22.RData")
+  load("./Outputs/RSF_pts/coy_available_2021-06-22.RData")
   
   #'  Read in spatial data
   wppp_bound <- st_read("./Shapefiles/WPPP_CovariateBoundary", layer = "WPPP_CovariateBoundary")
@@ -256,11 +262,10 @@
     return(sf_locs)
   }
   #'  Run used & available locations through function
-  # sf_locs <- lapply(coug_available, spatial_locs)
   used_locs <- lapply(spp_all_tracks, spatial_locs)
-  # md_locs <- lapply(md_available, spatial_locs)
+  md_locs <- lapply(md_available, spatial_locs)
   elk_locs <- lapply(elk_available, spatial_locs)
-  # wtd_locs <- lapply(wtd_available, spatial_locs)
+  wtd_locs <- lapply(wtd_available, spatial_locs)
   coug_locs <- lapply(coug_available, spatial_locs)
   wolf_locs <- lapply(wolf_available, spatial_locs)
   bob_locs <- lapply(bob_available, spatial_locs)
@@ -386,9 +391,9 @@
   # spp_avail_covs <- lapply(sf_locs, cov_extract) # non-parallel approach
   # spp_avail_covs <- future_lapply(sf_locs, cov_extract)
   used_covs <- future_lapply(used_locs, cov_extract, future.seed = TRUE)
-  # md_avail_covs <- future_lapply(md_locs, cov_extract, future.seed = TRUE)
+  md_avail_covs <- future_lapply(md_locs, cov_extract, future.seed = TRUE)
   elk_avail_covs <- future_lapply(elk_locs, cov_extract, future.seed = TRUE)
-  # wtd_avail_covs <- future_lapply(wtd_locs, cov_extract, future.seed = TRUE)
+  wtd_avail_covs <- future_lapply(wtd_locs, cov_extract, future.seed = TRUE)
   coug_avail_covs <- future_lapply(coug_locs, cov_extract, future.seed = TRUE)
   wolf_avail_covs <- future_lapply(wolf_locs, cov_extract, future.seed = TRUE)
   bob_avail_covs <- future_lapply(bob_locs, cov_extract, future.seed = TRUE)
@@ -427,9 +432,9 @@
   }
   #'  Run used and available locations and covariates through
   used_dat <- combo_data(used_locs, used_covs)
-  # md_avail_dat <- combo_data(md_available, md_avail_covs)
+  md_avail_dat <- combo_data(md_available, md_avail_covs)
   elk_avail_dat <- combo_data(elk_available, elk_avail_covs)
-  # wtd_avail_dat <- combo_data(wtd_available, wtd_avail_covs)
+  wtd_avail_dat <- combo_data(wtd_available, wtd_avail_covs)
   coug_avail_dat <- combo_data(coug_available, coug_avail_covs)
   wolf_avail_dat <- combo_data(wolf_available, wolf_avail_covs)
   bob_avail_dat <- combo_data(bob_available, bob_avail_covs)
@@ -454,9 +459,9 @@
     
   #'  Save used and available data separately
   save(used_dat, file = paste0("./Outputs/RSF_pts/used_dat_", Sys.Date(), ".RData"))
-  # save(md_avail_dat, file = paste0("./Outputs/RSF_pts/md_avail_dat_", Sys.Date(), ".RData"))
+  save(md_avail_dat, file = paste0("./Outputs/RSF_pts/md_avail_dat_", Sys.Date(), ".RData"))
   save(elk_avail_dat, file = paste0("./Outputs/RSF_pts/elk_avail_dat_", Sys.Date(), ".RData"))
-  # save(wtd_avail_dat, file = paste0("./Outputs/RSF_pts/wtd_avail_dat_", Sys.Date(), ".RData"))
+  save(wtd_avail_dat, file = paste0("./Outputs/RSF_pts/wtd_avail_dat_", Sys.Date(), ".RData"))
   save(coug_avail_dat, file = paste0("./Outputs/RSF_pts/coug_avail_dat_", Sys.Date(), ".RData"))
   save(wolf_avail_dat, file = paste0("./Outputs/RSF_pts/wolf_avail_dat_", Sys.Date(), ".RData"))
   save(bob_avail_dat, file = paste0("./Outputs/RSF_pts/bob_avail_dat_", Sys.Date(), ".RData"))
@@ -464,15 +469,15 @@
   
   
   #'  Merge used & available data per species
-  # md_dat_all <- rbind(used_dat[[1]], md_avail_dat[[1]], used_dat[[2]], md_avail_dat[[2]])  %>%
-  #   arrange(ID, Season, Used) %>%
-  #   dplyr::select(-c("Season.1", "ID.1"))
+  md_dat_all <- rbind(used_dat[[1]], md_avail_dat[[1]], used_dat[[2]], md_avail_dat[[2]])  %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
   elk_dat_all <- rbind(used_dat[[3]], elk_avail_dat[[1]], used_dat[[4]], elk_avail_dat[[2]]) %>%
     arrange(ID, Season, Used) %>%
     dplyr::select(-c("Season.1", "ID.1"))
-  # wtd_dat_all <- rbind(used_dat[[5]], wtd_avail_dat[[1]], used_dat[[6]], wtd_avail_dat[[2]]) %>%
-  #   arrange(ID, Season, Used) %>%
-  #   dplyr::select(-c("Season.1", "ID.1"))
+  wtd_dat_all <- rbind(used_dat[[5]], wtd_avail_dat[[1]], used_dat[[6]], wtd_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
   coug_dat_all <- rbind(used_dat[[7]], coug_avail_dat[[1]], used_dat[[8]], coug_avail_dat[[2]]) %>%
     arrange(ID, Season, Used) %>%
     dplyr::select(-c("Season.1", "ID.1"))
@@ -487,16 +492,16 @@
     dplyr::select(-c("Season.1", "ID.1"))
 
   #'  Save combined data for final RSFs
-  # save(md_dat_all, file = paste0("./Outputs/RSF_pts/md_dat_all_", Sys.Date(), ".RData"))
+  save(md_dat_all, file = paste0("./Outputs/RSF_pts/md_dat_all_", Sys.Date(), ".RData"))
   save(elk_dat_all, file = paste0("./Outputs/RSF_pts/elk_dat_all_", Sys.Date(), ".RData"))
-  # save(wtd_avail_dat, file = paste0("./Outputs/RSF_pts/wtd_dat_all_", Sys.Date(), ".RData"))
+  save(wtd_dat_all, file = paste0("./Outputs/RSF_pts/wtd_dat_all_", Sys.Date(), ".RData"))
   save(coug_dat_all, file = paste0("./Outputs/RSF_pts/coug_dat_all_", Sys.Date(), ".RData"))
   save(wolf_dat_all, file = paste0("./Outputs/RSF_pts/wolf_dat_all_", Sys.Date(), ".RData"))
   save(bob_dat_all, file = paste0("./Outputs/RSF_pts/bob_dat_all_", Sys.Date(), ".RData"))
   save(coy_dat_all, file = paste0("./Outputs/RSF_pts/coy_dat_all_", Sys.Date(), ".RData"))
   
   
-  
+
   
   
   
