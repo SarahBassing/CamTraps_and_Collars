@@ -28,7 +28,7 @@
   #  Turn off scientific notation
   options(scipen = 999) 
   #  Set digits to 15 to ensure GPS coordinates aren't truncated
-  options(digits=15) 
+  options(digits = 15) 
   
   #  Read in data
   #  Make sure specific columns are formatted correctly for data manipulation
@@ -90,38 +90,42 @@
     dplyr::select(-X)
   
   #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
-  md_skinny <- read.csv("md_skinny 2020-11-17.csv") %>%
-    mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
+  md_skinny <- read.csv("md_skinny 2021-07-06.csv") %>%
+    mutate(StudyArea = "OK",
+           daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
-                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt")
+                  "ObservationDateTimePST", "StudyArea", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
-  elk_skinny <- read.csv("elk_skinny 2020-11-17.csv") %>%
-    mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
+  elk_skinny <- read.csv("elk_skinny 2021-07-06.csv") %>%
+    mutate(StudyArea = "NE",
+           daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
-                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt")
+                  "ObservationDateTimePST", "StudyArea", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: WDFW WebApp allowed timezone to shift to PDT so must adjust to only PST
-  wtd_skinny <- read.csv("wtd_skinny 2020-11-17.csv") %>%
-    mutate(daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
+  wtd_skinny <- read.csv("wtd_skinny 2021-07-06.csv") %>%
+    mutate(StudyArea = "NE",
+           daytime = mdy_hms(ObservationDateTimePST, tz = "America/Los_Angeles"),
            UTCdt = with_tz(daytime, "UTC"),
            Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
            Floordt = floor_date(Finaldt, unit = "hour")) %>%
     dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
-                  "ObservationDateTimePST", "daytime", "UTCdt", "Finaldt", "Floordt")
+                  "ObservationDateTimePST", "StudyArea", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: data in UTC timezone to begin with
   meso_skinny <- read.csv("meso_skinny_noDispersal2021-06-14.csv") %>%  #"meso_skinny 2021-04-19.csv"
     mutate(
+      StudyArea = ifelse(grepl("NE", ID), "NE", "OK"),
       daytime = as.POSIXct(daytime, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
       UTCdt = with_tz(daytime, "UTC"),
       Finaldt = with_tz(UTCdt, tzone = "Etc/GMT+8"),
       Floordt = floor_date(Finaldt, unit = "hour")) %>%
     dplyr::select("ID", "CollarID", "Species", "Sex", "StudyArea", "Latitude", "Longitude", 
-                  "Acquisition.Time.UTC", "daytime", "UTCdt", "Finaldt", "Floordt")
+                  "Acquisition.Time.UTC", "StudyArea", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: already thinned, floored, tz adjusted & AnimalID attached by L.Satterfield
   coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_4hrs.csv") %>% #Cougar_Vectronic_ATS_Spring2021_4hrs_wDispersal.csv
     mutate(ID = as.factor(as.character(ID)),
@@ -129,11 +133,12 @@
            Sex = str_sub(ID, -1),
            Latitude = Lat,
            Longitude = Long,
+           StudyArea = ifelse(grepl("NE", ID), "NE", "OK"),
            daytime = as.POSIXct(LMT_DateTime, format = "%Y-%m-%d %H:%M:%S", tz = "Etc/GMT+8"),
            Finaldt = daytime,
            Floordt = daytime) %>%
     dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
-                "daytime", "Finaldt", "Floordt")
+                "StudyArea", "daytime", "Finaldt", "Floordt")
   #  Note: already thinned, floored, tz adjusted & AnimalID attached by L.Satterfield
   wolf_skinny <- read.csv("./Data/Wolf_Vectronic_Spring2021_4hrs.csv") %>%
     mutate(ID = as.factor(as.character(ID)),
@@ -141,11 +146,15 @@
            Sex = str_sub(ID, -1),
            Latitude = Lat,
            Longitude = Long,
+           StudyArea = ifelse(grepl("W61M", ID), "OK", "NE"),  
+           StudyArea = ifelse(grepl("W88M", ID), "OK", StudyArea),
+           StudyArea = ifelse(grepl("W93M", ID), "OK", StudyArea),
+           StudyArea = ifelse(grepl("W94M", ID), "OK", StudyArea),
            daytime = as.POSIXct(LMT_DateTime, format = "%Y-%m-%d %H:%M:%S", tz = "Etc/GMT+8"),
            Finaldt = daytime,
            Floordt = daytime) %>%
     dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
-            "daytime", "Finaldt", "Floordt")
+            "StudyArea", "daytime", "Finaldt", "Floordt")
 
   #  Migration times for Mule Deer
   md_migtimes <- read.csv("./Data/MD_migrationtimes_to_exclude_2021-06-21.csv") %>%
@@ -432,6 +441,10 @@
   bob_gtg <- filter(meso_gtg, Species == "Bobcat")
   
   #  Species_gtg are final data sets for HMM analyses
+  
+  #  Save RData for easy transfer to other computers
+  # save.image(paste0("./Data/Collar_Truncating&Filtering_", Sys.Date(), ".RData"))
+  save.image(paste0("./Data/Collar_Truncating&Filtering_noDispersal_", Sys.Date(), ".RData"))
   
   
   #  Function to identify locations generated during migration for RSF analyses
