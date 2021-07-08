@@ -27,15 +27,12 @@
   #'  Source script that generates detection histories
   #'  Detection histories come trimmed to desired season length
   source("./Scripts/CameraTrap_DetectionHistories.R")
-  #'  Alternatively, can read in specific detection histories, e.g., 
-  # DH_coug_smr18 <- read.csv("./Data/Detection_Histories/Cougar__detection_history__with_effort__7_days_per_occasion__occasionStart0h__first_day_2018-07-01__2021-02-01.csv")
-  # DH_coug_wtr1819 <- read.csv("./Data/Detection_Histories/Cougar__detection_history__with_effort__7_days_per_occasion__occasionStart0h__first_day_2018-12-01__2021-02-01.csv")
-  
+
   #'  Read in covariate data collected during camera deployment & scale
   #'  Canopy cover, land management & owner, habitat type => site-level occ covs
   #'  Dist. to focal pt, height, monitoring = > survey/site-level detection covs
-  # stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-05-14.csv") %>%
-  stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-06-22.csv") %>%
+  stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-05-14.csv") %>%
+  # stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-06-22.csv") %>%
     #'  Get rid of mysterious space after one of the NEs
     mutate(
       Study_Area = ifelse(Study_Area == "NE ", "NE", as.character(Study_Area)),
@@ -144,8 +141,10 @@
       PercXericShrub = scale(PercXericShrub),
       PercXericGrass = scale(PercXericGrass),
       # PercDeveloped = scale(PercDeveloped),
-      Elev = scale(Elev),
-      Slope = scale(Slope), 
+      # Elev = scale(Elev),
+      # Slope = scale(Slope),
+      Elev = scale(elevation),
+      Slope = scale(slope),
       # Aspect = scale(aspect), # CIRCULAR! Also, 90-degrees is used when slope = 0
       # TRI = scale(tri),
       # Roughness = scale(roughness),
@@ -154,11 +153,13 @@
       # Canopy = scale(canopy),           # Skewed but transformations don't help
       # Landfire = scale(landfire),       # Skewed but transformations don't help
       # WaterDensity = scale(water_density), 
-      RoadDensity = scale(RoadDen),   
+      # RoadDensity = scale(RoadDen),  
+      RoadDensity = scale(road_density), ################### make sure this is from the correct raster
       # NearestH2o = scale(km2water),        
       # NearestRd = scale(km2road),          
       # HumanDensity = scale(human_density), 
-      HumanModified = scale(HumanMod)      
+      # HumanModified = scale(HumanMod) 
+      HumanModified = scale(modified)
     )
 
   #'  Adjust reference category for Trail factors
@@ -192,48 +193,48 @@
   stations_NE <- filter(stations, Study_Area == "NE")
   stations_OK <- filter(stations, Study_Area == "OK")
   
-  #'  Check for correlation among covaraites
-  #'  Watch out for NAs (use="complete.obs")
-  cor(stations$Distance, stations$Height, use = "complete.obs")
-  cor(stations$Elev, stations$Slope, use = "complete.obs")
-  cor(stations$Elev, stations$Aspect, use = "complete.obs")
-  cor(stations$Slope, stations$Aspect, use = "complete.obs")
-  cor(stations$Elev, stations$TRI, use = "complete.obs")
-  cor(stations$TRI, stations$Roughness, use = "complete.obs")  # EEK! 0.986
-  cor(stations$Elev, stations$NDVI_sm18, use = "complete.obs")
-  cor(stations$Slope, stations$NDVI_sm18, use = "complete.obs")
-  cor(stations$Aspect, stations$NDVI_sm18, use = "complete.obs")
-  cor(stations$TRI, stations$WaterDensity, use = "complete.obs")
-  cor(stations$Elev, stations$WaterDensity, use = "complete.obs")
-  cor(stations$Elev, stations$RoadDensity, use = "complete.obs")
-  cor(stations$Elev, stations$HumanDensity, use = "complete.obs")
-  cor(stations$Elev, stations$HumanModified, use = "complete.obs")  # YEP -0.639
-  cor(stations$WaterDensity, stations$NearestH2o, use = "complete.obs")
-  cor(stations$RoadDensity, stations$NearestRd, use = "complete.obs")
-  cor(stations$RoadDensity, stations$HumanDensity, use = "complete.obs")
-  cor(stations$WaterDensity, stations$HumanDensity, use = "complete.obs")
-  cor(stations$Landfire, stations$Canopy, use = "complete.obs")             # YUP 0.668
-  cor(stations$HumanDensity, stations$HumanModified, use = "complete.obs")  # EHH 0.498
-  cor(stations$HumanModified, stations$RoadDensity, use = "complete.obs")
-  cor(stations$PercForest, stations$NDVI_sm, use = "complete.obs")        # OOF 0.745
-  cor(stations$PercForestMix, stations$NDVI_sm, use = "complete.obs")     # GAH 0.815
-  cor(stations$PercMesicGrass, stations$NDVI_sm, use = "complete.obs")
-  cor(stations$PercXericGrass, stations$NDVI_sm, use = "complete.obs")    # EHH -0.577
-  cor(stations$PercMesicShrub, stations$NDVI_sm, use = "complete.obs")
-  cor(stations$PercXericShrub, stations$NDVI_sm, use = "complete.obs")    # EHH -0.486
-  cor(stations$PercMesicMix, stations$NDVI_sm, use = "complete.obs")
-  cor(stations$PercDeveloped, stations$NDVI_sm, use = "complete.obs")
-  cor(stations$PercForest, stations$PercMesicMix, use = "complete.obs")   # EHH -0.567
-  cor(stations$PercForestMix, stations$Landfire, use = "complete.obs")    # YEAH 0.681
-  
-  
-  plot(stations$Elev, stations$HumanModified) # seems to be a break point around mid-elevation
-  
-  #'  Study area specific correlations
-  cor(stations_NE$Elev, stations_NE$HumanModified, use = "complete.obs")  
-  cor(stations_OK$Elev, stations_OK$HumanModified, use = "complete.obs")  
-  cor(stations_NE$RoadDensity, stations_NE$HumanModified, use = "complete.obs")
-  cor(stations_OK$RoadDensity, stations_OK$HumanModified, use = "complete.obs") 
+  #' #'  Check for correlation among covaraites
+  #' #'  Watch out for NAs (use="complete.obs")
+  #' cor(stations$Distance, stations$Height, use = "complete.obs")
+  #' cor(stations$Elev, stations$Slope, use = "complete.obs")
+  #' cor(stations$Elev, stations$Aspect, use = "complete.obs")
+  #' cor(stations$Slope, stations$Aspect, use = "complete.obs")
+  #' cor(stations$Elev, stations$TRI, use = "complete.obs")
+  #' cor(stations$TRI, stations$Roughness, use = "complete.obs")  # EEK! 0.986
+  #' cor(stations$Elev, stations$NDVI_sm18, use = "complete.obs")
+  #' cor(stations$Slope, stations$NDVI_sm18, use = "complete.obs")
+  #' cor(stations$Aspect, stations$NDVI_sm18, use = "complete.obs")
+  #' cor(stations$TRI, stations$WaterDensity, use = "complete.obs")
+  #' cor(stations$Elev, stations$WaterDensity, use = "complete.obs")
+  #' cor(stations$Elev, stations$RoadDensity, use = "complete.obs")
+  #' cor(stations$Elev, stations$HumanDensity, use = "complete.obs")
+  #' cor(stations$Elev, stations$HumanModified, use = "complete.obs")  # YEP -0.639
+  #' cor(stations$WaterDensity, stations$NearestH2o, use = "complete.obs")
+  #' cor(stations$RoadDensity, stations$NearestRd, use = "complete.obs")
+  #' cor(stations$RoadDensity, stations$HumanDensity, use = "complete.obs")
+  #' cor(stations$WaterDensity, stations$HumanDensity, use = "complete.obs")
+  #' cor(stations$Landfire, stations$Canopy, use = "complete.obs")             # YUP 0.668
+  #' cor(stations$HumanDensity, stations$HumanModified, use = "complete.obs")  # EHH 0.498
+  #' cor(stations$HumanModified, stations$RoadDensity, use = "complete.obs")
+  #' cor(stations$PercForest, stations$NDVI_sm, use = "complete.obs")        # OOF 0.745
+  #' cor(stations$PercForestMix, stations$NDVI_sm, use = "complete.obs")     # GAH 0.815
+  #' cor(stations$PercMesicGrass, stations$NDVI_sm, use = "complete.obs")
+  #' cor(stations$PercXericGrass, stations$NDVI_sm, use = "complete.obs")    # EHH -0.577
+  #' cor(stations$PercMesicShrub, stations$NDVI_sm, use = "complete.obs")
+  #' cor(stations$PercXericShrub, stations$NDVI_sm, use = "complete.obs")    # EHH -0.486
+  #' cor(stations$PercMesicMix, stations$NDVI_sm, use = "complete.obs")
+  #' cor(stations$PercDeveloped, stations$NDVI_sm, use = "complete.obs")
+  #' cor(stations$PercForest, stations$PercMesicMix, use = "complete.obs")   # EHH -0.567
+  #' cor(stations$PercForestMix, stations$Landfire, use = "complete.obs")    # YEAH 0.681
+  #' 
+  #' 
+  #' plot(stations$Elev, stations$HumanModified) # seems to be a break point around mid-elevation
+  #' 
+  #' #'  Study area specific correlations
+  #' cor(stations_NE$Elev, stations_NE$HumanModified, use = "complete.obs")  
+  #' cor(stations_OK$Elev, stations_OK$HumanModified, use = "complete.obs")  
+  #' cor(stations_NE$RoadDensity, stations_NE$HumanModified, use = "complete.obs")
+  #' cor(stations_OK$RoadDensity, stations_OK$HumanModified, use = "complete.obs") 
   
   
   #'  Survey covariates
@@ -446,8 +447,8 @@
                                     siteCovs = data.frame(Year = stations$Year,
                                                           Area = stations$Study_Area,
                                                           Trail = stations$Trail,
-                                                          NDVI = stations$NDVI_sm,
-                                                          Landcov = stations$Landcov,
+                                                          # NDVI = stations$NDVI_sm,
+                                                          # Landcov = stations$Landcov,
                                                           # PercFor = stations$PercForest,
                                                           PercForMix = stations$PercForestMix,
                                                           # PercMGrass = stations$PercMesicGrass,
@@ -457,13 +458,13 @@
                                                           # PercDev = stations$PercDeveloped,
                                                           Elev = stations$Elev,
                                                           Slope = stations$Slope,
-                                                          Aspect = stations$Aspect,                             
-                                                          Landfire = stations$Landfire,
-                                                          NearestH2o = stations$NearestH2o,
-                                                          NearestRd = stations$NearestRd,
-                                                          WaterDensity = stations$WaterDensity,
+                                                          # Aspect = stations$Aspect,                             
+                                                          # Landfire = stations$Landfire,
+                                                          # NearestH2o = stations$NearestH2o,
+                                                          # NearestRd = stations$NearestRd,
+                                                          # WaterDensity = stations$WaterDensity,
                                                           RoadDensity = stations$RoadDensity,
-                                                          HumanDensity = stations$HumanDensity,
+                                                          # HumanDensity = stations$HumanDensity,
                                                           HumanMod = stations$HumanModified),
                                     obsCovs = srvy_covs)
   nrow(coug_s1819_UMF@y)
@@ -474,8 +475,8 @@
                                     siteCovs = data.frame(Year = stations$Year,
                                                           Area = stations$Study_Area,
                                                           Trail = stations$Trail,
-                                                          NDVI = stations$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
-                                                          Landcov = stations$Landcov,
+                                                          # NDVI = stations$NDVI_sm, #  USE SUMMER NDVI FOR WINTER MODELS
+                                                          # Landcov = stations$Landcov,
                                                           # PercFor = stations$PercForest,
                                                           PercForMix = stations$PercForestMix,
                                                           # PercMGrass = stations$PercMesicGrass,
@@ -485,13 +486,13 @@
                                                           # PercDev = stations$PercDeveloped,
                                                           Elev = stations$Elev,
                                                           Slope = stations$Slope,
-                                                          Aspect = stations$Aspect,                             
-                                                          Landfire = stations$Landfire,
-                                                          NearestH2o = stations$NearestH2o,
-                                                          NearestRd = stations$NearestRd,
-                                                          WaterDensity = stations$WaterDensity,
+                                                          # Aspect = stations$Aspect,                             
+                                                          # Landfire = stations$Landfire,
+                                                          # NearestH2o = stations$NearestH2o,
+                                                          # NearestRd = stations$NearestRd,
+                                                          # WaterDensity = stations$WaterDensity,
                                                           RoadDensity = stations$RoadDensity,
-                                                          HumanDensity = stations$HumanDensity,
+                                                          # HumanDensity = stations$HumanDensity,
                                                           HumanMod = stations$HumanModified),
                                     obsCovs = srvy_covs)
   nrow(coug_w1820_UMF@y)
@@ -787,28 +788,30 @@
   #'  SUMMERS 2018 & 2019
   (bob_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, bob_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
-  bob_s1819_dd <- dredge(bob_s1819_global, rank = "AIC")
-  #'  Count the number of dredged models
-  tot_bob_smr_dd <- nrow(bob_s1819_dd)
-  print(bob_s1819_dd[1:5,])
-  #'  Keep top models (within 2 deltaAIC) & review the top model
-  bob_s1819_all <- get.models(bob_s1819_dd, subset = delta < 2,)
-  bob_s1819_all[[1]]
+  #' bob_s1819_dd <- dredge(bob_s1819_global, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_bob_smr_dd <- nrow(bob_s1819_dd)
+  #' print(bob_s1819_dd[1:5,])
+  #' #'  Keep top models (within 2 deltaAIC) & review the top model
+  #' bob_s1819_all <- get.models(bob_s1819_dd, subset = delta < 2,)
+  #' bob_s1819_all[[1]]
   #'  Dredge identified top model
   # (bob_s1819_top <- occu(formula = ~Distance + Height + Trail + Distance:Height  ~Area + HumanMod + PercXGrass, data = bob_s1819_UMF))
+  # (bob_s1819_top <- occu(formula = ~Distance  ~1, data = bob_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020           
   (bob_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, bob_w1820_UMF))
-  #'  Dredge the global model for all possible combinations
-  bob_w1820_dd <- dredge(bob_w1820_global, rank = "AIC")
-  #'  Count the number of dredged models
-  tot_bob_wtr_dd <- nrow(bob_w1820_dd)
-  print(bob_w1820_dd[1:5,])
-  #'  Keep top models (within 2 deltaAIC) & review the top model
-  bob_w1820_all <- get.models(bob_w1820_dd, subset = delta < 2,)
-  bob_w1820_all[[1]]
+  #' #'  Dredge the global model for all possible combinations
+  #' bob_w1820_dd <- dredge(bob_w1820_global, rank = "AIC")
+  #' #'  Count the number of dredged models
+  #' tot_bob_wtr_dd <- nrow(bob_w1820_dd)
+  #' print(bob_w1820_dd[1:5,])
+  #' #'  Keep top models (within 2 deltaAIC) & review the top model
+  #' bob_w1820_all <- get.models(bob_w1820_dd, subset = delta < 2,)
+  #' bob_w1820_all[[4]]
   #'  Dredge identified top model
   # (bob_w1820_top <- occu(formula = ~Distance ~Elev + HumanMod + PercForMix, data = bob_w1820_UMF))
+  # (bob_w1820_top <- occu(formula = ~1 ~Elev + PercForMix + PercXGrass + PercXShrub, data = bob_w1820_UMF))
 
   
   ####  COUGAR MODELS  ####
@@ -816,8 +819,8 @@
   #'  too correlated with Road level of the Trail covariate, leading to singularity 
   #'  in the hessian matrix?)
   #'  SUMMERS 2018 & 2019
-  # (coug_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, coug_s1819_UMF))
-  (coug_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_s1819_UMF))
+  (coug_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, coug_s1819_UMF))
+  # (coug_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coug_s1819_dd <- dredge(coug_s1819_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -827,11 +830,10 @@
   #' coug_s1819_all <- get.models(coug_s1819_dd, subset = delta < 2,)
   #' coug_s1819_all[[1]]
   #'  Dredge identified top model
-  (coug_s1819_top <- occu(formula = ~Height + Trail + Year ~Area + Elev + PercForMix, data = coug_s1819_UMF))
+  # (coug_s1819_top <- occu(formula = ~Height + Trail + Year ~Area + Elev + PercForMix, data = coug_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020           
-  # (coug_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, coug_w1820_UMF))
-  (coug_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + HumanMod + Area, coug_w1820_UMF))
+  (coug_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub  + RoadDensity + HumanMod + Area, coug_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' coug_w1820_dd <- dredge(coug_w1820_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -841,7 +843,7 @@
   #' coug_w1820_all <- get.models(coug_w1820_dd, subset = delta < 2,)
   #' coug_w1820_all[[1]]
   #'  Dredge identified top model
-  (coug_w1820_top <- occu(formula = ~Height + Trail ~Elev + HumanMod + PercForMix + Slope, data = coug_w1820_UMF))
+  # (coug_w1820_top <- occu(formula = ~Height + Trail ~Elev + HumanMod + PercForMix + Slope, data = coug_w1820_UMF))
   
   ####  COYOTE MODELS  ####
   #'  SUMMERS 2018 & 2019
@@ -855,7 +857,7 @@
   #' coy_s1819_all <- get.models(coy_s1819_dd, subset = delta < 2,)
   #' coy_s1819_all[[1]]
   #'  Dredge identified top model 
-  (coy_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + NearestRd + PercForMix + Slope, data = coy_s1819_UMF))
+  # (coy_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + NearestRd + PercForMix + Slope, data = coy_s1819_UMF))
    
   #'  #'  WINTERS 2018-2019 & 2019-2020              
   (coy_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, coy_w1820_UMF))
@@ -868,7 +870,7 @@
   #' coy_w1820_all <- get.models(coy_w1820_dd, subset = delta < 2,)
   #' coy_w1820_all[[1]]
   #'  Dredge identified top model
-  (coy_w1820_top <- occu(formula = ~Distance + Height + Temp_wtr + Trail + Distance:Height ~Elev + NearestRd + PercXGrass, data = coy_w1820_UMF))
+  # (coy_w1820_top <- occu(formula = ~Distance + Height + Temp_wtr + Trail + Distance:Height ~Elev + NearestRd + PercXGrass, data = coy_w1820_UMF))
   
   ####  WOLF MODELS  ####
   #'  SUMMERS 2018 & 2019    
@@ -884,15 +886,15 @@
   #' wolf_s1819_all <- get.models(wolf_s1819_dd, subset = delta < 2,)
   #' wolf_s1819_all[[1]]
   #'  Dredge identified top model
-  (wolf_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + HumanMod + NearestRd, data = wolf_s1819_UMF))
+  # (wolf_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + HumanMod + NearestRd, data = wolf_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020     
   #'  Dropped Elevation from global model due to problems with dredge (seemed to
   #'  arise when Elevation & Area were in the model; excluded Elevation b/c not
   #'  significant in global or dredged models but Area was)       
   # (wolf_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod + Area, wolf_w1820_UMF))
-  # (wolf_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_w1820_UMF)) # works with dredge but Elev not significant
-  (wolf_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Slope + PercForMix + PercXGrass + RoadDensity + HumanMod + Area, wolf_w1820_UMF))
+  # (wolf_w1820_global2 <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wolf_w1820_UMF)) 
+  (wolf_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod + Area, wolf_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wolf_w1820_dd <- dredge(wolf_w1820_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -902,7 +904,7 @@
   #' wolf_w1820_all <- get.models(wolf_w1820_dd, subset = delta < 2,)
   #' wolf_w1820_all[[1]]
   #'  Dredge identified top model
-  (wolf_w1820_top <- occu(formula = ~Trail ~Area + HumanMod, data = wolf_w1820_UMF))
+  # (wolf_w1820_top <- occu(formula = ~Trail ~Area + HumanMod, data = wolf_w1820_UMF))
   
   
   ####  ELK MODELS ####                          
@@ -920,7 +922,7 @@
   #' elk_s1819_all <- get.models(elk_s1819_dd, subset = delta < 2,)
   #' elk_s1819_all[[1]]
   #'  Dredge identified top model
-  (elk_s1819_top <- occu(formula = ~Distance + Height + Trail ~1, data = elk_s1819_UMF))
+  # (elk_s1819_top <- occu(formula = ~Distance + Height + Trail ~1, data = elk_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020
   #'  NE study area only so no Area effect 
@@ -939,7 +941,7 @@
   #'  Technically null model and one with Height on detection had lower AIC values
   #'  But this model was competitive (within 2 deltaAIC) and had variables that,
   #'  when in the right combination, were significant or tending towards signif.
-  (elk_w1820_top <- occu(formula = ~Trail ~Elev + NearestRd + Slope, data = elk_w1820_UMF))
+  # (elk_w1820_top <- occu(formula = ~Trail ~Elev + NearestRd + Slope, data = elk_w1820_UMF))
   
   
   ####  MULE DEER MODELS  ####
@@ -955,10 +957,11 @@
   #' md_s1819_all <- get.models(md_s1819_dd, subset = delta < 2,)
   #' md_s1819_all[[1]]
   #'  Dredge identified top model
-  (md_s1819_top <- occu(formula = ~Distance + Height + Temp_smr + Distance:Height ~HumanMod, data = md_s1819_UMF))
+  # (md_s1819_top <- occu(formula = ~Distance + Height + Temp_smr + Distance:Height ~HumanMod, data = md_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020, OK study area only so no Area effect                    
-  (md_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_w1820_UMF))
+  (md_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_w1820_UMF))  
+  #(md_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXShrub + RoadDensity + HumanMod, md_w1820_UMF))  
   #' #'  Dredge the global model for all possible combinations
   #' md_w1820_dd <- dredge(md_w1820_global, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -968,7 +971,7 @@
   #' md_w1820_all <- get.models(md_w1820_dd, subset = delta < 2,)
   #' md_w1820_all[[1]]
   #'  Dredge identified top model
-  (md_w1820_top <- occu(formula = ~Distance + Height + Trail + Year + Distance:Height ~NearestRd + PercXGrass + PercXShrub, data = md_w1820_UMF))
+  # (md_w1820_top <- occu(formula = ~Distance + Height + Trail + Year + Distance:Height ~NearestRd + PercXGrass + PercXShrub, data = md_w1820_UMF))
   
   
   ####  WHITE-TAILED DEER MODELS  ####
@@ -976,7 +979,7 @@
   #'  NE study area only so no Area effect 
   #'  Removed PercXShrub in global2 models due to poor convergence, esp. on winter model
   # (wtd_s1819_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, wtd_s1819_UMF))
-  (wtd_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_s1819_UMF))
+  (wtd_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + RoadDensity + HumanMod, wtd_s1819_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wtd_s1819_dd <- dredge(wtd_s1819_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -986,11 +989,11 @@
   #' wtd_s1819_all <- get.models(wtd_s1819_dd, subset = delta < 2,)
   #' wtd_s1819_all[[1]]
   #'  Dredge identified top model
-  (wtd_s1819_top <- occu(formula = ~Height + Trail ~Elev + PercForMix, data = wtd_s1819_UMF))
+  # (wtd_s1819_top <- occu(formula = ~Height + Trail ~Elev + PercForMix, data = wtd_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect              
   # (wtd_w1820_global <- occu(~Trail + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, wtd_w1820_UMF))
-  (wtd_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + HumanMod, wtd_w1820_UMF))
+  (wtd_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + RoadDensity + HumanMod, wtd_w1820_UMF))
   #' #'  Dredge the global model for all possible combinations
   #' wtd_w1820_dd <- dredge(wtd_w1820_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -1000,7 +1003,7 @@
   #' wtd_w1820_all <- get.models(wtd_w1820_dd, subset = delta < 2,)
   #' wtd_w1820_all[[1]]
   #'  Dredge identified top model
-  (wtd_w1820_top <- occu(formula = ~Distance + Height + Temp_wtr + Trail + Distance:Height ~Elev + HumanMod + PercForMix + PercXGrass, data = wtd_w1820_UMF))
+  # (wtd_w1820_top <- occu(formula = ~Distance + Height + Temp_wtr + Trail + Distance:Height ~Elev + HumanMod + PercForMix + PercXGrass, data = wtd_w1820_UMF))
   
 
   #' #'  Average number of dredged models
@@ -1055,20 +1058,20 @@
   wtd_s1819_occ <- occ_out(wtd_s1819_global2, "White-tailed Deer", "Summer", "Global")
   wtd_w1820_occ <- occ_out(wtd_w1820_global2, "White-tailed Deer", "Winter", "Global")
   #'  Top models identified by dredging
-  bob_s1819_occt <- occ_out(bob_s1819_top, "Bobcat", "Summer", "Top")
-  bob_w1820_occt <- occ_out(bob_w1820_top, "Bobcat", "Winter", "Top")
-  coug_s1819_occt <- occ_out(coug_s1819_top, "Cougar", "Summer", "Top")
-  coug_w1820_occt <- occ_out(coug_w1820_top, "Cougar", "Winter", "Top")
-  coy_s1819_occt <- occ_out(coy_s1819_top, "Coyote", "Summer", "Top")
-  coy_w1820_occt <- occ_out(coy_w1820_top, "Coyote", "Winter", "Top")
-  wolf_s1819_occt <- occ_out(wolf_s1819_top, "Wolf", "Summer", "Top")
-  wolf_w1820_occt <- occ_out(wolf_w1820_top, "Wolf", "Winter", "Top")
-  elk_s1819_occt <- occ_out(elk_s1819_top, "Elk", "Summer", "Top")
-  elk_w1820_occt <- occ_out(elk_w1820_top, "Elk", "Winter", "Top")
-  md_s1819_occt <- occ_out(md_s1819_top, "Mule Deer", "Summer", "Top")
-  md_w1820_occt <- occ_out(md_w1820_top, "Mule Deer", "Winter", "Top")
-  wtd_s1819_occt <- occ_out(wtd_s1819_top, "White-tailed Deer", "Summer", "Top")
-  wtd_w1820_occt <- occ_out(wtd_w1820_top, "White-tailed Deer", "Winter", "Top")
+  # bob_s1819_occt <- occ_out(bob_s1819_top, "Bobcat", "Summer", "Top")
+  # bob_w1820_occt <- occ_out(bob_w1820_top, "Bobcat", "Winter", "Top")
+  # coug_s1819_occt <- occ_out(coug_s1819_top, "Cougar", "Summer", "Top")
+  # coug_w1820_occt <- occ_out(coug_w1820_top, "Cougar", "Winter", "Top")
+  # coy_s1819_occt <- occ_out(coy_s1819_top, "Coyote", "Summer", "Top")
+  # coy_w1820_occt <- occ_out(coy_w1820_top, "Coyote", "Winter", "Top")
+  # wolf_s1819_occt <- occ_out(wolf_s1819_top, "Wolf", "Summer", "Top")
+  # wolf_w1820_occt <- occ_out(wolf_w1820_top, "Wolf", "Winter", "Top")
+  # elk_s1819_occt <- occ_out(elk_s1819_top, "Elk", "Summer", "Top")
+  # elk_w1820_occt <- occ_out(elk_w1820_top, "Elk", "Winter", "Top")
+  # md_s1819_occt <- occ_out(md_s1819_top, "Mule Deer", "Summer", "Top")
+  # md_w1820_occt <- occ_out(md_w1820_top, "Mule Deer", "Winter", "Top")
+  # wtd_s1819_occt <- occ_out(wtd_s1819_top, "White-tailed Deer", "Summer", "Top")
+  # wtd_w1820_occt <- occ_out(wtd_w1820_top, "White-tailed Deer", "Winter", "Top")
   
   #'  Merge into larger data frames for easy comparison
   #'  Full models
@@ -1079,26 +1082,26 @@
   occ_results <- rbind(summer_occ, winter_occ) %>%
     arrange(Species)
   colnames(occ_results) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
-  #'  Top models identified by derdging
-  summer_occ_top <- rbind(bob_s1819_occt, coug_s1819_occt, coy_s1819_occt, wolf_s1819_occt,
-                      elk_s1819_occt, md_s1819_occt, wtd_s1819_occt)
-  winter_occ_top <- rbind(bob_w1820_occt, coug_w1820_occt, coy_w1820_occt, wolf_w1820_occt,
-                      elk_w1820_occt, md_w1820_occt, wtd_w1820_occt)
-  occ_results_top <- rbind(summer_occ_top, winter_occ_top) %>%
-    arrange(Species) 
-  colnames(occ_results_top) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
-  #'  Combine full model and top model results
-  summer_occ_combo <- rbind(bob_s1819_occ, bob_s1819_occt, coug_s1819_occ, coug_s1819_occt, 
-                          coy_s1819_occ, coy_s1819_occt, wolf_s1819_occ, wolf_s1819_occt,
-                          elk_s1819_occ, elk_s1819_occt, md_s1819_occ, md_s1819_occt, 
-                          wtd_s1819_occ, wtd_s1819_occt)
-  winter_occ_combo <- rbind(bob_w1820_occ, bob_w1820_occt, coug_w1820_occ, coug_w1820_occt, 
-                          coy_w1820_occ, coy_w1820_occt, wolf_w1820_occ, wolf_w1820_occt,
-                          elk_w1820_occ, elk_w1820_occt, md_w1820_occ, md_w1820_occt, 
-                          wtd_w1820_occ, wtd_w1820_occt)
-  occ_results_combo <- rbind(summer_occ_combo, winter_occ_combo) %>%
-    arrange(Species) 
-  colnames(occ_results_combo) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
+  #' #'  Top models identified by derdging
+  #' summer_occ_top <- rbind(bob_s1819_occt, coug_s1819_occt, coy_s1819_occt, wolf_s1819_occt,
+  #'                     elk_s1819_occt, md_s1819_occt, wtd_s1819_occt)
+  #' winter_occ_top <- rbind(bob_w1820_occt, coug_w1820_occt, coy_w1820_occt, wolf_w1820_occt,
+  #'                     elk_w1820_occt, md_w1820_occt, wtd_w1820_occt)
+  #' occ_results_top <- rbind(summer_occ_top, winter_occ_top) %>%
+  #'   arrange(Species) 
+  #' colnames(occ_results_top) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
+  #' #'  Combine full model and top model results
+  #' summer_occ_combo <- rbind(bob_s1819_occ, bob_s1819_occt, coug_s1819_occ, coug_s1819_occt, 
+  #'                         coy_s1819_occ, coy_s1819_occt, wolf_s1819_occ, wolf_s1819_occt,
+  #'                         elk_s1819_occ, elk_s1819_occt, md_s1819_occ, md_s1819_occt, 
+  #'                         wtd_s1819_occ, wtd_s1819_occt)
+  #' winter_occ_combo <- rbind(bob_w1820_occ, bob_w1820_occt, coug_w1820_occ, coug_w1820_occt, 
+  #'                         coy_w1820_occ, coy_w1820_occt, wolf_w1820_occ, wolf_w1820_occt,
+  #'                         elk_w1820_occ, elk_w1820_occt, md_w1820_occ, md_w1820_occt, 
+  #'                         wtd_w1820_occ, wtd_w1820_occt)
+  #' occ_results_combo <- rbind(summer_occ_combo, winter_occ_combo) %>%
+  #'   arrange(Species) 
+  #' colnames(occ_results_combo) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
 
   #'  Round so numbers are easier to look at
   rounddig <- 3
@@ -1109,23 +1112,23 @@
       z = round(z, rounddig),
       Pval = round(Pval, rounddig)
     )
-  results_psi_top <- occ_results_top %>%
-    mutate(
-      Estimate = round(Estimate, rounddig),
-      SE = round(SE, rounddig),
-      z = round(z, rounddig),
-      Pval = round(Pval, rounddig)
-    )
-  results_psi_combo <- occ_results_combo %>%
-    mutate(
-      Estimate = round(Estimate, rounddig),
-      SE = round(SE, rounddig),
-      z = round(z, rounddig),
-      Pval = round(Pval, rounddig)
-    )
+  # results_psi_top <- occ_results_top %>%
+  #   mutate(
+  #     Estimate = round(Estimate, rounddig),
+  #     SE = round(SE, rounddig),
+  #     z = round(z, rounddig),
+  #     Pval = round(Pval, rounddig)
+  #   )
+  # results_psi_combo <- occ_results_combo %>%
+  #   mutate(
+  #     Estimate = round(Estimate, rounddig),
+  #     SE = round(SE, rounddig),
+  #     z = round(z, rounddig),
+  #     Pval = round(Pval, rounddig)
+  #   )
   
   #'  Spread this out so the coefficient effects are easier to compare across species
-  results_psi_wide <- results_psi_combo %>% #results_psi
+  results_psi_wide <- results_psi %>%  #results_psi_combo
     dplyr::select(-z) %>%
     mutate(
       SE = round(SE, 2),
@@ -1186,20 +1189,20 @@
   wtd_s1819_det <- det_out(wtd_s1819_global2, "White-tailed Deer", "Summer", "Global")
   wtd_w1820_det <- det_out(wtd_w1820_global2, "White-tailed Deer", "Winter", "Global")
 
-  bob_s1819_dett <- det_out(bob_s1819_top, "Bobcat", "Summer", "Top")
-  bob_w1820_dett <- det_out(bob_w1820_top, "Bobcat", "Winter", "Top")
-  coug_s1819_dett <- det_out(coug_s1819_top, "Cougar", "Summer", "Top")
-  coug_w1820_dett <- det_out(coug_w1820_top, "Cougar", "Winter", "Top")
-  coy_s1819_dett <- det_out(coy_s1819_top, "Coyote", "Summer", "Top")
-  coy_w1820_dett <- det_out(coy_w1820_top, "Coyote", "Winter", "Top")
-  wolf_s1819_dett <- det_out(wolf_s1819_top, "Wolf", "Summer", "Top")
-  wolf_w1820_dett <- det_out(wolf_w1820_top, "Wolf", "Winter", "Top")
-  elk_s1819_dett <- det_out(elk_s1819_top, "Elk", "Summer", "Top")
-  elk_w1820_dett <- det_out(elk_w1820_top, "Elk", "Winter", "Top")
-  md_s1819_dett <- det_out(md_s1819_top, "Mule Deer", "Summer", "Top")
-  md_w1820_dett <- det_out(md_w1820_top, "Mule Deer", "Winter", "Top")
-  wtd_s1819_dett <- det_out(wtd_s1819_top, "White-tailed Deer", "Summer", "Top")
-  wtd_w1820_dett <- det_out(wtd_w1820_top, "White-tailed Deer", "Winter", "Top")
+  # bob_s1819_dett <- det_out(bob_s1819_top, "Bobcat", "Summer", "Top")
+  # bob_w1820_dett <- det_out(bob_w1820_top, "Bobcat", "Winter", "Top")
+  # coug_s1819_dett <- det_out(coug_s1819_top, "Cougar", "Summer", "Top")
+  # coug_w1820_dett <- det_out(coug_w1820_top, "Cougar", "Winter", "Top")
+  # coy_s1819_dett <- det_out(coy_s1819_top, "Coyote", "Summer", "Top")
+  # coy_w1820_dett <- det_out(coy_w1820_top, "Coyote", "Winter", "Top")
+  # wolf_s1819_dett <- det_out(wolf_s1819_top, "Wolf", "Summer", "Top")
+  # wolf_w1820_dett <- det_out(wolf_w1820_top, "Wolf", "Winter", "Top")
+  # elk_s1819_dett <- det_out(elk_s1819_top, "Elk", "Summer", "Top")
+  # elk_w1820_dett <- det_out(elk_w1820_top, "Elk", "Winter", "Top")
+  # md_s1819_dett <- det_out(md_s1819_top, "Mule Deer", "Summer", "Top")
+  # md_w1820_dett <- det_out(md_w1820_top, "Mule Deer", "Winter", "Top")
+  # wtd_s1819_dett <- det_out(wtd_s1819_top, "White-tailed Deer", "Summer", "Top")
+  # wtd_w1820_dett <- det_out(wtd_w1820_top, "White-tailed Deer", "Winter", "Top")
   
   #'  Merge into larger data frames for easy comparison
   summer_det <- rbind(bob_s1819_det, coug_s1819_det, coy_s1819_det, wolf_s1819_det,
@@ -1210,25 +1213,25 @@
     arrange(Species)
   colnames(det_results) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
   
-  summer_det_top <- rbind(bob_s1819_dett, coug_s1819_dett, coy_s1819_dett, wolf_s1819_dett,
-                      elk_s1819_dett, md_s1819_dett, wtd_s1819_dett)
-  winter_det_top <- rbind(bob_w1820_dett, coug_w1820_dett, coy_w1820_dett, wolf_w1820_dett,
-                      elk_w1820_dett, md_w1820_dett, wtd_w1820_dett)
-  det_results_top <- rbind(summer_det_top, winter_det_top) %>%
-    arrange(Species)
-  colnames(det_results_top) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
-  
-  summer_det_combo <- rbind(bob_s1819_det, bob_s1819_dett, coug_s1819_det, coug_s1819_dett, 
-                            coy_s1819_det, coy_s1819_dett, wolf_s1819_det, wolf_s1819_dett,
-                            elk_s1819_det, elk_s1819_dett, md_s1819_det, md_s1819_dett, 
-                            wtd_s1819_det, wtd_s1819_dett)
-  winter_det_combo <- rbind(bob_w1820_det, bob_w1820_dett, coug_w1820_det, coug_w1820_dett, 
-                            coy_w1820_det, coy_w1820_dett, wolf_w1820_det, wolf_w1820_dett,
-                            elk_w1820_det, elk_w1820_dett, md_w1820_det, md_w1820_dett, 
-                            wtd_w1820_det, wtd_w1820_dett)
-  det_results_combo <- rbind(summer_det_combo, winter_det_combo) %>%
-    arrange(Species)
-  colnames(det_results_combo) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
+  # summer_det_top <- rbind(bob_s1819_dett, coug_s1819_dett, coy_s1819_dett, wolf_s1819_dett,
+  #                     elk_s1819_dett, md_s1819_dett, wtd_s1819_dett)
+  # winter_det_top <- rbind(bob_w1820_dett, coug_w1820_dett, coy_w1820_dett, wolf_w1820_dett,
+  #                     elk_w1820_dett, md_w1820_dett, wtd_w1820_dett)
+  # det_results_top <- rbind(summer_det_top, winter_det_top) %>%
+  #   arrange(Species)
+  # colnames(det_results_top) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
+  # 
+  # summer_det_combo <- rbind(bob_s1819_det, bob_s1819_dett, coug_s1819_det, coug_s1819_dett, 
+  #                           coy_s1819_det, coy_s1819_dett, wolf_s1819_det, wolf_s1819_dett,
+  #                           elk_s1819_det, elk_s1819_dett, md_s1819_det, md_s1819_dett, 
+  #                           wtd_s1819_det, wtd_s1819_dett)
+  # winter_det_combo <- rbind(bob_w1820_det, bob_w1820_dett, coug_w1820_det, coug_w1820_dett, 
+  #                           coy_w1820_det, coy_w1820_dett, wolf_w1820_det, wolf_w1820_dett,
+  #                           elk_w1820_det, elk_w1820_dett, md_w1820_det, md_w1820_dett, 
+  #                           wtd_w1820_det, wtd_w1820_dett)
+  # det_results_combo <- rbind(summer_det_combo, winter_det_combo) %>%
+  #   arrange(Species)
+  # colnames(det_results_combo) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
 
   #'  Round so numbers are a little easier to interpret
   results_det <- det_results %>%
@@ -1238,25 +1241,25 @@
       z = round(z, 3),
       Pval = round(Pval, 3)
     )
-  results_det_top <- det_results_top %>%
-    mutate(
-      Estimate = round(Estimate, 3),
-      SE = round(SE, 3),
-      z = round(z, 3),
-      Pval = round(Pval, 3),
-      Parameter = ifelse(Parameter == "Distance:Height", "Height:Distance", Parameter)
-    )
-  results_det_combo <- det_results_combo %>%
-    mutate(
-      Estimate = round(Estimate, 3),
-      SE = round(SE, 3),
-      z = round(z, 3),
-      Pval = round(Pval, 3),
-      Parameter = ifelse(Parameter == "Distance:Height", "Height:Distance", Parameter)
-    )
+  # results_det_top <- det_results_top %>%
+  #   mutate(
+  #     Estimate = round(Estimate, 3),
+  #     SE = round(SE, 3),
+  #     z = round(z, 3),
+  #     Pval = round(Pval, 3),
+  #     Parameter = ifelse(Parameter == "Distance:Height", "Height:Distance", Parameter)
+  #   )
+  # results_det_combo <- det_results_combo %>%
+  #   mutate(
+  #     Estimate = round(Estimate, 3),
+  #     SE = round(SE, 3),
+  #     z = round(z, 3),
+  #     Pval = round(Pval, 3),
+  #     Parameter = ifelse(Parameter == "Distance:Height", "Height:Distance", Parameter)
+  #   )
   
   #'  Spread this out so the coefficient effects are easier to compare across species
-  results_det_wide <- results_det_combo %>% #results_det
+  results_det_wide <- results_det %>% #results_det_combo
     dplyr::select(-z) %>%
     mutate(
       SE = round(SE, 2),
