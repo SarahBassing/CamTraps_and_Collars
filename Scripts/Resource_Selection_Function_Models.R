@@ -19,13 +19,22 @@
   library(lme4)
   
   #'  Load used and available locations, and covariate data
-  load("./Outputs/RSF_pts/md_dat_all_2021-06-22.RData")
-  load("./Outputs/RSF_pts/elk_dat_all_2021-06-22.RData")
-  load("./Outputs/RSF_pts/wtd_dat_all_2021-06-22.RData")
-  load("./Outputs/RSF_pts/coug_dat_all_2021-06-22.RData")
-  load("./Outputs/RSF_pts/wolf_dat_all_2021-06-22.RData")
-  load("./Outputs/RSF_pts/bob_dat_all_2021-06-22.RData")
-  load("./Outputs/RSF_pts/coy_dat_all_2021-06-22.RData")
+  #'  3rd Order Selection
+  # load("./Outputs/RSF_pts/md_dat_all_2021-06-30.RData")  # 2021-06-22 uses reprojected rasters
+  # load("./Outputs/RSF_pts/elk_dat_all_2021-06-30.RData")
+  # load("./Outputs/RSF_pts/wtd_dat_all_2021-06-30.RData")
+  # load("./Outputs/RSF_pts/coug_dat_all_2021-06-30.RData")
+  # load("./Outputs/RSF_pts/wolf_dat_all_2021-06-30.RData")
+  # load("./Outputs/RSF_pts/bob_dat_all_2021-06-30.RData")
+  # load("./Outputs/RSF_pts/coy_dat_all_2021-06-30.RData")
+  #'  2nd Order Selection
+  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-07-07.RData")  # 2021-06-22 uses reprojected rasters
+  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-07-07.RData")
+  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-07-07.RData")
+  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-07-07.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-07-07.RData")
+  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-07-07.RData")
+  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-07-07.RData")
   
   #'  Center & scale covariates 
   #'  Note: standardizing across all IDs & years, but separately by season & spp
@@ -75,18 +84,23 @@
   #'  for individual
   #'  Wolf, bobcat, & coyote RSFs exclude random effect for year because very few
   #'  collars were on air in both years
-  #'  Do I want study area as a fixed effect? Does that make sense? What's most
-  #'  consistent with the occupancy models?
+  #'  Mule deer summer RSF excludes random effect for year because too many
+  #'  collars were on air in both years
+  #'  Do I want study area as a fixed effect? Does that make sense? Including it
+  #'  would be consistent with the occupancy models but a collared animal can't
+  #'  "select" for one study area over the other since both study areas aren't
+  #'  "available" to them. Not including.
   #'  Other habitat covariates excluded based on species and convergence issues
   
   ####  Mule Deer RSF  ####
-  #'  Global model with random effect for individual and year
-  #'  SUMMERS 2018 & 2019, OK study area only = no Area effect
-  md_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + HumanMod + (1|ID) + (1|Year),
+  #'  Global model with random effect for individual and year (winter only)
+  #'  SUMMERS 2018 & 2019
+  md_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + HumanMod + (1|ID), # + (1|Year),
                           data = mdData_smr, family = binomial(link = "logit"))
   summary(md_global_smr)
+  #'  Singularity issues caused when year is included- possibly because almost all collars deployed both summers so no variation there?
 
-  #'  WINTERS 2018-2019 & 2019-2020, OK study area only = no Area effect
+  #'  WINTERS 2018-2019 & 2019-2020
   md_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + HumanMod + (1|ID) + (1|Year),
                           data = mdData_wtr, family = binomial(link = "logit"))
   summary(md_global_wtr)
@@ -94,12 +108,12 @@
   
   ####  Elk RSF  ####
   #'  Global model with random effect for individual and year
-  #'  SUMMERS 2018 & 2019, NE study area only = no Area effect
+  #'  SUMMERS 2018 & 2019
   elk_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + HumanMod + (1|ID) + (1|Year),
                         data = elkData_smr, family = binomial(link = "logit"))
   summary(elk_global_smr)
   
-  #'  WINTERS 2018-2019 & 2019-2020, NE study area only = no Area effect
+  #'  WINTERS 2018-2019 & 2019-2020
   elk_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + HumanMod + (1|ID) + (1|Year),
                       data = elkData_wtr, family = binomial(link = "logit"))
   summary(elk_global_wtr)
@@ -107,12 +121,12 @@
   
   ####  White-tailed Deer RSF  ####
   #'  Global model with random effect for individual and year
-  #'  SUMMERS 2018 & 2019, NE study area only = no Area effect
+  #'  SUMMERS 2018 & 2019
   wtd_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + HumanMod + (1|ID) + (1|Year),
                           data = wtdData_smr, family = binomial(link = "logit"))
   summary(wtd_global_smr)
 
-  #'  WINTERS 2018-2019 & 2019-2020, NE study area only = no Area effect
+  #'  WINTERS 2018-2019 & 2019-2020
   wtd_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + HumanMod + (1|ID) + (1|Year),
                           data = wtdData_wtr, family = binomial(link = "logit"))
   summary(wtd_global_wtr)
@@ -170,20 +184,20 @@
   
   
   #'  Save
-  save(md_global_smr, file = "./Outputs/RSF_output/md_RSF_smr.RData")
-  save(md_global_wtr, file = "./Outputs/RSF_output/md_RSF_wtr.RData")
-  save(elk_global_smr, file = "./Outputs/RSF_output/elk_RSF_smr.RData")
-  save(elk_global_wtr, file = "./Outputs/RSF_output/elk_RSF_wtr.RData")
-  save(wtd_global_smr, file = "./Outputs/RSF_output/wtd_RSF_smr.RData")
-  save(wtd_global_wtr, file = "./Outputs/RSF_output/wtd_RSF_wtr.RData")
-  save(coug_global_smr, file = "./Outputs/RSF_output/coug_RSF_smr.RData")
-  save(coug_global_wtr, file = "./Outputs/RSF_output/coug_RSF_wtr.RData")
-  save(wolf_global_smr, file = "./Outputs/RSF_output/wolf_RSF_smr.RData")
-  save(wolf_global_wtr, file = "./Outputs/RSF_output/wolf_RSF_wtr.RData")
-  save(bob_global_smr, file = "./Outputs/RSF_output/bob_RSF_smr.RData")
-  save(bob_global_wtr, file = "./Outputs/RSF_output/bob_RSF_wtr.RData")
-  save(coy_global_smr, file = "./Outputs/RSF_output/coy_RSF_smr.RData")
-  save(coy_global_wtr, file = "./Outputs/RSF_output/coy_RSF_wtr.RData")
+  save(md_global_smr, file = paste0("./Outputs/RSF_output/md_RSF_smr_", Sys.Date(), ".RData"))
+  save(md_global_wtr, file = paste0("./Outputs/RSF_output/md_RSF_wtr_", Sys.Date(), ".RData"))
+  save(elk_global_smr, file = paste0("./Outputs/RSF_output/elk_RSF_smr_", Sys.Date(), ".RData"))
+  save(elk_global_wtr, file = paste0("./Outputs/RSF_output/elk_RSF_wtr_", Sys.Date(), ".RData"))
+  save(wtd_global_smr, file = paste0("./Outputs/RSF_output/wtd_RSF_smr_", Sys.Date(), ".RData"))
+  save(wtd_global_wtr, file = paste0("./Outputs/RSF_output/wtd_RSF_wtr_", Sys.Date(), ".RData"))
+  save(coug_global_smr, file = paste0("./Outputs/RSF_output/coug_RSF_smr_", Sys.Date(), ".RData"))
+  save(coug_global_wtr, file = paste0("./Outputs/RSF_output/coug_RSF_wtr_", Sys.Date(), ".RData"))
+  save(wolf_global_smr, file = paste0("./Outputs/RSF_output/wolf_RSF_smr_", Sys.Date(), ".RData"))
+  save(wolf_global_wtr, file = paste0("./Outputs/RSF_output/wolf_RSF_wtr_", Sys.Date(), ".RData"))
+  save(bob_global_smr, file = paste0("./Outputs/RSF_output/bob_RSF_smr_", Sys.Date(), ".RData"))
+  save(bob_global_wtr, file = paste0("./Outputs/RSF_output/bob_RSF_wtr_", Sys.Date(), ".RData"))
+  save(coy_global_smr, file = paste0("./Outputs/RSF_output/coy_RSF_smr_", Sys.Date(), ".RData"))
+  save(coy_global_wtr, file = paste0("./Outputs/RSF_output/coy_RSF_wtr_", Sys.Date(), ".RData"))
   
   
   ####  Summary tables  ####
@@ -246,9 +260,9 @@
 
   #'  Merge into larger data frames for easy comparison
   summer_rsf <- rbind(bob_s1819_rsf, coug_s1819_rsf, coy_s1819_rsf, wolf_s1819_rsf,
-                      elk_s1819_rsf, md_s1819_rsf, wtd_s1819_rsf) #
+                      elk_s1819_rsf, md_s1819_rsf, wtd_s1819_rsf) 
   winter_rsf <- rbind(bob_w1820_rsf, coug_w1820_rsf, coy_w1820_rsf, wolf_w1820_rsf,
-                      elk_w1820_rsf, md_w1820_rsf, wtd_w1820_rsf) #
+                      elk_w1820_rsf, md_w1820_rsf, wtd_w1820_rsf) 
   rsf_results <- rbind(summer_rsf, winter_rsf) %>%
     arrange(Species)
   colnames(rsf_results) <- c("Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
@@ -275,7 +289,7 @@
     separate("PercXGrass", c("PercXGrass (SE)", "PercXGrass Pval"), sep = "_") %>%
     separate("PercXShrub", c("PercXShrub (SE)", "PercXShrub Pval"), sep = "_") %>%
     separate("RoadDen", c("Road Density (SE)", "Road Density Pval"), sep = "_") %>%
-    separate("HumanMod", c("HumanMod (SE)", "HumanMod Pval"), sep = "_") #%>%
+    separate("HumanMod", c("HumanMod (SE)", "HumanMod Pval"), sep = "_") %>%
     arrange(match(Species, c("Bobcat", "Cougar", "Coyote", "Wolf", "Mule Deer", "Elk", "White-tailed Deer"))) %>%
     arrange(match(Season, c("Summer", "Winter")))
   
@@ -288,4 +302,5 @@
   
   
   
+  #'  SHOULD I BE CONSIDERING A VARIENCE INFLATION FACTOR ON THESE ESTIMATES????
   
