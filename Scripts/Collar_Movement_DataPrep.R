@@ -33,41 +33,41 @@
   # source("./Scripts/Collar_Truncating&Filtering.R")
   # load("./Data/Collar_Truncating&Filtering_2021-05-01.RData")
   # load("./Data/Collar_Truncating&Filtering_noDispersal_2021-06-14.RData")
-  load("./Data/Collar_Truncating&Filtering_noDispMig_2021-06-22.RData")
+  load("./Data/Collar_Truncating&Filtering_noDispMig_2021-07-07.RData") #2021-06-22
 
   ####  Data preparation  ####
   #'  Select relevant columns
   #'  Keeping version of datetime that have been floored to beginning of hour
   rawELK <- elk_gtg %>%
-    dplyr::select(ID, FullID, Sex, Season, Longitude, Latitude, Floordt) %>%
+    dplyr::select(ID, FullID, Sex, Season, StudyArea, Longitude, Latitude, Floordt) %>%
     arrange(ID, Floordt)
-  colnames(rawELK) <- c("ID", "FullID", "Sex", "Season", "Long", "Lat", "time")
+  colnames(rawELK) <- c("ID", "FullID", "Sex", "Season", "StudyArea", "Long", "Lat", "time")
   #'  Only keep first track to practice with
   # rawELK1 <- subset(rawELK, ID == unique(ID)[2])
   rawMD <- md_gtg_nomig %>% #md_gtg  # USING MD data with NO MIGRATIONS for RSF
-    dplyr::select(ID, FullID, Sex, Season, Longitude, Latitude, Floordt)%>%
+    dplyr::select(ID, FullID, Sex, Season, StudyArea, Longitude, Latitude, Floordt)%>%
     arrange(ID, Floordt)
-  colnames(rawMD) <- c("ID", "FullID", "Sex", "Season", "Long", "Lat", "time")
+  colnames(rawMD) <- c("ID", "FullID", "Sex", "Season", "StudyArea", "Long", "Lat", "time")
   rawWTD <- wtd_gtg %>%
-    dplyr::select(ID, FullID, Sex, Season, Longitude, Latitude, Floordt)%>%
+    dplyr::select(ID, FullID, Sex, Season, StudyArea, Longitude, Latitude, Floordt)%>%
     arrange(ID, Floordt)
-  colnames(rawWTD) <- c("ID", "FullID", "Sex", "Season", "Long", "Lat", "time")
+  colnames(rawWTD) <- c("ID", "FullID", "Sex", "Season", "StudyArea", "Long", "Lat", "time")
   rawCOUG <- coug_gtg %>%
-    dplyr::select(ID, FullID, Sex, Season, Longitude, Latitude, Floordt)%>%
+    dplyr::select(ID, FullID, Sex, Season, StudyArea, Longitude, Latitude, Floordt)%>%
     arrange(ID, Floordt)
-  colnames(rawCOUG) <- c("ID", "FullID", "Sex", "Season", "Long", "Lat", "time")
+  colnames(rawCOUG) <- c("ID", "FullID", "Sex", "Season", "StudyArea", "Long", "Lat", "time")
   rawWOLF <- wolf_gtg %>%
-    dplyr::select(ID, FullID, Sex, Season, Longitude, Latitude, Floordt)%>%
+    dplyr::select(ID, FullID, Sex, Season, StudyArea, Longitude, Latitude, Floordt)%>%
     arrange(ID, Floordt)
-  colnames(rawWOLF) <- c("ID", "FullID", "Sex", "Season", "Long", "Lat", "time")
+  colnames(rawWOLF) <- c("ID", "FullID", "Sex", "Season", "StudyArea", "Long", "Lat", "time")
   rawBOB <- bob_gtg %>%
-    dplyr::select(ID, FullID, Sex, Season, Longitude, Latitude, Floordt)%>%
+    dplyr::select(ID, FullID, Sex, Season, StudyArea, Longitude, Latitude, Floordt)%>%
     arrange(ID, Floordt)
-  colnames(rawBOB) <- c("ID", "FullID", "Sex", "Season", "Long", "Lat", "time")
+  colnames(rawBOB) <- c("ID", "FullID", "Sex", "Season", "StudyArea", "Long", "Lat", "time")
   rawCOY <- coy_gtg %>%
-    dplyr::select(ID, FullID, Sex, Season, Longitude, Latitude, Floordt)%>%
+    dplyr::select(ID, FullID, Sex, Season, StudyArea, Longitude, Latitude, Floordt)%>%
     arrange(ID, Floordt)
-  colnames(rawCOY) <- c("ID", "FullID", "Sex", "Season", "Long", "Lat", "time")
+  colnames(rawCOY) <- c("ID", "FullID", "Sex", "Season", "StudyArea", "Long", "Lat", "time")
 
 
 
@@ -77,7 +77,7 @@
     raw$time <- as.POSIXct(raw$time, format = "%Y-%m-%d %H:%M:%S", tz = "America/Los_Angeles")
 
     #'  Make locations spatial and project to UTM coordinates with study area projection
-    llcoord <- SpatialPoints(raw[,5:6], proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+    llcoord <- SpatialPoints(raw[,6:7], proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
     utmcoord <- spTransform(llcoord, CRS("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs "))
     #'  Add UTM locations to data frame
     raw$x <- attr(utmcoord, "coords")[,1]
