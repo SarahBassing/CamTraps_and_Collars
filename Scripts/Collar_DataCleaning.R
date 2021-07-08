@@ -184,9 +184,9 @@
   wtd_info <- spp_info(wtd_cap, wtd_mort, wtd_capmort, wtd_tel)  
   
   #  Save for later use
-  # write.csv(md_info, paste0('md_info ', Sys.Date(), '.csv'))
-  # write.csv(elk_info, paste0('elk_info ', Sys.Date(), '.csv'))
-  # write.csv(wtd_info, paste0('wtd_info ', Sys.Date(), '.csv'))
+  write.csv(md_info, paste0('md_info ', Sys.Date(), '.csv'))
+  write.csv(elk_info, paste0('elk_info ', Sys.Date(), '.csv'))
+  write.csv(wtd_info, paste0('wtd_info ', Sys.Date(), '.csv'))
   
   ####  Running list of collars that got nixed in this stage  ####
   #  Mule deer
@@ -291,9 +291,9 @@
   #  Pacific Standard Time for location data!
 
   #  Save MASTER data files
-  # write.csv(md_master, paste0('md_master ', Sys.Date(), '.csv'))
-  # write.csv(elk_master, paste0('elk_master ', Sys.Date(), '.csv'))
-  # write.csv(wtd_master, paste0('wtd_master ', Sys.Date(), '.csv'))
+  write.csv(md_master, paste0('md_master ', Sys.Date(), '.csv'))
+  write.csv(elk_master, paste0('elk_master ', Sys.Date(), '.csv'))
+  write.csv(wtd_master, paste0('wtd_master ', Sys.Date(), '.csv'))
   
   
   ####  NEED TO ADD SOMETHING THAT PLOTS DISTANCE BTWN TIMES TO MAKE SURE I'M NOT MISSING LOCATIONS/ATTEMPTED FIXES
@@ -337,9 +337,9 @@
 
   
   #  Save locations with high accuracy fixes only
-  # write.csv(md_clean, paste0('md_clean ', Sys.Date(), '.csv'))
-  # write.csv(elk_clean, paste0('elk_clean ', Sys.Date(), '.csv'))
-  # write.csv(wtd_clean, paste0('wtd_clean ', Sys.Date(), '.csv'))
+  write.csv(md_clean, paste0('md_clean ', Sys.Date(), '.csv'))
+  write.csv(elk_clean, paste0('elk_clean ', Sys.Date(), '.csv'))
+  write.csv(wtd_clean, paste0('wtd_clean ', Sys.Date(), '.csv'))
   
   
   ####  ==========================
@@ -408,9 +408,9 @@
   
   
   #  Save locations thinned to correct fix schedule
-  # write.csv(md_skinny, paste0('md_skinny ', Sys.Date(), '.csv'))
-  # write.csv(elk_skinny, paste0('elk_skinny ', Sys.Date(), '.csv'))
-  # write.csv(wtd_skinny, paste0('wtd_skinny ', Sys.Date(), '.csv'))
+  write.csv(md_skinny, paste0('md_skinny ', Sys.Date(), '.csv'))
+  write.csv(elk_skinny, paste0('elk_skinny ', Sys.Date(), '.csv'))
+  write.csv(wtd_skinny, paste0('wtd_skinny ', Sys.Date(), '.csv'))
   
   
   ####  ============================================
