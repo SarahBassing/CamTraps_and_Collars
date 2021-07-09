@@ -1,12 +1,16 @@
-  #'  ==================================
-  #'  Maps and figures
+  #'  =================================================
+  #'  Maps and figures for camera vs collar manuscript
   #'  Washington Predator-Prey Project
   #'  Sarah Bassing
   #'  May 2021
-  #'  ==================================
-  #'  Plot study area map with camera locations and inset map showing study area
-  #'  locations in relation to Washington State
+  #'  =================================================
+  #'  1. Plot study area map with camera locations and inset map showing study 
+  #'     area locations in relation to Washington State
+  #'  2. Plot occupancy and RSF results
+  #'  =================================================
   
+  #'  Clear memory
+  rm(list=ls())
 
   #'  Load libraries
   library(ggplot2)
@@ -17,15 +21,20 @@
   library(raster)
   library(tidyverse)
   
+  
+  ####  1. Map study area and camera locations  ####
+  #'  ==============================================
   #'  Read in camera locations
   station_covs <- read.csv("./Data/Camera_Station18-20_Covariates_2021-04-25.csv")
   CameraLocation <- station_covs$CameraLocation
   Year <- station_covs$Year
   
-  #'  Make camera location data spatial and reproject to study area projection
+  #'  Define projections
   wgs84 <- projection("+proj=longlat +datum=WGS84 +no_defs")
-  cams <- st_as_sf(station_covs[,6:8], coords = c("Longitude", "Latitude"), crs = wgs84)
   sa_proj <- projection("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
+  
+  #'  Make camera location data spatial and reproject to study area projection
+  cams <- st_as_sf(station_covs[,6:8], coords = c("Longitude", "Latitude"), crs = wgs84)
   cams_reproj <- st_transform(cams, crs = sa_proj)
   cams_reproj$Year <- Year
   
@@ -39,6 +48,7 @@
     st_transform(crs = sa_proj)
   NE_SA$NAME <- "Northeast"
   dem <- raster("./Shapefiles/WA DEM rasters/WPPP_DEM_30m_reproj.tif")
+  
   projection(WA)
   projection(OK_SA)
   projection(dem)
@@ -46,9 +56,9 @@
   extent(NE_SA)
   
   #'  Reduce raster resolution and prep new DEM raster for ggplot
-  dem_low <- aggregate(dem, fact = 10)
+  # dem_low <- aggregate(dem, fact = 10)
   # writeRaster(dem_low, file = "./Shapefiles/WA DEM rasters/dem_reproj_low", format = "GTiff")
-  # dem_low <- raster("./Shapefiles/WA DEM rasters/dem_reproj_low.tif")
+  dem_low <- raster("./Shapefiles/WA DEM rasters/dem_reproj_low.tif")
   dem_p_low <- rasterToPoints(dem_low)
   dem_p_df <- as.data.frame(dem_p_low)
   colnames(dem_p_df) <- c("x", "y", "value")
@@ -70,7 +80,6 @@
           #'  No margins around figure
           plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "pt"))
   plot(WA_SA_map)
-
 
   #'  Plot study areas against DEM with camera locations
   cam_SA_map <- ggplot() +
@@ -107,7 +116,6 @@
     annotation_scale(location = "bl", width_hint = 0.5)
   plot(cam_SA_map)
   
-  
   #'  Build plot with map of study areas and inset map of WA
   #'  https://upgo.lab.mcgill.ca/2019/12/13/making-beautiful-maps/
   #'  Requires "cowplot" package
@@ -133,6 +141,175 @@
       height = 0.25)
   plot(StudyArea_Map)
   # dev.off()
+  
+  
+  
+  ####  2. Maps of capture effort and MCPs  ####
+  #'  ==========================================
+  #'  Plot study areas with capture locations and MCPs for each species and 
+  #'  display in a paneled figure
+  
+  
+  ####  3. Plot OccMod & RSF Results  ####
+  #'  ====================================
+  #'  Plot effect size and CI's for occ mod & RSF results for key covariates
+  #'  that were generally significant in both models (elevation, % forest, % grass,
+  #'  human modified landscape). Display in multiple panels by model and season.
+  
+  #'  Occupancy model output
+  occ_out <- read.csv("./Outputs/OccMod_OccProb_Results_2021-07-01.csv") %>%
+    #'  Calculate 95% confidence intervals
+    mutate(
+      l95 = (Estimate - (1.95 * SE)),
+      u95 = (Estimate + (1.96 * SE))
+    ) %>%
+    dplyr::select(-c(X, Model))
+  #'  RSF results output
+  rsf_out <- read.csv("./Outputs/RSF_Results_2021-07-08.csv") %>%
+    #'  Calculate 95% confidence intervals
+    mutate(
+      l95 = (Estimate - (1.95 * SE)),
+      u95 = (Estimate + (1.96 * SE))
+    ) %>%
+    dplyr::select(-X)
+  
+  #'  Isolate results for specific covariates and seasons
+  #'  Elevation
+  elev_occ <- filter(occ_out, Parameter == "Elev")
+  elev_occ_smr <- filter(elev_occ, Season == "Summer")
+  elev_occ_wtr <- filter(elev_occ, Season == "Winter")
+  elev_rsf <- filter(rsf_out, Parameter == "Elev")
+  elev_rsf_smr <- filter(elev_rsf, Season == "Summer")
+  elev_rsf_wtr <- filter(elev_rsf, Season == "Winter")
+  #'  Percent Forest
+  for_occ <- filter(occ_out, Parameter == "PercForMix")
+  for_occ_smr <- filter(for_occ, Season == "Summer")
+  for_occ_wtr <- filter(for_occ, Season == "Winter")
+  for_rsf <- filter(rsf_out, Parameter == "PercForMix")
+  for_rsf_smr <- filter(for_rsf, Season == "Summer")
+  for_rsf_wtr <- filter(for_rsf, Season == "Winter")
+  #'  Percent Grass
+  grass_occ <- filter(occ_out, Parameter == "PercXGrass")
+  #'  Add in species that did not test for effect of percent grass in OccMods
+  elk_smr <- c("Elk", "Summer", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  elk_wtr <- c("Elk", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  wtd_smr <- c("White-tailed Deer", "Summer", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  wtd_wtr <- c("White-tailed Deer", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  grass_occ <- rbind(grass_occ, elk_smr, elk_wtr, wtd_smr, wtd_wtr) %>%
+    mutate(Estimate = as.numeric(as.character(Estimate)),
+           l95 = as.numeric(as.character(l95)),
+           u95 = as.numeric(as.character(u95)))
+  grass_occ_smr <- filter(grass_occ, Season == "Summer")
+  grass_occ_wtr <- filter(grass_occ, Season == "Winter")
+  grass_rsf <- filter(rsf_out, Parameter == "PercXGrass")
+  grass_rsf_smr <- filter(grass_rsf, Season == "Summer")
+  grass_rsf_wtr <- filter(grass_rsf, Season == "Winter")
+  #'  Human Modified
+  hm_occ <- filter(occ_out, Parameter == "HumanMod")
+  hm_occ_smr <- filter(hm_occ, Season == "Summer")
+  hm_occ_wtr <- filter(hm_occ, Season == "Winter")
+  hm_rsf <- filter(rsf_out, Parameter == "HumanMod")
+  hm_rsf_smr <- filter(hm_rsf, Season == "Summer")
+  hm_rsf_wtr <- filter(hm_rsf, Season == "Winter")
+  
+  
+  #'  Plot effects by covariate, season, and model type for all species
+  #'  ----------------------------  
+  ####  OCCUPANCY MODEL RESULTS  ####
+  #'  ----------------------------
+  #'  Effect of ELEVATION on probability of use (on logit scale)
+  #'  Summer results
+  elev_occ_smr_fig <- ggplot(elev_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    # scale_color_manual(name = "Species"), 
+                        # labels = c("Above Average", "Below Average"), 
+                        # values = c("above"="#00ba38", "below"="#f8766d")) + 
+    # geom_text(color = "black", size = 2) +
+    labs(title = "Elevation", 
+         subtitle = "Summer Occupancy Models") +
+    xlab("") + ylab("Estimates") +
+    ylim(-5, 5) +
+    coord_flip()
+  #'  Winter results
+  elev_occ_wtr_fig <- ggplot(elev_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Elevation", 
+         subtitle = "Winter Occupancy Models") +
+    xlab("") + ylab("Estimates") +
+    ylim(-5, 5) +
+    coord_flip()
+  
+  #'  Effect of PERCENT MIXED FOREST on Probability of Use (logit scale)
+  #'  Summer results
+  for_occ_smr_fig <- ggplot(for_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Percent Forest within 250m", 
+         subtitle = "Summer Occupancy Models") +
+    xlab("") + ylab("Estimates") +
+    ylim(-5, 5) +
+    coord_flip()
+  #'  Winter results
+  for_occ_wtr_fig <- ggplot(for_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Percent Forest within 250m", 
+         subtitle = "Winter Occupancy Models") +
+    xlab("") + ylab("Estimates") +
+    ylim(-5, 5) +
+    coord_flip()
+  
+  #'  Effect of PERCENT GRASS on Probability of Use (logit scale)
+  #'  Summer results
+  grass_occ_smr_fig <- ggplot(grass_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Percent Grass within 250m", 
+         subtitle = "Summer Occupancy Models") +
+    xlab("") + ylab("Estimates") +
+    ylim(-5, 5) +
+    coord_flip()
+  #'  Winter results
+  grass_occ_wtr_fig <- ggplot(grass_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Percent Grass within 250m", 
+         subtitle = "Winter Occupancy Models") +
+    xlab("") + ylab("Estimates") +
+    ylim(-5, 12) +
+    coord_flip()
+  
+  #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on Probability of Use (logit scale)
+  #'  Summer results
+  hm_occ_smr_fig <- ggplot(hm_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Percent of Human Modified Landscape", 
+         subtitle = "Summer Occupancy Models") +
+    xlab("") + ylab("Estimates") +
+    ylim(-5, 5) +
+    coord_flip()
+  #'  Winter results
+  hm_occ_wtr_fig <- ggplot(hm_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Percent of Human Modified Landscape", 
+         subtitle = "Winter Occupancy Models") +
+    xlab("") + ylab("Estimates") +
+    ylim(-5, 5) +
+    coord_flip()
+  
+  
   
   
   
