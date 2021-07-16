@@ -16,7 +16,11 @@
   library(ggplot2)
   library(ggspatial)
   library(cowplot)
+  library(patchwork)
+  library(png)
+  library(RCurl)
   library(RColorBrewer)
+  library(rphylopic)
   library(sf)
   library(raster)
   library(tidyverse)
@@ -211,12 +215,30 @@
   hm_rsf <- filter(rsf_out, Parameter == "HumanMod")
   hm_rsf_smr <- filter(hm_rsf, Season == "Summer")
   hm_rsf_wtr <- filter(hm_rsf, Season == "Winter")
-  
+
+  #'  Get silhouettes for each species from PhyloPic
+  cougurl <- "http://phylopic.org/assets/images/submissions/3f8eff77-2868-4121-8d7d-a55ebdd49e04.64.png"
+  cougimg <- readPNG(getURLContent(cougurl))
+  wolfurl <- "http://phylopic.org/assets/images/submissions/8cad2b22-30d3-4cbd-86a3-a6d2d004b201.512.png"
+  wolfimg <- readPNG(getURLContent(wolfurl))
+  boburl <- "http://phylopic.org/assets/images/submissions/ab6cfd4f-aef7-40fa-b5a5-1b79b7d112aa.512.png"
+  bobimg <- readPNG(getURLContent(boburl))
+  coyurl <- "http://phylopic.org/assets/images/submissions/5a0398e3-a455-4ca6-ba86-cf3f1b25977a.512.png"
+  coyimg <- readPNG(getURLContent(coyurl)) 
+  mdurl <- "http://phylopic.org/assets/images/submissions/f889b336-9e67-4154-bc96-db4095a55be2.512.png"
+  mdimg <- readPNG(getURLContent(mdurl))
+  elkmurl <- "http://phylopic.org/assets/images/submissions/72f2f997-e474-4caf-bbd5-72fc8dbcc40d.512.png"
+  elkmimg <- readPNG(getURLContent(elkmurl))
+  elkfurl <- "http://phylopic.org/assets/images/submissions/97f83f5e-9afe-4ce8-812e-337f506ca841.512.png"
+  elkfimg <- readPNG(getURLContent(elkfurl))
+  wtdurl <- "http://phylopic.org/assets/images/submissions/56f6fdb2-15d0-43b5-b13f-714f2cb0f5d0.512.png"
+  wtdimg <- readPNG(getURLContent(wtdurl))
+
   
   #'  Plot effects by covariate, season, and model type for all species
-  #'  ----------------------------  
-  ####  OCCUPANCY MODEL RESULTS  ####
-  #'  ----------------------------
+  #'  --------------------------------  
+  ####  PLOT OCCUPANCY MODEL RESULTS  ####
+  #'  --------------------------------
   #'  Effect of ELEVATION on probability of use (on logit scale)
   #'  Summer results
   elev_occ_smr_fig <- ggplot(elev_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -227,20 +249,25 @@
                         # labels = c("Above Average", "Below Average"), 
                         # values = c("above"="#00ba38", "below"="#f8766d")) + 
     # geom_text(color = "black", size = 2) +
-    labs(title = "Elevation", 
-         subtitle = "Summer Occupancy Models") +
+    labs(title = "Summer Elevation", 
+         subtitle = "Occupancy") +
     xlab("") + ylab("Estimates") +
-    ylim(-5, 5) +
-    coord_flip()
+    theme(legend.position = "none") +
+    ylim(-4, 2.5) + # (-5, 5)
+    coord_flip() 
+
   #'  Winter results
   elev_occ_wtr_fig <- ggplot(elev_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "Elevation", 
-         subtitle = "Winter Occupancy Models") +
+    labs(title = "Winter Elevation", 
+         subtitle = "Occupancy") +
     xlab("") + ylab("Estimates") +
-    ylim(-5, 5) +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-5, 2) +
     coord_flip()
   
   #'  Effect of PERCENT MIXED FOREST on Probability of Use (logit scale)
@@ -249,32 +276,36 @@
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "Percent Forest within 250m", 
-         subtitle = "Summer Occupancy Models") +
+    labs(title = "Summer Percent Forest within 250m", 
+         subtitle = "Occupancy") +
     xlab("") + ylab("Estimates") +
-    ylim(-5, 5) +
+    theme(legend.position = "none") +
+    ylim(-2.5, 2.5) +
     coord_flip()
   #'  Winter results
   for_occ_wtr_fig <- ggplot(for_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "Percent Forest within 250m", 
-         subtitle = "Winter Occupancy Models") +
+    labs(title = "", #"Percent Forest within 250m", 
+         subtitle = "Occupancy") +
     xlab("") + ylab("Estimates") +
-    ylim(-5, 5) +
+    theme(legend.position = "none") +
+    ylim(-2.5, 3.5) +
     coord_flip()
   
   #'  Effect of PERCENT GRASS on Probability of Use (logit scale)
+  #'  Warnings are OK- for wtd & elk where % grass cov was excluded from OccMods
   #'  Summer results
   grass_occ_smr_fig <- ggplot(grass_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
     labs(title = "Percent Grass within 250m", 
-         subtitle = "Summer Occupancy Models") +
+         subtitle = "Summer Occupancy") +
     xlab("") + ylab("Estimates") +
-    ylim(-5, 5) +
+    theme(legend.position = "none") +
+    ylim(-2.5, 2.5) +
     coord_flip()
   #'  Winter results
   grass_occ_wtr_fig <- ggplot(grass_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -282,9 +313,10 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
     labs(title = "Percent Grass within 250m", 
-         subtitle = "Winter Occupancy Models") +
+         subtitle = "Winter Occupancy") +
     xlab("") + ylab("Estimates") +
-    ylim(-5, 12) +
+    theme(legend.position = "none") +
+    ylim(-2.5, 12) +
     coord_flip()
   
   #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on Probability of Use (logit scale)
@@ -294,9 +326,10 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
     labs(title = "Percent of Human Modified Landscape", 
-         subtitle = "Summer Occupancy Models") +
+         subtitle = "Summer Occupancy") +
     xlab("") + ylab("Estimates") +
-    ylim(-5, 5) +
+    theme(legend.position = "none") +
+    ylim(-2.5, 2) +
     coord_flip()
   #'  Winter results
   hm_occ_wtr_fig <- ggplot(hm_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -304,13 +337,163 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
     labs(title = "Percent of Human Modified Landscape", 
-         subtitle = "Winter Occupancy Models") +
+         subtitle = "Winter Occupancy") +
     xlab("") + ylab("Estimates") +
+    theme(legend.position = "none") +
+    ylim(-2.5, 2) +
+    coord_flip()
+  
+  #'  ----------------------------  
+  ####  RESOURCE SELECTION RESULTS  ####
+  #'  ----------------------------
+  #'  Effect of ELEVATION on relative probability of selection (on logit scale)
+  #'  Summer results
+  elev_rsf_smr_fig <- ggplot(elev_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Elevation", 
+         subtitle = "Resource Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-0.5, 0.5) +
+    coord_flip()
+  #'  Winter results
+  elev_rsf_wtr_fig <- ggplot(elev_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", # "Elevation", 
+         subtitle = "Resource Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-1.5, 0.5) +
+    coord_flip() +
+    add_phylopic(wolfimg, x = 7.05, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(wtdimg, x = 6.1, y = 0.2, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimg, x = 5.05, y = 0.3, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkmimg, x = 4.05, y = 0.2, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(coyimg, x = 3.05, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(cougimg, x = 2, y = 0.2, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(bobimg, x = 1.05, y = 0.3, ysize = 0.4, color = "black", alpha = 1)
+    # add_phylopic(wolfimg, x = 7.05, y = 0.5, ysize = 0.5, color = "black", alpha = 1) +
+    # add_phylopic(wtdimg, x = 6.1, y = 0.4, ysize = 1, color = "black", alpha = 1) +
+    # add_phylopic(mdimg, x = 5.05, y = 0.5, ysize = 0.65, color = "black", alpha = 1) +
+    # add_phylopic(elkmimg, x = 4.05, y = 0.4, ysize = 1, color = "black", alpha = 1) +
+    # add_phylopic(coyimg, x = 3.05, y = 0.5, ysize = 0.5, color = "black", alpha = 1) +
+    # add_phylopic(cougimg, x = 2, y = 0.4, ysize = 0.5, color = "black", alpha = 1) +
+    # add_phylopic(bobimg, x = 1.05, y = 0.5, ysize = 0.4, color = "black", alpha = 1)
+  
+  #'  Effect of PERCENT MIXED FOREST on relative probability of selection (logit scale)
+  #'  Summer results
+  for_rsf_smr_fig <- ggplot(for_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Percent Forest within 250m", 
+         subtitle = "Summer Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-0.5, 0.5) +
+    coord_flip()
+  #'  Winter results
+  for_rsf_wtr_fig <- ggplot(for_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Percent Forest within 250m", 
+         subtitle = "Winter Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
     ylim(-5, 5) +
     coord_flip()
   
+  #'  Effect of PERCENT GRASS on relative probability of selection (logit scale)
+  #'  Summer results
+  grass_rsf_smr_fig <- ggplot(grass_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Percent Grass within 250m", 
+         subtitle = "Summer Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-1.5, 1.5) +
+    coord_flip()
+  #'  Winter results
+  grass_rsf_wtr_fig <- ggplot(grass_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Percent Grass within 250m", 
+         subtitle = "Winter Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-1, 1) +
+    coord_flip()
+  
+  #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on relative probability of selection (logit scale)
+  #'  Summer results
+  hm_rsf_smr_fig <- ggplot(hm_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Percent of Human Modified Landscape", 
+         subtitle = "Summer Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-2.5, 1.5) +
+    coord_flip()
+  #'  Winter results
+  hm_rsf_wtr_fig <- ggplot(hm_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Percent of Human Modified Landscape", 
+         subtitle = "Winter Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-1, 0.5) +
+    coord_flip()
   
   
+  ####  Pair OccMod and RSF plots  ####
+  #' #'  cowplot version:
+  #' elev_smr_fig <- plot_grid(elev_occ_smr_fig, elev_rsf_smr_fig, align = "h")
+  #' elev_wtr_fig <- plot_grid(elev_occ_wtr_fig, elev_rsf_wtr_fig, align = "h")
+  #' elev_fig <- plot_grid(elev_smr_fig, elev_wtr_fig, align = "h")
+  #' plot(elev_smr_fig)
+  #' plot(elev_wtr_fig)
+  #' plot(elev_fig)
+  #' 
+  #' tst <- plot_grid(elev_occ_smr_fig, elev_rsf_smr_fig, elev_occ_wtr_fig, elev_rsf_wtr_fig, align = "h")
+  #' plot(tst)
+  
+  #'  patchwork version:
+  elev_fig <- elev_occ_smr_fig + elev_rsf_smr_fig + elev_occ_wtr_fig + elev_rsf_wtr_fig + plot_layout(ncol = 4)
+  plot(elev_fig)
+  
+
+  #### Combine into 8 window panel 
+  #### [cov1 smr occ, cov1 smr rsf] [cov1 wtr occ, cov1 wtr rsf]
+  #### [cov2 smr occ, cov2 smr rsf] [cov2 wtr occ, cov2 wtr rsf] etc.
+
   
   
   
