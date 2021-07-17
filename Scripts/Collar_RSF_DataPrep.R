@@ -356,7 +356,7 @@
   load("./Outputs/RSF_pts/elk_available_2nd_2021-07-07.RData")
   load("./Outputs/RSF_pts/wtd_available_2nd_2021-07-07.RData")
   load("./Outputs/RSF_pts/coug_available_2nd_2021-07-07.RData")
-  load("./Outputs/RSF_pts/wolf_available_2nd_2021-07-07.RData")
+  load("./Outputs/RSF_pts/wolf_available_2nd_2021-07-17.RData")
   load("./Outputs/RSF_pts/bob_available_2nd_2021-07-07.RData")
   load("./Outputs/RSF_pts/coy_available_2nd_2021-07-07.RData")
   
