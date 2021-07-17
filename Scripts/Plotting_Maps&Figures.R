@@ -185,6 +185,13 @@
   elev_rsf <- filter(rsf_out, Parameter == "Elev")
   elev_rsf_smr <- filter(elev_rsf, Season == "Summer")
   elev_rsf_wtr <- filter(elev_rsf, Season == "Winter")
+  #'  Slope
+  slope_occ <- filter(occ_out, Parameter == "Slope")
+  slope_occ_smr <- filter(slope_occ, Season == "Summer")
+  slope_occ_wtr <- filter(slope_occ, Season == "Winter")
+  slope_rsf <- filter(rsf_out, Parameter == "Slope")
+  slope_rsf_smr <- filter(slope_rsf, Season == "Summer")
+  slope_rsf_wtr <- filter(slope_rsf, Season == "Winter")
   #'  Percent Forest
   for_occ <- filter(occ_out, Parameter == "PercForMix")
   for_occ_smr <- filter(for_occ, Season == "Summer")
@@ -208,6 +215,31 @@
   grass_rsf <- filter(rsf_out, Parameter == "PercXGrass")
   grass_rsf_smr <- filter(grass_rsf, Season == "Summer")
   grass_rsf_wtr <- filter(grass_rsf, Season == "Winter")
+  #'  Percent Shrub
+  shrub_occ <- filter(occ_out, Parameter == "PercXShrub")
+  #'  Add in species that did not test for effect of percent shrub in OccMods
+  elk_smr <- c("Elk", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  elk_wtr <- c("Elk", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  wtd_smr <- c("White-tailed Deer", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  wtd_wtr <- c("White-tailed Deer", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  wolf_smr <- c("Wolf", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  wolf_wtr <- c("Wolf", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  shrub_occ <- rbind(shrub_occ, elk_smr, elk_wtr, wtd_smr, wtd_wtr, wolf_smr, wolf_wtr) %>%
+    mutate(Estimate = as.numeric(as.character(Estimate)),
+           l95 = as.numeric(as.character(l95)),
+           u95 = as.numeric(as.character(u95)))
+  shrub_occ_smr <- filter(shrub_occ, Season == "Summer")
+  shrub_occ_wtr <- filter(shrub_occ, Season == "Winter")
+  shrub_rsf <- filter(rsf_out, Parameter == "PercXShrub")
+  shrub_rsf_smr <- filter(shrub_rsf, Season == "Summer")
+  shrub_rsf_wtr <- filter(shrub_rsf, Season == "Winter")
+  #'  Road Density
+  rdden_occ <- filter(occ_out, Parameter == "RoadDensity")
+  rdden_occ_smr <- filter(rdden_occ, Season == "Summer")
+  rdden_occ_wtr <- filter(rdden_occ, Season == "Winter")
+  rdden_rsf <- filter(rsf_out, Parameter == "RoadDen")
+  rdden_rsf_smr <- filter(rdden_rsf, Season == "Summer")
+  rdden_rsf_wtr <- filter(rdden_rsf, Season == "Winter")
   #'  Human Modified
   hm_occ <- filter(occ_out, Parameter == "HumanMod")
   hm_occ_smr <- filter(hm_occ, Season == "Summer")
@@ -270,13 +302,40 @@
     ylim(-5, 2) +
     coord_flip()
   
+  #'  Effect of SLOPE on probability of use (on logit scale)
+  #'  Summer results
+  slope_occ_smr_fig <- ggplot(slope_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Summer Slope", 
+         subtitle = "Occupancy") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none") +
+    ylim(-1.5, 2) + # (-5, 5)
+    coord_flip() 
+  
+  #'  Winter results
+  slope_occ_wtr_fig <- ggplot(slope_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Winter Slope", 
+         subtitle = "Occupancy") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-1, 1.5) +
+    coord_flip()
+  
   #'  Effect of PERCENT MIXED FOREST on Probability of Use (logit scale)
   #'  Summer results
   for_occ_smr_fig <- ggplot(for_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "Summer Percent Forest within 250m", 
+    labs(title = "Summer Percent Forest", 
          subtitle = "Occupancy") +
     xlab("") + ylab("Estimates") +
     theme(legend.position = "none") +
@@ -287,10 +346,12 @@
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "", #"Percent Forest within 250m", 
+    labs(title = "Winter Percent Forest", 
          subtitle = "Occupancy") +
     xlab("") + ylab("Estimates") +
-    theme(legend.position = "none") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
     ylim(-2.5, 3.5) +
     coord_flip()
   
@@ -301,8 +362,8 @@
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "Percent Grass within 250m", 
-         subtitle = "Summer Occupancy") +
+    labs(title = "Summer Percent Grass", 
+         subtitle = "Occupancy") +
     xlab("") + ylab("Estimates") +
     theme(legend.position = "none") +
     ylim(-2.5, 2.5) +
@@ -312,12 +373,69 @@
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "Percent Grass within 250m", 
-         subtitle = "Winter Occupancy") +
+    labs(title = "Winter Percent Grass", 
+         subtitle = "Occupancy") +
     xlab("") + ylab("Estimates") +
-    theme(legend.position = "none") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
     ylim(-2.5, 12) +
     coord_flip()
+  
+  #'  Effect of PERCENT SHRUB on Probability of Use (logit scale)
+  #'  Warnings are OK- for wtd & elk where % shrub cov was excluded from OccMods
+  #'  Summer results
+  shrub_occ_smr_fig <- ggplot(shrub_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Summer Percent Shrub", 
+         subtitle = "Occupancy") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none") +
+    ylim(-1.5, 1.5) +
+    coord_flip()
+  #'  Winter results
+  shrub_occ_wtr_fig <- ggplot(shrub_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Winter Percent Shrub", 
+         subtitle = "Occupancy") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-1.5, 2) +
+    coord_flip()
+  
+  
+  #'  Effect of ROAD DENSITY on Probability of Use (logit scale)
+  #'  Summer results
+  rdden_occ_smr_fig <- ggplot(rdden_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Summer Road Density", 
+         subtitle = "Occupancy") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none") +
+    ylim(-2, 1.5) +
+    coord_flip()
+  #'  Winter results
+  rdden_occ_wtr_fig <- ggplot(rdden_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "Winter Road Density", 
+         subtitle = "Occupancy") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-2.5, 2) +
+    coord_flip()
+  
   
   #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on Probability of Use (logit scale)
   #'  Summer results
@@ -325,8 +443,8 @@
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "Percent of Human Modified Landscape", 
-         subtitle = "Summer Occupancy") +
+    labs(title = "Summer Human Modified", 
+         subtitle = "Occupancy") +
     xlab("") + ylab("Estimates") +
     theme(legend.position = "none") +
     ylim(-2.5, 2) +
@@ -336,10 +454,12 @@
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "Percent of Human Modified Landscape", 
-         subtitle = "Winter Occupancy") +
+    labs(title = "Winter Human Modified", 
+         subtitle = "Occupancy") +
     xlab("") + ylab("Estimates") +
-    theme(legend.position = "none") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
     ylim(-2.5, 2) +
     coord_flip()
   
@@ -374,19 +494,49 @@
     ylim(-1.5, 0.5) +
     coord_flip() +
     add_phylopic(wolfimg, x = 7.05, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(wtdimg, x = 6.1, y = 0.2, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(wtdimg, x = 6.1, y = 0.3, ysize = 1, color = "black", alpha = 1) +
     add_phylopic(mdimg, x = 5.05, y = 0.3, ysize = 0.65, color = "black", alpha = 1) +
-    add_phylopic(elkmimg, x = 4.05, y = 0.2, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(elkmimg, x = 4.05, y = 0.3, ysize = 1, color = "black", alpha = 1) +
     add_phylopic(coyimg, x = 3.05, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(cougimg, x = 2, y = 0.2, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(cougimg, x = 2, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.3, ysize = 0.4, color = "black", alpha = 1)
-    # add_phylopic(wolfimg, x = 7.05, y = 0.5, ysize = 0.5, color = "black", alpha = 1) +
-    # add_phylopic(wtdimg, x = 6.1, y = 0.4, ysize = 1, color = "black", alpha = 1) +
-    # add_phylopic(mdimg, x = 5.05, y = 0.5, ysize = 0.65, color = "black", alpha = 1) +
-    # add_phylopic(elkmimg, x = 4.05, y = 0.4, ysize = 1, color = "black", alpha = 1) +
-    # add_phylopic(coyimg, x = 3.05, y = 0.5, ysize = 0.5, color = "black", alpha = 1) +
-    # add_phylopic(cougimg, x = 2, y = 0.4, ysize = 0.5, color = "black", alpha = 1) +
-    # add_phylopic(bobimg, x = 1.05, y = 0.5, ysize = 0.4, color = "black", alpha = 1)
+    
+  
+  #'  Effect of SLOPE on relative probability of selection (on logit scale)
+  #'  Summer results
+  slope_rsf_smr_fig <- ggplot(slope_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Slope", 
+         subtitle = "Resource Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-1, 0.5) +
+    coord_flip()
+  #'  Winter results
+  slope_rsf_wtr_fig <- ggplot(slope_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", # "Slope", 
+         subtitle = "Resource Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-0.25, 0.8) +
+    coord_flip() +
+    add_phylopic(wolfimg, x = 7.05, y = 0.7, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(wtdimg, x = 6.1, y = 0.7, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimg, x = 5.05, y = 0.7, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkmimg, x = 4.05, y = 0.7, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(coyimg, x = 3.05, y = 0.7, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(cougimg, x = 2, y = 0.7, ysize = 0.25, color = "black", alpha = 1) +
+    add_phylopic(bobimg, x = 1.05, y = 0.7, ysize = 0.4, color = "black", alpha = 1)
+  
   
   #'  Effect of PERCENT MIXED FOREST on relative probability of selection (logit scale)
   #'  Summer results
@@ -395,7 +545,7 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
     labs(title = "", #"Percent Forest within 250m", 
-         subtitle = "Summer Selection") +
+         subtitle = "Resource Selection") +
     xlab("") + ylab("Estimates") +
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
@@ -408,13 +558,21 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
     labs(title = "", #"Percent Forest within 250m", 
-         subtitle = "Winter Selection") +
+         subtitle = "Resource Selection") +
     xlab("") + ylab("Estimates") +
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
     ylim(-5, 5) +
-    coord_flip()
+    coord_flip() +
+    add_phylopic(wolfimg, x = 7.05, y = 4, ysize = 2.1, color = "black", alpha = 1) +
+    add_phylopic(wtdimg, x = 6.1, y = 4, ysize = 1.7, color = "black", alpha = 1) +
+    add_phylopic(mdimg, x = 5.05, y = 4, ysize = 2.3, color = "black", alpha = 1) +
+    add_phylopic(elkmimg, x = 4.05, y = 4, ysize = 1.85, color = "black", alpha = 1) +
+    add_phylopic(coyimg, x = 3.05, y = 4, ysize = 1.6, color = "black", alpha = 1) +
+    add_phylopic(cougimg, x = 2, y = 4, ysize = 2.4, color = "black", alpha = 1) +
+    add_phylopic(bobimg, x = 1.05, y = 4, ysize = 1.85, color = "black", alpha = 1)
+  
   
   #'  Effect of PERCENT GRASS on relative probability of selection (logit scale)
   #'  Summer results
@@ -423,7 +581,7 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
     labs(title = "", #"Percent Grass within 250m", 
-         subtitle = "Summer Selection") +
+         subtitle = "Resource Selection") +
     xlab("") + ylab("Estimates") +
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
@@ -436,13 +594,93 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
     labs(title = "", #"Percent Grass within 250m", 
-         subtitle = "Winter Selection") +
+         subtitle = "Resource Selection") +
     xlab("") + ylab("Estimates") +
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
     ylim(-1, 1) +
+    coord_flip() +
+    add_phylopic(wolfimg, x = 7.05, y = 0.8, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(wtdimg, x = 6.1, y = 0.8, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimg, x = 5.05, y = 0.8, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkmimg, x = 4.05, y = 0.8, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(coyimg, x = 3.05, y = 0.8, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(cougimg, x = 2, y = 0.8, ysize = 0.45, color = "black", alpha = 1) +
+    add_phylopic(bobimg, x = 1.05, y = 0.8, ysize = 0.4, color = "black", alpha = 1)
+  
+  
+  #'  Effect of PERCENT SHRUB on relative probability of selection (logit scale)
+  #'  Summer results
+  shrub_rsf_smr_fig <- ggplot(shrub_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Percent Grass within 250m", 
+         subtitle = "Resource Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-9, 0.5) +
     coord_flip()
+  #'  Winter results
+  shrub_rsf_wtr_fig <- ggplot(shrub_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Percent Grass within 250m", 
+         subtitle = "Resource Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-0.5, 0.6) +
+    coord_flip() +
+    add_phylopic(wolfimg, x = 7.05, y = 0.5, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(wtdimg, x = 6.1, y = 0.5, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimg, x = 5.05, y = 0.5, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkmimg, x = 4.05, y = 0.5, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(coyimg, x = 3.05, y = 0.5, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(cougimg, x = 2, y = 0.5, ysize = 0.25, color = "black", alpha = 1) +
+    add_phylopic(bobimg, x = 1.05, y = 0.5, ysize = 0.4, color = "black", alpha = 1)
+  
+  
+  #'  Effect of ROAD DENSITY on relative probability of selection (logit scale)
+  #'  Summer results
+  rdden_rsf_smr_fig <- ggplot(rdden_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Percent of Road Density", 
+         subtitle = "Resource Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-0.5, 1) +
+    coord_flip()
+  #'  Winter results
+  rdden_rsf_wtr_fig <- ggplot(rdden_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+    labs(title = "", #"Percent of Road Density", 
+         subtitle = "Resource Selection") +
+    xlab("") + ylab("Estimates") +
+    theme(legend.position = "none", 
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    ylim(-0.5, 0.8) +
+    coord_flip() +
+    add_phylopic(wolfimg, x = 7.05, y = 0.7, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(wtdimg, x = 6.1, y = 0.7, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimg, x = 5.05, y = 0.7, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkmimg, x = 4.05, y = 0.7, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(coyimg, x = 3.05, y = 0.7, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(cougimg, x = 2, y = 0.7, ysize = 0.3, color = "black", alpha = 1) +
+    add_phylopic(bobimg, x = 1.05, y = 0.7, ysize = 0.4, color = "black", alpha = 1)
+  
   
   #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on relative probability of selection (logit scale)
   #'  Summer results
@@ -451,7 +689,7 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
     labs(title = "", #"Percent of Human Modified Landscape", 
-         subtitle = "Summer Selection") +
+         subtitle = "Resource Selection") +
     xlab("") + ylab("Estimates") +
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
@@ -464,16 +702,68 @@
     geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
     geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
     labs(title = "", #"Percent of Human Modified Landscape", 
-         subtitle = "Winter Selection") +
+         subtitle = "Resource Selection") +
     xlab("") + ylab("Estimates") +
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
     ylim(-1, 0.5) +
-    coord_flip()
+    coord_flip() +
+    add_phylopic(wolfimg, x = 7.05, y = 0.35, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(wtdimg, x = 6.1, y = 0.35, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimg, x = 5.05, y = 0.35, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkmimg, x = 4.05, y = 0.35, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(coyimg, x = 3.05, y = 0.35, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(cougimg, x = 2, y = 0.35, ysize = 0.4, color = "black", alpha = 1) +
+    add_phylopic(bobimg, x = 1.05, y = 0.35, ysize = 0.4, color = "black", alpha = 1)
+  
   
   
   ####  Pair OccMod and RSF plots  ####
+  #'  patchwork version:
+  elev_fig <- elev_occ_smr_fig + plot_annotation(title = "A") + elev_rsf_smr_fig + elev_occ_wtr_fig + elev_rsf_wtr_fig + plot_layout(ncol = 4)
+  slope_fig <- slope_occ_smr_fig + plot_annotation(title = "B") + slope_rsf_smr_fig + slope_occ_wtr_fig + slope_rsf_wtr_fig + plot_layout(ncol = 4)
+  for_fig <- for_occ_smr_fig + plot_annotation(title = "C") + for_rsf_smr_fig + for_occ_wtr_fig + for_rsf_wtr_fig + plot_layout(ncol = 4)
+  grass_fig <- grass_occ_smr_fig + plot_annotation(title = "D") + grass_rsf_smr_fig + grass_occ_wtr_fig + grass_rsf_wtr_fig + plot_layout(ncol = 4)
+  shrub_fig <- shrub_occ_smr_fig + plot_annotation(title = "E") + shrub_rsf_smr_fig + shrub_occ_wtr_fig + shrub_rsf_wtr_fig + plot_layout(ncol = 4)
+  rdden_fig <- rdden_occ_smr_fig + plot_annotation(title = "F") + rdden_rsf_smr_fig + rdden_occ_wtr_fig + rdden_rsf_wtr_fig + plot_layout(ncol = 4)
+  hm_fig <- hm_occ_smr_fig + plot_annotation(title = "G") + hm_rsf_smr_fig + hm_occ_wtr_fig + hm_rsf_wtr_fig + plot_layout(ncol = 4)
+  
+    
+  plot(elev_fig)
+  plot(slope_fig)
+  plot(for_fig)
+  plot(grass_fig)
+  plot(shrub_fig)
+  plot(rdden_fig)
+  plot(hm_fig)
+  
+  #'  Save different file formats
+  #'  PNG
+  ggsave("./Outputs/Figures/Elevation_Occ-RSF_plot.png", elev_fig)
+  ggsave("./Outputs/Figures/Slope_Occ-RSF_plot.png", slope_fig)
+  ggsave("./Outputs/Figures/Forest_Occ-RSF_plot.png", for_fig)
+  ggsave("./Outputs/Figures/Grass_Occ-RSF_plot.png", grass_fig)
+  ggsave("./Outputs/Figures/Shrub_Occ-RSF_plot.png", shrub_fig)
+  ggsave("./Outputs/Figures/RoadDensity_Occ-RSF_plot.png", rdden_fig)
+  ggsave("./Outputs/Figures/HumanMod_Occ-RSF_plot.png", hm_fig)
+  #'  JPEG
+  ggsave("./Outputs/Figures/Elevation_Occ-RSF_plot.jpeg", elev_fig)
+  ggsave("./Outputs/Figures/Slope_Occ-RSF_plot.jpeg", slope_fig)
+  ggsave("./Outputs/Figures/Forest_Occ-RSF_plot.jpeg", for_fig)
+  ggsave("./Outputs/Figures/Grass_Occ-RSF_plot.jpeg", grass_fig)
+  ggsave("./Outputs/Figures/Shrub_Occ-RSF_plot.jpeg", shrub_fig)
+  ggsave("./Outputs/Figures/RoadDensity_Occ-RSF_plot.jpeg", rdden_fig)
+  ggsave("./Outputs/Figures/HumanMod_Occ-RSF_plot.jpeg", hm_fig)
+  
+  #' #'  One single figure... ugly
+  #' cov_fig <- elev_occ_smr_fig + elev_rsf_smr_fig + elev_occ_wtr_fig + elev_rsf_wtr_fig + 
+  #'   for_occ_smr_fig + for_rsf_smr_fig + for_occ_wtr_fig + for_rsf_wtr_fig + 
+  #'   grass_occ_smr_fig + grass_rsf_smr_fig + grass_occ_wtr_fig + grass_rsf_wtr_fig + 
+  #'   hm_occ_smr_fig + hm_rsf_smr_fig + hm_occ_wtr_fig + hm_rsf_wtr_fig + plot_layout(ncol = 4, nrow = 4)
+  #' ggsave("./Outputs/Figures/OccMod_v_RSF_plot.png", cov_fig)
+  
+  
   #' #'  cowplot version:
   #' elev_smr_fig <- plot_grid(elev_occ_smr_fig, elev_rsf_smr_fig, align = "h")
   #' elev_wtr_fig <- plot_grid(elev_occ_wtr_fig, elev_rsf_wtr_fig, align = "h")
@@ -484,10 +774,6 @@
   #' 
   #' tst <- plot_grid(elev_occ_smr_fig, elev_rsf_smr_fig, elev_occ_wtr_fig, elev_rsf_wtr_fig, align = "h")
   #' plot(tst)
-  
-  #'  patchwork version:
-  elev_fig <- elev_occ_smr_fig + elev_rsf_smr_fig + elev_occ_wtr_fig + elev_rsf_wtr_fig + plot_layout(ncol = 4)
-  plot(elev_fig)
   
 
   #### Combine into 8 window panel 
