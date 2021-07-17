@@ -32,7 +32,7 @@
   load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-07-07.RData")
   load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-07-07.RData")
   load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-07-07.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-07-07.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-07-17.RData")
   load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-07-07.RData")
   load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-07-07.RData")
   
