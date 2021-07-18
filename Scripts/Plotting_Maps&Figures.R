@@ -6,7 +6,9 @@
   #'  =================================================
   #'  1. Plot study area map with camera locations and inset map showing study 
   #'     area locations in relation to Washington State
-  #'  2. Plot occupancy and RSF results
+  #'  2. Plot collaring effort and MCPs based on all collars per species and 
+  #'     study area
+  #'  3. Plot occupancy and RSF results
   #'  =================================================
   
   #'  Clear memory
@@ -26,23 +28,15 @@
   library(tidyverse)
   
   
-  ####  1. Map study area and camera locations  ####
-  #'  ==============================================
-  #'  Read in camera locations
-  station_covs <- read.csv("./Data/Camera_Station18-20_Covariates_2021-04-25.csv")
-  CameraLocation <- station_covs$CameraLocation
-  Year <- station_covs$Year
-  
+  #'  Get some basics pulled together to be used across most figures
+  #'  -----------------------------
+  ####  Spatial Data for Mapping  ####
+  #'  -----------------------------
   #'  Define projections
   wgs84 <- projection("+proj=longlat +datum=WGS84 +no_defs")
   sa_proj <- projection("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
   
-  #'  Make camera location data spatial and reproject to study area projection
-  cams <- st_as_sf(station_covs[,6:8], coords = c("Longitude", "Latitude"), crs = wgs84)
-  cams_reproj <- st_transform(cams, crs = sa_proj)
-  cams_reproj$Year <- Year
-  
-  #'  Read in spatial data and reproject
+  #'  Read in study area data and reproject
   WA <- st_read("./Shapefiles/Washington_State_Boundary/WA_State_Geospatial_Open_Data", layer = "WA_State_Boundary") %>%
     st_transform(crs = sa_proj)
   OK_SA <- st_read("./Shapefiles/fwdstudyareamaps", layer = "METHOW_SA") %>%
@@ -51,15 +45,15 @@
   NE_SA <- st_read("./Shapefiles/fwdstudyareamaps", layer = "NE_SA") %>%
     st_transform(crs = sa_proj)
   NE_SA$NAME <- "Northeast"
-  # dem <- raster("./Shapefiles/WA DEM rasters/WPPP_DEM_30m_reproj.tif")
   
   projection(WA)
   projection(OK_SA)
-  projection(dem)
   extent(OK_SA)
   extent(NE_SA)
   
-  #'  Reduce raster resolution and prep new DEM raster for ggplot
+  #'  Reduce DEM raster resolution and prep new raster for ggplot
+  # dem <- raster("./Shapefiles/WA DEM rasters/WPPP_DEM_30m_reproj.tif")
+  # projection(dem)
   # dem_low <- aggregate(dem, fact = 10)
   # writeRaster(dem_low, file = "./Shapefiles/WA DEM rasters/dem_reproj_low", format = "GTiff")
   dem_low <- raster("./Shapefiles/WA DEM rasters/dem_reproj_low.tif")
@@ -67,6 +61,39 @@
   dem_p_df <- as.data.frame(dem_p_low)
   colnames(dem_p_df) <- c("x", "y", "value")
   
+  #'  ------------------------
+  ####  Species silhouettes  ####
+  #'  ------------------------
+  #'  Silhouettes for each species from PhyloPic
+  cougurl <- "http://phylopic.org/assets/images/submissions/3f8eff77-2868-4121-8d7d-a55ebdd49e04.64.png"
+  cougimg <- readPNG(getURLContent(cougurl))
+  wolfurl <- "http://phylopic.org/assets/images/submissions/8cad2b22-30d3-4cbd-86a3-a6d2d004b201.512.png"
+  wolfimg <- readPNG(getURLContent(wolfurl))
+  boburl <- "http://phylopic.org/assets/images/submissions/ab6cfd4f-aef7-40fa-b5a5-1b79b7d112aa.512.png"
+  bobimg <- readPNG(getURLContent(boburl))
+  coyurl <- "http://phylopic.org/assets/images/submissions/5a0398e3-a455-4ca6-ba86-cf3f1b25977a.512.png"
+  coyimg <- readPNG(getURLContent(coyurl)) 
+  mdurl <- "http://phylopic.org/assets/images/submissions/f889b336-9e67-4154-bc96-db4095a55be2.512.png"
+  mdimg <- readPNG(getURLContent(mdurl))
+  elkmurl <- "http://phylopic.org/assets/images/submissions/72f2f997-e474-4caf-bbd5-72fc8dbcc40d.512.png"
+  elkmimg <- readPNG(getURLContent(elkmurl))
+  elkfurl <- "http://phylopic.org/assets/images/submissions/97f83f5e-9afe-4ce8-812e-337f506ca841.512.png"
+  elkfimg <- readPNG(getURLContent(elkfurl))
+  wtdurl <- "http://phylopic.org/assets/images/submissions/56f6fdb2-15d0-43b5-b13f-714f2cb0f5d0.512.png"
+  wtdimg <- readPNG(getURLContent(wtdurl))
+
+  
+  ####  1. Map study area and camera locations  ####
+  #'  ==============================================
+  #'  Read in camera locations
+  station_covs <- read.csv("./Data/Camera_Station18-20_Covariates_2021-04-25.csv")
+  CameraLocation <- station_covs$CameraLocation
+  Year <- station_covs$Year
+  
+  #'  Make camera location data spatial and reproject to study area projection
+  cams <- st_as_sf(station_covs[,6:8], coords = c("Longitude", "Latitude"), crs = wgs84)
+  cams_reproj <- st_transform(cams, crs = sa_proj)
+  cams_reproj$Year <- Year
   
   #'  Plot state of WA with study areas
   #'  https://r-spatial.org/r/2018/10/25/ggplot2-sf.html
@@ -195,7 +222,6 @@
   colnames(coyIDwtr) <- "AnimalID"
   coyID <- unique(rbind(coyIDsmr, coyIDwtr))
   
-  
   #'  Read in capture location data for each species, clean, and make spatial
   mdcap <- read.csv("./Data/Capture (MD)_11.16.20.csv") %>%
     transmute(
@@ -206,6 +232,7 @@
     ) %>% 
     #'  Retain only capture data of animals included in RSF
     filter(AnimalID %in% mdID$AnimalID) %>%
+    #'  Make spatial
     st_as_sf(., coords = c("Capture_Long", "Capture_Lat"), crs = wgs84) %>%
     st_transform(., crs = sa_proj)
   elkcap <- read.csv("./Data/Capture (Elk)_11.16.20.csv") %>%
@@ -285,8 +312,10 @@
   coy_NE_poly <- st_read("./Outputs/MCPs", layer = "coy_NE_poly")
   coy_OK_poly <- st_read("./Outputs/MCPs", layer = "coy_OK_poly")
   
-  #'  Plot study areas with capture locations and MCPs for each species and 
-  #'  display in a paneled figure
+  #'  Plot capture effort and sampling area of RSFs
+  #'  ----------------------------------------
+  ####  Capture Locations & MCPs per Species ####
+  #'  ----------------------------------------
   md_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
     #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
@@ -296,19 +325,25 @@
     #'  Add study area and MCP polygons
     geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
     geom_sf(data = md_poly, fill = NA, color = "blue", size = 0.80) +
-    #'  Note the hjust & vjust need to change based on font size and coord_sf
-    #'  DEPENDS ON HOW BIG YOUR PLOT WINDOW IS TOO!!!!
-    # geom_sf_text(data = OK_SA, aes(label = NAME, hjust = 1.3, vjust = -9.5), size = 4.5) +
-    # geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    # geom_sf_text(data = NE_SA, aes(label = NAME, hjust = 0.75, vjust = -6.75), size = 4.5) +
     #'  Add camera locations and vary color by deployment year
     geom_sf(data = mdcap, color = "black", shape = 16) +
+    #'  Drop x and y-axis labels
+    xlab("") + ylab("") +
+    theme(legend.position = "none",
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank()) +
     #'  Change camera data aesthetics (make sure it's colorblind friendly)
     # scale_discrete_manual(aesthetics = "color", values = c("#601A4A", "#63ACBE")) +
     # labs(colour = "Camera\ndeployment") +
     #'  Constrain plot to OK study area only 
-    #coord_sf(xlim = c(500000.0, 780000.0), ylim = c(102000.0, 240000.0))
-    coord_sf(xlim = c(480000.0, 600000.0), ylim = c(102000.0, 240000.0))
+    coord_sf(xlim = c(480000.0, 600000.0), ylim = c(102000.0, 240000.0))  
+    # annotation_custom(mdimg, xmin = 470000, xmax = 480000, ymin = 230000, ymax = 240000)
+    # add_phylopic(mdimg, x = 2, y = 0.3, color = "black", alpha = 1)
+  tst <- md_map + inset_element(p = mdimg,
+                       left = 1,
+                       bottom = 1,
+                       right = 0.25,
+                       top = 0.25, on_top = TRUE)
   elk_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
     #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
@@ -321,6 +356,11 @@
     geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
     geom_sf(data = elkcap, color = "black", shape = 16) +
+    #'  Drop x and y-axis labels
+    xlab("") + ylab("") +
+    theme(legend.position = "none",
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank()) +
     #'  Constrain plot to NE study area only 
     coord_sf(xlim = c(680000.0, 780000.0), ylim = c(102000.0, 200000.0))
   wtd_map <- ggplot() +
@@ -335,6 +375,11 @@
     geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
     geom_sf(data = wtdcap, color = "black", shape = 16) +
+    #'  Drop x and y-axis labels
+    xlab("") + ylab("") +
+    theme(legend.position = "none",
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank()) +
     #'  Constrain plot to NE study area only 
     coord_sf(xlim = c(680000.0, 780000.0), ylim = c(102000.0, 200000.0))
   coug_map <- ggplot() +
@@ -350,6 +395,8 @@
     geom_sf(data = coug_NE_poly, fill = NA, color = "blue", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
     geom_sf(data = cougcap, color = "black", shape = 16) +
+    #'  Give x and y-axis labels
+    xlab("Longitude") + ylab("Latitude") +
     #'  Constrain plot to both study areas
     coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0))
   wolf_map <- ggplot() +
@@ -365,8 +412,64 @@
     geom_sf(data = wolf_NE_poly, fill = NA, color = "blue", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
     geom_sf(data = wolfcap, color = "black", shape = 16) +
+    #'  Drop x and y-axis labels
+    xlab("") + ylab("") +
+    theme(legend.position = "none",
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
     #'  Constrain plot to both study areas
     coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0))
+  FAKEbob_map <- ggplot() +
+    geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
+    #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
+    scale_alpha(range = c(0.3, 0.8)) +
+    #'  Change colors of the raster
+    scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
+    #'  Add study area and MCP polygons
+    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
+    geom_sf(data = wolf_OK_poly, fill = NA, color = "blue", size = 0.80) +
+    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
+    geom_sf(data = wolf_NE_poly, fill = NA, color = "blue", size = 0.80) +
+    #'  Add camera locations and vary color by deployment year
+    geom_sf(data = wolfcap, color = "black", shape = 16) +
+    #'  Drop x and y-axis labels
+    xlab("") + ylab("") +
+    theme(legend.position = "none",
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    #'  Constrain plot to both study areas
+    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) 
+  FAKEcoy_map <- ggplot() +
+    geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
+    #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
+    scale_alpha(range = c(0.3, 0.8)) +
+    #'  Change colors of the raster
+    scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
+    #'  Add study area and MCP polygons
+    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
+    geom_sf(data = wolf_OK_poly, fill = NA, color = "blue", size = 0.80) +
+    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
+    geom_sf(data = wolf_NE_poly, fill = NA, color = "blue", size = 0.80) +
+    #'  Add camera locations and vary color by deployment year
+    geom_sf(data = wolfcap, color = "black", shape = 16) +
+    #'  Drop x and y-axis labels
+    xlab("") + ylab("") +
+    theme(legend.position = "none",
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
+    #'  Constrain plot to both study areas
+    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0))
+  
+  ####  Panel of maps  ####
+  capture_fig <- (md_map + elk_map + wtd_map) / (FAKEbob_map + FAKEcoy_map) / (coug_map + wolf_map) 
+  plot(capture_fig)
+  
   
  #'  TROUBLE SHOOTING MASSIVE WOLF MCPs  
  #'  wolf_smr <- spp_all_tracks[[9]]
@@ -382,7 +485,6 @@
  #'  wolf_locs <- read.csv("./Data/Wolf_Vectronic_Spring2021_4hrs.csv")
  #'  wolf_collars <- as.data.frame(unique(wolf_locs$ID))
  #' 
- #'  
  #'  wolf_NE_MCP <- st_as_sf(wolf_NE_mcp)
  #'  wolf_NE_poly <- st_as_sf(wolf_NE_poly)
  #'  wolf_OK_MCP <- st_as_sf(wolf_OK_mcp)
@@ -429,7 +531,7 @@
     ) %>%
     dplyr::select(-c(X, Model))
   #'  RSF results output
-  rsf_out <- read.csv("./Outputs/RSF_Results_2021-07-08.csv") %>%
+  rsf_out <- read.csv("./Outputs/RSF_Results_2021-07-17.csv") %>% #2021-07-08
     #'  Calculate 95% confidence intervals
     mutate(
       l95 = (Estimate - (1.95 * SE)),
@@ -508,24 +610,6 @@
   hm_rsf_smr <- filter(hm_rsf, Season == "Summer")
   hm_rsf_wtr <- filter(hm_rsf, Season == "Winter")
 
-  #'  Get silhouettes for each species from PhyloPic
-  cougurl <- "http://phylopic.org/assets/images/submissions/3f8eff77-2868-4121-8d7d-a55ebdd49e04.64.png"
-  cougimg <- readPNG(getURLContent(cougurl))
-  wolfurl <- "http://phylopic.org/assets/images/submissions/8cad2b22-30d3-4cbd-86a3-a6d2d004b201.512.png"
-  wolfimg <- readPNG(getURLContent(wolfurl))
-  boburl <- "http://phylopic.org/assets/images/submissions/ab6cfd4f-aef7-40fa-b5a5-1b79b7d112aa.512.png"
-  bobimg <- readPNG(getURLContent(boburl))
-  coyurl <- "http://phylopic.org/assets/images/submissions/5a0398e3-a455-4ca6-ba86-cf3f1b25977a.512.png"
-  coyimg <- readPNG(getURLContent(coyurl)) 
-  mdurl <- "http://phylopic.org/assets/images/submissions/f889b336-9e67-4154-bc96-db4095a55be2.512.png"
-  mdimg <- readPNG(getURLContent(mdurl))
-  elkmurl <- "http://phylopic.org/assets/images/submissions/72f2f997-e474-4caf-bbd5-72fc8dbcc40d.512.png"
-  elkmimg <- readPNG(getURLContent(elkmurl))
-  elkfurl <- "http://phylopic.org/assets/images/submissions/97f83f5e-9afe-4ce8-812e-337f506ca841.512.png"
-  elkfimg <- readPNG(getURLContent(elkfurl))
-  wtdurl <- "http://phylopic.org/assets/images/submissions/56f6fdb2-15d0-43b5-b13f-714f2cb0f5d0.512.png"
-  wtdimg <- readPNG(getURLContent(wtdurl))
-
   
   #'  Plot effects by covariate, season, and model type for all species
   #'  --------------------------------  
@@ -547,7 +631,6 @@
     theme(legend.position = "none") +
     ylim(-4, 2.5) + # (-5, 5)
     coord_flip() 
-
   #'  Winter results
   elev_occ_wtr_fig <- ggplot(elev_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
     geom_hline(yintercept = 0, linetype = "dashed") + 
@@ -574,7 +657,6 @@
     theme(legend.position = "none") +
     ylim(-1.5, 2) + # (-5, 5)
     coord_flip() 
-  
   #'  Winter results
   slope_occ_wtr_fig <- ggplot(slope_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
     geom_hline(yintercept = 0, linetype = "dashed") + 
@@ -669,7 +751,6 @@
     ylim(-1.5, 2) +
     coord_flip()
   
-  
   #'  Effect of ROAD DENSITY on Probability of Use (logit scale)
   #'  Summer results
   rdden_occ_smr_fig <- ggplot(rdden_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -695,7 +776,6 @@
           axis.ticks.y = element_blank()) +
     ylim(-2.5, 2) +
     coord_flip()
-  
   
   #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on Probability of Use (logit scale)
   #'  Summer results
@@ -760,7 +840,6 @@
     add_phylopic(coyimg, x = 3.05, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
     add_phylopic(cougimg, x = 2, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.3, ysize = 0.4, color = "black", alpha = 1)
-    
   
   #'  Effect of SLOPE on relative probability of selection (on logit scale)
   #'  Summer results
@@ -797,7 +876,6 @@
     add_phylopic(cougimg, x = 2, y = 0.7, ysize = 0.25, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.7, ysize = 0.4, color = "black", alpha = 1)
   
-  
   #'  Effect of PERCENT MIXED FOREST on relative probability of selection (logit scale)
   #'  Summer results
   for_rsf_smr_fig <- ggplot(for_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -832,7 +910,6 @@
     add_phylopic(coyimg, x = 3.05, y = 4, ysize = 1.6, color = "black", alpha = 1) +
     add_phylopic(cougimg, x = 2, y = 4, ysize = 2.4, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 4, ysize = 1.85, color = "black", alpha = 1)
-  
   
   #'  Effect of PERCENT GRASS on relative probability of selection (logit scale)
   #'  Summer results
@@ -869,7 +946,6 @@
     add_phylopic(cougimg, x = 2, y = 0.8, ysize = 0.45, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.8, ysize = 0.4, color = "black", alpha = 1)
   
-  
   #'  Effect of PERCENT SHRUB on relative probability of selection (logit scale)
   #'  Summer results
   shrub_rsf_smr_fig <- ggplot(shrub_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -904,7 +980,6 @@
     add_phylopic(coyimg, x = 3.05, y = 0.5, ysize = 0.5, color = "black", alpha = 1) +
     add_phylopic(cougimg, x = 2, y = 0.5, ysize = 0.25, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.5, ysize = 0.4, color = "black", alpha = 1)
-  
   
   #'  Effect of ROAD DENSITY on relative probability of selection (logit scale)
   #'  Summer results
@@ -941,7 +1016,6 @@
     add_phylopic(cougimg, x = 2, y = 0.7, ysize = 0.3, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.7, ysize = 0.4, color = "black", alpha = 1)
   
-  
   #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on relative probability of selection (logit scale)
   #'  Summer results
   hm_rsf_smr_fig <- ggplot(hm_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -976,7 +1050,6 @@
     add_phylopic(coyimg, x = 3.05, y = 0.35, ysize = 0.5, color = "black", alpha = 1) +
     add_phylopic(cougimg, x = 2, y = 0.35, ysize = 0.4, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.35, ysize = 0.4, color = "black", alpha = 1)
-  
   
   
   ####  Pair OccMod and RSF plots  ####
@@ -1034,11 +1107,7 @@
   #' 
   #' tst <- plot_grid(elev_occ_smr_fig, elev_rsf_smr_fig, elev_occ_wtr_fig, elev_rsf_wtr_fig, align = "h")
   #' plot(tst)
-  
 
-  #### Combine into 8 window panel 
-  #### [cov1 smr occ, cov1 smr rsf] [cov1 wtr occ, cov1 wtr rsf]
-  #### [cov2 smr occ, cov2 smr rsf] [cov2 wtr occ, cov2 wtr rsf] etc.
 
   
   
