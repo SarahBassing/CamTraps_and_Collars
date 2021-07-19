@@ -19,6 +19,7 @@
   library(ggspatial)
   library(cowplot)
   library(patchwork)
+  library(grid)
   library(png)
   library(RCurl)
   library(RColorBrewer)
@@ -64,25 +65,33 @@
   #'  ------------------------
   ####  Species silhouettes  ####
   #'  ------------------------
-  #'  Silhouettes for each species from PhyloPic
+  #'  Silhouettes for each species from PhyloPic in two different formats (PNG & rastergrob)
   cougurl <- "http://phylopic.org/assets/images/submissions/3f8eff77-2868-4121-8d7d-a55ebdd49e04.64.png"
   cougimg <- readPNG(getURLContent(cougurl))
+  cougg <- rasterGrob(cougimg, interpolate = TRUE)
   wolfurl <- "http://phylopic.org/assets/images/submissions/8cad2b22-30d3-4cbd-86a3-a6d2d004b201.512.png"
   wolfimg <- readPNG(getURLContent(wolfurl))
+  wolfg <- rasterGrob(wolfimg, interpolate = TRUE)
   boburl <- "http://phylopic.org/assets/images/submissions/ab6cfd4f-aef7-40fa-b5a5-1b79b7d112aa.512.png"
   bobimg <- readPNG(getURLContent(boburl))
+  bobg <- rasterGrob(bobimg, interpolate = TRUE)
   coyurl <- "http://phylopic.org/assets/images/submissions/5a0398e3-a455-4ca6-ba86-cf3f1b25977a.512.png"
   coyimg <- readPNG(getURLContent(coyurl)) 
+  coyg <- rasterGrob(coyimg, interpolate = TRUE)
   mdurl <- "http://phylopic.org/assets/images/submissions/f889b336-9e67-4154-bc96-db4095a55be2.512.png"
   mdimg <- readPNG(getURLContent(mdurl))
+  mdg <- rasterGrob(mdimg, interpolate = TRUE)
   elkmurl <- "http://phylopic.org/assets/images/submissions/72f2f997-e474-4caf-bbd5-72fc8dbcc40d.512.png"
   elkmimg <- readPNG(getURLContent(elkmurl))
+  elkmg <- rasterGrob(elkmimg, interpolate = TRUE)
   elkfurl <- "http://phylopic.org/assets/images/submissions/97f83f5e-9afe-4ce8-812e-337f506ca841.512.png"
   elkfimg <- readPNG(getURLContent(elkfurl))
+  elkfg <- rasterGrob(elkfimg, interpolate = TRUE)
   wtdurl <- "http://phylopic.org/assets/images/submissions/56f6fdb2-15d0-43b5-b13f-714f2cb0f5d0.512.png"
   wtdimg <- readPNG(getURLContent(wtdurl))
+  wtdg <- rasterGrob(wtdimg, interpolate = TRUE)
 
-  
+
   ####  1. Map study area and camera locations  ####
   #'  ==============================================
   #'  Read in camera locations
@@ -335,15 +344,11 @@
     #'  Change camera data aesthetics (make sure it's colorblind friendly)
     # scale_discrete_manual(aesthetics = "color", values = c("#601A4A", "#63ACBE")) +
     # labs(colour = "Camera\ndeployment") +
-    #'  Constrain plot to OK study area only 
-    coord_sf(xlim = c(480000.0, 600000.0), ylim = c(102000.0, 240000.0))  
-    # annotation_custom(mdimg, xmin = 470000, xmax = 480000, ymin = 230000, ymax = 240000)
-    # add_phylopic(mdimg, x = 2, y = 0.3, color = "black", alpha = 1)
-  tst <- md_map + inset_element(p = mdimg,
-                       left = 1,
-                       bottom = 1,
-                       right = 0.25,
-                       top = 0.25, on_top = TRUE)
+    #'  Constrain plot to OK study area only  
+    coord_sf(xlim = c(480000.0, 600000.0), ylim = c(102000.0, 250000.0)) + #ylim = c(102000.0, 240000.0)
+    #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
+    annotation_custom(mdg, xmin = 480000.0, xmax = 510000.0, ymin = 225000, ymax = 255000) #xmin = 480000.0, xmax = 505000.0, 
+  
   elk_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
     #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
@@ -362,7 +367,10 @@
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank()) +
     #'  Constrain plot to NE study area only 
-    coord_sf(xlim = c(680000.0, 780000.0), ylim = c(102000.0, 200000.0))
+    coord_sf(xlim = c(680000.0, 780000.0), ylim = c(102000.0, 250000.0)) + #ylim = c(102000.0, 200000.0)
+    #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
+    annotation_custom(elkmg, xmin = 680000.0, xmax = 710000.0, ymin = 225000, ymax = 255000) #xmin = 680000.0, xmax = 695000.0, ymin = 180000, ymax = 205000
+  
   wtd_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
     #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
@@ -381,7 +389,10 @@
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank()) +
     #'  Constrain plot to NE study area only 
-    coord_sf(xlim = c(680000.0, 780000.0), ylim = c(102000.0, 200000.0))
+    coord_sf(xlim = c(680000.0, 780000.0), ylim = c(102000.0, 250000.0)) + #ylim = c(102000.0, 200000.0)
+    #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
+    annotation_custom(wtdg, xmin = 680000.0, xmax = 710000.0, ymin = 225000, ymax = 255000) #xmin = 680000.0, xmax = 695000.0, ymin = 180000, ymax = 205000
+  
   coug_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
     #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
@@ -395,10 +406,18 @@
     geom_sf(data = coug_NE_poly, fill = NA, color = "blue", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
     geom_sf(data = cougcap, color = "black", shape = 16) +
-    #'  Give x and y-axis labels
-    xlab("Longitude") + ylab("Latitude") +
+    #'  Drop x and y-axis labels
+    xlab("") + ylab("") +
+    theme(legend.position = "none",
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank()) +
     #'  Constrain plot to both study areas
-    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0))
+    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) +
+    #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
+    annotation_custom(cougg, xmin = 740000.0, xmax = 780000.0, ymin = 220000, ymax = 260000)
+  
   wolf_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
     #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
@@ -420,7 +439,10 @@
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
     #'  Constrain plot to both study areas
-    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0))
+    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) +
+    #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
+    annotation_custom(wolfg, xmin = 750000.0, xmax = 780000.0, ymin = 220000, ymax = 260000)
+  
   FAKEbob_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
     #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
@@ -442,7 +464,10 @@
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
     #'  Constrain plot to both study areas
-    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) 
+    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) +
+    #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
+    annotation_custom(bobg, xmin = 750000.0, xmax = 780000.0, ymin = 220000, ymax = 260000)
+  
   FAKEcoy_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
     #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
@@ -456,20 +481,49 @@
     geom_sf(data = wolf_NE_poly, fill = NA, color = "blue", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
     geom_sf(data = wolfcap, color = "black", shape = 16) +
-    #'  Drop x and y-axis labels
-    xlab("") + ylab("") +
-    theme(legend.position = "none",
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank()) +
+    #'  Give x and y-axis labels
+    xlab("Longitude") + ylab("Latitude") +
     #'  Constrain plot to both study areas
-    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0))
+    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) + 
+    #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
+    annotation_custom(coyg, xmin = 760000.0, xmax = 780000.0, ymin = 220000, ymax = 260000)
+  
+  #'  Check 'em out!
+  plot(md_map)
+  plot(elk_map)
+  plot(wtd_map)
+  plot(coug_map)
+  plot(wolf_map)
+  # plot(bob_map)
+  # plot(coy_map)
   
   ####  Panel of maps  ####
-  capture_fig <- (md_map + elk_map + wtd_map) / (FAKEbob_map + FAKEcoy_map) / (coug_map + wolf_map) 
+  capture_fig <- (md_map + elk_map + wtd_map) / (FAKEbob_map + coug_map) / (FAKEcoy_map + wolf_map) 
   plot(capture_fig)
   
+  #'  Save
+  ggsave("./Outputs/Figures/CaptureEffort_fig.png", capture_fig)
+  ggsave("./Outputs/Figures/MuleDeerCaptureEffort.png", md_map)
+  ggsave("./Outputs/Figures/ElkCaptureEffort.png", elk_map)
+  ggsave("./Outputs/Figures/WTDeerCaptureEffort.png", wtd_map)
+  ggsave("./Outputs/Figures/CougarCaptureEffort.png", coug_map)
+  ggsave("./Outputs/Figures/WolfCaptureEffort.png", wolf_map)
+  # ggsave("./Outputs/Figures/BobcatCaptureEffort.png", bob_map)
+  # ggsave("./Outputs/Figures/CoyoteCaptureEffort.png", coy_map)
+  
+  
+  
+  #  NEXT: Change capture locations to first telemetry location used in analysis?
+  #  Mule deer were gathered and collared away from capture sights
+  #  This would also avoid having to track down meso capture data
+  
+  #  Also think about changing the axis- add a little space btwn plot and tick marks?
+  #  Add a legend for dots and MCP?
+  
+  
+  
+  
+ 
   
  #'  TROUBLE SHOOTING MASSIVE WOLF MCPs  
  #'  wolf_smr <- spp_all_tracks[[9]]
