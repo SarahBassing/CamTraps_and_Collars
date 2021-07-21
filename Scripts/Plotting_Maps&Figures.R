@@ -186,127 +186,56 @@
   
   ####  2. Maps of capture effort and MCPs  ####
   #'  ==========================================
-  #'  Read in telemetry data & identify AnimalID of collars included in RSFs
+  #'  Read in telemetry data & identify 1st location of collars included in RSFs
+  #'  Track data of animals included in RSF
   load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispMig.RData")
-  #'  Mule Deer
-  mdIDsmr <- as.data.frame(unique(spp_all_tracks[[1]]$AnimalID))
-  colnames(mdIDsmr) <- "AnimalID"
-  mdIDwtr <- as.data.frame(unique(spp_all_tracks[[2]]$AnimalID))
-  colnames(mdIDwtr) <- "AnimalID"
-  mdID <- unique(rbind(mdIDsmr, mdIDwtr))
-  #'  Elk
-  elkIDsmr <- as.data.frame(unique(spp_all_tracks[[3]]$AnimalID))
-  colnames(elkIDsmr) <- "AnimalID"
-  elkIDwtr <- as.data.frame(unique(spp_all_tracks[[4]]$AnimalID))
-  colnames(elkIDwtr) <- "AnimalID"
-  elkID <- unique(rbind(elkIDsmr, elkIDwtr))
-  #'  White-tailed Deer
-  wtdIDsmr <- as.data.frame(unique(spp_all_tracks[[5]]$AnimalID))
-  colnames(wtdIDsmr) <- "AnimalID"
-  wtdIDwtr <- as.data.frame(unique(spp_all_tracks[[6]]$AnimalID))
-  colnames(wtdIDwtr) <- "AnimalID"
-  wtdID <- unique(rbind(wtdIDsmr, wtdIDwtr))
-  #'  Cougar
-  cougIDsmr <- as.data.frame(unique(spp_all_tracks[[7]]$AnimalID))
-  colnames(cougIDsmr) <- "AnimalID"
-  cougIDwtr <- as.data.frame(unique(spp_all_tracks[[8]]$AnimalID))
-  colnames(cougIDwtr) <- "AnimalID"
-  cougID <- unique(rbind(cougIDsmr, cougIDwtr))
-  #'  Wolf
-  wolfIDsmr <- as.data.frame(unique(spp_all_tracks[[9]]$AnimalID))
-  colnames(wolfIDsmr) <- "AnimalID"
-  wolfIDwtr <- as.data.frame(unique(spp_all_tracks[[10]]$AnimalID))
-  colnames(wolfIDwtr) <- "AnimalID"
-  wolfID <- unique(rbind(wolfIDsmr, wolfIDwtr))
-  #'  Bobcat
-  bobIDsmr <- as.data.frame(unique(spp_all_tracks[[11]]$AnimalID))
-  colnames(bobIDsmr) <- "AnimalID"
-  bobIDwtr <- as.data.frame(unique(spp_all_tracks[[12]]$AnimalID))
-  colnames(bobIDwtr) <- "AnimalID"
-  bobID <- unique(rbind(bobIDsmr, bobIDwtr))
-  #'  Coyote
-  coyIDsmr <- as.data.frame(unique(spp_all_tracks[[13]]$AnimalID))
-  colnames(coyIDsmr) <- "AnimalID"
-  coyIDwtr <- as.data.frame(unique(spp_all_tracks[[14]]$AnimalID))
-  colnames(coyIDwtr) <- "AnimalID"
-  coyID <- unique(rbind(coyIDsmr, coyIDwtr))
+  #'  Cleaned telemetry data of animals from start of collar deployment (no 
+  #'  thinning, filtering, or truncating but bad locations removed)
+  load("./Data/Collar_AllSpecies_AllLocations_Clean.RData")
+  #'  Truncated locations 2 weeks post-capture
+  load("./Data/Collar_AllSpecies_AllLocations_Truncated.RData")
+  #'  Separate meso data into different species
+  coy_trunk <- droplevels(clean_data[[6]][clean_data[[6]]$Species == "Coyote",])
+  bob_trunk <- droplevels(clean_data[[6]][clean_data[[6]]$Species == "Bobcat",])
   
-  #'  Read in capture location data for each species, clean, and make spatial
-  mdcap <- read.csv("./Data/Capture (MD)_11.16.20.csv") %>%
-    transmute(
-      AnimalID = ï..IndividualIdentifier,  # Watch out for weird start to column header
-      StudyArea = "OK",
-      Capture_Long = CaptureLocationLon,
-      Capture_Lat = CaptureLocationLat
-    ) %>% 
-    #'  Retain only capture data of animals included in RSF
-    filter(AnimalID %in% mdID$AnimalID) %>%
+  #'  Function to identify each animal included in any of the RSFs (based on 
+  #'  track data), pull out the 1st location from the truncated location data 
+  #'  2 weeks post-capture, and filter those observations to just the animals
+  #'  included in the RSFs.
+  first_loc <- function(smrtrack, wtrtrack, spptrunk) {
+    #  Identify the unique collars included in the RSFs
+    smrcollars <- as.data.frame(unique(smrtrack$AnimalID)) 
+    colnames(smrcollars) <- "ID"
+    wtrcollars <- as.data.frame(unique(wtrtrack$AnimalID)) 
+    colnames(wtrcollars) <- "ID"
+    rsfcollars <- unique(rbind(smrcollars, wtrcollars))
+    
+    #'  Retain the first location for each collared animal in the truncated data
+    collar_start <- spptrunk %>% 
+      group_by(ID) %>%
+      slice(1) %>%
+      ungroup() %>%
+      dplyr::select(c(ID, StudyArea, Longitude, Latitude, Finaldt)) %>%
+    #'  Retain only location data of animals included in RSFs
+    filter(ID %in% rsfcollars$ID) %>%
     #'  Make spatial
-    st_as_sf(., coords = c("Capture_Long", "Capture_Lat"), crs = wgs84) %>%
+    st_as_sf(., coords = c("Longitude", "Latitude"), crs = wgs84) %>%
     st_transform(., crs = sa_proj)
-  elkcap <- read.csv("./Data/Capture (Elk)_11.16.20.csv") %>%
-    transmute(
-      AnimalID = ï..IndividualIdentifier,  # Watch out for weird start to column header
-      StudyArea = "OK",
-      Capture_Long = CaptureLocationLon,
-      Capture_Lat = CaptureLocationLat
-    ) %>% 
-    #'  Retain only capture data of animals included in RSF
-    filter(AnimalID %in% elkID$AnimalID) %>%
-    st_as_sf(., coords = c("Capture_Long", "Capture_Lat"), crs = wgs84) %>%
-    st_transform(., crs = sa_proj)
-  wtdcap <- read.csv("./Data/Capture (WTD)_11.16.20.csv") %>%
-    transmute(
-      AnimalID = ï..IndividualIdentifier,  # Watch out for weird start to column header
-      StudyArea = "OK",
-      Capture_Long = CaptureLocationLon,
-      Capture_Lat = CaptureLocationLat
-    ) %>% 
-    #'  Retain only capture data of animals included in RSF
-    filter(AnimalID %in% wtdID$AnimalID) %>%
-    st_as_sf(., coords = c("Capture_Long", "Capture_Lat"), crs = wgs84) %>%
-    st_transform(., crs = sa_proj)
-  cougcap <- read.csv("./Data/Capture (Cougar)_11.16.20.csv") %>%
-    dplyr::select(c(IndividualIdentifier, CaptureLocationLon, CaptureLocationLat, CaptureType)) %>%
-    mutate(
-      StudyArea = ifelse(grepl("N", IndividualIdentifier), "NE", "OK")
-    ) %>%
-    filter(CaptureType != "Recapture") %>%
-    transmute(
-      AnimalID = IndividualIdentifier,
-      AnimalID = str_replace(AnimalID, "MC", "MVC"),
-      AnimalID = str_replace(AnimalID, "NC", "NEC"),
-      StudyArea = StudyArea,
-      Capture_Long = CaptureLocationLon,
-      Capture_Lat = CaptureLocationLat
-    ) %>% 
-    #'  Retain only capture data of animals included in RSF
-    #'  Seem to be missing capture data for 3 collars
-    filter(AnimalID %in% cougID$AnimalID) %>%
-    st_as_sf(., coords = c("Capture_Long", "Capture_Lat"), crs = wgs84) %>%
-    st_transform(., crs = sa_proj)
-  wolfcap <- read.csv("./Data/CaptureDatabase_Wolf_043021.csv") %>% 
-    dplyr::select(c(Animal_ID, Start_Long, Start_Lat, StudyArea)) %>%
-    transmute(
-      AnimalID = Animal_ID,
-      AnimalID = paste("W", AnimalID, sep = ""),
-      StudyArea = ifelse(grepl("Northeast", StudyArea), "NE", "OK"),
-      Capture_Long = Start_Long,
-      Capture_Lat = Start_Lat
-    )  %>%
-    #'  Remove W61M's recapture data
-    distinct(AnimalID, .keep_all = TRUE) %>%
-    #'  Retain only capture data of animals included in RSF
-    filter(AnimalID %in% wolfID$AnimalID) %>%
-    #'  Adjust lat/long to be slightly off of real capture locations for security reasons
-    mutate(
-      Capture_Long = Capture_Long + 0.04,
-      Capture_Lat = Capture_Lat + 0.004
-    ) %>% 
-    st_as_sf(., coords = c("Capture_Long", "Capture_Lat"), crs = wgs84) %>%
-    st_transform(., crs = sa_proj)
-  # bobcap # NEED TO GET FROM BECCA OR LAURA
-  # coycap # NEED TO GET FROM BECCA OR LAURA
+    
+    return(collar_start)
+  }
+  #'  Run seasonal track & full truncated data for each species through function
+  #'  NOTE: supplying truncated data for mule deer since start of clean telemetry
+  #'  locations are affected by where they were taken for capture processing
+  #'  All other species use the cleaned but not truncated data since the start 
+  #'  of their collar data is more representative of where they were captured.
+  mdstart <- first_loc(spp_all_tracks[[1]], spp_all_tracks[[2]], trunk_data[[1]])
+  elkstart <- first_loc(spp_all_tracks[[3]], spp_all_tracks[[4]], clean_data[[2]])
+  wtdstart <- first_loc(spp_all_tracks[[5]], spp_all_tracks[[6]], clean_data[[3]])
+  cougstart <- first_loc(spp_all_tracks[[7]], spp_all_tracks[[8]], clean_data[[4]])
+  wolfstart <- first_loc(spp_all_tracks[[9]], spp_all_tracks[[10]], clean_data[[5]])
+  bobstart <- first_loc(spp_all_tracks[[11]], spp_all_tracks[[12]], bob_trunk)
+  coystart <- first_loc(spp_all_tracks[[13]], spp_all_tracks[[14]], coy_trunk)
   
   #'  Read in MCP polygons per species
   md_poly <- st_read("./Outputs/MCPs", layer = "md_poly")
@@ -335,7 +264,7 @@
     geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
     geom_sf(data = md_poly, fill = NA, color = "blue", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
-    geom_sf(data = mdcap, color = "black", shape = 16) +
+    geom_sf(data = mdstart, color = "black", shape = 16) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
@@ -360,7 +289,7 @@
     geom_sf(data = elk_poly, fill = NA, color = "blue", size = 0.80) +
     geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
-    geom_sf(data = elkcap, color = "black", shape = 16) +
+    geom_sf(data = elkstart, color = "black", shape = 16) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
@@ -382,7 +311,7 @@
     geom_sf(data = wtd_poly, fill = NA, color = "blue", size = 0.80) +
     geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
-    geom_sf(data = wtdcap, color = "black", shape = 16) +
+    geom_sf(data = wtdstart, color = "black", shape = 16) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
@@ -405,7 +334,7 @@
     geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
     geom_sf(data = coug_NE_poly, fill = NA, color = "blue", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
-    geom_sf(data = cougcap, color = "black", shape = 16) +
+    geom_sf(data = cougstart, color = "black", shape = 16) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
@@ -430,7 +359,7 @@
     geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
     geom_sf(data = wolf_NE_poly, fill = NA, color = "blue", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
-    geom_sf(data = wolfcap, color = "black", shape = 16) +
+    geom_sf(data = wolfstart, color = "black", shape = 16) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
@@ -443,7 +372,7 @@
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
     annotation_custom(wolfg, xmin = 750000.0, xmax = 780000.0, ymin = 220000, ymax = 260000)
   
-  FAKEbob_map <- ggplot() +
+  bob_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
     #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
     scale_alpha(range = c(0.3, 0.8)) +
@@ -451,11 +380,11 @@
     scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
     #'  Add study area and MCP polygons
     geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
-    geom_sf(data = wolf_OK_poly, fill = NA, color = "blue", size = 0.80) +
+    geom_sf(data = bob_OK_poly, fill = NA, color = "blue", size = 0.80) +
     geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    geom_sf(data = wolf_NE_poly, fill = NA, color = "blue", size = 0.80) +
+    geom_sf(data = bob_NE_poly, fill = NA, color = "blue", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
-    geom_sf(data = wolfcap, color = "black", shape = 16) +
+    geom_sf(data = bobstart, color = "black", shape = 16) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
@@ -468,7 +397,7 @@
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
     annotation_custom(bobg, xmin = 750000.0, xmax = 780000.0, ymin = 220000, ymax = 260000)
   
-  FAKEcoy_map <- ggplot() +
+  coy_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
     #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
     scale_alpha(range = c(0.3, 0.8)) +
@@ -476,11 +405,11 @@
     scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
     #'  Add study area and MCP polygons
     geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
-    geom_sf(data = wolf_OK_poly, fill = NA, color = "blue", size = 0.80) +
+    geom_sf(data = coy_OK_poly, fill = NA, color = "blue", size = 0.80) +
     geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    geom_sf(data = wolf_NE_poly, fill = NA, color = "blue", size = 0.80) +
+    geom_sf(data = coy_NE_poly, fill = NA, color = "blue", size = 0.80) +
     #'  Add camera locations and vary color by deployment year
-    geom_sf(data = wolfcap, color = "black", shape = 16) +
+    geom_sf(data = coystart, color = "black", shape = 16) +
     #'  Give x and y-axis labels
     xlab("Longitude") + ylab("Latitude") +
     #'  Constrain plot to both study areas
@@ -494,11 +423,11 @@
   plot(wtd_map)
   plot(coug_map)
   plot(wolf_map)
-  # plot(bob_map)
-  # plot(coy_map)
+  plot(bob_map)
+  plot(coy_map)
   
   ####  Panel of maps  ####
-  capture_fig <- (md_map + elk_map + wtd_map) / (FAKEbob_map + coug_map) / (FAKEcoy_map + wolf_map) 
+  capture_fig <- (md_map + elk_map + wtd_map) / (bob_map + coug_map) / (coy_map + wolf_map) 
   plot(capture_fig)
   
   #'  Save
@@ -508,42 +437,34 @@
   ggsave("./Outputs/Figures/WTDeerCaptureEffort.png", wtd_map)
   ggsave("./Outputs/Figures/CougarCaptureEffort.png", coug_map)
   ggsave("./Outputs/Figures/WolfCaptureEffort.png", wolf_map)
-  # ggsave("./Outputs/Figures/BobcatCaptureEffort.png", bob_map)
-  # ggsave("./Outputs/Figures/CoyoteCaptureEffort.png", coy_map)
+  ggsave("./Outputs/Figures/BobcatCaptureEffort.png", bob_map)
+  ggsave("./Outputs/Figures/CoyoteCaptureEffort.png", coy_map)
   
-  
-  
-  #  NEXT: Change capture locations to first telemetry location used in analysis?
-  #  Mule deer were gathered and collared away from capture sights
-  #  This would also avoid having to track down meso capture data
   
   #  Also think about changing the axis- add a little space btwn plot and tick marks?
   #  Add a legend for dots and MCP?
   
-  
-  
-  
- 
-  
- #'  TROUBLE SHOOTING MASSIVE WOLF MCPs  
- #'  wolf_smr <- spp_all_tracks[[9]]
- #'  wolf_wtr <- spp_all_tracks[[10]]
- #'  wolf_all <- rbind(wolf_smr, wolf_wtr)
- #'  wolf_sf <- st_as_sf(wolf_all, coords = c("Long", "Lat"), crs = wgs84) %>%
+
+ #' #'  TROUBLE SHOOTING MASSIVE MCPs  
+ #'  bob_smr <- spp_all_tracks[[11]]
+ #'  bob_wtr <- spp_all_tracks[[12]]
+ #'  bob_all <- rbind(bob_smr, bob_wtr)
+ #'  bob_sf <- st_as_sf(bob_all, coords = c("Long", "Lat"), crs = wgs84) %>%
  #'    st_transform(crs = sa_proj)
- #'  wolf_all_ID <- as.data.frame(unique(wolf_all$AnimalID))
- #'  
- #'  wolf_skinny_sf <- st_transform(wolf_skinny, crs = sa_proj)
- #'  wolf_skinny_NE <- wolf_skinny_sf[wolf_skinny_sf$StudyArea == "NE",]
- #'  wolf_skinny_OK <- wolf_skinny_sf[wolf_skinny_sf$StudyArea == "OK",]
- #'  wolf_locs <- read.csv("./Data/Wolf_Vectronic_Spring2021_4hrs.csv")
- #'  wolf_collars <- as.data.frame(unique(wolf_locs$ID))
+ #'  bob_all_ID <- as.data.frame(unique(bob_all$AnimalID))
  #' 
- #'  wolf_NE_MCP <- st_as_sf(wolf_NE_mcp)
- #'  wolf_NE_poly <- st_as_sf(wolf_NE_poly)
- #'  wolf_OK_MCP <- st_as_sf(wolf_OK_mcp)
- #'  wolf_OK_poly <- st_as_sf(wolf_OK_poly)
- #'  
+ #'  bob_trunk <- st_as_sf(bob_trunk, coords = c("Longitude", "Latitude"), crs = wgs84)
+ #'  bob_skinny_sf <- st_transform(bob_trunk, crs = sa_proj)
+ #'  bob_skinny_NE <- bob_skinny_sf[bob_skinny_sf$StudyArea == "NE",]
+ #'  bob_skinny_OK <- bob_skinny_sf[bob_skinny_sf$StudyArea == "OK",]
+ #'  bob_locs <- read.csv("./Data/BobcatData_AllLocations.csv")
+ #'  bob_collars <- as.data.frame(unique(bob_locs$ID))
+ #' 
+ #'  bob_NE_MCP <- st_as_sf(bob_NE_mcp)
+ #'  bob_NE_poly <- st_as_sf(bob_NE_poly)
+ #'  bob_OK_MCP <- st_as_sf(bob_OK_mcp)
+ #'  bob_OK_poly <- st_as_sf(bob_OK_poly)
+ #' 
  #' ggplot() +
  #'    #' geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
  #'    #' #'  alpha adjusts transparency of the raster (can also just set it range = 0.7)
@@ -552,23 +473,20 @@
  #'    #' scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
  #'    #'  Add study area and MCP polygons
  #'    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
- #'    geom_sf(data = wolf_OK_MCP, fill = NA, color = "red", size = 0.8) +
- #'    geom_sf(data = wolf_OK_poly, fill = NA, color = "blue", size = 0.80) +
+ #'    # geom_sf(data = bob_OK_MCP, fill = NA, color = "red", size = 0.8) +
+ #'    geom_sf(data = bob_OK_poly, fill = NA, color = "blue", size = 0.80) +
  #'    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
- #'    geom_sf(data = wolf_NE_MCP, fill = NA, color = "red", size = 0.8) +
- #'    geom_sf(data = wolf_NE_poly, fill = NA, color = "blue", size = 0.80) +
- #'    geom_sf(data = wolf_sf, color = "black", shape = 16) +
- #'    geom_sf(data = wolf_skinny_NE, color = "green", shape = 16) +
- #'    geom_sf(data = wolf_skinny_OK, color = "orange", shape = 16) +
+ #'    # geom_sf(data = bob_NE_MCP, fill = NA, color = "red", size = 0.8) +
+ #'    geom_sf(data = bob_NE_poly, fill = NA, color = "blue", size = 0.80) +
+ #'    geom_sf(data = bob_sf, color = "black", shape = 16) +
+ #'    geom_sf(data = bob_skinny_NE, color = "green", shape = 16) +
+ #'    geom_sf(data = bob_skinny_OK, color = "orange", shape = 16) +
  #'    #'  Add camera locations and vary color by deployment year
- #'    geom_sf(data = wolfcap, color = "black", shape = 16) +
+ #'    geom_sf(data = bobstart, color = "black", shape = 16) +
  #'    #'  Constrain plot to both study areas
  #'    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0))
   
-  
-  
-  
-  
+ 
   
   ####  3. Plot OccMod & RSF Results  ####
   #'  ====================================
