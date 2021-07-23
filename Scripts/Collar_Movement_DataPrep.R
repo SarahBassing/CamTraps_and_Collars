@@ -12,10 +12,12 @@
   #'  momentuHMM GitHub, J.Merkel Movement Workshop, L.Satterfield, & R.Emmet.
   #'  Time periods and covariates to match up with single-season occupancy models.
   #'  
-  #'  Telemetry data initially cleaned with Collar_DataCleaning.R script, 
+  #'  Telemetry data initially cleaned with Collar_DataCleaning.R scripts, 
   #'  Collar_Truncating&Filtering.R script, & by T.Ganz, L.Satterfield & B.Windell.
   #'  Data from Collar_Truncating&Filtering... script will depend on whether 
-  #'  dispersal movements were included (HMM) or excluded (RSF) for further analyses.
+  #'  dispersal movements were included (HMM) or excluded (RSF) and whether
+  #'  mule deer migrations were included (2nd order RSF) or excluded (3rd order
+  #'  RSF) for further analyses.
   #'  
   #'  Covariates based on remotely sensed data available from various sources
   #'  (noted in occupancy model script).
@@ -32,8 +34,8 @@
   #'  Source cleaned telemetry data
   # source("./Scripts/Collar_Truncating&Filtering.R")
   # load("./Data/Collar_Truncating&Filtering_2021-05-01.RData")
-  # load("./Data/Collar_Truncating&Filtering_noDispersal_2021-06-14.RData")
-  load("./Data/Collar_Truncating&Filtering_noDispMig_2021-07-07.RData") #2021-06-22
+  load("./Data/Collar_Truncating&Filtering_noDispersal_2021-07-22.RData") #2021-06-14
+  # load("./Data/Collar_Truncating&Filtering_noDispMig_2021-07-07.RData") #2021-06-22
 
   ####  Data preparation  ####
   #'  Select relevant columns
@@ -44,8 +46,8 @@
   colnames(rawELK) <- c("ID", "FullID", "Sex", "Season", "StudyArea", "Long", "Lat", "time")
   #'  Only keep first track to practice with
   # rawELK1 <- subset(rawELK, ID == unique(ID)[2])
-  rawMD <- md_gtg_nomig %>% #md_gtg  # USING MD data with NO MIGRATIONS for RSF
-    dplyr::select(ID, FullID, Sex, Season, StudyArea, Longitude, Latitude, Floordt)%>%
+  rawMD <- md_gtg %>% #md_gtg_nomig  # md data depends on whether migrations are included
+    dplyr::select(ID, FullID, Sex, Season, StudyArea, Longitude, Latitude, Floordt) %>%
     arrange(ID, Floordt)
   colnames(rawMD) <- c("ID", "FullID", "Sex", "Season", "StudyArea", "Long", "Lat", "time")
   rawWTD <- wtd_gtg %>%
@@ -68,9 +70,6 @@
     dplyr::select(ID, FullID, Sex, Season, StudyArea, Longitude, Latitude, Floordt)%>%
     arrange(ID, Floordt)
   colnames(rawCOY) <- c("ID", "FullID", "Sex", "Season", "StudyArea", "Long", "Lat", "time")
-
-
-
 
   #'  Function to covert times to POSIX & make locations spatial for each species
   prep_raw <- function(raw, plotit = TRUE) {
@@ -263,8 +262,8 @@
                      WOLF_smr_track, WOLF_wtr_track, BOB_smr_track, BOB_wtr_track,
                      COY_smr_track, COY_wtr_track)
   # save(spp_all_tracks, file = "./Outputs/Telemetry_tracks/spp_all_tracks.RData")
-  # save(spp_all_tracks, file = "./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal.RData")
-  save(spp_all_tracks, file = "./Outputs/Telemetry_tracks/spp_all_tracks_noDispMig.RData")
+  save(spp_all_tracks, file = "./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal.RData")
+  #save(spp_all_tracks, file = "./Outputs/Telemetry_tracks/spp_all_tracks_noDispMig.RData")
   
   
   #'  Load tracks
