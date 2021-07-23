@@ -1104,7 +1104,7 @@
   #' colnames(occ_results_combo) <- c("Model", "Species", "Season", "Parameter", "Estimate", "SE", "z", "Pval")
 
   #'  Round so numbers are easier to look at
-  rounddig <- 3
+  rounddig <- 2
   results_psi <- occ_results %>%
     mutate(
       Estimate = round(Estimate, rounddig),
@@ -1236,10 +1236,10 @@
   #'  Round so numbers are a little easier to interpret
   results_det <- det_results %>%
     mutate(
-      Estimate = round(Estimate, 3),
-      SE = round(SE, 3),
-      z = round(z, 3),
-      Pval = round(Pval, 3)
+      Estimate = round(Estimate, 2),
+      SE = round(SE, 2),
+      z = round(z, 2),
+      Pval = round(Pval, 2)
     )
   # results_det_top <- det_results_top %>%
   #   mutate(
@@ -1288,7 +1288,7 @@
   write.csv(results_det_wide, paste0("./Outputs/OccMod_DetProb_Results_wide", Sys.Date(), ".csv"))
 
   #'  Save workspace
-  # save.image(file = "CamvCollar_OccMods.RData")
+  save.image(file = "./Outputs/OccMod_script_results.RData")
 
 
 
