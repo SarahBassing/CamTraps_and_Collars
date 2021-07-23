@@ -39,49 +39,24 @@
   NE_wgs84 <- st_transform(NE_SA, sa_proj)
   
   #'  Load cleaned data    ### NEED TO BREAK APART BY STUDY AREA!!!
-  md_skinny <- read.csv("md_skinny 2021-07-06.csv") %>%
+  load("./Data/Collar_AllSpecies_AllLocations_Clean.RData")
+  md_skinny <- clean_data[[1]] %>%
     dplyr::select(Species, Latitude, Longitude) 
-  elk_skinny <- read.csv("elk_skinny 2021-07-06.csv") %>%
-    dplyr::select(Species, Latitude, Longitude) %>%
-    st_as_sf(coords = c("Longitude", "Latitude"), crs = wgs84)
-  wtd_skinny <- read.csv("wtd_skinny 2021-07-06.csv") %>%
-    dplyr::select(Species, Latitude, Longitude) %>%
-    st_as_sf(coords = c("Longitude", "Latitude"), crs = wgs84)
-  coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_4hrs.csv") %>%
-    mutate(Species = "Cougar",
-           Latitude = Lat,
-           Longitude = Long,
-           #'  Identify study area for each collar
-           StudyArea = ifelse(grepl("NE", ID), "NE", "OK")) %>%
-    dplyr::select(Species, StudyArea, Latitude, Longitude) %>%
-    st_as_sf(coords = c("Longitude", "Latitude"), crs = wgs84)
-  #'  Using wolf track data (not full wolf_skinny) b/c other collars and major
-  #'  dispersals in full wolf data create MASSIVE MCPs that aren't representative
-  #'  of what's really available to the collared wolves in this analysis
-  load("./Outputs/Telemetry_tracks/WOLF_track.RData")
-  wolf_skinny <- WOLF_track %>%
-    mutate(Species = "Wolf",
-           Latitude = Lat,
-           Longitude = Long) %>%
-    dplyr::select(Species, StudyArea, Latitude, Longitude) %>%
-    st_as_sf(coords = c("Longitude", "Latitude"), crs = wgs84)
-  #' wolf_skinny <- read.csv("./Data/Wolf_Vectronic_Spring2021_4hrs.csv") %>%
-  #'   mutate(Species = "Wolf",
-  #'          Latitude = Lat,
-  #'          Longitude = Long,
-  #'          #'  Identify study area for each collar
-  #'          StudyArea = ifelse(grepl("W61M", ID), "OK", "NE"),  
-  #'          StudyArea = ifelse(grepl("W88M", ID), "OK", StudyArea),
-  #'          StudyArea = ifelse(grepl("W93M", ID), "OK", StudyArea),
-  #'          StudyArea = ifelse(grepl("W94M", ID), "OK", StudyArea)) %>%
-  #'   dplyr::select(Species, StudyArea, Latitude, Longitude) %>%
-  #'   st_as_sf(coords = c("Longitude", "Latitude"), crs = wgs84)
-  meso_skinny <- read.csv("meso_skinny_noDispersal2021-06-14.csv") %>%
-    dplyr::select(Species, StudyArea, Latitude, Longitude) %>%
-    st_as_sf(coords = c("Longitude", "Latitude"), crs = wgs84)
-  coy_skinny <- meso_skinny %>% filter(Species == "Coyote") 
-  bob_skinny <- meso_skinny %>% filter(Species == "Bobcat") 
-  
+  elk_skinny <- clean_data[[2]] %>%
+    dplyr::select(Species, Latitude, Longitude) 
+  wtd_skinny <- clean_data[[3]] %>%
+    dplyr::select(Species, Latitude, Longitude) 
+  coug_skinny <- clean_data[[4]] %>%
+    mutate(Species = "Cougar") %>%
+    dplyr::select(Species, StudyArea, Latitude, Longitude) 
+  wolf_skinny <- clean_data[[5]] %>%
+    mutate(Species = "WOlf") %>%
+    dplyr::select(Species, StudyArea, Latitude, Longitude) 
+  meso_skinny <- clean_data[[6]] %>%
+    dplyr::select(Species, StudyArea, Latitude, Longitude) 
+  bob_skinny <- meso_skinny[meso_skinny$Species == "Bobcat",]
+  coy_skinny <- meso_skinny[meso_skinny$Species == "Coyote",]
+
   #'  Separate predator locations by study area so MCP are study area specific
   coug_NE <- coug_skinny[coug_skinny$StudyArea == "NE",] %>%
     dplyr::select(-StudyArea)
