@@ -227,8 +227,8 @@
   ####  Rarefy location data  ####
   #  KEEP locations with 4-hr fix schedule with 2, 6, 10, 14, 18, 22 hr fixes
   #  DISCARD: 
-  #    -Extra locations from summer elk collars & collars in mortality-mode   
-  #     where collars increase fix schedule to 2-hr or 20-min. interval, respectfully.
+  #    -Extra locations from collars in mortality-mode where collars increase fix
+  #     schedule to 20-min. interval.
   #    -Initial deployment data on the wrong fix schedule (0, 4, 8 hr)- NOT DOING currently.
   
   thin_locs <- function(clean) {
@@ -277,8 +277,10 @@
   #  Exclude locations associated with translocation, dispersal, extra-territorial forays
   #  NEBOB13F: Translocation (3/28/19 - 8/8/19)
   meso_skinny <- meso_skinny[!(meso_skinny$ID == "NEBOB13F" & meso_skinny$Floordt < "2019-10-12 00:00:00"),]
-  # #  MVBOB71M: Dispersal (9/22/19 - 10/11/19)
+  # #  MVBOB71M: Dispersal (9/22/19 - 10/11/19) and remains far outside study area
   # meso_skinny <- meso_skinny[!(meso_skinny$ID == "MVBOB71M" & meso_skinny$Floordt > "2019-09-22 00:00:00" & meso_skinny$Floordt < "2019-10-12 00:00:00"),]
+  # # Cut all locations after dispersal since it moves so far outside study area
+  meso_skinny <- meso_skinny[!(meso_skinny$ID == "MVBOB71M" & meso_skinny$Floordt > "2019-09-22 00:00:00"),]
   # #  MVBOB66M: Extra-territorial foray (11/28/19 - 3/6/20)
   # #  Appears to be transient in general (used different home ranges each season & year)
   # meso_skinny <- meso_skinny[!(meso_skinny$ID == "MVBOB66M" & meso_skinny$Floordt > "2019-11-28 00:00:00" & meso_skinny$Floordt < "2020-03-21 00:00:00"),]
@@ -294,6 +296,10 @@
   #  Save locations thinned to correct fix schedule
   # write.csv(meso_skinny, paste0('meso_skinny ', Sys.Date(), '.csv'))
   # write.csv(meso_skinny_noDispersal, paste0('meso_skinny_noDispersal', Sys.Date(), '.csv'))
+  
+  #  FYI: meso_skinny 2021-07-22.csv excludes translocation and MVBOB71M's
+  #  dispersal/new territory on the COlville but does not exclude other apparent
+  #  extra-territorial movements or general transient behavior.
 
 
   
