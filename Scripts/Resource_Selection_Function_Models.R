@@ -228,7 +228,7 @@
 
   #'  Function to save parameter estimates & p-values
   #'  use coef(mod) to look at random effects estimates
-  rounddig <- 3
+  rounddig <- 2
   
   rsf_out <- function(mod, spp, season){
     betas <- mod@beta
