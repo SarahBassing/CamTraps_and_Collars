@@ -28,13 +28,13 @@
   # load("./Outputs/RSF_pts/bob_dat_all_2021-06-30.RData")
   # load("./Outputs/RSF_pts/coy_dat_all_2021-06-30.RData")
   #'  2nd Order Selection
-  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-07-07.RData")  # 2021-06-22 uses reprojected rasters
-  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-07-07.RData")
-  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-07-07.RData")
-  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-07-07.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-07-17.RData")
-  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-07-07.RData")
-  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-07-07.RData")
+  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-07-22.RData")  # 2021-06-22 uses reprojected rasters
+  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-07-22.RData")
+  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-07-22.RData")
+  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-07-22.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-07-22.RData")
+  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-07-22.RData")
+  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-07-22.RData")
   
   #'  Center & scale covariates 
   #'  Note: standardizing across all IDs & years, but separately by season & spp
@@ -168,6 +168,11 @@
   bob_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + HumanMod + (1|ID),
                            data = bobData_wtr, family = binomial(link = "logit")) #1/11 collars active both years
   summary(bob_global_wtr)
+  #  Winter1920 MVBOB71M disperses somewhere on the Colville reservation between 
+  #  two study areas and make the OK bobcat MCP super big as a result. But his
+  #  locations are included in the RSFs so I have to keep in in. Either cut his
+  #  winter 1920 data completely (exclude from RSF and MCP) or keep this large
+  #  MCP which then influences what's "available" to all bobcats in the RSF.
   
   
   ####  Coy RSF  ####
