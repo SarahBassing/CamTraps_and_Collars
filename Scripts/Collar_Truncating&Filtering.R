@@ -6,8 +6,8 @@
   ##  Script takes cleaned master GPS satellite data and takes final  steps to 
   ##  truncate and filter telemetry data for analyses specific to my project. Be
   ##  sure to use correct track data depending on if this is an HMM analysis
-  ##  (use all locations) or an RSF (exclude dispersal movements outside of an
-  ##  established home range).
+  ##  (use all locations) or a 3rd-order RSF (exclude dispersal movements outside 
+  ##  of an established home range).
   ##     1. Truncating 2-wks after animal was captured to ensure any movements 
   ##        affected by the capture are excluded from analyses.
   ##     2. Thinning data to only include locations on the WPPP chosen 4-hr fix
@@ -15,8 +15,11 @@
   ##        & 22:00 for all individuals.
   ##     3. Remove any individuals that have very few locations or are missing
   ##        a lot of data due to collar malfunctions or previous filtering.
-  ##  This should produce the final data set to be used with HMMs to evaluate
-  ##  habitat associations under different movement states.
+  ##  This should produce the final data set to be used with HMMs & RSFs.
+  ##
+  ##  Cleaned data used below were generated in the Collar_DataCleaning.R and
+  ##  Collar_DataCleaning_Mesopredators.R scripts. Cougar & wolf data were cleaned
+  ##  by L.Satterfield but were reviewed with Collar_DataCleaning_CougarWolf.R
   ##  =========================================================
   
   #  Clean work space and load libraries
@@ -117,7 +120,7 @@
     dplyr::select("OBJECTID", "ID", "CollarID", "Species", "Sex", "Latitude", "Longitude", 
                   "ObservationDateTimePST", "StudyArea", "daytime", "UTCdt", "Finaldt", "Floordt")
   #  Note: data in UTC timezone to begin with
-  meso_skinny <- read.csv("meso_skinny_noDispersal2021-06-14.csv") %>%  #"meso_skinny 2021-04-19.csv"
+  meso_skinny <- read.csv("meso_skinny 2021-07-22.csv") %>%  #"meso_skinny_noDispersal2021-06-14.csv"
     mutate(
       StudyArea = ifelse(grepl("NE", ID), "NE", "OK"),
       daytime = as.POSIXct(daytime, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
@@ -147,6 +150,7 @@
            Latitude = Lat,
            Longitude = Long,
            StudyArea = ifelse(grepl("W61M", ID), "OK", "NE"),  
+           StudyArea = ifelse(grepl("W71F", ID), "OK", StudyArea),
            StudyArea = ifelse(grepl("W88M", ID), "OK", StudyArea),
            StudyArea = ifelse(grepl("W93M", ID), "OK", StudyArea),
            StudyArea = ifelse(grepl("W94M", ID), "OK", StudyArea),
@@ -155,19 +159,22 @@
            Floordt = daytime) %>%
     dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
             "StudyArea", "daytime", "Finaldt", "Floordt")
+  # W91 has several extraterritorial forays starting 2019-10-31 & never returns
+  wolf_skinny <- wolf_skinny[!(wolf_skinny$ID == "W91F" & wolf_skinny$Floordt > "2019-10-31 02:00:00"),]
+  
 
   #  Save cleaned data
   clean_data <- list(md_skinny, elk_skinny, wtd_skinny, coug_skinny, wolf_skinny, meso_skinny)
   save(clean_data, file = "./Data/Collar_AllSpecies_AllLocations_Clean.RData")
   
-  #  Migration times for Mule Deer
-  md_migtimes <- read.csv("./Data/MD_migrationtimes_to_exclude_2021-06-21.csv") %>%
-    mutate(
-      AnimalID = ID,
-      Start_mig = lubridate::as_date(Start_mig, format = "%m/%d/%Y"),
-      End_mig = lubridate::as_date(End_mig, format = "%m/%d/%Y"),
-    ) %>%
-    dplyr::select(-ID)
+  # #  Migration times for Mule Deer--- use for 3rd-order RSF analyses
+  # md_migtimes <- read.csv("./Data/MD_migrationtimes_to_exclude_2021-06-21.csv") %>%
+  #   mutate(
+  #     AnimalID = ID,
+  #     Start_mig = lubridate::as_date(Start_mig, format = "%m/%d/%Y"),
+  #     End_mig = lubridate::as_date(End_mig, format = "%m/%d/%Y"),
+  #   ) %>%
+  #   dplyr::select(-ID)
 
   
   #  Function to truncate telemetry data by excluding first 2 weeks after capture
@@ -448,14 +455,14 @@
   coy_gtg <- filter(meso_gtg, Species == "Coyote")
   bob_gtg <- filter(meso_gtg, Species == "Bobcat")
   
-  #  Species_gtg are final data sets for HMM analyses
+  #  Species_gtg are final data sets for HMM analyses and 2nd-order RSFs
   
   #  Save RData for easy transfer to other computers
   # save.image(paste0("./Data/Collar_Truncating&Filtering_", Sys.Date(), ".RData"))
   save.image(paste0("./Data/Collar_Truncating&Filtering_noDispersal_", Sys.Date(), ".RData"))
   
   
-  #  Function to identify locations generated during migration for RSF analyses
+  #  Function to identify locations generated during migration for 3rd-order RSFs
   #  Note: only identifies locations from dates that overlap summer & winter
   #  seasons of interest for RSF study. Migrations in Oct - Nov & March - June 
   #  are ignored & automatically excluded via filtering above.
