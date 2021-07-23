@@ -189,7 +189,7 @@
   #'  ==========================================
   #'  Read in telemetry data & identify 1st location of collars included in RSFs
   #'  Track data of animals included in RSF
-  load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispMig.RData")
+  load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal.RData") #spp_all_tracks_noDispMig
   #'  Cleaned telemetry data of animals from start of collar deployment (no 
   #'  thinning, filtering, or truncating but bad locations removed)
   load("./Data/Collar_AllSpecies_AllLocations_Clean.RData")
