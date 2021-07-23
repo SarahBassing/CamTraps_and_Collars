@@ -103,6 +103,7 @@
   cams <- st_as_sf(station_covs[,6:8], coords = c("Longitude", "Latitude"), crs = wgs84)
   cams_reproj <- st_transform(cams, crs = sa_proj)
   cams_reproj$Year <- Year
+  cams_reproj <- mutate(cams_reproj, Year = ifelse(Year == "Year1", "2018-2019", "2019-2020" ))
   
   #'  Plot state of WA with study areas
   #'  https://r-spatial.org/r/2018/10/25/ggplot2-sf.html
@@ -138,7 +139,7 @@
     #'  Add camera locations and vary color by deployment year
     geom_sf(data = cams_reproj, aes(color = Year), shape = 16) +
     #'  Change camera data aesthetics (make sure it's colorblind friendly)
-    scale_discrete_manual(aesthetics = "color", values = c("#601A4A", "#63ACBE")) +
+    scale_discrete_manual(aesthetics = "color", values = c("#a6611a", "#018571")) + #c("#dfc27d", "#80cdc1") #c("#601A4A", "#63ACBE")
     labs(colour = "Camera\ndeployment") +
     #'  Constrain plot to two study areas plus some room on the side & bottom
     coord_sf(xlim = c(480000.0, 810000.0), ylim = c(39000.0, 218000.0), expand = FALSE) +
@@ -496,17 +497,17 @@
   
   #'  Occupancy model output
   occ_out <- read.csv("./Outputs/OccMod_OccProb_Results_2021-07-01.csv") %>%
-    #'  Calculate 95% confidence intervals
+    #'  Calculate 90% confidence intervals to mirror alpha = 0.1
     mutate(
-      l95 = (Estimate - (1.95 * SE)),
-      u95 = (Estimate + (1.96 * SE))
+      l95 = (Estimate - (1.64 * SE)),  #### REMINDER: this is 90% CI even though column says l95/u95
+      u95 = (Estimate + (1.64 * SE))   
     ) %>%
     dplyr::select(-c(X, Model))
   #'  RSF results output
   rsf_out <- read.csv("./Outputs/RSF_Results_2021-07-17.csv") %>% #2021-07-08
-    #'  Calculate 95% confidence intervals
+    #'  Calculate 95% confidence intervals to mirror alpha = 0.05
     mutate(
-      l95 = (Estimate - (1.95 * SE)),
+      l95 = (Estimate - (1.96 * SE)),  #### REMINDER: this is 95% CI
       u95 = (Estimate + (1.96 * SE))
     ) %>%
     dplyr::select(-X)
@@ -873,15 +874,22 @@
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    ylim(-5, 5) +
+    ylim(-1, 1.25) +
     coord_flip() +
-    add_phylopic(wolfimg, x = 7.05, y = 4, ysize = 2.1, color = "black", alpha = 1) +
-    add_phylopic(wtdimg, x = 6.1, y = 4, ysize = 1.7, color = "black", alpha = 1) +
-    add_phylopic(mdimg, x = 5.05, y = 4, ysize = 2.3, color = "black", alpha = 1) +
-    add_phylopic(elkmimg, x = 4.05, y = 4, ysize = 1.85, color = "black", alpha = 1) +
-    add_phylopic(coyimg, x = 3.05, y = 4, ysize = 1.6, color = "black", alpha = 1) +
-    add_phylopic(cougimg, x = 2, y = 4, ysize = 2.4, color = "black", alpha = 1) +
-    add_phylopic(bobimg, x = 1.05, y = 4, ysize = 1.85, color = "black", alpha = 1)
+    add_phylopic(wolfimg, x = 7.05, y = 1, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(wtdimg, x = 6.1, y = 1, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimg, x = 5.05, y = 1, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkmimg, x = 4.05, y = 1, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(coyimg, x = 3.05, y = 1, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(cougimg, x = 2, y = 1, ysize = 0.48, color = "black", alpha = 1) +
+    add_phylopic(bobimg, x = 1.05, y = 1, ysize = 0.4, color = "black", alpha = 1)
+  # add_phylopic(wolfimg, x = 7.05, y = 1.5, ysize = 2.1, color = "black", alpha = 1) +
+  #   add_phylopic(wtdimg, x = 6.1, y = 1.5, ysize = 1.7, color = "black", alpha = 1) +
+  #   add_phylopic(mdimg, x = 5.05, y = 1.5, ysize = 2.3, color = "black", alpha = 1) +
+  #   add_phylopic(elkmimg, x = 4.05, y = 1.5, ysize = 1.85, color = "black", alpha = 1) +
+  #   add_phylopic(coyimg, x = 3.05, y = 1.5, ysize = 1.6, color = "black", alpha = 1) +
+  #   add_phylopic(cougimg, x = 2, y = 1.5, ysize = 2.4, color = "black", alpha = 1) +
+  #   add_phylopic(bobimg, x = 1.05, y = 1.5, ysize = 1.85, color = "black", alpha = 1)
   
   #'  Effect of PERCENT GRASS on relative probability of selection (logit scale)
   #'  Summer results
@@ -930,7 +938,7 @@
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    ylim(-9, 0.5) +
+    ylim(-3, 0.5) +
     coord_flip()
   #'  Winter results
   shrub_rsf_wtr_fig <- ggplot(shrub_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -1020,7 +1028,7 @@
     add_phylopic(mdimg, x = 5.05, y = 0.35, ysize = 0.65, color = "black", alpha = 1) +
     add_phylopic(elkmimg, x = 4.05, y = 0.35, ysize = 1, color = "black", alpha = 1) +
     add_phylopic(coyimg, x = 3.05, y = 0.35, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(cougimg, x = 2, y = 0.35, ysize = 0.4, color = "black", alpha = 1) +
+    add_phylopic(cougimg, x = 2, y = 0.35, ysize = 0.38, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.35, ysize = 0.4, color = "black", alpha = 1)
   
   
@@ -1061,24 +1069,12 @@
   ggsave("./Outputs/Figures/RoadDensity_Occ-RSF_plot.jpeg", rdden_fig)
   ggsave("./Outputs/Figures/HumanMod_Occ-RSF_plot.jpeg", hm_fig)
   
-  #' #'  One single figure... ugly
-  #' cov_fig <- elev_occ_smr_fig + elev_rsf_smr_fig + elev_occ_wtr_fig + elev_rsf_wtr_fig + 
-  #'   for_occ_smr_fig + for_rsf_smr_fig + for_occ_wtr_fig + for_rsf_wtr_fig + 
-  #'   grass_occ_smr_fig + grass_rsf_smr_fig + grass_occ_wtr_fig + grass_rsf_wtr_fig + 
-  #'   hm_occ_smr_fig + hm_rsf_smr_fig + hm_occ_wtr_fig + hm_rsf_wtr_fig + plot_layout(ncol = 4, nrow = 4)
-  #' ggsave("./Outputs/Figures/OccMod_v_RSF_plot.png", cov_fig)
-  
-  
-  #' #'  cowplot version:
-  #' elev_smr_fig <- plot_grid(elev_occ_smr_fig, elev_rsf_smr_fig, align = "h")
-  #' elev_wtr_fig <- plot_grid(elev_occ_wtr_fig, elev_rsf_wtr_fig, align = "h")
-  #' elev_fig <- plot_grid(elev_smr_fig, elev_wtr_fig, align = "h")
-  #' plot(elev_smr_fig)
-  #' plot(elev_wtr_fig)
-  #' plot(elev_fig)
-  #' 
-  #' tst <- plot_grid(elev_occ_smr_fig, elev_rsf_smr_fig, elev_occ_wtr_fig, elev_rsf_wtr_fig, align = "h")
-  #' plot(tst)
+  #'  One single figure... ugly and terrible and don't do it
+  # cov_fig <- elev_fig / slope_fig / for_fig / grass_fig / shrub_fig / rdden_fig / hm_fig
+  # ggsave("./Outputs/Figures/OccMod_v_RSF_plot.png", cov_fig)
+  # cov_fig_partial <- elev_fig / slope_fig / for_fig / hm_fig
+  # ggsave("./Outputs/Figures/OccMod_v_RSF_plot_partial.png", cov_fig_partial)
+
 
 
   
