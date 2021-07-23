@@ -34,8 +34,8 @@
   
   #'  Load telemetry data
   # load("./Outputs/Telemetry_tracks/spp_all_tracks.RData")
-  # load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal.RData")
-  load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispMig.RData")
+  load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal.RData")
+  # load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispMig.RData")
   
   
   #'  Functions to filter species-specific data by study area
@@ -44,7 +44,7 @@
     tracks <- filter(locs, StudyArea == "NE")
     return(tracks)
   }
-  #'  Drop mule deer summer and winter lists
+  #'  Drop mule deer summer and winter lists since no mulies in NE study area
   noMD <- spp_all_tracks[-c(1:2)]
   #'  Run list through function
   NE_tracks <- lapply(noMD, NE_collars)
@@ -53,7 +53,7 @@
     tracks <- filter(locs, StudyArea == "OK")
     return(tracks)
   }
-  #'  Drop elk and white-tailed deer summer and winter lists
+  #'  Drop elk and white-tailed deer summer and winter lists since no elk or wtd in OK
   noELKWTD <- spp_all_tracks[-c(3:6)]
   #'  Run list through function
   OK_tracks <- lapply(noELKWTD, OK_collars)
@@ -111,6 +111,7 @@
   #'  =========================================================
   #'  Set projection for spatial analyses
   sa_proj <- CRS("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
+  
   
   #'  3rd ORDER SELECTION
   #'  -------------------
@@ -352,13 +353,13 @@
   # load("./Outputs/RSF_pts/bob_available_2021-06-22.RData")
   # load("./Outputs/RSF_pts/coy_available_2021-06-22.RData")
   #'  2nd Order Selection
-  load("./Outputs/RSF_pts/md_available_2nd_2021-07-07.RData")
-  load("./Outputs/RSF_pts/elk_available_2nd_2021-07-07.RData")
-  load("./Outputs/RSF_pts/wtd_available_2nd_2021-07-07.RData")
-  load("./Outputs/RSF_pts/coug_available_2nd_2021-07-07.RData")
-  load("./Outputs/RSF_pts/wolf_available_2nd_2021-07-17.RData")
-  load("./Outputs/RSF_pts/bob_available_2nd_2021-07-07.RData")
-  load("./Outputs/RSF_pts/coy_available_2nd_2021-07-07.RData")
+  load("./Outputs/RSF_pts/md_available_2nd_2021-07-22.RData") #2021-07-07
+  load("./Outputs/RSF_pts/elk_available_2nd_2021-07-22.RData")
+  load("./Outputs/RSF_pts/wtd_available_2nd_2021-07-22.RData")
+  load("./Outputs/RSF_pts/coug_available_2nd_2021-07-22.RData")
+  load("./Outputs/RSF_pts/wolf_available_2nd_2021-07-22.RData")
+  load("./Outputs/RSF_pts/bob_available_2nd_2021-07-22.RData")
+  load("./Outputs/RSF_pts/coy_available_2nd_2021-07-22.RData")
   
   #'  Read in spatial data
   wppp_bound <- st_read("./Shapefiles/WPPP_CovariateBoundary", layer = "WPPP_CovariateBoundary")
