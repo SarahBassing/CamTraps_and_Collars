@@ -1077,7 +1077,433 @@
 
 
 
+  ####  4. Plot OccMod and RSF Results Against Each Other  ####
+  #'  ====================================================
+  #'  Plot the correlation between OccMod and RSF confidence intervals for easier 
+  #'  comparison of which effects are significant and consistent across the
+  #'  two different models.
   
+  #'  Pull out confidence interval data by covariate and species
+  occmod_90ci <- dplyr::select(occ_out, c(Species, Season, Parameter, Estimate, l95, u95)) %>%
+    mutate(
+      Estimate_occ = Estimate,
+      l95_occ = l95,
+      u95_occ = u95,
+      Parameter = as.character(Parameter)
+    ) %>%
+    dplyr::select(-c(Estimate, l95, u95)) %>%
+    filter(Parameter != "AreaOK") %>%
+    filter(Parameter != "(Intercept)")
+  rsf_95ci <- dplyr::select(rsf_out, c(Species, Season, Parameter, Estimate, l95, u95)) %>%
+    mutate(
+      Estimate_rsf = Estimate,
+      l95_rsf = l95, #- 0.05, # SUBTRACTING 1 FROM L95 SO IT'S VISIBLE IN PLOT
+      u95_rsf = u95, #+ 0.05, # ADDING 1 TO U95 SO IT'S VISIBLE IN PLOT
+      Parameter = as.character(Parameter),
+      Parameter = ifelse(Parameter == "RoadDen", "RoadDensity", Parameter)
+    ) %>%
+    dplyr::select(-c(Estimate, l95, u95)) %>%
+    filter(Parameter != "(Intercept)")
+  #'  Merge CI data from different models into single table
+  combo_ci <- full_join(occmod_90ci, rsf_95ci, by = c("Species", "Season", "Parameter"))
+  
+  #'  Identify min and max values of confidence intervals
+  min(combo_ci$l95_occ, na.rm = TRUE); max(combo_ci$u95_occ, na.rm = TRUE) # -3.89 to 10.877
+  min(combo_ci$l95_rsf, na.rm = TRUE); max(combo_ci$u95_rsf, na.rm = TRUE) # -2.91 to 0.63
+  
+  #'  Separate CIs by Covariate
+  elev_ci <- combo_ci[combo_ci$Parameter == "Elev",]
+  slope_ci <- combo_ci[combo_ci$Parameter == "Slope",]
+  for_ci <- combo_ci[combo_ci$Parameter == "PercForMix",]
+  grass_ci <- combo_ci[combo_ci$Parameter == "PercXGrass",]
+  shrub_ci <- combo_ci[combo_ci$Parameter == "PercXShrub",]
+  rdden_ci <- combo_ci[combo_ci$Parameter == "RoadDensity",]
+  hm_ci <- combo_ci[combo_ci$Parameter == "HumanMod",]
+  #'  Separate CIs by Species
+  md_ci <- combo_ci[combo_ci$Species == "Mule Deer",]
+  elk_ci <- combo_ci[combo_ci$Species == "Elk",]
+  wtd_ci <- combo_ci[combo_ci$Species == "White-tailed Deer",]
+  coug_ci <- combo_ci[combo_ci$Species == "Cougar",]
+  wolf_ci <- combo_ci[combo_ci$Species == "Wolf",]
+  bob_ci <- combo_ci[combo_ci$Species == "Bobcat",]
+  coy_ci <- combo_ci[combo_ci$Species == "Coyote",]
+  
+  #'  By covariate and season
+  #'  Plots for each covariate, season differs by point shape
+  elev_ci_fig <- ggplot(elev_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Species)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) + 
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Effect of Elevation") +
+    xlab("RSF") + ylab("Occupancy") 
+  slope_ci_fig <- ggplot(slope_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) +  
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Effect of Slope") +
+    xlab("RSF") + ylab("Occupancy")
+  for_ci_fig <- ggplot(for_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Effect of Percent Forest") +
+    xlab("RSF") + ylab("Occupancy")
+  grass_ci_fig <- ggplot(grass_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) +
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Effect of Percent Grass") +
+    xlab("RSF") + ylab("Occupancy")
+  shrub_ci_fig <- ggplot(shrub_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) +
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Effect of Percent Shrub") +
+    xlab("RSF") + ylab("Occupancy")
+  rdden_ci_fig <- ggplot(rdden_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Effect of Road Density") +
+    xlab("RSF") + ylab("Occupancy")
+  hm_ci_fig <- ggplot(hm_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Effect of Human Modified Landscape") +
+    xlab("RSF") + ylab("Occupancy")
+  
+  #'  Save as PNG images
+  ggsave("./Outputs/Figures/Elevation_Occ-by-RSF_plot.png", elev_ci_fig)
+  ggsave("./Outputs/Figures/Slope_Occ-by-RSF_plot.png", slope_ci_fig)
+  ggsave("./Outputs/Figures/PercentForest_Occ-by-RSF_plot.png", for_ci_fig)
+  ggsave("./Outputs/Figures/PercentGrass_Occ-by-RSF_plot.png", grass_ci_fig)
+  ggsave("./Outputs/Figures/PercentShrub_Occ-by-RSF_plot.png", shrub_ci_fig)
+  ggsave("./Outputs/Figures/RoadDensity_Occ-by-RSF_plot.png", rdden_ci_fig)
+  ggsave("./Outputs/Figures/HumanMod_Occ-by-RSF_plot.png", hm_ci_fig)
+  
+  #'  By Species and Season
+  md_ci_fig <- ggplot(md_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Mule Deer") +
+    xlab("RSF") + ylab("Occupancy")
+  elk_ci_fig <- ggplot(elk_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Elk") +
+    xlab("RSF") + ylab("Occupancy")
+  #'  NOT PLOTTING SHRUB AND GRASS RESULTS FOR RSFs
+  wtd_ci_fig <- ggplot(wtd_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "White-tailed Deer") +
+    xlab("RSF") + ylab("Occupancy")
+  #'  NOT PLOTTING SHRUB AND GRASS RESULTS FOR RSFs
+  coug_ci_fig <- ggplot(coug_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Cougar") +
+    xlab("RSF") + ylab("Occupancy")
+  wolf_ci_fig <- ggplot(wolf_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Wolf") +
+    xlab("RSF") + ylab("Occupancy") # NOT PLOTTING SOMETHING
+  bob_ci_fig <- ggplot(bob_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Bobcat") +
+    xlab("RSF") + ylab("Occupancy")
+  coy_ci_fig <- ggplot(coy_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    scale_shape_manual(values = c(19, 23)) +
+    labs(title = "Coyote") +
+    xlab("RSF") + ylab("Occupancy")
+  
+  #'  Save as PNG images
+  ggsave("./Outputs/Figures/MuleDeer_Occ-by-RSF_plot.png", md_ci_fig)
+  ggsave("./Outputs/Figures/Elk_Occ-by-RSF_plot.png", elk_ci_fig)
+  ggsave("./Outputs/Figures/WTD_Occ-by-RSF_plot.png", wtd_ci_fig)
+  ggsave("./Outputs/Figures/Cougar_Occ-by-RSF_plot.png", coug_ci_fig)
+  ggsave("./Outputs/Figures/Wolf_Occ-by-RSF_plot.png", wolf_ci_fig)
+  ggsave("./Outputs/Figures/Bobcat_Occ-by-RSF_plot.png", bob_ci_fig)
+  ggsave("./Outputs/Figures/Coyote_Occ-by-RSF_plot.png", coy_ci_fig)
+  
+  
+  #'  Stand alone plots for each season and covariate
+  elev_smr_ci_fig <- ggplot(elev_ci[elev_ci$Season == "Summer",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Summer Responses") +  # "Occupancy Model vs. RSF Covariate Effects
+    xlab("RSF") + ylab("Occupancy") +
+    theme(legend.position = "none")
+  elev_wtr_ci_fig <- ggplot(elev_ci[elev_ci$Season == "Winter",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Winter Responses") +
+    xlab("RSF") + ylab("Occupancy") 
+  slope_smr_ci_fig <- ggplot(slope_ci[slope_ci$Season == "Summer",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Summer Responses") +
+    xlab("RSF") + ylab("Occupancy") +
+    theme(legend.position = "none")
+  slope_wtr_ci_fig <- ggplot(slope_ci[slope_ci$Season == "Winter",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Winter Responses") +
+    xlab("RSF") + ylab("Occupancy")
+  for_smr_ci_fig <- ggplot(for_ci[for_ci$Season == "Summer",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.025) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Summer Responses") +
+    xlab("RSF") + ylab("Occupancy") +
+    theme(legend.position = "none")
+  for_wtr_ci_fig <- ggplot(for_ci[for_ci$Season == "Winter",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Winter Responses") +
+    xlab("RSF") + ylab("Occupancy")
+  grass_smr_ci_fig <- ggplot(grass_ci[grass_ci$Season == "Summer",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Summer Responses") +
+    xlab("RSF") + ylab("Occupancy") +
+    theme(legend.position = "none")
+  grass_wtr_ci_fig <- ggplot(grass_ci[grass_ci$Season == "Winter",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Winter Responses") +
+    xlab("RSF") + ylab("Occupancy")
+  shrub_smr_ci_fig <- ggplot(shrub_ci[shrub_ci$Season == "Summer",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Summer Responses") +
+    xlab("RSF") + ylab("Occupancy") +
+    theme(legend.position = "none") 
+  shrub_wtr_ci_fig <- ggplot(shrub_ci[shrub_ci$Season == "Winter",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Winter Responses") +
+    xlab("RSF") + ylab("Occupancy")
+  rdden_smr_ci_fig <- ggplot(rdden_ci[rdden_ci$Season == "Summer",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Summer Responses") +
+    xlab("RSF") + ylab("Occupancy") +
+    theme(legend.position = "none")
+  rdden_wtr_ci_fig <- ggplot(rdden_ci[rdden_ci$Season == "Winter",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Winter Responses") +
+    xlab("RSF") + ylab("Occupancy")
+  hm_smr_ci_fig <- ggplot(hm_ci[hm_ci$Season == "Summer",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Summer Responses") +
+    xlab("RSF") + ylab("Occupancy") +
+    theme(legend.position = "none")
+  hm_wtr_ci_fig <- ggplot(hm_ci[hm_ci$Season == "Winter",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species)) + #size = 3.5 
+    labs(title = "Winter Responses") +
+    xlab("RSF") + ylab("Occupancy")
+  
+  hm_ci_fig <- ggplot(hm_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 2.5) + #size = 3.5 
+    labs(title = "Winter Responses") +
+    xlab("RSF") + ylab("Occupancy")
+  
+  #'  Plot summer and winter figures together
+  elev_ci_fig <- elev_smr_ci_fig + plot_annotation(title = "A. Elevation") + elev_wtr_ci_fig
+  slope_ci_fig <- slope_smr_ci_fig + plot_annotation(title = "B. Slope") + slope_wtr_ci_fig
+  for_ci_fig <- for_smr_ci_fig + plot_annotation(title = "C. Percent Forest") + for_wtr_ci_fig
+  grass_ci_fig <- grass_smr_ci_fig + plot_annotation(title = "D. Percent Grass") + grass_wtr_ci_fig
+  shrub_ci_fig <- shrub_smr_ci_fig + plot_annotation(title = "E. Percent Shrub") + shrub_wtr_ci_fig
+  rdden_ci_fig <- rdden_smr_ci_fig + plot_annotation(title = "F. Road Density") + rdden_wtr_ci_fig
+  hm_ci_fig <- hm_smr_ci_fig + plot_annotation(title = "G. Human Modification") + hm_wtr_ci_fig
+  
+  #'  Visualize these lovely plots!
+  plot(elev_smr_ci_fig)
+  plot(elev_wtr_ci_fig)
+  plot(slope_smr_ci_fig)
+  plot(slope_wtr_ci_fig)
+  plot(for_smr_ci_fig)
+  plot(for_wtr_ci_fig)
+  plot(grass_smr_ci_fig)
+  plot(grass_wtr_ci_fig)
+  plot(shrub_smr_ci_fig)
+  plot(shrub_wtr_ci_fig)
+  plot(rdden_smr_ci_fig)
+  plot(rdden_wtr_ci_fig)
+  plot(hm_smr_ci_fig)
+  plot(hm_wtr_ci_fig)
+  
+  plot(elev_ci_fig)
+  plot(slope_ci_fig)
+  plot(for_ci_fig)
+  plot(grass_ci_fig)
+  plot(shrub_ci_fig)
+  plot(rdden_ci_fig)
+  plot(hm_ci_fig)
+  
+  #' #'  Save as PNG images
+  #' ggsave("./Outputs/Figures/Elevation_Occ-by-RSF_plot.png", elev_ci_fig)
+  #' ggsave("./Outputs/Figures/Slope_Occ-by-RSF_plot.png", slope_ci_fig)
+  #' ggsave("./Outputs/Figures/Forest_Occ-by-RSF_plot.png", for_ci_fig)
+  #' ggsave("./Outputs/Figures/Grass_Occ-by-RSF_plot.png", grass_ci_fig)
+  #' ggsave("./Outputs/Figures/Shrub_Occ-by-RSF_plot.png", shrub_ci_fig)
+  #' ggsave("./Outputs/Figures/RoadDensity_Occ-by-RSF_plot.png", rdden_ci_fig)
+  #' ggsave("./Outputs/Figures/HumanMod_Occ-by-RSF_plot.png", hm_ci_fig)
+  
+  
+  #'  By species and season
+  md_smr_ci_fig <- ggplot(md_ci[md_ci$Season == "Summer",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.025) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) +
+    geom_point(stat = 'identity', aes(col = Parameter)) + #size = 3.5 
+    labs(title = "Occupancy Model vs. RSF Covariate Effects",
+         subtitle = "Mule Deer Summer") +
+    xlab("RSF") + ylab("Occupancy") 
+  # need to figure out how to make winter and summer estimates different shades so they can be plotted together
+  md_wtr_ci_fig <- ggplot(md_ci[md_ci$Season == "Winter",], aes(x = Estimate_rsf, y = Estimate_occ)) +
+    geom_hline(yintercept = 0, linetype = "dashed") + 
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.025) +
+    geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) +
+    geom_point(stat = 'identity', aes(col = Parameter)) + #size = 3.5 
+    labs(title = "Occupancy Model vs. RSF Covariate Effects",
+         subtitle = "Mule Deer Winter") +
+    xlab("RSF") + ylab("Occupancy")
   
   
   
