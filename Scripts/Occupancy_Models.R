@@ -1292,10 +1292,54 @@
 
 
 
+  #'  Predict probability of occupancy across sites
+  mu_occ <- function(mod, species, season) {
+    #'  Predict occupancy probability for all camera sties
+    occu_mean <- predict(object = mod, type = "state") %>%  # do I provide newdata = sitecovariates if it's the same values as what went into the model?
+      #'  Average occupancy probabilities across sites for mean psi
+      summarise_at(c("Predicted", "SE"), mean, na.rm = TRUE)
+    #'  Predict occupancy probability for all camera sties
+    det_mean <- predict(object = mod, type = "det") %>%
+      #'  Average occupancy probabilities across sites for mean psi
+      summarise_at(c("Predicted", "SE"), mean, na.rm = TRUE) 
+    predicted <- as.data.frame(rbind(occu_mean, det_mean))
+    colnames(predicted) <- c("Mean", "SE")
+    Parameter <- c("Occupancy", "Detection")
+    Species <- species
+    Season <- season
+    predicted <- cbind(predicted, Parameter)
+    predicted <- cbind(predicted, Species)
+    predicted <- cbind(predicted, Season)
+    return(predicted)
+  }
+  #'  Estimate mean probability of occupancy and detection per species and season
+  md_predict_smr <- mu_occ(md_s1819_global, "Mule Deer", "Summer")
+  md_predict_wtr <- mu_occ(md_w1820_global, "Mule Deer", "Winter")
+  elk_predict_smr <- mu_occ(elk_s1819_global2, "Elk", "Summer")
+  elk_predict_wtr <- mu_occ(elk_w1820_global2, "Elk", "Winter")
+  wtd_predict_smr <- mu_occ(wtd_s1819_global2, "White-tailed Deer", "Summer")
+  wtd_predict_wtr <- mu_occ(wtd_w1820_global2, "White-tailed Deer", "Winter")
+  coug_predict_smr <- mu_occ(coug_s1819_global, "Cougar", "Summer")
+  coug_predict_wtr <- mu_occ(coug_w1820_global, "Cougar", "Winter")
+  wolf_predict_smr <- mu_occ(wolf_s1819_global2, "Wolf", "Summer")
+  wolf_predict_wtr <- mu_occ(wolf_w1820_global2, "Wolf", "Winter")
+  bob_predict_smr <- mu_occ(bob_s1819_global, "Bobcat", "Summer")
+  bob_predict_wtr <- mu_occ(bob_w1820_global, "Bobcat", "Winter")
+  coy_predict_smr <- mu_occ(coy_s1819_global, "Coyote", "Summer")
+  coy_predict_wtr <- mu_occ(coy_w1820_global, "Coyote", "Winter")
 
+  #'  Make a pretty table
+  Mean_tbl <- bind_rows(md_predict_smr, md_predict_wtr, elk_predict_smr, elk_predict_wtr, wtd_predict_smr, 
+              wtd_predict_wtr, coug_predict_smr, coug_predict_wtr, wolf_predict_smr, 
+              wolf_predict_wtr, bob_predict_smr, bob_predict_wtr, coy_predict_smr, 
+              coy_predict_wtr) %>%
+    relocate(Species, .before = Mean) %>%
+    relocate(Season, .after = Species) %>%
+    relocate(Parameter, .after = Season) %>%
+    arrange(Parameter, Mean, Species)
   
-
-
+  #'  Save
+  write.csv(Mean_tbl, "./Outputs/Tables/OccMod_Mean_Estimates.csv")
   
-  
+ 
   
