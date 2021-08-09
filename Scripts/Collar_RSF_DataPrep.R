@@ -105,7 +105,27 @@
   # NE_navailable <- NE_mean_used*20
   # OK_navailable <- OK_mean_used*20
 
-  
+  #'  Function to identify the number of used observations per individual
+  #'  Used to describe how many "available" points to draw for each animal
+  #'  following a 1:1, 1:10, and 1:20 ratio per individual instead of the 1:20
+  #'  ratio for the average number of observations per individual as above
+  nobs <- function(locs) {
+    indlocs <- locs %>%
+      group_by(AnimalID, Season) %>%
+      tally() %>%
+      ungroup()
+    nlocs <- as.data.frame(indlocs) %>%
+      mutate(n10 = n*10, n20 = n*20)
+    return(nlocs)
+  }
+  #'  Run each species through function
+  ind_nlocs <- lapply(spp_all_tracks, nobs)
+  #'  Create giant dataframe instead of species-specific lists
+  IDlocs <- ind_nlocs %>%
+    map(rownames_to_column) %>%
+    bind_rows() %>%
+    dplyr::select(c(AnimalID, Season, n, n10, n20))
+
   
   #'  Generate random "Available" locations for each individual
   #'  =========================================================
@@ -113,8 +133,8 @@
   sa_proj <- CRS("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
   
   
-  #'  3rd ORDER SELECTION
-  #'  -------------------
+  #'  3rd ORDER SELECTION Average 1:20 used:available
+  #'  -----------------------------------------------
   #'  Function to randomly select "Available" points within each animal's seasonal 
   #'  home range (utilization distributions)
   avail_pts_3rd <- function(locs, plotit = F) {
@@ -140,6 +160,7 @@
     
     #'  3. Randomly select points within each home range
     #'  ------------------------------------------------
+    #'  Sampling 20 available points to every 1 used point, on average.
     set.seed(2021)
     rndpts <- spsample(UD95, navailable, type = "random")
     #'  Turn them into spatial points
@@ -214,10 +235,11 @@
   save(coy_available, file = paste0("./Outputs/RSF_pts/coy_available_", Sys.Date(), ".RData"))
  
   
-  #'  2nd ORDER SELECTION
-  #'  -------------------
+  #'  2nd ORDER SELECTION Average 1:20 used:available
+  #'  -----------------------------------------------
   #'  Function to randomly select "Available" points within MCPs generated from
-  #'  all individuals of a given species across seasons within a study area
+  #'  all individuals of a given species across seasons within a study area.
+  #'  Sampling 20 available points to every 1 used point, on average.
   #'  MPCs created in Collar_MCPs.R script
   avail_pts_2nd <- function(locs, mcps, plotit = F) {
     #'  1. Randomly select points within each MCP
@@ -327,8 +349,12 @@
   save(wolf_available_2nd, file = paste0("./Outputs/RSF_pts/wolf_available_2nd_", Sys.Date(), ".RData"))
   save(bob_available_2nd, file = paste0("./Outputs/RSF_pts/bob_available_2nd_", Sys.Date(), ".RData"))
   save(coy_available_2nd, file = paste0("./Outputs/RSF_pts/coy_available_2nd_", Sys.Date(), ".RData"))
+
+
   
+  #### CURRENTLY STRUGGLING TO FIGURE OUT HOW TO DO THIS WITH THE 1:1, 1:10, AND 1:20 RATIOS I CREATED  ####
   
+
   
   #'  Extract covariate data for each available location
   #'  ==================================================
