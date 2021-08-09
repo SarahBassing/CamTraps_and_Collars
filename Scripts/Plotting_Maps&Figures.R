@@ -162,7 +162,7 @@
   #'  Requires "cowplot" package
   #'  Don't use png or other calls to save while plotting- formatting gets messed up
   #'  Use export option in Plot window and formatting holds
-  # png(file = "./Outputs/Figures/StudyAreas_Cameras1820.png",
+  # png(file = "./Outputs/Figures/Maps/StudyAreas_Cameras1820.png",
   #     width = 1000, height = 691)
   StudyArea_Map <- ggdraw(cam_SA_map) +
     draw_plot(
@@ -432,14 +432,14 @@
   plot(capture_fig)
   
   #'  Save
-  ggsave("./Outputs/Figures/CaptureEffort_fig.png", capture_fig)
-  ggsave("./Outputs/Figures/MuleDeerCaptureEffort.png", md_map)
-  ggsave("./Outputs/Figures/ElkCaptureEffort.png", elk_map)
-  ggsave("./Outputs/Figures/WTDeerCaptureEffort.png", wtd_map)
-  ggsave("./Outputs/Figures/CougarCaptureEffort.png", coug_map)
-  ggsave("./Outputs/Figures/WolfCaptureEffort.png", wolf_map)
-  ggsave("./Outputs/Figures/BobcatCaptureEffort.png", bob_map)
-  ggsave("./Outputs/Figures/CoyoteCaptureEffort.png", coy_map)
+  ggsave("./Outputs/Figures/Maps/CaptureEffort_fig.png", capture_fig)
+  ggsave("./Outputs/Figures/Maps/MuleDeerCaptureEffort.png", md_map)
+  ggsave("./Outputs/Figures/Maps/ElkCaptureEffort.png", elk_map)
+  ggsave("./Outputs/Figures/Maps/WTDeerCaptureEffort.png", wtd_map)
+  ggsave("./Outputs/Figures/Maps/CougarCaptureEffort.png", coug_map)
+  ggsave("./Outputs/Figures/Maps/WolfCaptureEffort.png", wolf_map)
+  ggsave("./Outputs/Figures/Maps/BobcatCaptureEffort.png", bob_map)
+  ggsave("./Outputs/Figures/Maps/CoyoteCaptureEffort.png", coy_map)
   
   
   #  Also think about changing the axis- add a little space btwn plot and tick marks?
@@ -496,7 +496,7 @@
   #'  human modified landscape). Display in multiple panels by model and season.
   
   #'  Occupancy model output
-  occ_out <- read.csv("./Outputs/OccMod_OccProb_Results_2021-07-01.csv") %>%
+  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_2021-07-23.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 90% confidence intervals to mirror alpha = 0.1
     mutate(
       l95 = (Estimate - (1.64 * SE)),  #### REMINDER: this is 90% CI even though column says l95/u95
@@ -504,7 +504,7 @@
     ) %>%
     dplyr::select(-c(X, Model))
   #'  RSF results output
-  rsf_out <- read.csv("./Outputs/RSF_Results_2021-07-17.csv") %>% #2021-07-08
+  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_2021-07-23.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 95% confidence intervals to mirror alpha = 0.05
     mutate(
       l95 = (Estimate - (1.96 * SE)),  #### REMINDER: this is 95% CI
@@ -1053,21 +1053,21 @@
   
   #'  Save different file formats
   #'  PNG
-  ggsave("./Outputs/Figures/Elevation_Occ-RSF_plot.png", elev_fig)
-  ggsave("./Outputs/Figures/Slope_Occ-RSF_plot.png", slope_fig)
-  ggsave("./Outputs/Figures/Forest_Occ-RSF_plot.png", for_fig)
-  ggsave("./Outputs/Figures/Grass_Occ-RSF_plot.png", grass_fig)
-  ggsave("./Outputs/Figures/Shrub_Occ-RSF_plot.png", shrub_fig)
-  ggsave("./Outputs/Figures/RoadDensity_Occ-RSF_plot.png", rdden_fig)
-  ggsave("./Outputs/Figures/HumanMod_Occ-RSF_plot.png", hm_fig)
+  ggsave("./Outputs/Figures/Side by Side/Elevation_Occ-RSF_plot.png", elev_fig, width = 15, units = "in")
+  ggsave("./Outputs/Figures/Side by Side/Slope_Occ-RSF_plot.png", slope_fig, width = 15, units = "in")
+  ggsave("./Outputs/Figures/Side by Side/Forest_Occ-RSF_plot.png", for_fig, width = 15, units = "in")
+  ggsave("./Outputs/Figures/Side by Side/Grass_Occ-RSF_plot.png", grass_fig, width = 15, units = "in")
+  ggsave("./Outputs/Figures/Side by Side/Shrub_Occ-RSF_plot.png", shrub_fig, width = 15, units = "in")
+  ggsave("./Outputs/Figures/Side by Side/RoadDensity_Occ-RSF_plot.png", rdden_fig, width = 15, units = "in")
+  ggsave("./Outputs/Figures/Side by Side/HumanMod_Occ-RSF_plot.png", hm_fig, width = 15, units = "in")
   #'  JPEG
-  ggsave("./Outputs/Figures/Elevation_Occ-RSF_plot.jpeg", elev_fig)
-  ggsave("./Outputs/Figures/Slope_Occ-RSF_plot.jpeg", slope_fig)
-  ggsave("./Outputs/Figures/Forest_Occ-RSF_plot.jpeg", for_fig)
-  ggsave("./Outputs/Figures/Grass_Occ-RSF_plot.jpeg", grass_fig)
-  ggsave("./Outputs/Figures/Shrub_Occ-RSF_plot.jpeg", shrub_fig)
-  ggsave("./Outputs/Figures/RoadDensity_Occ-RSF_plot.jpeg", rdden_fig)
-  ggsave("./Outputs/Figures/HumanMod_Occ-RSF_plot.jpeg", hm_fig)
+  ggsave("./Outputs/Figures/Side by Side/Elevation_Occ-RSF_plot.jpeg", elev_fig)
+  ggsave("./Outputs/Figures/Side by Side/Slope_Occ-RSF_plot.jpeg", slope_fig)
+  ggsave("./Outputs/Figures/Side by Side/Forest_Occ-RSF_plot.jpeg", for_fig)
+  ggsave("./Outputs/Figures/Side by Side/Grass_Occ-RSF_plot.jpeg", grass_fig)
+  ggsave("./Outputs/Figures/Side by Side/Shrub_Occ-RSF_plot.jpeg", shrub_fig)
+  ggsave("./Outputs/Figures/Side by Side/RoadDensity_Occ-RSF_plot.jpeg", rdden_fig)
+  ggsave("./Outputs/Figures/Side by Side/HumanMod_Occ-RSF_plot.jpeg", hm_fig)
   
   #'  One single figure... ugly and terrible and don't do it
   # cov_fig <- elev_fig / slope_fig / for_fig / grass_fig / shrub_fig / rdden_fig / hm_fig
@@ -1138,7 +1138,7 @@
     geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) + 
-    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Effect of Elevation") +
     xlab("RSF") + ylab("Occupancy") 
@@ -1148,7 +1148,7 @@
     geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
-    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) +  
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) +  
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Effect of Slope") +
     xlab("RSF") + ylab("Occupancy")
@@ -1158,7 +1158,7 @@
     geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
-    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Effect of Percent Forest") +
     xlab("RSF") + ylab("Occupancy")
@@ -1168,7 +1168,7 @@
     geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
-    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) +
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) +
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Effect of Percent Grass") +
     xlab("RSF") + ylab("Occupancy")
@@ -1178,7 +1178,7 @@
     geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
-    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) +
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) +
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Effect of Percent Shrub") +
     xlab("RSF") + ylab("Occupancy")
@@ -1188,7 +1188,7 @@
     geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
-    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Effect of Road Density") +
     xlab("RSF") + ylab("Occupancy")
@@ -1198,19 +1198,19 @@
     geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
-    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Effect of Human Modified Landscape") +
     xlab("RSF") + ylab("Occupancy")
   
   #'  Save as PNG images
-  ggsave("./Outputs/Figures/Elevation_Occ-by-RSF_plot.png", elev_ci_fig)
-  ggsave("./Outputs/Figures/Slope_Occ-by-RSF_plot.png", slope_ci_fig)
-  ggsave("./Outputs/Figures/PercentForest_Occ-by-RSF_plot.png", for_ci_fig)
-  ggsave("./Outputs/Figures/PercentGrass_Occ-by-RSF_plot.png", grass_ci_fig)
-  ggsave("./Outputs/Figures/PercentShrub_Occ-by-RSF_plot.png", shrub_ci_fig)
-  ggsave("./Outputs/Figures/RoadDensity_Occ-by-RSF_plot.png", rdden_ci_fig)
-  ggsave("./Outputs/Figures/HumanMod_Occ-by-RSF_plot.png", hm_ci_fig)
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Elevation_Occ-by-RSF_plot.png", elev_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Slope_Occ-by-RSF_plot.png", slope_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentForest_Occ-by-RSF_plot.png", for_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentGrass_Occ-by-RSF_plot.png", grass_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentShrub_Occ-by-RSF_plot.png", shrub_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/RoadDensity_Occ-by-RSF_plot.png", rdden_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/HumanMod_Occ-by-RSF_plot.png", hm_ci_fig, width = 9.3, units = "in")
   
   #'  -------------------------
   ####  By Species and Season  ####
@@ -1222,7 +1222,7 @@
     geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
-    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Mule Deer") +
     xlab("RSF") + ylab("Occupancy")
@@ -1232,7 +1232,7 @@
     geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
-    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Elk") +
     xlab("RSF") + ylab("Occupancy")
@@ -1243,7 +1243,7 @@
     geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
-    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "White-tailed Deer") +
     xlab("RSF") + ylab("Occupancy")
@@ -1254,7 +1254,7 @@
     geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
-    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Cougar") +
     xlab("RSF") + ylab("Occupancy")
@@ -1264,7 +1264,7 @@
     geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
-    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Wolf") +
     xlab("RSF") + ylab("Occupancy") # NOT PLOTTING SOMETHING
@@ -1274,7 +1274,7 @@
     geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
-    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Bobcat") +
     xlab("RSF") + ylab("Occupancy")
@@ -1284,19 +1284,19 @@
     geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
-    geom_point(stat = 'identity', aes(shape = Season), size = 3) + 
+    geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Coyote") +
     xlab("RSF") + ylab("Occupancy")
   
   #'  Save as PNG images
-  ggsave("./Outputs/Figures/MuleDeer_Occ-by-RSF_plot.png", md_ci_fig)
-  ggsave("./Outputs/Figures/Elk_Occ-by-RSF_plot.png", elk_ci_fig)
-  ggsave("./Outputs/Figures/WTD_Occ-by-RSF_plot.png", wtd_ci_fig)
-  ggsave("./Outputs/Figures/Cougar_Occ-by-RSF_plot.png", coug_ci_fig)
-  ggsave("./Outputs/Figures/Wolf_Occ-by-RSF_plot.png", wolf_ci_fig)
-  ggsave("./Outputs/Figures/Bobcat_Occ-by-RSF_plot.png", bob_ci_fig)
-  ggsave("./Outputs/Figures/Coyote_Occ-by-RSF_plot.png", coy_ci_fig)
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/MuleDeer_Occ-by-RSF_plot.png", md_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Elk_Occ-by-RSF_plot.png", elk_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/WTD_Occ-by-RSF_plot.png", wtd_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Cougar_Occ-by-RSF_plot.png", coug_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Wolf_Occ-by-RSF_plot.png", wolf_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Bobcat_Occ-by-RSF_plot.png", bob_ci_fig, width = 9.3, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Coyote_Occ-by-RSF_plot.png", coy_ci_fig, width = 9.3, units = "in")
   
   #'  ------------------------------
   ####  Stand alone seasonal plots  ####
@@ -1480,13 +1480,13 @@
   plot(hm_ci_fig)
   
   #' #'  Save as PNG images
-  #' ggsave("./Outputs/Figures/Elevation_Occ-by-RSF_plot.png", elev_ci_fig)
-  #' ggsave("./Outputs/Figures/Slope_Occ-by-RSF_plot.png", slope_ci_fig)
-  #' ggsave("./Outputs/Figures/Forest_Occ-by-RSF_plot.png", for_ci_fig)
-  #' ggsave("./Outputs/Figures/Grass_Occ-by-RSF_plot.png", grass_ci_fig)
-  #' ggsave("./Outputs/Figures/Shrub_Occ-by-RSF_plot.png", shrub_ci_fig)
-  #' ggsave("./Outputs/Figures/RoadDensity_Occ-by-RSF_plot.png", rdden_ci_fig)
-  #' ggsave("./Outputs/Figures/HumanMod_Occ-by-RSF_plot.png", hm_ci_fig)
+  #' ggsave("./Outputs/Figures/Occu-RSF-Correlation/Elevation_Occ-by-RSF_plot.png", elev_ci_fig)
+  #' ggsave("./Outputs/Figures/Occu-RSF-Correlation/Slope_Occ-by-RSF_plot.png", slope_ci_fig)
+  #' ggsave("./Outputs/Figures/Occu-RSF-Correlation/Forest_Occ-by-RSF_plot.png", for_ci_fig)
+  #' ggsave("./Outputs/Figures/Occu-RSF-Correlation/Grass_Occ-by-RSF_plot.png", grass_ci_fig)
+  #' ggsave("./Outputs/Figures/Occu-RSF-Correlation/Shrub_Occ-by-RSF_plot.png", shrub_ci_fig)
+  #' ggsave("./Outputs/Figures/Occu-RSF-Correlation/RoadDensity_Occ-by-RSF_plot.png", rdden_ci_fig)
+  #' ggsave("./Outputs/Figures/Occu-RSF-Correlation/HumanMod_Occ-by-RSF_plot.png", hm_ci_fig)
   
   
   #'  By species and season
@@ -1627,6 +1627,21 @@
     mutate(Season = ifelse(Season == "Summer18" | Season == "Summer19", "Summer", "Winter"))
   coy_used <- filter(coy_dat_all, Used == 1) %>%
     mutate(Season = ifelse(Season == "Summer18" | Season == "Summer19", "Summer", "Winter"))
+  #'  Retain only the available locations and their covariate values
+  md_avail <- filter(md_dat_all, Used == 0) %>%
+    mutate(Season = ifelse(Season == "Summer18" | Season == "Summer19", "Summer", "Winter"))
+  elk_avail <- filter(elk_dat_all, Used == 0) %>%
+    mutate(Season = ifelse(Season == "Summer18" | Season == "Summer19", "Summer", "Winter"))
+  wtd_avail <- filter(wtd_dat_all, Used == 0) %>%
+    mutate(Season = ifelse(Season == "Summer18" | Season == "Summer19", "Summer", "Winter"))
+  coug_avail <- filter(coug_dat_all, Used == 0) %>%
+    mutate(Season = ifelse(Season == "Summer18" | Season == "Summer19", "Summer", "Winter"))
+  wolf_avail <- filter(wolf_dat_all, Used == 0) %>%
+    mutate(Season = ifelse(Season == "Summer18" | Season == "Summer19", "Summer", "Winter"))
+  bob_avail <- filter(bob_dat_all, Used == 0) %>%
+    mutate(Season = ifelse(Season == "Summer18" | Season == "Summer19", "Summer", "Winter"))
+  coy_avail <- filter(coy_dat_all, Used == 0) %>%
+    mutate(Season = ifelse(Season == "Summer18" | Season == "Summer19", "Summer", "Winter"))
   
   
   #'  Combine detection and GPS location data
@@ -1642,6 +1657,7 @@
     combo_data <- rbind(cam_data, col_data)
     return(combo_data)
   }
+  #'  Combine camera data with used data
   md_obs <- all_obs(md_det, md_used)
   elk_obs <- all_obs(elk_det, elk_used)
   wtd_obs <- all_obs(wtd_det, wtd_used)
@@ -1649,10 +1665,20 @@
   wolf_obs <- all_obs(wolf_det, wolf_used)
   bob_obs <- all_obs(bob_det, bob_used)
   coy_obs <- all_obs(coy_det, coy_used)
+  #'  Combine camera data with available data
+  md_sampled <- all_obs(md_det, md_avail)
+  elk_sampled <- all_obs(elk_det, elk_avail)
+  wtd_sampled <- all_obs(wtd_det, wtd_avail)
+  coug_sampled <- all_obs(coug_det, coug_avail)
+  wolf_sampled <- all_obs(wolf_det, wolf_avail)
+  bob_sampled <- all_obs(bob_det, bob_avail)
+  coy_sampled <- all_obs(coy_det, coy_avail)
+  
   
   #'  Identify mean and median values for each variable by data set
   #'  List observation data
   all_data <- list(md_obs, elk_obs, wtd_obs, coug_obs, wolf_obs, bob_obs, coy_obs)
+  avail_data <- list(md_sampled, elk_sampled, wtd_sampled, coug_sampled, wolf_sampled, bob_sampled, coy_sampled)
   #'  Calculate mean values per data type and species 
   mean_obs <- function(obs) {
     mu <- obs %>% 
@@ -1662,6 +1688,7 @@
     return(mu)
   }
   mu_obs <- lapply(all_data, mean_obs) # ignore summarise() comment about grouping
+  mu_avail <- lapply(avail_data, mean_obs)
   #'  Calculate median values per data type and species
   median_obs <- function(obs) {
     med <- obs %>% 
@@ -1671,6 +1698,7 @@
     return(med)
   }
   med_obs <- lapply(all_data, median_obs)
+  med_avail <- lapply(avail_data, median_obs)
   
   
   #'  -----------------------------------
@@ -1693,6 +1721,13 @@
   ggplot(bob_used, aes(x = Elev, color = Season, fill = Season)) + geom_histogram(binwidth = 100, alpha = 0.5, position = "identity") + labs(title = "Bobcat GPS Locations", x = "Elevation (m)", y = "Number of GPS Locations")
   ggplot(coy_used, aes(x = Elev, color = Season, fill = Season)) + geom_histogram(binwidth = 100, alpha = 0.5, position = "identity") + labs(title = "Coyote GPS Locations", x = "Elevation (m)", y = "Number of GPS Locations")
   
+  #'  Compare used vs available for mule deer human modified landscape data
+  md_useavail <- mutate(md_dat_all, 
+                        Season = ifelse(Season == "Summer18" | Season == "Summer19", "Summer", "Winter"),
+                        Used = as.factor(Used))
+  ggplot(md_useavail, aes(x = HumanMod, color = Used, fill = Used)) + geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity") + labs(title = "Mule Deer GPS Locations", x = "Percent Human Modified Landscape", y = "Number of GPS Locations")
+  
+  
   #'  Compare camera detections and collar locations
   #'  ----------------------------------------------
   #'  NOTE: There are *SO* many more collar observations than camera detections
@@ -1707,160 +1742,224 @@
   #'  median addresses major skews in some of these data sets. Model intercepts
   #'  are based on the mean to mean values better represent model outputs.
   #'  Summer
-  ggplot(md_obs[md_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+  md_elev_smr <- ggplot(md_obs[md_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Mule Deer Summer Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_obs[[1]]$Elev[1], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[1]]$Elev[3], linetype = "dashed", color = "blue")
-  ggplot(elk_obs[elk_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+  elk_elev_smr <- ggplot(elk_obs[elk_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Elk Summer Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 1700)) +
     geom_vline(xintercept = mu_obs[[2]]$Elev[1], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[2]]$Elev[3], linetype = "dashed", color = "blue")
-  ggplot(wtd_obs[wtd_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+  wtd_elev_smr <- ggplot(wtd_obs[wtd_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "White-tailed Deer Summer Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 1700)) +
     geom_vline(xintercept = mu_obs[[3]]$Elev[1], linetype = "dashed", color = "red") +  
     geom_vline(xintercept = mu_obs[[3]]$Elev[3], linetype = "dashed", color = "blue")
-  ggplot(coug_obs[coug_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+  coug_elev_smr <- ggplot(coug_obs[coug_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Cougar Summer Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) +
     geom_vline(xintercept = mu_obs[[4]]$Elev[1], linetype = "dashed", color = "red") + #cam & collar means are identical!
     geom_vline(xintercept = mu_obs[[4]]$Elev[3], linetype = "dashed", color = "blue")
-  ggplot(wolf_obs[wolf_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+  wolf_elev_smr <- ggplot(wolf_obs[wolf_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Wolf Summer Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) +
     geom_vline(xintercept = mu_obs[[5]]$Elev[1], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[5]]$Elev[3], linetype = "dashed", color = "blue")
-  ggplot(bob_obs[bob_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+  bob_elev_smr <- ggplot(bob_obs[bob_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Bobcat Summer Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) +
     geom_vline(xintercept = mu_obs[[6]]$Elev[1], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[6]]$Elev[3], linetype = "dashed", color = "blue")
-  ggplot(coy_obs[coy_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+  coy_elev_smr <- ggplot(coy_obs[coy_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Coyote Summer Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) +
     geom_vline(xintercept = mu_obs[[7]]$Elev[1], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[7]]$Elev[3], linetype = "dashed", color = "blue")
   #'  Winter
-  ggplot(md_obs[md_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+  md_elev_wtr <- ggplot(md_obs[md_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Mule Deer Winter Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_obs[[1]]$Elev[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[1]]$Elev[4], linetype = "dashed", color = "blue")
-  ggplot(elk_obs[elk_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+  elk_elev_wtr <- ggplot(elk_obs[elk_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Elk Winter Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 1700)) + 
     geom_vline(xintercept = mu_obs[[2]]$Elev[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[2]]$Elev[4], linetype = "dashed", color = "blue")
-  ggplot(wtd_obs[wtd_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+  wtd_elev_wtr <- ggplot(wtd_obs[wtd_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "White-tailed Deer Winter Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 1700)) + 
     geom_vline(xintercept = mu_obs[[3]]$Elev[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[3]]$Elev[4], linetype = "dashed", color = "blue")
-  ggplot(coug_obs[coug_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+  coug_elev_wtr <- ggplot(coug_obs[coug_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Cougar Winter Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_obs[[4]]$Elev[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[4]]$Elev[4], linetype = "dashed", color = "blue")
-  ggplot(wolf_obs[wolf_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+  wolf_elev_wtr <- ggplot(wolf_obs[wolf_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Wolf Winter Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_obs[[5]]$Elev[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[5]]$Elev[4], linetype = "dashed", color = "blue")
-  ggplot(bob_obs[bob_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+  bob_elev_wtr <- ggplot(bob_obs[bob_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Bobcat Winter Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_obs[[6]]$Elev[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[6]]$Elev[4], linetype = "dashed", color = "blue")
-  ggplot(coy_obs[coy_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+  coy_elev_wtr <- ggplot(coy_obs[coy_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Coyote Winter Observations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_obs[[7]]$Elev[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[7]]$Elev[4], linetype = "dashed", color = "blue")
-
+  #'  Elk camera samples vs what was available for elevation
+  elk_allelev_smr <- ggplot(elk_sampled[elk_sampled$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    labs(title = "Elk Summer Cameras vs Availble Data", x = "Elevation (m)", y = "Proportion of Observations per Data Type")  + 
+    coord_cartesian(xlim = c(300, 2500)) + 
+    geom_vline(xintercept = mu_avail[[2]]$Elev[1], linetype = "dashed", color = "red") +
+    geom_vline(xintercept = mu_avail[[2]]$Elev[3], linetype = "dashed", color = "blue")
+  elk_allelev_wtr <- ggplot(elk_sampled[elk_sampled$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    labs(title = "Elk Winter Cameras vs Availble Data", x = "Elevation (m)", y = "Proportion of Observations per Data Type")  + 
+    coord_cartesian(xlim = c(300, 2500)) + 
+    geom_vline(xintercept = mu_avail[[2]]$Elev[2], linetype = "dashed", color = "red") +
+    geom_vline(xintercept = mu_avail[[2]]$Elev[4], linetype = "dashed", color = "blue")
+  
+  #'  PERCENT FOREST histograms
+  elk_for_smr <- ggplot(elk_obs[elk_obs$Season == "Summer",], aes(x = PercForMix, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    labs(title = "Elk Summer Observations", x = "Percent Forest within 250m of Observation", y = "Proportion of Observations per Data Type")  + 
+    geom_vline(xintercept = mu_obs[[2]]$PercForMix[1], linetype = "dashed", color = "red") +
+    geom_vline(xintercept = mu_obs[[2]]$PercForMix[3], linetype = "dashed", color = "blue")
+  elk_for_wtr <- ggplot(elk_obs[elk_obs$Season == "Winter",], aes(x = PercForMix, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    labs(title = "Elk Winter Observations", x = "Percent Forest within 250m of Observation", y = "Proportion of Observations per Data Type")  + 
+    geom_vline(xintercept = mu_obs[[2]]$PercForMix[2], linetype = "dashed", color = "red") +
+    geom_vline(xintercept = mu_obs[[2]]$PercForMix[4], linetype = "dashed", color = "blue")
+  #'  Camera samples vs what was available
+  elk_allfor_smr <- ggplot(elk_sampled[elk_sampled$Season == "Summer",], aes(x = PercForMix, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    labs(title = "Elk Summer Cameras vs Availble Data", x = "Percent Forest within 250m of Observation", y = "Proportion of Observations per Data Type")  + 
+    geom_vline(xintercept = mu_avail[[2]]$PercForMix[1], linetype = "dashed", color = "red") +
+    geom_vline(xintercept = mu_avail[[2]]$PercForMix[3], linetype = "dashed", color = "blue")
+  elk_allfor_wtr <- ggplot(elk_sampled[elk_sampled$Season == "Winter",], aes(x = PercForMix, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    labs(title = "Elk Winter Cameras vs Availble Data", x = "Percent Forest within 250m of Observation", y = "Proportion of Observations per Data Type")  + 
+    geom_vline(xintercept = mu_avail[[2]]$PercForMix[2], linetype = "dashed", color = "red") +
+    geom_vline(xintercept = mu_avail[[2]]$PercForMix[4], linetype = "dashed", color = "blue")
+  
   #'  Winter GRASS histograms
-  ggplot(coy_obs[coy_obs$Season == "Winter",], aes(x = PercXGrass, color = Data, fill = Data)) + 
+  coy_grass_wtr <- ggplot(coy_obs[coy_obs$Season == "Winter",], aes(x = PercXGrass, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Coyote Winter Observations", x = "Percent Grass within 250m of Observation", y = "Proportion of Observations per Data Type")  + 
     geom_vline(xintercept = mu_obs[[7]]$PercXGrass[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[7]]$PercXGrass[4], linetype = "dashed", color = "blue")
   
   #'  SHRUB histograms
-  ggplot(md_obs[md_obs$Season == "Summer",], aes(x = PercXShrub, color = Data, fill = Data)) + 
+  md_shrub_smr <- ggplot(md_obs[md_obs$Season == "Summer",], aes(x = PercXShrub, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Mule Deer Summer Observations", x = "Percent Shrub within 250m of Observation", y = "Proportion of Observations per Data Type")  + 
     geom_vline(xintercept = mu_obs[[1]]$PercXShrub[1], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[1]]$PercXShrub[3], linetype = "dashed", color = "blue")
-  ggplot(md_obs[md_obs$Season == "Winter",], aes(x = PercXShrub, color = Data, fill = Data)) + 
+  md_shrub_wtr <- ggplot(md_obs[md_obs$Season == "Winter",], aes(x = PercXShrub, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Mule Deer Winter Observations", x = "Percent Shrub within 250m of Observation", y = "Proportion of Observations per Data Type")  + 
     geom_vline(xintercept = mu_obs[[1]]$PercXShrub[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[1]]$PercXShrub[4], linetype = "dashed", color = "blue")
   
   #'  ROAD DENSITY histograms
-  ggplot(elk_obs[elk_obs$Season == "Summer",], aes(x = RoadDen, color = Data, fill = Data)) + 
+  elk_rd_smr <- ggplot(elk_obs[elk_obs$Season == "Summer",], aes(x = RoadDen, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 400, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Elk Summer Observations", x = "Road Density (road length/1000 m2)", y = "Proportion of Observations per Data Type")  + 
     geom_vline(xintercept = mu_obs[[2]]$RoadDen[1], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[2]]$RoadDen[3], linetype = "dashed", color = "blue")
-  ggplot(elk_obs[elk_obs$Season == "Winter",], aes(x = RoadDen, color = Data, fill = Data)) + 
+  elk_rd_wtr <- ggplot(elk_obs[elk_obs$Season == "Winter",], aes(x = RoadDen, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 400, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Elk Winter Observations", x = "Road Density (road length/1000 m2)", y = "Proportion of Observations per Data Type")  + 
     geom_vline(xintercept = mu_obs[[2]]$RoadDen[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[2]]$RoadDen[4], linetype = "dashed", color = "blue")
-  ggplot(coug_obs[coug_obs$Season == "Summer",], aes(x = RoadDen, color = Data, fill = Data)) + 
+  coug_rd_smr <- ggplot(coug_obs[coug_obs$Season == "Summer",], aes(x = RoadDen, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 400, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Cougar Summer Observations", x = "Road Density (road length/1000 m2)", y = "Proportion of Observations per Data Type")  + 
     geom_vline(xintercept = mu_obs[[4]]$RoadDen[1], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[4]]$RoadDen[3], linetype = "dashed", color = "blue")
-  ggplot(coug_obs[coug_obs$Season == "Winter",], aes(x = RoadDen, color = Data, fill = Data)) + 
+  coug_rd_wtr <- ggplot(coug_obs[coug_obs$Season == "Winter",], aes(x = RoadDen, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 500, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Cougar Winter Observations", x = "Road Density (road length/1000 m2)", y = "Proportion of Observations per Data Type")  + 
     geom_vline(xintercept = mu_obs[[4]]$RoadDen[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[4]]$RoadDen[4], linetype = "dashed", color = "blue")
   
   #'  HUMAN MODIFIED LANDSCAPE histograms
-  ggplot(md_obs[md_obs$Season == "Summer",], aes(x = HumanMod, color = Data, fill = Data)) + 
+  md_hm_smr <- ggplot(md_obs[md_obs$Season == "Summer",], aes(x = HumanMod, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Mule Deer Summer Observations", x = "Percent Human Modified Landscape", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(0, 1)) +
     geom_vline(xintercept = mu_obs[[1]]$HumanMod[1], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[1]]$HumanMod[3], linetype = "dashed", color = "blue")
-  ggplot(md_obs[md_obs$Season == "Winter",], aes(x = HumanMod, color = Data, fill = Data)) + 
+  md_hm_wtr <- ggplot(md_obs[md_obs$Season == "Winter",], aes(x = HumanMod, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Mule Deer Winter Observations", x = "Percent Human Modified Landscape", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(0, 1))  +
     geom_vline(xintercept = mu_obs[[1]]$HumanMod[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[1]]$HumanMod[4], linetype = "dashed", color = "blue")
-  ggplot(coy_obs[coy_obs$Season == "Summer",], aes(x = HumanMod, color = Data, fill = Data)) +
+  coy_hm_smr <- ggplot(coy_obs[coy_obs$Season == "Summer",], aes(x = HumanMod, color = Data, fill = Data)) +
     geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Coyote Summer Observations", x = "Percent Human Modified Landscape", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(0, 1))  +
     geom_vline(xintercept = mu_obs[[7]]$HumanMod[1], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[7]]$HumanMod[3], linetype = "dashed", color = "blue")
-  ggplot(coy_obs[coy_obs$Season == "Winter",], aes(x = HumanMod, color = Data, fill = Data)) + 
+  coy_hm_wtr <- ggplot(coy_obs[coy_obs$Season == "Winter",], aes(x = HumanMod, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     labs(title = "Coyote Winter Observations", x = "Percent Human Modified Landscape", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(0, 1))  +
     geom_vline(xintercept = mu_obs[[7]]$HumanMod[2], linetype = "dashed", color = "red") +
     geom_vline(xintercept = mu_obs[[7]]$HumanMod[4], linetype = "dashed", color = "blue")
+  #'  Mule deer camera samples vs what was available for human modified
+  md_availhm_smr <- ggplot(md_sampled[md_sampled$Season == "Summer",], aes(x = HumanMod, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    labs(title = "Mule Deer Summer Cameras vs Availble Data", x = "Percent Human Modified Landscape", y = "Proportion of Observations per Data Type") + 
+    coord_cartesian(xlim = c(0, 1)) +
+    geom_vline(xintercept = mu_avail[[1]]$HumanMod[1], linetype = "dashed", color = "red") +
+    geom_vline(xintercept = mu_avail[[1]]$HumanMod[3], linetype = "dashed", color = "blue")
+  md_availhm_wtr <- ggplot(md_sampled[md_sampled$Season == "Winter",], aes(x = HumanMod, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    labs(title = "Mule Deer Winter Cameras vs Availble Data", x = "Percent Human Modified Landscape", y = "Proportion of Observations per Data Type") + 
+    coord_cartesian(xlim = c(0, 1))  +
+    geom_vline(xintercept = mu_avail[[1]]$HumanMod[2], linetype = "dashed", color = "red") +
+    geom_vline(xintercept = mu_avail[[1]]$HumanMod[4], linetype = "dashed", color = "blue")
   
   
   
-  
+  #'  Save select figures as PNG images
+  ggsave("./Outputs/Figures/Histograms/MuleDeer_elev_smr_plot.png", md_elev_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/MuleDeer_elev_wtr_plot.png", md_elev_wtr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/MuleDeer_hm_smr_plot.png", md_hm_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/MuleDeer_hm_wtr_plot.png", md_hm_wtr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Coyote_hm_smr_plot.png", coy_hm_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Coyote_hm_wtr_plot.png", coy_hm_wtr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Elk_elev_smr_plot.png", elk_elev_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Elk_elev_wtr_plot.png", elk_elev_wtr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Elk_allelev_smr_plot.png", elk_allelev_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Elk_allelev_wtr_plot.png", elk_allelev_wtr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Elk_forest_smr_plot.png", elk_for_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Elk_forest_wtr_plot.png", elk_for_wtr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Coyote_hm_wtr_plot.png", coy_hm_wtr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Elk_allforest_smr_plot.png", elk_allfor_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Elk_allforest_wtr_plot.png", elk_allfor_wtr, width = 7.3, units = "in")
   
