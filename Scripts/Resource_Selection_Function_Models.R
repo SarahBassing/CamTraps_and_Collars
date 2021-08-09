@@ -300,8 +300,8 @@
   
   
   #'  Save!
-  write.csv(rsf_results, paste0("./Outputs/RSF_Results_", Sys.Date(), ".csv"))
-  write.csv(rsf_results_wide, paste0("./Outputs/RSF_Results_wide_", Sys.Date(), ".csv"))
+  write.csv(rsf_results, paste0("./Outputs/Tables/RSF_Results_", Sys.Date(), ".csv"))
+  write.csv(rsf_results_wide, paste0("./Outputs/Tables/RSF_Results_wide_", Sys.Date(), ".csv"))
   
   save.image("./Outputs/RSF_script_results.RData")
   
