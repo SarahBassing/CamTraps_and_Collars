@@ -231,10 +231,10 @@
   #' plot(stations$Elev, stations$HumanModified) # seems to be a break point around mid-elevation
   #' 
   #' #'  Study area specific correlations
-  #' cor(stations_NE$Elev, stations_NE$HumanModified, use = "complete.obs")  
-  #' cor(stations_OK$Elev, stations_OK$HumanModified, use = "complete.obs")  
+  #' cor(stations_NE$Elev, stations_NE$HumanModified, use = "complete.obs")  #  EHH -0.566
+  #' cor(stations_OK$Elev, stations_OK$HumanModified, use = "complete.obs")  #  UGH -0.687
   #' cor(stations_NE$RoadDensity, stations_NE$HumanModified, use = "complete.obs")
-  #' cor(stations_OK$RoadDensity, stations_OK$HumanModified, use = "complete.obs") 
+  #' cor(stations_OK$RoadDensity, stations_OK$HumanModified, use = "complete.obs")  # EHH 0.573
   
   
   #'  Survey covariates
@@ -829,8 +829,11 @@
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' coug_s1819_all <- get.models(coug_s1819_dd, subset = delta < 2,)
   #' coug_s1819_all[[1]]
-  #'  Dredge identified top model
-  # (coug_s1819_top <- occu(formula = ~Height + Trail + Year ~Area + Elev + PercForMix, data = coug_s1819_UMF))
+  #' #'  Dredge identified top model
+  #' (coug_s1819_top <- occu(formula = ~Height + Trail + Year ~Area + Elev + PercForMix, data = coug_s1819_UMF))
+  #' #'  Uni-variate model (on occupancy) for elevation to make sure opposing OccMod & RSF effects aren't due to over-parameterization or confounding variables in OccMod
+  #' (coug_s1819_elev <- occu(formula = ~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev, data = coug_s1819_UMF)) # elev has + effect
+  # (coug_s1819_global_noHM <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, coug_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020           
   (coug_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub  + RoadDensity + HumanMod + Area, coug_w1820_UMF))
@@ -844,6 +847,7 @@
   #' coug_w1820_all[[1]]
   #'  Dredge identified top model
   # (coug_w1820_top <- occu(formula = ~Height + Trail ~Elev + HumanMod + PercForMix + Slope, data = coug_w1820_UMF))
+  
   
   ####  COYOTE MODELS  ####
   #'  SUMMERS 2018 & 2019
@@ -869,8 +873,11 @@
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' coy_w1820_all <- get.models(coy_w1820_dd, subset = delta < 2,)
   #' coy_w1820_all[[1]]
-  #'  Dredge identified top model
-  # (coy_w1820_top <- occu(formula = ~Distance + Height + Temp_wtr + Trail + Distance:Height ~Elev + NearestRd + PercXGrass, data = coy_w1820_UMF))
+  #' #'  Dredge identified top model
+  #' (coy_w1820_top <- occu(formula = ~Distance + Height + Temp_wtr + Trail + Distance:Height ~Elev + PercXGrass, data = coy_w1820_UMF)) # used to contain NearestRd
+  #' #'  Uni-variate model (on occupancy) for percent grass
+  #' (coy_w1820_grass <- occu(formula = ~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~PercXGrass, data = coy_w1820_UMF)) # PercXGrass effect is +
+
   
   ####  WOLF MODELS  ####
   #'  SUMMERS 2018 & 2019    
@@ -885,9 +892,12 @@
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' wolf_s1819_all <- get.models(wolf_s1819_dd, subset = delta < 2,)
   #' wolf_s1819_all[[1]]
-  #'  Dredge identified top model
-  # (wolf_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + HumanMod + NearestRd, data = wolf_s1819_UMF))
-  
+  #' #'  Dredge identified top model
+  #' (wolf_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + HumanMod, data = wolf_s1819_UMF)) # used to contain NearestRd
+  #' #'  Uni-variate model (on occupancy) with elevation
+  #' (wolf_s1819_elev <- occu(formula = ~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev, data = wolf_s1819_UMF)) # elevation effect is +
+  # (wolf_s1819_global2_noHM <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + Area, wolf_s1819_UMF))
+
   #'  WINTERS 2018-2019 & 2019-2020     
   #'  Dropped Elevation from global model due to problems with dredge (seemed to
   #'  arise when Elevation & Area were in the model; excluded Elevation b/c not
@@ -956,8 +966,14 @@
   #' #'  Keep top models (within 2 deltaAIC) & review the top model
   #' md_s1819_all <- get.models(md_s1819_dd, subset = delta < 2,)
   #' md_s1819_all[[1]]
-  #'  Dredge identified top model
-  # (md_s1819_top <- occu(formula = ~Distance + Height + Temp_smr + Distance:Height ~HumanMod, data = md_s1819_UMF))
+  #' #'  Dredge identified top model
+  #' (md_s1819_top <- occu(formula = ~Distance + Height + Temp_smr + Distance:Height ~HumanMod, data = md_s1819_UMF))
+  #' #'  Uni-variate model (on occupancy) with human modified landscapes
+  #' (md_s1819_hm <- occu(formula = ~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~HumanMod, data = md_s1819_UMF)) # HumanMod effect is - (however, Elev alone is + but switches to negative when HumanMod included in model so they do confound each other even if Elev is not significant)
+  #' (md_s1819_global_noElev <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_s1819_UMF))
+  #' #'  What happens when we drop HumanHod from the model since it's so closely correlated with Elevation?
+  #' (md_s1819_global_noHM <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity, md_s1819_UMF))
+  #' (md_s1819_elev <- occu(formula = ~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev, data = md_s1819_UMF))
   
   #'  WINTERS 2018-2019 & 2019-2020, OK study area only so no Area effect                    
   (md_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + HumanMod, md_w1820_UMF))  
@@ -1153,8 +1169,8 @@
     arrange(match(Season, c("Summer", "Winter")))
   
   #'  Save!
-  write.csv(results_psi, paste0("./Outputs/OccMod_OccProb_Results_", Sys.Date(), ".csv"))
-  write.csv(results_psi_wide, paste0("./Outputs/OccMod_OccProb_Results_wide_", Sys.Date(), ".csv"))
+  write.csv(results_psi, paste0("./Outputs/Tables/OccMod_OccProb_Results_", Sys.Date(), ".csv"))
+  write.csv(results_psi_wide, paste0("./Outputs/Tables/OccMod_OccProb_Results_wide_", Sys.Date(), ".csv"))
   
  
   #'  Function to save detection results
@@ -1284,12 +1300,8 @@
     arrange(match(Season, c("Summer", "Winter")))
 
   #'  Save!
-  write.csv(results_det, paste0("./Outputs/OccMod_DetProb_Results_", Sys.Date(), ".csv"))
-  write.csv(results_det_wide, paste0("./Outputs/OccMod_DetProb_Results_wide", Sys.Date(), ".csv"))
-
-  #'  Save workspace
-  save.image(file = "./Outputs/OccMod_script_results.RData")
-
+  write.csv(results_det, paste0("./Outputs/Tables/OccMod_DetProb_Results_", Sys.Date(), ".csv"))
+  write.csv(results_det_wide, paste0("./Outputs/Tables/OccMod_DetProb_Results_wide", Sys.Date(), ".csv"))
 
 
   #'  Predict probability of occupancy across sites
@@ -1339,7 +1351,9 @@
     arrange(Parameter, Mean, Species)
   
   #'  Save
-  write.csv(Mean_tbl, "./Outputs/Tables/OccMod_Mean_Estimates.csv")
+  # write.csv(Mean_tbl, paste0("./Outputs/Tables/OccMod_Mean_Estimates_", Sys.Date(), ".csv"))
   
  
+  #'  Save workspace
+  save.image(file = "./Outputs/OccMod_script_results.RData")
   
