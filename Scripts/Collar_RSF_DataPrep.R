@@ -226,13 +226,13 @@
   coy_available <- list(coy_smr_df, coy_wtr_df)
   
   #'  Save available points based on individual home ranges
-  save(md_available, file = paste0("./Outputs/RSF_pts/md_available_", Sys.Date(), ".RData"))
-  save(elk_available, file = paste0("./Outputs/RSF_pts/elk_available_", Sys.Date(), ".RData"))
-  save(wtd_available, file = paste0("./Outputs/RSF_pts/wtd_available_", Sys.Date(), ".RData"))
-  save(coug_available, file = paste0("./Outputs/RSF_pts/coug_available_", Sys.Date(), ".RData"))
-  save(wolf_available, file = paste0("./Outputs/RSF_pts/wolf_available_", Sys.Date(), ".RData"))
-  save(bob_available, file = paste0("./Outputs/RSF_pts/bob_available_", Sys.Date(), ".RData"))
-  save(coy_available, file = paste0("./Outputs/RSF_pts/coy_available_", Sys.Date(), ".RData"))
+  save(md_available, file = paste0("./Outputs/RSF_pts/md_available_3rd_", Sys.Date(), ".RData"))
+  save(elk_available, file = paste0("./Outputs/RSF_pts/elk_available_3rd_", Sys.Date(), ".RData"))
+  save(wtd_available, file = paste0("./Outputs/RSF_pts/wtd_available_3rd_", Sys.Date(), ".RData"))
+  save(coug_available, file = paste0("./Outputs/RSF_pts/coug_available_3rd_", Sys.Date(), ".RData"))
+  save(wolf_available, file = paste0("./Outputs/RSF_pts/wolf_available_3rd_", Sys.Date(), ".RData"))
+  save(bob_available, file = paste0("./Outputs/RSF_pts/bob_available_3rd_", Sys.Date(), ".RData"))
+  save(coy_available, file = paste0("./Outputs/RSF_pts/coy_available_3rd_", Sys.Date(), ".RData"))
  
   
   #'  2nd ORDER SELECTION Average 1:20 used:available
@@ -406,7 +406,8 @@
   xshrubprop18 <- raster("./Shapefiles/Cascadia_layers/xshrubprop_18.tif")
   xshrubprop19 <- raster("./Shapefiles/Cascadia_layers/xshrubprop_19.tif")
   # roads <- st_read("./Shapefiles/Cascadia_layers/roadsForTaylor", layer = "roadsForTaylor")
-  rdden <- raster("./Shapefiles/roaddensity/road.density_km2_TIF.tif")
+  # rdden <- raster("./Shapefiles/roaddensity/road.density_km2_TIF.tif")
+  rdden <- raster("./Shapefiles/Cascadia_layers/roadsForTaylor/RoadDensity_1km.tif")
   #'  Human density and human modified landscapes
   # HM <- raster("./Shapefiles/Additional_WPPP_Layers/WPPP_gHM_reproj.tif")
   HM <- raster("./Shapefiles/Additional_WPPP_Layers/WPPP_gHM.tif")
@@ -456,6 +457,7 @@
   
   
   ####  KEEP TRACK OF WHICH VERSION OF THESE LOCS DATA I USE BELOW!  ####
+  #'  Am I using 3rd order available data or 2nd order available_2nd data?
   
 
   #'  COVARIATE EXTRACTION & CALCULATIONS  
@@ -491,11 +493,11 @@
         obs = ID,
         Elev = round(WPPP_DEM_30m, digits = 2),
         Slope = round(WPPP_slope_aspect, digits = 2),
-        RoadDen = round(road.density_km2_TIF, digits = 2),
+        RoadDen = round(RoadDensity_1km, digits = 2),
         HumanMod = round(WPPP_gHM, digits = 2)
         # Elev = round(WPPP_DEM_30m_reproj, digits = 2),
         # Slope = round(WPPP_slope_aspect_reproj, digits = 2),
-        # RoadDen = round(road.density_km2_TIF, digits = 2),
+        # RoadDen = round(road.density_km2_TIF, digits = 2), # double check the raster
         # HumanMod = round(WPPP_gHM_reproj, digits = 2)
       ) %>%
       #'  Need to change NAs to 0 for road density (if NA it means there are no
@@ -694,6 +696,7 @@
   
   
   # 2021-06-22 uses reprojected rasters
+  # 2021-08-09 uses my road density raster (km of road length/1 sq-km)... other versions use Lauren's raster that I think is meters of road length/1 sq-km
   
   
   
