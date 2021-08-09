@@ -1963,3 +1963,66 @@
   ggsave("./Outputs/Figures/Histograms/Elk_allforest_smr_plot.png", elk_allfor_smr, width = 7.3, units = "in")
   ggsave("./Outputs/Figures/Histograms/Elk_allforest_wtr_plot.png", elk_allfor_wtr, width = 7.3, units = "in")
   
+  
+  
+  ####  Mapping predicted habitat use/selection  ####
+  #'  Read in extracted covariate data for entire study areas (based on 1km grids)
+  OK_covs <- read.csv("./Outputs/Tables/StudyAreaWide_OK_Covariates_2021-08-09.csv") %>%
+    mutate(
+      Elev = scale(Elev),
+      Slope = scale(Slope),
+      RoadDen = scale(RoadDen),
+      HumanMod = scale(HumanMod),
+      PercForMix = scale(PercForestMix2),
+      PercXGrass = scale(PercXericGrass),
+      PercXShrub = scale(PercXericShrub),
+      Area = "OK",
+      x = as.numeric(x),
+      y = as.numeric(y)
+    )
+  NE_covs <- read.csv("./Outputs/Tables/StudyAreaWide_NE_Covariates_2021-08-09.csv") %>%
+    mutate(
+      Elev = scale(Elev),
+      Slope = scale(Slope),
+      RoadDen = scale(RoadDen),
+      HumanMod = scale(HumanMod),
+      PercForMix = scale(PercForestMix2),
+      PercXGrass = scale(PercXericGrass),
+      PercXShrub = scale(PercXericShrub),
+      Area = "NE",
+      x = as.numeric(x),
+      y = as.numeric(y)
+    )
+  all_covs <- as.data.frame(rbind(NE_covs, OK_covs))
+  
+  #'  Function to predict across all grid cells based on occupancy model results
+  #'  Should end up with 1 predicted value per grid cell
+  predict_occ <- function(cov, alpha, B1, B2, B3, B4, B5, B6, B7, B8) {
+    predict_odds <- c()
+    predict_prob <- c()
+    for(i in 1:nrow(cov)) {
+      predict_odds[i] <- exp(alpha + B1*cov$Area[i] + B2*cov$Elev[i] + B3*cov$Slope[i]+ B4*cov$PercForMix[i] + B5*cov$PercXGrass[i] + B6*cov$PercXShrub[i] + B7*cov$RoadDen[i] + B8*cov$HumanMod[i])
+      predict_prob[i] <- odds[i] / (1 + odds[i])
+    }
+    predict_prob <- as.data.frame(predict_prob)
+    return(predict_prob)
+  }
+
+  
+  #'  Run estimates from linear model through function to predict probability of use
+  elk_smr_predict_occ <- predict_occ(mu_a0_elk, b_elev_elk, b_road_elk, elev, road)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
