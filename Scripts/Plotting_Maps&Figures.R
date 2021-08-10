@@ -1033,7 +1033,7 @@
   
   
   ####  Pair OccMod and RSF plots  ####
-  #'  patchwork version:
+  #'  patchwork figures together:
   elev_fig <- elev_occ_smr_fig + plot_annotation(title = "A") + elev_rsf_smr_fig + elev_occ_wtr_fig + elev_rsf_wtr_fig + plot_layout(ncol = 4)
   slope_fig <- slope_occ_smr_fig + plot_annotation(title = "B") + slope_rsf_smr_fig + slope_occ_wtr_fig + slope_rsf_wtr_fig + plot_layout(ncol = 4)
   for_fig <- for_occ_smr_fig + plot_annotation(title = "C") + for_rsf_smr_fig + for_occ_wtr_fig + for_rsf_wtr_fig + plot_layout(ncol = 4)
@@ -1965,10 +1965,12 @@
   
   
   
-  ####  Mapping predicted habitat use/selection  ####
+  ####  6. Mapping predicted habitat use/selection  ####
   #'  Read in extracted covariate data for entire study areas (based on 1km grids)
   OK_covs <- read.csv("./Outputs/Tables/StudyAreaWide_OK_Covariates_2021-08-09.csv") %>%
-    mutate(
+    dplyr::select(-X) %>%
+    transmute(
+      obs = obs,
       Elev = scale(Elev),
       Slope = scale(Slope),
       RoadDen = scale(RoadDen),
@@ -1976,12 +1978,14 @@
       PercForMix = scale(PercForestMix2),
       PercXGrass = scale(PercXericGrass),
       PercXShrub = scale(PercXericShrub),
-      Area = "OK",
-      x = as.numeric(x),
-      y = as.numeric(y)
+      Area = 1,
+      x = x,
+      y = y
     )
   NE_covs <- read.csv("./Outputs/Tables/StudyAreaWide_NE_Covariates_2021-08-09.csv") %>%
-    mutate(
+    dplyr::select(-X) %>%
+    transmute(
+      obs = obs,
       Elev = scale(Elev),
       Slope = scale(Slope),
       RoadDen = scale(RoadDen),
@@ -1989,36 +1993,752 @@
       PercForMix = scale(PercForestMix2),
       PercXGrass = scale(PercXericGrass),
       PercXShrub = scale(PercXericShrub),
-      Area = "NE",
-      x = as.numeric(x),
-      y = as.numeric(y)
+      Area = 0,
+      x = x,
+      y = y
     )
   all_covs <- as.data.frame(rbind(NE_covs, OK_covs))
   
+  #'  Convert into SpatialPointsDataFrame
+  xy <- all_covs[,c(10,11)]
+  covs_spdf <- SpatialPointsDataFrame(data = all_covs, coords = xy,
+                                 proj4string = CRS(sa_proj))
+  #'  Extract Lat/Long coordinates and append to covariate data frame
+  xy_saproj <- coordinates(covs_spdf)
+  colnames(xy_saproj) <- c("x2", "y2")
+  all_covs <- cbind(all_covs, xy_saproj)
+  #' #'  Transform to WGS84
+  #' covs_wgs84 <- spTransform(covs_spdf, wgs84)
+  #' #'  Extract Lat/Long coordinates and append to covariate data frame
+  #' latlong <- coordinates(covs_wgs84)
+  #' colnames(latlong) <- c("Long", "Lat")
+  #' all_covs <- cbind(all_covs, latlong)
+  
+  
+  ####  Predict occupancy probability across study area  ####
+  #'  Manipulate Occupancy result tables (read in above at 3. OccMod vs RSF plots)
+  occ_coefs <- occ_out %>%
+    dplyr::select(c(Species, Season, Parameter, Estimate)) %>%
+    mutate(Parameter = ifelse(Parameter == "(Intercept)", "Intercept", Parameter)) %>%
+    #'  Spread data so each row represents model coefficients for a single season, single species model
+    pivot_wider(names_from = Parameter, values_from = Estimate) %>%
+    #'  Rename coefficients so they're different than covariate names
+    transmute(
+      Species = Species,
+      Season = Season,
+      alpha = Intercept,
+      B.elev = Elev,
+      B.slope = Slope,
+      B.for = PercForMix,
+      B.grass = PercXGrass,
+      B.shrub = PercXShrub,
+      B.rd = RoadDensity,
+      B.hm = HumanMod,
+      B.area = AreaOK
+    ) %>%
+    #'  Change NAs to 0 (no effect) for coefficients not included in species-specific models
+    mutate(
+      B.grass = ifelse(is.na(B.grass), 0, B.grass),
+      B.shrub = ifelse(is.na(B.shrub), 0, B.shrub),
+      B.area = ifelse(is.na(B.area), 0, B.area)
+    )
+ 
   #'  Function to predict across all grid cells based on occupancy model results
   #'  Should end up with 1 predicted value per grid cell
-  predict_occ <- function(cov, alpha, B1, B2, B3, B4, B5, B6, B7, B8) {
+  predict_occ <- function(cov, coef) {
     predict_odds <- c()
     predict_prob <- c()
     for(i in 1:nrow(cov)) {
-      predict_odds[i] <- exp(alpha + B1*cov$Area[i] + B2*cov$Elev[i] + B3*cov$Slope[i]+ B4*cov$PercForMix[i] + B5*cov$PercXGrass[i] + B6*cov$PercXShrub[i] + B7*cov$RoadDen[i] + B8*cov$HumanMod[i])
-      predict_prob[i] <- odds[i] / (1 + odds[i])
+      predict_odds[i] <- exp(coef$alpha + coef$B.area*cov$Area[i] + coef$B.elev*cov$Elev[i] + 
+                               coef$B.slope*cov$Slope[i]+ coef$B.for*cov$PercForMix[i] + 
+                               coef$B.grass*cov$PercXGrass[i] + coef$B.shrub*cov$PercXShrub[i] + 
+                               coef$B.rd*cov$RoadDen[i] + coef$B.hm*cov$HumanMod[i])
+      predict_prob[i] <- predict_odds[i] / (1 + predict_odds[i])
     }
-    predict_prob <- as.data.frame(predict_prob)
+    predict_prob <- as.data.frame(predict_prob) %>%
+      transmute(
+        Predicted_Occ = round(predict_prob, 2)
+      )
     return(predict_prob)
   }
+  #'  Run estimates from linear model through function to predict probability of use
+  md_smr_predict_occ <- predict_occ(OK_covs, occ_coefs[occ_coefs$Species == "Mule Deer" & occ_coefs$Season == "Summer",])
+  md_wtr_predict_occ <- predict_occ(OK_covs, occ_coefs[occ_coefs$Species == "Mule Deer" & occ_coefs$Season == "Winter",])
+  elk_smr_predict_occ <- predict_occ(NE_covs, occ_coefs[occ_coefs$Species == "Elk" & occ_coefs$Season == "Summer",])
+  elk_wtr_predict_occ <- predict_occ(NE_covs, occ_coefs[occ_coefs$Species == "Elk" & occ_coefs$Season == "Winter",])
+  wtd_smr_predict_occ <- predict_occ(NE_covs, occ_coefs[occ_coefs$Species == "White-tailed Deer" & occ_coefs$Season == "Summer",])
+  wtd_wtr_predict_occ <- predict_occ(NE_covs, occ_coefs[occ_coefs$Species == "White-tailed Deer" & occ_coefs$Season == "Winter",])
+  coug_smr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Cougar" & occ_coefs$Season == "Summer",])
+  coug_wtr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Cougar" & occ_coefs$Season == "Winter",])
+  wolf_smr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Wolf" & occ_coefs$Season == "Summer",])
+  wolf_wtr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Wolf" & occ_coefs$Season == "Winter",])
+  bob_smr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Bobcat" & occ_coefs$Season == "Summer",])
+  bob_wtr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Bobcat" & occ_coefs$Season == "Winter",])
+  coy_smr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Coyote" & occ_coefs$Season == "Summer",])
+  coy_wtr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Coyote" & occ_coefs$Season == "Winter",])
+  
+  #'  Combine into a monster data frame
+  #'  Start with predator data that spans both study areas
+  Predicted_occ <- all_covs %>%
+    dplyr::select(obs, Area, x, y) %>% 
+    mutate(Area = ifelse(Area == 0, "Northeast", "Okanogan")) %>%
+    cbind(coug_smr_predict_occ, coug_wtr_predict_occ, 
+          wolf_smr_predict_occ, wolf_wtr_predict_occ, 
+          bob_smr_predict_occ, bob_wtr_predict_occ, 
+          coy_smr_predict_occ, coy_wtr_predict_occ)
+  #'  Make sure you have the order right when you change the names!!!
+  colnames(Predicted_occ) <- c("obs", "Area", "x", "y",  
+                               "COUG_smr_occ", "COUG_wtr_occ", 
+                               "WOLF_smr_occ", "WOLF_wtr_occ", "BOB_smr_occ", 
+                               "BOB_wtr_occ", "COY_smr_occ", "COY_wtr_occ")
+  #'  Okanogan-only data (mule deer)
+  OK_rows <- seq(1:nrow(md_smr_predict_occ))
+  Area <- rep("Okanogan", length(OK_rows))
+  OK_occ <- as.data.frame(cbind(OK_rows, Area, md_smr_predict_occ, md_wtr_predict_occ)) 
+  colnames(OK_occ) <- c("obs", "Area", "MD_smr_occ", "MD_wtr_occ")
+  #'  Northeast-only data (elk & white-tailed deer)
+  NE_rows <- seq(1:nrow(elk_smr_predict_occ))
+  Area <- rep("Northeast", length(NE_rows))
+  NE_occ <- as.data.frame(cbind(NE_rows, Area, elk_smr_predict_occ, elk_wtr_predict_occ, 
+                                wtd_smr_predict_occ, wtd_wtr_predict_occ)) 
+  colnames(NE_occ) <- c("obs", "Area", "ELK_smr_occ", "ELK_wtr_occ", "WTD_smr_occ", "WTD_wtr_occ")
+  #'  Merge ungulate & predator data by study area
+  Predicted_occ_OK <- Predicted_occ[Predicted_occ$Area == "Okanogan",] %>%
+    #'  Need to account for columns that are present in other study area dataframe
+    mutate(
+      ELK_smr_occ = "NA",
+      ELK_wtr_occ = "NA",
+      WTD_smr_occ = "NA",
+      WTD_wtr_occ = "NA"
+    ) %>%
+    full_join(OK_occ, by = c("obs", "Area")) 
+  Predicted_occ_NE <- Predicted_occ[Predicted_occ$Area == "Northeast",] %>%
+    full_join(NE_occ, by = c("obs", "Area")) %>%
+    #'  Need to account for columns that are present in other study area dataframe
+    mutate(
+      MD_smr_occ = "NA",
+      MD_wtr_occ = "NA"
+    )
+  #'  Merge NE and OK predictions togther
+  Predicted_occ <- as.data.frame(rbind(Predicted_occ_NE, Predicted_occ_OK))
+  
+  
+  ####  Predict resource selection across study area  ####
+  #'  Manipulate RSF result tables (read in above at 3. OccMod vs RSF plots)
+  rsf_coefs <- rsf_out %>%
+    dplyr::select(c(Species, Season, Parameter, Estimate)) %>%
+    mutate(Parameter = ifelse(Parameter == "(Intercept)", "Intercept", Parameter)) %>%
+    #'  Spread data so each row represents model coefficients for a single season, single species model
+    pivot_wider(names_from = Parameter, values_from = Estimate) %>%
+    #'  Rename coefficients so they're different than covariate names
+    transmute(
+      Species = Species,
+      Season = Season,
+      alpha = Intercept,
+      B.elev = Elev,
+      B.slope = Slope,
+      B.for = PercForMix,
+      B.grass = PercXGrass,
+      B.shrub = PercXShrub,
+      B.rd = RoadDen,
+      B.hm = HumanMod
+    )
+  
+  #'  Function to predict across all grid cells based on RSF results
+  #'  Should end up with 1 predicted value per grid cell
+  predict_rsf <- function(cov, coef) {
+    predict_odds <- c()
+    predict_prob <- c()
+    for(i in 1:nrow(cov)) {
+      predict_odds[i] <- exp(coef$alpha + coef$B.elev*cov$Elev[i] + coef$B.slope*cov$Slope[i] + 
+                               coef$B.for*cov$PercForMix[i] + coef$B.grass*cov$PercXGrass[i] + 
+                               coef$B.shrub*cov$PercXShrub[i] + coef$B.rd*cov$RoadDen[i] + 
+                               coef$B.hm*cov$HumanMod[i])
+      predict_prob[i] <- predict_odds[i] / (1 + predict_odds[i])
+    }
+    predict_prob <- as.data.frame(predict_prob) %>%
+      transmute(
+        Predicted_RSF = round(predict_prob, 2)
+      )
+    return(predict_prob)
+  }
+  #'  Run estimates from linear model through function to predict probability of use
+  md_smr_predict_rsf <- predict_rsf(OK_covs, rsf_coefs[rsf_coefs$Species == "Mule Deer" & rsf_coefs$Season == "Summer",])
+  md_wtr_predict_rsf <- predict_rsf(OK_covs, rsf_coefs[rsf_coefs$Species == "Mule Deer" & rsf_coefs$Season == "Winter",])
+  elk_smr_predict_rsf <- predict_rsf(NE_covs, rsf_coefs[rsf_coefs$Species == "Elk" & rsf_coefs$Season == "Summer",])
+  elk_wtr_predict_rsf <- predict_rsf(NE_covs, rsf_coefs[rsf_coefs$Species == "Elk" & rsf_coefs$Season == "Winter",])
+  wtd_smr_predict_rsf <- predict_rsf(NE_covs, rsf_coefs[rsf_coefs$Species == "White-tailed Deer" & rsf_coefs$Season == "Summer",])
+  wtd_wtr_predict_rsf <- predict_rsf(NE_covs, rsf_coefs[rsf_coefs$Species == "White-tailed Deer" & rsf_coefs$Season == "Winter",])
+  coug_smr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Cougar" & rsf_coefs$Season == "Summer",])
+  coug_wtr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Cougar" & rsf_coefs$Season == "Winter",])
+  wolf_smr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Wolf" & rsf_coefs$Season == "Summer",])
+  wolf_wtr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Wolf" & rsf_coefs$Season == "Winter",])
+  bob_smr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Bobcat" & rsf_coefs$Season == "Summer",])
+  bob_wtr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Bobcat" & rsf_coefs$Season == "Winter",])
+  coy_smr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Coyote" & rsf_coefs$Season == "Summer",])
+  coy_wtr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Coyote" & rsf_coefs$Season == "Winter",])
+  
+  #'  Combine into a monster data frame
+  #'  Start with predators
+  Predicted_rsf <- all_covs %>%
+    dplyr::select(obs, Area, x, y) %>% 
+    mutate(Area = ifelse(Area == 0, "Northeast", "Okanogan")) %>%
+    cbind(coug_smr_predict_rsf, coug_wtr_predict_rsf, 
+          wolf_smr_predict_rsf, wolf_wtr_predict_rsf, 
+          bob_smr_predict_rsf, bob_wtr_predict_rsf, 
+          coy_smr_predict_rsf, coy_wtr_predict_rsf)
+  #'  Make sure you have the order right when you change the names!!!
+  colnames(Predicted_rsf) <- c("obs", "Area", "x", "y",  
+                               "COUG_smr_rsf", "COUG_wtr_rsf", 
+                               "WOLF_smr_rsf", "WOLF_wtr_rsf", "BOB_smr_rsf", 
+                               "BOB_wtr_rsf", "COY_smr_rsf", "COY_wtr_rsf")
+  #'  Okanogan-only data (mule deer)
+  OK_rows <- seq(1:nrow(md_smr_predict_rsf))
+  Area <- rep("Okanogan", length(OK_rows))
+  OK_rsf <- as.data.frame(cbind(OK_rows, Area, md_smr_predict_rsf, md_wtr_predict_rsf)) 
+  colnames(OK_rsf) <- c("obs", "Area", "MD_smr_rsf", "MD_wtr_rsf")
+  #'  Northeast-only data (elk & white-tailed deer)
+  NE_rows <- seq(1:nrow(elk_smr_predict_rsf))
+  Area <- rep("Northeast", length(NE_rows))
+  NE_rsf <- as.data.frame(cbind(NE_rows, Area, elk_smr_predict_rsf, elk_wtr_predict_rsf, 
+                                wtd_smr_predict_rsf, wtd_wtr_predict_rsf)) 
+  colnames(NE_rsf) <- c("obs", "Area", "ELK_smr_rsf", "ELK_wtr_rsf", "WTD_smr_rsf", "WTD_wtr_rsf")
+  #'  Merge ungulate & predator data by study area
+  Predicted_rsf_OK <- Predicted_rsf[Predicted_rsf$Area == "Okanogan",] %>%
+    #'  Need to account for columns that are present in other study area dataframe
+    mutate(
+      ELK_smr_rsf = "NA",
+      ELK_wtr_rsf = "NA",
+      WTD_smr_rsf = "NA",
+      WTD_wtr_rsf = "NA"
+    ) %>%
+    full_join(OK_rsf, by = c("obs", "Area")) 
+  Predicted_rsf_NE <- Predicted_rsf[Predicted_rsf$Area == "Northeast",] %>%
+    full_join(NE_rsf, by = c("obs", "Area")) %>%
+    #'  Need to account for columns that are present in other study area dataframe
+    mutate(
+      MD_smr_rsf = "NA",
+      MD_wtr_rsf = "NA"
+    )
+  #'  Merge NE and OK predictions togther
+  Predicted_rsf <- as.data.frame(rbind(Predicted_rsf_NE, Predicted_rsf_OK))
 
   
-  #'  Run estimates from linear model through function to predict probability of use
-  elk_smr_predict_occ <- predict_occ(mu_a0_elk, b_elev_elk, b_road_elk, elev, road)
+  ####  Plot predicted estimates  ####
+  #'  Keep in mind the occupancy and RSF results are on very different scales
+  #'  so the coloration is going to differ just because of that.
+  #'  Is there a way to weight the RSF results so they higher selected areas show
+  #'  up better?
+  
+  ####  MULE DEER  ####
+  #'  Summer Occ
+  md_smr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ_OK, aes(x = x, y = y, fill = MD_smr_occ)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + #low = "azure" #low = "floralwhite"
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Summer Occupancy Model") 
+  #'  Summer RSF
+  md_smr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf_OK, aes(x = x, y = y, fill = MD_smr_rsf)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Summer Resource Selection Function")
+  #'  Winter Occ
+  md_wtr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ_OK, aes(x = x, y = y, fill = MD_wtr_occ)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Winter Occupancy Model") 
+  #'  Winter RSF
+  md_wtr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf_OK, aes(x = x, y = y, fill = MD_wtr_rsf)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Winter Resource Selection Function")
+  
+  #'  patchwork figures together:
+  md_smr_map <- md_smr_occ_fig + plot_annotation(title = "Predicted Summer Mule Deer Space Use") + md_smr_rsf_fig 
+  md_wtr_map <- md_wtr_occ_fig + plot_annotation(title = "Predicted Winter Mule Deer Space Use") + md_wtr_rsf_fig 
+  md_predicted_map <- md_smr_occ_fig + plot_annotation(title = "Predicted Mule Deer Space Use") + 
+    md_smr_rsf_fig + md_wtr_occ_fig + md_wtr_rsf_fig + plot_layout(ncol = 2)
+  
+  #'  Visualize
+  plot(md_smr_map)
+  plot(md_wtr_map)
+  plot(md_predicted_map)
+  
+  #'  How do I thin out x-axis values so they aren't so bunched in panel figure?
   
   
   
+  ####  ELK  ####
+  #'  Summer Occ
+  elk_smr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ_NE, aes(x = x, y = y, fill = ELK_smr_occ)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
+    #'  Add study area outlines for reference
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Summer Occupancy Model") 
+  #'  Summer RSF
+  elk_smr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf_NE, aes(x = x, y = y, fill = ELK_smr_rsf)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Summer Resource Selection Function")
+  #'  Winter Occ
+  elk_wtr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ_NE, aes(x = x, y = y, fill = ELK_wtr_occ)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
+    #'  Add study area outlines for reference
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Winter Occupancy Model") 
+  #'  Winter RSF
+  elk_wtr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf_NE, aes(x = x, y = y, fill = ELK_wtr_rsf)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Winter Resource Selection Function")
+  
+  #'  patchwork figures together:
+  elk_smr_map <- elk_smr_occ_fig + plot_annotation(title = "Predicted Summer Elk Space Use") + elk_smr_rsf_fig 
+  elk_wtr_map <- elk_wtr_occ_fig + plot_annotation(title = "Predicted Winter Elk Space Use") + elk_wtr_rsf_fig 
+  elk_predicted_map <- elk_smr_occ_fig + plot_annotation(title = "Predicted Elk Space Use") + 
+    elk_smr_rsf_fig + elk_wtr_occ_fig + elk_wtr_rsf_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+  
+  #'  Visualize
+  plot(elk_smr_map)
+  plot(elk_wtr_map)
+  plot(elk_predicted_map)
   
   
+  ####  WHITE-TAILED DEER  ####
+  #'  Summer Occ
+  wtd_smr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ_NE, aes(x = x, y = y, fill = WTD_smr_occ)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
+    #'  Add study area outlines for reference
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Summer Occupancy Model") 
+  #'  Summer RSF
+  wtd_smr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf_NE, aes(x = x, y = y, fill = WTD_smr_rsf)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Summer Resource Selection Function")
+  #'  Winter Occ
+  wtd_wtr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ_NE, aes(x = x, y = y, fill = WTD_wtr_occ)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
+    #'  Add study area outlines for reference
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Winter Occupancy Model") 
+  #'  Winter RSF
+  wtd_wtr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf_NE, aes(x = x, y = y, fill = WTD_wtr_rsf)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Winter Resource Selection Function")
+  
+  #'  patchwork figures together:
+  wtd_smr_map <- wtd_smr_occ_fig + plot_annotation(title = "Predicted Summer White-tailed Deer Space Use") + wtd_smr_rsf_fig 
+  wtd_wtr_map <- wtd_wtr_occ_fig + plot_annotation(title = "Predicted Winter White-tailed Deer Space Use") + wtd_wtr_rsf_fig 
+  wtd_predicted_map <- wtd_smr_occ_fig + plot_annotation(title = "Predicted White-tailed Deer Space Use") + 
+    wtd_smr_rsf_fig + wtd_wtr_occ_fig + wtd_wtr_rsf_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+  
+  #'  Visualize
+  plot(wtd_smr_map)
+  plot(wtd_wtr_map)
+  plot(wtd_predicted_map)
   
   
+  ####  COUGAR  ####
+  #'  Summer Occ
+  coug_smr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = COUG_smr_occ)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Summer Occupancy Model") 
+  #'  Summer RSF
+  coug_smr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf, aes(x = x, y = y, fill = COUG_smr_rsf)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Summer Resource Selection Function")
+  #'  Winter Occ
+  coug_wtr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = COUG_wtr_occ)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Winter Occupancy Model") 
+  #'  Winter RSF
+  coug_wtr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf, aes(x = x, y = y, fill = COUG_wtr_rsf)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Winter Resource Selection Function")
   
+  #'  patchwork figures together:
+  coug_smr_map <- coug_smr_occ_fig + plot_annotation(title = "Predicted Summer Cougar Space Use") + coug_smr_rsf_fig + plot_layout(ncol = 1)
+  coug_wtr_map <- coug_wtr_occ_fig + plot_annotation(title = "Predicted Winter Cougar Space Use") + coug_wtr_rsf_fig + plot_layout(ncol = 1)
+  coug_predicted_map <- coug_smr_occ_fig + plot_annotation(title = "Predicted Cougar Space Use") + 
+    coug_wtr_rsf_fig + coug_smr_rsf_fig + coug_wtr_occ_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+  
+  #'  Visualize
+  plot(coug_smr_map)
+  plot(coug_wtr_map)
+  plot(coug_predicted_map)
+  
+  
+  ####  WOLF  ####
+  #'  Summer Occ
+  wolf_smr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = WOLF_smr_occ)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Summer Occupancy Model") 
+  #'  Summer RSF
+  wolf_smr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf, aes(x = x, y = y, fill = WOLF_smr_rsf)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Summer Resource Selection Function")
+  #'  Winter Occ
+  wolf_wtr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = WOLF_wtr_occ)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Winter Occupancy Model") 
+  #'  Winter RSF
+  wolf_wtr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf, aes(x = x, y = y, fill = WOLF_wtr_rsf)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Winter Resource Selection Function")
+  
+  #'  patchwork figures together:
+  wolf_smr_map <- wolf_smr_occ_fig + plot_annotation(title = "Predicted Summer Wolf Space Use") + wolf_smr_rsf_fig + plot_layout(ncol = 1)
+  wolf_wtr_map <- wolf_wtr_occ_fig + plot_annotation(title = "Predicted Winter Wolf Space Use") + wolf_wtr_rsf_fig + plot_layout(ncol = 1)
+  wolf_predicted_map <- wolf_smr_occ_fig + plot_annotation(title = "Predicted Wolf Space Use") + 
+    wolf_wtr_rsf_fig + wolf_smr_rsf_fig + wolf_wtr_occ_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+  
+  #'  Visualize
+  plot(wolf_smr_map)
+  plot(wolf_wtr_map)
+  plot(wolf_predicted_map)
+  
+  
+  ####  BOBCAT  ####
+  #'  Summer Occ
+  bob_smr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = BOB_smr_occ)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Summer Occupancy Model") 
+  #'  Summer RSF
+  bob_smr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf, aes(x = x, y = y, fill = BOB_smr_rsf)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Summer Resource Selection Function")
+  #'  Winter Occ
+  bob_wtr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = BOB_wtr_occ)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Winter Occupancy Model") 
+  #'  Winter RSF
+  bob_wtr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf, aes(x = x, y = y, fill = BOB_wtr_rsf)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Winter Resource Selection Function")
+  
+  #'  patchwork figures together:
+  bob_smr_map <- bob_smr_occ_fig + plot_annotation(title = "Predicted Summer Bobcat Space Use") + bob_smr_rsf_fig + plot_layout(ncol = 1)
+  bob_wtr_map <- bob_wtr_occ_fig + plot_annotation(title = "Predicted Winter Bobcat Space Use") + bob_wtr_rsf_fig + plot_layout(ncol = 1)
+  bob_predicted_map <- bob_smr_occ_fig + plot_annotation(title = "Predicted Bobcat Space Use") + 
+    bob_wtr_rsf_fig + bob_smr_rsf_fig + bob_wtr_occ_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+  
+  #'  Visualize
+  plot(bob_smr_map)
+  plot(bob_wtr_map)
+  plot(bob_predicted_map)
+  
+  
+  ####  COYOTE  ####
+  #'  Summer Occ
+  coy_smr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = COY_smr_occ)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Summer Occupancy Model") 
+  #'  Summer RSF
+  coy_smr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf, aes(x = x, y = y, fill = COY_smr_rsf)) +
+    scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Summer Resource Selection Function")
+  #'  Winter Occ
+  coy_wtr_occ_fig <- ggplot() +
+    geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = COY_wtr_occ)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Probability \nof Site Use')  +
+    ggtitle("Winter Occupancy Model") 
+  #'  Winter RSF
+  coy_wtr_rsf_fig <- ggplot() +
+    geom_tile(data = Predicted_rsf, aes(x = x, y = y, fill = COY_wtr_rsf)) +
+    scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
+    #'  Add study area outlines for reference
+    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    #'  Get rid of lines and gray background
+    theme_bw() +
+    theme(panel.border = element_blank()) +
+    #'  Change legend, axis, & main titles
+    xlab("Longitude") + ylab("Latitude") +
+    labs(fill = 'Relative Probability \nof Selection')  +
+    ggtitle("Winter Resource Selection Function")
+  
+  #'  patchwork figures together:
+  coy_smr_map <- coy_smr_occ_fig + plot_annotation(title = "Predicted Summer Coyote Space Use") + coy_smr_rsf_fig + plot_layout(ncol = 1)
+  coy_wtr_map <- coy_wtr_occ_fig + plot_annotation(title = "Predicted Winter Coyote Space Use") + coy_wtr_rsf_fig + plot_layout(ncol = 1)
+  coy_predicted_map <- coy_smr_occ_fig + plot_annotation(title = "Predicted Coyote Space Use") + 
+    coy_wtr_rsf_fig + coy_smr_rsf_fig + coy_wtr_occ_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+  
+  #'  Visualize
+  plot(coy_smr_map)
+  plot(coy_wtr_map)
+  plot(coy_predicted_map)
+  
+  
+  #'  Save figures as PNG images
+  ggsave("./Outputs/Figures/Maps/MuleDeer_predict_smr_plot.png", md_smr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/MuleDeer_predict_wtr_plot.png", md_wtr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/MuleDeer_predicted_plot.png", md_predicted_map, width = 9.2, units = "in")
+  
+  ggsave("./Outputs/Figures/Maps/Elk_predict_smr_plot.png", elk_smr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Elk_predict_wtr_plot.png", elk_wtr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Elk_predicted_plot.png", elk_predicted_map, width = 9.2, units = "in")
+  
+  ggsave("./Outputs/Figures/Maps/WTDeer_predict_smr_plot.png", wtd_smr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/WTDeer_predict_wtr_plot.png", wtd_wtr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/WTDeer_predicted_plot.png", wtd_predicted_map, width = 9.2, units = "in")
+  
+  ggsave("./Outputs/Figures/Maps/Cougar_predict_smr_plot.png", coug_smr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Cougar_predict_wtr_plot.png", coug_wtr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Cougar_predicted_plot.png", coug_predicted_map, width = 9.2, units = "in")
+  
+  ggsave("./Outputs/Figures/Maps/Wolf_predict_smr_plot.png", wolf_smr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Wolf_predict_wtr_plot.png", wolf_wtr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Wolf_predicted_plot.png", wolf_predicted_map, width = 9.2, units = "in")
+  
+  ggsave("./Outputs/Figures/Maps/Bobcat_predict_smr_plot.png", bob_smr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Bobcat_predict_wtr_plot.png", bob_wtr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Bobcat_predicted_plot.png", bob_predicted_map, width = 9.2, units = "in")
+  
+  ggsave("./Outputs/Figures/Maps/Coyote_predict_smr_plot.png", coy_smr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Coyote_predict_wtr_plot.png", coy_wtr_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Coyote_predicted_plot.png", coy_predicted_map, width = 9.2, units = "in")
   
   
   
