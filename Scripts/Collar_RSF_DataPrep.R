@@ -20,6 +20,9 @@
   #'  which take FOREVER to run. 
   #'  ============================================
   
+  #'  Clean workspace & load libraries
+  rm(list = ls())  
+
   #'  Load packages for selecting available points
   library(tidyverse)
   library(sp)
@@ -582,7 +585,7 @@
   
   #'  Run list of species used & available location data through function in parallel
   #'  This will take AWHILE even in parallel
-  #'  3rd Order Selection
+  #'  Keep track of which order of selection is being extracted here!!!
   used_covs <- future_lapply(used_locs, cov_extract, future.seed = TRUE)
   md_avail_covs <- future_lapply(md_locs, cov_extract, future.seed = TRUE)
   elk_avail_covs <- future_lapply(elk_locs, cov_extract, future.seed = TRUE)
@@ -696,7 +699,7 @@
   
   
   # 2021-06-22 uses reprojected rasters
-  # 2021-08-09 uses my road density raster (km of road length/1 sq-km)... other versions use Lauren's raster that I think is meters of road length/1 sq-km
+  # 2021-08-10 uses my road density raster (km of road length/1 sq-km)... other versions use Lauren's raster that I think is meters of road length/1 sq-km
   
   
   
