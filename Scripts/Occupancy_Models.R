@@ -31,8 +31,8 @@
   #'  Read in covariate data collected during camera deployment & scale
   #'  Canopy cover, land management & owner, habitat type => site-level occ covs
   #'  Dist. to focal pt, height, monitoring = > survey/site-level detection covs
-  stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-05-14.csv") %>%
-  # stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-06-22.csv") %>%
+  stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-08-10.csv") %>% #2021-05-14 update covariate names below if using this older version
+  # stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-06-22.csv") %>% #uses reprojected covariates and all is bad bad bad
     #'  Get rid of mysterious space after one of the NEs
     mutate(
       Study_Area = ifelse(Study_Area == "NE ", "NE", as.character(Study_Area)),
@@ -141,10 +141,10 @@
       PercXericShrub = scale(PercXericShrub),
       PercXericGrass = scale(PercXericGrass),
       # PercDeveloped = scale(PercDeveloped),
-      # Elev = scale(Elev),
-      # Slope = scale(Slope),
-      Elev = scale(elevation),
-      Slope = scale(slope),
+      # Elev = scale(elevation), #2021-05-14 version
+      # Slope = scale(slope), #2021-05-14 version
+      Elev = scale(Elev), #2021-08-10 version
+      Slope = scale(Slope), #2021-08-10 version
       # Aspect = scale(aspect), # CIRCULAR! Also, 90-degrees is used when slope = 0
       # TRI = scale(tri),
       # Roughness = scale(roughness),
@@ -153,14 +153,15 @@
       # Canopy = scale(canopy),           # Skewed but transformations don't help
       # Landfire = scale(landfire),       # Skewed but transformations don't help
       # WaterDensity = scale(water_density), 
-      # RoadDensity = scale(RoadDen),  
-      RoadDensity = scale(road_density), ################### make sure this is from the correct raster
+      RoadDensity = scale(RoadDen), #2021-08-10 version
+      # RoadDensity = scale(road_density), #2021-05-14 version
       # NearestH2o = scale(km2water),        
       # NearestRd = scale(km2road),          
       # HumanDensity = scale(human_density), 
-      # HumanModified = scale(HumanMod) 
-      HumanModified = scale(modified)
-    )
+      HumanModified = scale(HumanMod) #2021-08-10 version
+      # HumanModified = scale(modified) #2021-05-14 version
+    ) %>%
+    arrange(Year) #NECESSARY TO MATCH DH's CAMERALOCATION ORDER 2021-08-10 version
 
   #'  Adjust reference category for Trail factors
   order_trail <- c("Trail", "Dirt road", "Decommissioned road")
@@ -187,7 +188,7 @@
   stations$Canopy_Cov[is.na(stations$Canopy_Cov),] <- 0
   
   #'  Save
-  # write.csv(stations, paste0('./Outputs/stations18-20_', Sys.Date(), '.csv'))
+  # write.csv(stations, paste0('./Outputs/Tables/stations18-20_', Sys.Date(), '.csv'))
     
   #'  Save study-area specific covaraites (important for ungulate models)
   stations_NE <- filter(stations, Study_Area == "NE")
@@ -379,6 +380,9 @@
 
   
   #'  Create unmarked dataframes
+  #'  FYI: unmarkedFrameOccu is NOT smart enough to match up DH and covs by CameraLocation
+  #'  so BE SURE DH AND STATIONS CAMERA SITES ARE ORDERED IN THE SAME WAY!!!!
+  
   ####  BOBCAT UMF  ####
   bob_s1819_UMF <- unmarkedFrameOccu(DH_bob_smr1819,
                                    siteCovs = data.frame(Year = stations$Year,
@@ -406,6 +410,10 @@
                                    obsCovs = srvy_covs)
 
   nrow(bob_s1819_UMF@y)
+  #'  Double check the order of CameraLocations in stations matches the DH
+  # bob_station_arranged <- stations
+  # bob_covs_arranged <- bob_s1819_UMF@siteCovs
+  # bob_DH_arranged <- bob_s1819_UMF@y
   #'  Remove rows with missing observation covariate data (Height & Distance data)
   # bob_s1819_UMF <- bob_s1819_UMF[-missing_dat]
   # nrow(bob_s1819_UMF@y)
@@ -1351,7 +1359,7 @@
     arrange(Parameter, Mean, Species)
   
   #'  Save
-  # write.csv(Mean_tbl, paste0("./Outputs/Tables/OccMod_Mean_Estimates_", Sys.Date(), ".csv"))
+  write.csv(Mean_tbl, paste0("./Outputs/Tables/OccMod_Mean_Estimates_", Sys.Date(), ".csv"))
   
  
   #'  Save workspace
