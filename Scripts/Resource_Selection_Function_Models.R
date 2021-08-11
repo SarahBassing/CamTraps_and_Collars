@@ -28,13 +28,13 @@
   # load("./Outputs/RSF_pts/bob_dat_all_2021-06-30.RData")
   # load("./Outputs/RSF_pts/coy_dat_all_2021-06-30.RData")
   #'  2nd Order Selection
-  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-07-22.RData")  # 2021-06-22 uses reprojected rasters
-  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-07-22.RData")
+  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-08-10.RData")  # 2021-07-22 uses Lauren's road density raster data
+  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-08-10.RData")
   
   #'  Center & scale covariates 
   #'  Note: standardizing across all IDs & years, but separately by season & spp
