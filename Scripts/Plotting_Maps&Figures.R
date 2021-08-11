@@ -496,7 +496,7 @@
   #'  human modified landscape). Display in multiple panels by model and season.
   
   #'  Occupancy model output
-  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_2021-07-23.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_2021-08-10.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 90% confidence intervals to mirror alpha = 0.1
     mutate(
       l95 = (Estimate - (1.64 * SE)),  #### REMINDER: this is 90% CI even though column says l95/u95
@@ -504,7 +504,7 @@
     ) %>%
     dplyr::select(-c(X, Model))
   #'  RSF results output
-  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_2021-07-23.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_2021-08-10.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 95% confidence intervals to mirror alpha = 0.05
     mutate(
       l95 = (Estimate - (1.96 * SE)),  #### REMINDER: this is 95% CI
@@ -791,7 +791,7 @@
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    ylim(-0.5, 0.5) +
+    ylim(-0.75, 0.75) +
     coord_flip()
   #'  Winter results
   elev_rsf_wtr_fig <- ggplot(elev_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -1008,7 +1008,7 @@
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    ylim(-2.5, 1.5) +
+    ylim(-2.0, 1) +
     coord_flip()
   #'  Winter results
   hm_rsf_wtr_fig <- ggplot(hm_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -1053,13 +1053,13 @@
   
   #'  Save different file formats
   #'  PNG
-  ggsave("./Outputs/Figures/Side by Side/Elevation_Occ-RSF_plot.png", elev_fig, width = 15, units = "in")
-  ggsave("./Outputs/Figures/Side by Side/Slope_Occ-RSF_plot.png", slope_fig, width = 15, units = "in")
-  ggsave("./Outputs/Figures/Side by Side/Forest_Occ-RSF_plot.png", for_fig, width = 15, units = "in")
-  ggsave("./Outputs/Figures/Side by Side/Grass_Occ-RSF_plot.png", grass_fig, width = 15, units = "in")
-  ggsave("./Outputs/Figures/Side by Side/Shrub_Occ-RSF_plot.png", shrub_fig, width = 15, units = "in")
-  ggsave("./Outputs/Figures/Side by Side/RoadDensity_Occ-RSF_plot.png", rdden_fig, width = 15, units = "in")
-  ggsave("./Outputs/Figures/Side by Side/HumanMod_Occ-RSF_plot.png", hm_fig, width = 15, units = "in")
+  ggsave("./Outputs/Figures/Side by Side/Elevation_Occ-RSF_plot.png", elev_fig) #, width = 15, units = "in"
+  ggsave("./Outputs/Figures/Side by Side/Slope_Occ-RSF_plot.png", slope_fig)
+  ggsave("./Outputs/Figures/Side by Side/Forest_Occ-RSF_plot.png", for_fig)
+  ggsave("./Outputs/Figures/Side by Side/Grass_Occ-RSF_plot.png", grass_fig)
+  ggsave("./Outputs/Figures/Side by Side/Shrub_Occ-RSF_plot.png", shrub_fig)
+  ggsave("./Outputs/Figures/Side by Side/RoadDensity_Occ-RSF_plot.png", rdden_fig)
+  ggsave("./Outputs/Figures/Side by Side/HumanMod_Occ-RSF_plot.png", hm_fig)
   #'  JPEG
   ggsave("./Outputs/Figures/Side by Side/Elevation_Occ-RSF_plot.jpeg", elev_fig)
   ggsave("./Outputs/Figures/Side by Side/Slope_Occ-RSF_plot.jpeg", slope_fig)
@@ -1523,7 +1523,7 @@
   #'  Occupancy input data
   source("./Scripts/CameraTrap_DetectionHistories.R")
   #'  Covariate data that went into OccMods, just not scaled here
-  stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-05-14.csv") %>%
+  stations <- read.csv("G:/My Drive/1_Repositories/WPPP_CameraTrapping/Output/CameraLocation_Covariates18-20_2021-08-10.csv") %>% #2021-05-14
     mutate(
       Study_Area = ifelse(Study_Area == "NE ", "NE", as.character(Study_Area)),
     ) %>%
@@ -1604,13 +1604,13 @@
   
   
   #'  RSF input data
-  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-07-22.RData")
-  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-07-22.RData")
+  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-08-10.RData") #2021-07-22
+  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-08-10.RData")
   
   #'  Retain only the used locations and their covariate values
   md_used <- filter(md_dat_all, Used == 1) %>%
@@ -1967,7 +1967,7 @@
   
   ####  6. Mapping predicted habitat use/selection  ####
   #'  Read in extracted covariate data for entire study areas (based on 1km grids)
-  OK_covs <- read.csv("./Outputs/Tables/StudyAreaWide_OK_Covariates_2021-08-09.csv") %>%
+  OK_covs <- read.csv("./Outputs/Tables/StudyAreaWide_OK_Covariates_2021-08-10.csv") %>%
     dplyr::select(-X) %>%
     transmute(
       obs = obs,
@@ -2017,6 +2017,7 @@
   
   ####  Predict occupancy probability across study area  ####
   #'  Manipulate Occupancy result tables (read in above at 3. OccMod vs RSF plots)
+  #'  Version 1: Include all coefficients, even if non-significant
   occ_coefs <- occ_out %>%
     dplyr::select(c(Species, Season, Parameter, Estimate)) %>%
     mutate(Parameter = ifelse(Parameter == "(Intercept)", "Intercept", Parameter)) %>%
@@ -2027,6 +2028,43 @@
       Species = Species,
       Season = Season,
       alpha = Intercept,
+      B.elev = Elev,
+      B.slope = Slope,
+      B.for = PercForMix,
+      B.grass = PercXGrass,
+      B.shrub = PercXShrub,
+      B.rd = RoadDensity,
+      B.hm = HumanMod,
+      B.area = AreaOK
+    ) %>%
+    #'  Change NAs to 0 (no effect) for coefficients not included in species-specific models
+    mutate(
+      B.grass = ifelse(is.na(B.grass), 0, B.grass),
+      B.shrub = ifelse(is.na(B.shrub), 0, B.shrub),
+      B.area = ifelse(is.na(B.area), 0, B.area)
+    )
+  
+  #'  Manipulate Occupancy result tables (read in above at 3. OccMod vs RSF plots)
+  #'  Version 2. Exclude all non-significant coefficients
+  occ_coefs_signif <- occ_out %>%
+    dplyr::select(c(Species, Season, Parameter, Estimate, Pval)) %>%
+    mutate(Parameter = ifelse(Parameter == "(Intercept)", "Intercept", Parameter)) %>%
+    #'  Use p-values to change non-significant coefficients (alpha-level = 0.1) to 0 so there is no effect
+    mutate(Estimate = ifelse(Pval > 0.1, Estimate == 0, Estimate)) %>%
+    dplyr::select(-Pval) %>%
+    #'  Spread data so each row represents model coefficients for a single season, single species model
+    pivot_wider(names_from = Parameter, values_from = Estimate) %>%
+    #'  Problem is many of the intercepts were reduced to 0 which we don't want 
+    #'  so we need to swap this intercept column with the original intercepts 
+    #'  using the occ_coef data frame above 
+    cbind(occ_coefs$alpha) %>%
+    dplyr::select(-Intercept) %>%
+    relocate("occ_coefs$alpha", .after = "Season") %>%
+    #'  Rename coefficients so they're different than covariate names
+    transmute(
+      Species = Species,
+      Season = Season,
+      alpha = occ_coefs$alpha,
       B.elev = Elev,
       B.slope = Slope,
       B.for = PercForMix,
@@ -2061,7 +2099,8 @@
       )
     return(predict_prob)
   }
-  #'  Run estimates from linear model through function to predict probability of use
+  #'  Run estimates from occupancy sub-model through function to predict probability of use
+  #'  Includes ALL coefficients, even if most are non-significant
   md_smr_predict_occ <- predict_occ(OK_covs, occ_coefs[occ_coefs$Species == "Mule Deer" & occ_coefs$Season == "Summer",])
   md_wtr_predict_occ <- predict_occ(OK_covs, occ_coefs[occ_coefs$Species == "Mule Deer" & occ_coefs$Season == "Winter",])
   elk_smr_predict_occ <- predict_occ(NE_covs, occ_coefs[occ_coefs$Species == "Elk" & occ_coefs$Season == "Summer",])
@@ -2076,13 +2115,28 @@
   bob_wtr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Bobcat" & occ_coefs$Season == "Winter",])
   coy_smr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Coyote" & occ_coefs$Season == "Summer",])
   coy_wtr_predict_occ <- predict_occ(all_covs, occ_coefs[occ_coefs$Species == "Coyote" & occ_coefs$Season == "Winter",])
+  #'  Includes ONLY significant coefficients per species and season
+  md_smr_predict_occ_sgnf <- predict_occ(OK_covs, occ_coefs_signif[occ_coefs_signif$Species == "Mule Deer" & occ_coefs_signif$Season == "Summer",])
+  md_wtr_predict_occ_sgnf <- predict_occ(OK_covs, occ_coefs_signif[occ_coefs_signif$Species == "Mule Deer" & occ_coefs_signif$Season == "Winter",])
+  elk_smr_predict_occ_sgnf <- predict_occ(NE_covs, occ_coefs_signif[occ_coefs_signif$Species == "Elk" & occ_coefs_signif$Season == "Summer",])
+  elk_wtr_predict_occ_sgnf <- predict_occ(NE_covs, occ_coefs_signif[occ_coefs_signif$Species == "Elk" & occ_coefs_signif$Season == "Winter",])
+  wtd_smr_predict_occ_sgnf <- predict_occ(NE_covs, occ_coefs_signif[occ_coefs_signif$Species == "White-tailed Deer" & occ_coefs_signif$Season == "Summer",])
+  wtd_wtr_predict_occ_sgnf <- predict_occ(NE_covs, occ_coefs_signif[occ_coefs_signif$Species == "White-tailed Deer" & occ_coefs_signif$Season == "Winter",])
+  coug_smr_predict_occ_sgnf <- predict_occ(all_covs, occ_coefs_signif[occ_coefs_signif$Species == "Cougar" & occ_coefs_signif$Season == "Summer",])
+  coug_wtr_predict_occ_sgnf <- predict_occ(all_covs, occ_coefs_signif[occ_coefs_signif$Species == "Cougar" & occ_coefs_signif$Season == "Winter",])
+  wolf_smr_predict_occ_sgnf <- predict_occ(all_covs, occ_coefs_signif[occ_coefs_signif$Species == "Wolf" & occ_coefs_signif$Season == "Summer",])
+  wolf_wtr_predict_occ_sgnf <- predict_occ(all_covs, occ_coefs_signif[occ_coefs_signif$Species == "Wolf" & occ_coefs_signif$Season == "Winter",])
+  bob_smr_predict_occ_sgnf <- predict_occ(all_covs, occ_coefs_signif[occ_coefs_signif$Species == "Bobcat" & occ_coefs_signif$Season == "Summer",])
+  bob_wtr_predict_occ_sgnf <- predict_occ(all_covs, occ_coefs_signif[occ_coefs_signif$Species == "Bobcat" & occ_coefs_signif$Season == "Winter",])
+  coy_smr_predict_occ_sgnf <- predict_occ(all_covs, occ_coefs_signif[occ_coefs_signif$Species == "Coyote" & occ_coefs_signif$Season == "Summer",])
+  coy_wtr_predict_occ_sgnf <- predict_occ(all_covs, occ_coefs_signif[occ_coefs_signif$Species == "Coyote" & occ_coefs_signif$Season == "Winter",])
   
   #'  Combine into a monster data frame
   #'  Start with predator data that spans both study areas
   Predicted_occ <- all_covs %>%
     dplyr::select(obs, Area, x, y) %>% 
     mutate(Area = ifelse(Area == 0, "Northeast", "Okanogan")) %>%
-    cbind(coug_smr_predict_occ, coug_wtr_predict_occ, 
+    cbind(coug_smr_predict_occ, coug_wtr_predict_occ, # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs)
           wolf_smr_predict_occ, wolf_wtr_predict_occ, 
           bob_smr_predict_occ, bob_wtr_predict_occ, 
           coy_smr_predict_occ, coy_wtr_predict_occ)
@@ -2094,12 +2148,12 @@
   #'  Okanogan-only data (mule deer)
   OK_rows <- seq(1:nrow(md_smr_predict_occ))
   Area <- rep("Okanogan", length(OK_rows))
-  OK_occ <- as.data.frame(cbind(OK_rows, Area, md_smr_predict_occ, md_wtr_predict_occ)) 
+  OK_occ <- as.data.frame(cbind(OK_rows, Area, md_smr_predict_occ, md_wtr_predict_occ)) # KEEP TRACK of which version of the predicted results I'm using
   colnames(OK_occ) <- c("obs", "Area", "MD_smr_occ", "MD_wtr_occ")
   #'  Northeast-only data (elk & white-tailed deer)
   NE_rows <- seq(1:nrow(elk_smr_predict_occ))
   Area <- rep("Northeast", length(NE_rows))
-  NE_occ <- as.data.frame(cbind(NE_rows, Area, elk_smr_predict_occ, elk_wtr_predict_occ, 
+  NE_occ <- as.data.frame(cbind(NE_rows, Area, elk_smr_predict_occ, elk_wtr_predict_occ, #KEEP TRACK of which version of the predicted results I'm using
                                 wtd_smr_predict_occ, wtd_wtr_predict_occ)) 
   colnames(NE_occ) <- c("obs", "Area", "ELK_smr_occ", "ELK_wtr_occ", "WTD_smr_occ", "WTD_wtr_occ")
   #'  Merge ungulate & predator data by study area
@@ -2125,6 +2179,7 @@
   
   ####  Predict resource selection across study area  ####
   #'  Manipulate RSF result tables (read in above at 3. OccMod vs RSF plots)
+  #'  Version 1: Include all coefficients, even if non-significant
   rsf_coefs <- rsf_out %>%
     dplyr::select(c(Species, Season, Parameter, Estimate)) %>%
     mutate(Parameter = ifelse(Parameter == "(Intercept)", "Intercept", Parameter)) %>%
@@ -2135,6 +2190,37 @@
       Species = Species,
       Season = Season,
       alpha = Intercept,
+      B.elev = Elev,
+      B.slope = Slope,
+      B.for = PercForMix,
+      B.grass = PercXGrass,
+      B.shrub = PercXShrub,
+      B.rd = RoadDen,
+      B.hm = HumanMod
+    )
+  
+  #'  Version 2: Include ONLY significant coefficients
+  rsf_coefs_signif <- rsf_out %>%
+    dplyr::select(c(Species, Season, Parameter, Estimate, Pval)) %>%
+    mutate(Parameter = ifelse(Parameter == "(Intercept)", "Intercept", Parameter)) %>%
+    #'  Use p-values to change non-significant coefficients (alpha-level = 0.05) to 0 so there is no effect
+    mutate(Estimate = ifelse(Pval > 0.05, Estimate == 0, Estimate)) %>%
+    #'  For some reason the mutation above changes estimates that are already 0.00 with Pval > 0.05 to equal 1!?!?!
+    #'  So changing those back to 0 since the effect is non-significant
+    mutate(Estimate = ifelse(Estimate == 1, Estimate == 0, Estimate)) %>%
+    dplyr::select(-Pval) %>%
+    #'  Spread data so each row represents model coefficients for a single season, single species model
+    pivot_wider(names_from = Parameter, values_from = Estimate) %>%
+    #'  No intercepts should have been changed here but just in case- swap current
+    #'  intercept column with the intercept column from above
+    cbind(rsf_coefs$alpha) %>%
+    dplyr::select(-Intercept) %>%
+    relocate("rsf_coefs$alpha", .after = "Season") %>%
+    #'  Rename coefficients so they're different than covariate names
+    transmute(
+      Species = Species,
+      Season = Season,
+      alpha = rsf_coefs$alpha,
       B.elev = Elev,
       B.slope = Slope,
       B.for = PercForMix,
@@ -2162,7 +2248,8 @@
       )
     return(predict_prob)
   }
-  #'  Run estimates from linear model through function to predict probability of use
+  #'  Run estimated coefficients from RSFs through function to predict relative probability of selection
+  #'  Includes ALL coefficients, even if a few are non-significant
   md_smr_predict_rsf <- predict_rsf(OK_covs, rsf_coefs[rsf_coefs$Species == "Mule Deer" & rsf_coefs$Season == "Summer",])
   md_wtr_predict_rsf <- predict_rsf(OK_covs, rsf_coefs[rsf_coefs$Species == "Mule Deer" & rsf_coefs$Season == "Winter",])
   elk_smr_predict_rsf <- predict_rsf(NE_covs, rsf_coefs[rsf_coefs$Species == "Elk" & rsf_coefs$Season == "Summer",])
@@ -2177,13 +2264,28 @@
   bob_wtr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Bobcat" & rsf_coefs$Season == "Winter",])
   coy_smr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Coyote" & rsf_coefs$Season == "Summer",])
   coy_wtr_predict_rsf <- predict_rsf(all_covs, rsf_coefs[rsf_coefs$Species == "Coyote" & rsf_coefs$Season == "Winter",])
+  #'  Includes ONLY significant coefficients
+  md_smr_predict_rsf_sgnf <- predict_rsf(OK_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Mule Deer" & rsf_coefs_signif$Season == "Summer",])
+  md_wtr_predict_rsf_sgnf <- predict_rsf(OK_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Mule Deer" & rsf_coefs_signif$Season == "Winter",])
+  elk_smr_predict_rsf_sgnf <- predict_rsf(NE_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Elk" & rsf_coefs_signif$Season == "Summer",])
+  elk_wtr_predict_rsf_sgnf <- predict_rsf(NE_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Elk" & rsf_coefs_signif$Season == "Winter",])
+  wtd_smr_predict_rsf_sgnf <- predict_rsf(NE_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "White-tailed Deer" & rsf_coefs_signif$Season == "Summer",])
+  wtd_wtr_predict_rsf_sgnf <- predict_rsf(NE_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "White-tailed Deer" & rsf_coefs_signif$Season == "Winter",])
+  coug_smr_predict_rsf_sgnf <- predict_rsf(all_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Cougar" & rsf_coefs_signif$Season == "Summer",])
+  coug_wtr_predict_rsf_sgnf <- predict_rsf(all_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Cougar" & rsf_coefs_signif$Season == "Winter",])
+  wolf_smr_predict_rsf_sgnf <- predict_rsf(all_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Wolf" & rsf_coefs_signif$Season == "Summer",])
+  wolf_wtr_predict_rsf_sgnf <- predict_rsf(all_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Wolf" & rsf_coefs_signif$Season == "Winter",])
+  bob_smr_predict_rsf_sgnf <- predict_rsf(all_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Bobcat" & rsf_coefs_signif$Season == "Summer",])
+  bob_wtr_predict_rsf_sgnf <- predict_rsf(all_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Bobcat" & rsf_coefs_signif$Season == "Winter",])
+  coy_smr_predict_rsf_sgnf <- predict_rsf(all_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Coyote" & rsf_coefs_signif$Season == "Summer",])
+  coy_wtr_predict_rsf_sgnf <- predict_rsf(all_covs, rsf_coefs_signif[rsf_coefs_signif$Species == "Coyote" & rsf_coefs_signif$Season == "Winter",])
   
   #'  Combine into a monster data frame
   #'  Start with predators
   Predicted_rsf <- all_covs %>%
     dplyr::select(obs, Area, x, y) %>% 
     mutate(Area = ifelse(Area == 0, "Northeast", "Okanogan")) %>%
-    cbind(coug_smr_predict_rsf, coug_wtr_predict_rsf, 
+    cbind(coug_smr_predict_rsf, coug_wtr_predict_rsf, # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs)
           wolf_smr_predict_rsf, wolf_wtr_predict_rsf, 
           bob_smr_predict_rsf, bob_wtr_predict_rsf, 
           coy_smr_predict_rsf, coy_wtr_predict_rsf)
@@ -2195,12 +2297,12 @@
   #'  Okanogan-only data (mule deer)
   OK_rows <- seq(1:nrow(md_smr_predict_rsf))
   Area <- rep("Okanogan", length(OK_rows))
-  OK_rsf <- as.data.frame(cbind(OK_rows, Area, md_smr_predict_rsf, md_wtr_predict_rsf)) 
+  OK_rsf <- as.data.frame(cbind(OK_rows, Area, md_smr_predict_rsf, md_wtr_predict_rsf)) # KEEP TRACK of which version of the predicted results I'm using
   colnames(OK_rsf) <- c("obs", "Area", "MD_smr_rsf", "MD_wtr_rsf")
   #'  Northeast-only data (elk & white-tailed deer)
   NE_rows <- seq(1:nrow(elk_smr_predict_rsf))
   Area <- rep("Northeast", length(NE_rows))
-  NE_rsf <- as.data.frame(cbind(NE_rows, Area, elk_smr_predict_rsf, elk_wtr_predict_rsf, 
+  NE_rsf <- as.data.frame(cbind(NE_rows, Area, elk_smr_predict_rsf, elk_wtr_predict_rsf, # KEEP TRACK of which version of the predicted results I'm using
                                 wtd_smr_predict_rsf, wtd_wtr_predict_rsf)) 
   colnames(NE_rsf) <- c("obs", "Area", "ELK_smr_rsf", "ELK_wtr_rsf", "WTD_smr_rsf", "WTD_wtr_rsf")
   #'  Merge ungulate & predator data by study area
@@ -2288,7 +2390,7 @@
   md_smr_map <- md_smr_occ_fig + plot_annotation(title = "Predicted Summer Mule Deer Space Use") + md_smr_rsf_fig 
   md_wtr_map <- md_wtr_occ_fig + plot_annotation(title = "Predicted Winter Mule Deer Space Use") + md_wtr_rsf_fig 
   md_predicted_map <- md_smr_occ_fig + plot_annotation(title = "Predicted Mule Deer Space Use") + 
-    md_smr_rsf_fig + md_wtr_occ_fig + md_wtr_rsf_fig + plot_layout(ncol = 2)
+    md_wtr_occ_fig + md_smr_rsf_fig + md_wtr_rsf_fig + plot_layout(ncol = 2)
   
   #'  Visualize
   plot(md_smr_map)
@@ -2357,7 +2459,7 @@
   elk_smr_map <- elk_smr_occ_fig + plot_annotation(title = "Predicted Summer Elk Space Use") + elk_smr_rsf_fig 
   elk_wtr_map <- elk_wtr_occ_fig + plot_annotation(title = "Predicted Winter Elk Space Use") + elk_wtr_rsf_fig 
   elk_predicted_map <- elk_smr_occ_fig + plot_annotation(title = "Predicted Elk Space Use") + 
-    elk_smr_rsf_fig + elk_wtr_occ_fig + elk_wtr_rsf_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+    elk_wtr_occ_fig + elk_smr_rsf_fig + elk_wtr_rsf_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
   
   #'  Visualize
   plot(elk_smr_map)
@@ -2423,7 +2525,7 @@
   wtd_smr_map <- wtd_smr_occ_fig + plot_annotation(title = "Predicted Summer White-tailed Deer Space Use") + wtd_smr_rsf_fig 
   wtd_wtr_map <- wtd_wtr_occ_fig + plot_annotation(title = "Predicted Winter White-tailed Deer Space Use") + wtd_wtr_rsf_fig 
   wtd_predicted_map <- wtd_smr_occ_fig + plot_annotation(title = "Predicted White-tailed Deer Space Use") + 
-    wtd_smr_rsf_fig + wtd_wtr_occ_fig + wtd_wtr_rsf_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+    wtd_wtr_occ_fig + wtd_smr_rsf_fig +  wtd_wtr_rsf_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
   
   #'  Visualize
   plot(wtd_smr_map)
@@ -2493,7 +2595,7 @@
   coug_smr_map <- coug_smr_occ_fig + plot_annotation(title = "Predicted Summer Cougar Space Use") + coug_smr_rsf_fig + plot_layout(ncol = 1)
   coug_wtr_map <- coug_wtr_occ_fig + plot_annotation(title = "Predicted Winter Cougar Space Use") + coug_wtr_rsf_fig + plot_layout(ncol = 1)
   coug_predicted_map <- coug_smr_occ_fig + plot_annotation(title = "Predicted Cougar Space Use") + 
-    coug_wtr_rsf_fig + coug_smr_rsf_fig + coug_wtr_occ_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+    coug_wtr_occ_fig + coug_smr_rsf_fig + coug_wtr_rsf_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
   
   #'  Visualize
   plot(coug_smr_map)
@@ -2563,7 +2665,7 @@
   wolf_smr_map <- wolf_smr_occ_fig + plot_annotation(title = "Predicted Summer Wolf Space Use") + wolf_smr_rsf_fig + plot_layout(ncol = 1)
   wolf_wtr_map <- wolf_wtr_occ_fig + plot_annotation(title = "Predicted Winter Wolf Space Use") + wolf_wtr_rsf_fig + plot_layout(ncol = 1)
   wolf_predicted_map <- wolf_smr_occ_fig + plot_annotation(title = "Predicted Wolf Space Use") + 
-    wolf_wtr_rsf_fig + wolf_smr_rsf_fig + wolf_wtr_occ_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+    wolf_wtr_occ_fig + wolf_smr_rsf_fig + wolf_wtr_rsf_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
   
   #'  Visualize
   plot(wolf_smr_map)
@@ -2633,7 +2735,7 @@
   bob_smr_map <- bob_smr_occ_fig + plot_annotation(title = "Predicted Summer Bobcat Space Use") + bob_smr_rsf_fig + plot_layout(ncol = 1)
   bob_wtr_map <- bob_wtr_occ_fig + plot_annotation(title = "Predicted Winter Bobcat Space Use") + bob_wtr_rsf_fig + plot_layout(ncol = 1)
   bob_predicted_map <- bob_smr_occ_fig + plot_annotation(title = "Predicted Bobcat Space Use") + 
-    bob_wtr_rsf_fig + bob_smr_rsf_fig + bob_wtr_occ_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+    bob_wtr_occ_fig + bob_smr_rsf_fig + bob_wtr_rsf_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
   
   #'  Visualize
   plot(bob_smr_map)
@@ -2703,7 +2805,7 @@
   coy_smr_map <- coy_smr_occ_fig + plot_annotation(title = "Predicted Summer Coyote Space Use") + coy_smr_rsf_fig + plot_layout(ncol = 1)
   coy_wtr_map <- coy_wtr_occ_fig + plot_annotation(title = "Predicted Winter Coyote Space Use") + coy_wtr_rsf_fig + plot_layout(ncol = 1)
   coy_predicted_map <- coy_smr_occ_fig + plot_annotation(title = "Predicted Coyote Space Use") + 
-    coy_wtr_rsf_fig + coy_smr_rsf_fig + coy_wtr_occ_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
+    coy_wtr_occ_fig + coy_smr_rsf_fig + coy_wtr_rsf_fig + plot_layout(ncol = 2) #+ plot_layout(guides = 'collect')
   
   #'  Visualize
   plot(coy_smr_map)
@@ -2712,33 +2814,33 @@
   
   
   #'  Save figures as PNG images
-  ggsave("./Outputs/Figures/Maps/MuleDeer_predict_smr_plot.png", md_smr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/MuleDeer_predict_wtr_plot.png", md_wtr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/MuleDeer_predicted_plot.png", md_predicted_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/MuleDeer_predict_smr_plot.png", md_smr_map, width = 14.3, units = "in")
+  ggsave("./Outputs/Figures/Maps/MuleDeer_predict_wtr_plot.png", md_wtr_map, width = 14.3, units = "in")
+  ggsave("./Outputs/Figures/Maps/MuleDeer_predicted_plot.png", md_predicted_map, width = 14.3, units = "in")
   
-  ggsave("./Outputs/Figures/Maps/Elk_predict_smr_plot.png", elk_smr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/Elk_predict_wtr_plot.png", elk_wtr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/Elk_predicted_plot.png", elk_predicted_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Elk_predict_smr_plot.png", elk_smr_map, width = 14.3, units = "in")
+  ggsave("./Outputs/Figures/Maps/Elk_predict_wtr_plot.png", elk_wtr_map, width = 14.3, units = "in")
+  ggsave("./Outputs/Figures/Maps/Elk_predicted_plot.png", elk_predicted_map, width = 14.3, units = "in")
   
-  ggsave("./Outputs/Figures/Maps/WTDeer_predict_smr_plot.png", wtd_smr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/WTDeer_predict_wtr_plot.png", wtd_wtr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/WTDeer_predicted_plot.png", wtd_predicted_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/WTDeer_predict_smr_plot.png", wtd_smr_map, width = 14.3, units = "in")
+  ggsave("./Outputs/Figures/Maps/WTDeer_predict_wtr_plot.png", wtd_wtr_map, width = 14.3, units = "in")
+  ggsave("./Outputs/Figures/Maps/WTDeer_predicted_plot.png", wtd_predicted_map, width = 14.3, units = "in")
   
-  ggsave("./Outputs/Figures/Maps/Cougar_predict_smr_plot.png", coug_smr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/Cougar_predict_wtr_plot.png", coug_wtr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/Cougar_predicted_plot.png", coug_predicted_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Cougar_predict_smr_plot.png", coug_smr_map, width = 18.5, units = "in")
+  ggsave("./Outputs/Figures/Maps/Cougar_predict_wtr_plot.png", coug_wtr_map, width = 18.5, units = "in")
+  ggsave("./Outputs/Figures/Maps/Cougar_predicted_plot.png", coug_predicted_map, width = 18.5, units = "in")
   
-  ggsave("./Outputs/Figures/Maps/Wolf_predict_smr_plot.png", wolf_smr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/Wolf_predict_wtr_plot.png", wolf_wtr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/Wolf_predicted_plot.png", wolf_predicted_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Wolf_predict_smr_plot.png", wolf_smr_map, width = 18.5, units = "in")
+  ggsave("./Outputs/Figures/Maps/Wolf_predict_wtr_plot.png", wolf_wtr_map, width = 18.5, units = "in")
+  ggsave("./Outputs/Figures/Maps/Wolf_predicted_plot.png", wolf_predicted_map, width = 18.5, units = "in")
   
-  ggsave("./Outputs/Figures/Maps/Bobcat_predict_smr_plot.png", bob_smr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/Bobcat_predict_wtr_plot.png", bob_wtr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/Bobcat_predicted_plot.png", bob_predicted_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Bobcat_predict_smr_plot.png", bob_smr_map, width = 18.5, units = "in")
+  ggsave("./Outputs/Figures/Maps/Bobcat_predict_wtr_plot.png", bob_wtr_map, width = 18.5, units = "in")
+  ggsave("./Outputs/Figures/Maps/Bobcat_predicted_plot.png", bob_predicted_map, width = 18.5, units = "in")
   
-  ggsave("./Outputs/Figures/Maps/Coyote_predict_smr_plot.png", coy_smr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/Coyote_predict_wtr_plot.png", coy_wtr_map, width = 9.2, units = "in")
-  ggsave("./Outputs/Figures/Maps/Coyote_predicted_plot.png", coy_predicted_map, width = 9.2, units = "in")
+  ggsave("./Outputs/Figures/Maps/Coyote_predict_smr_plot.png", coy_smr_map, width = 18.5, units = "in")
+  ggsave("./Outputs/Figures/Maps/Coyote_predict_wtr_plot.png", coy_wtr_map, width = 18.5, units = "in")
+  ggsave("./Outputs/Figures/Maps/Coyote_predicted_plot.png", coy_predicted_map, width = 18.5, units = "in")
   
   
   
