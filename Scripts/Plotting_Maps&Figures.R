@@ -2110,7 +2110,7 @@
     }
     predict_prob <- as.data.frame(predict_prob) %>%
       transmute(
-        Predicted_Occ = round(predict_prob, 2)
+        Predicted_Occ = predict_prob
       )
     return(predict_prob)
   }
@@ -2247,21 +2247,35 @@
   
   #'  Function to predict across all grid cells based on RSF results
   #'  Should end up with 1 predicted value per grid cell
+  #'  NOTE: I want the predict relative probability of use from the RSF so not 
+  #'  using a logit transformation like I normally would with logistic regression.
+  #'  Instead, dropping the intercept from the model and just exponentiating the 
+  #'  coeffs*covs (Fieberg et al. 2020), then multiplying by a normalizing constant 
+  #'  c = (exp(intercept)) so the function does not exceed 1 (Johnson et al. 2006, 
+  #'  Avgar et al. 2017)
   predict_rsf <- function(cov, coef) {
     predict_odds <- c()
     predict_prob <- c()
+    #'  Normalizing constant so values are constrained between 0 & 1
+    c <- exp(coef$alpha)
+    #'  Predict across each grid cell
     for(i in 1:nrow(cov)) {
-      predict_odds[i] <- exp(coef$alpha + coef$B.elev*cov$Elev[i] + coef$B.slope*cov$Slope[i] + 
+      predict_odds[i] <- exp(coef$B.elev*cov$Elev[i] + coef$B.slope*cov$Slope[i] + 
                                coef$B.for*cov$PercForMix[i] + coef$B.grass*cov$PercXGrass[i] + 
                                coef$B.shrub*cov$PercXShrub[i] + coef$B.rd*cov$RoadDen[i] + 
-                               coef$B.hm*cov$HumanMod[i])
+                               coef$B.hm*cov$HumanMod[i]) 
+      #'  If we were back-transforming like a normal logistic regression
       predict_prob[i] <- predict_odds[i] / (1 + predict_odds[i])
     }
-    predict_prob <- as.data.frame(predict_prob) %>%
+    predict_rsf <- as.data.frame(cbind(predict_prob, predict_odds)) %>%
       transmute(
-        Predicted_RSF = round(predict_prob, 2)
+        # Predicted_RSF = predict_odds,
+        # Logit_RSF = predict_prob,
+        #'  Multiply predictions by normalizing constant
+        normalized_RSF = c*predict_odds
+
       )
-    return(predict_prob)
+    return(predict_rsf)
   }
   #'  Run estimated coefficients from RSFs through function to predict relative probability of selection
   #'  Includes ALL coefficients, even if a few are non-significant
@@ -2300,7 +2314,7 @@
   Predicted_rsf <- all_covs %>%
     dplyr::select(obs, Area, x, y) %>% 
     mutate(Area = ifelse(Area == 0, "Northeast", "Okanogan")) %>%
-    cbind(coug_smr_predict_rsf_sgnf, coug_wtr_predict_rsf_sgnf, # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs)
+    cbind(coug_smr_predict_rsf_sgnf, coug_wtr_predict_rsf_sgnf, # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs, w/ or w/o normalizing constant)
           wolf_smr_predict_rsf_sgnf, wolf_wtr_predict_rsf_sgnf, 
           bob_smr_predict_rsf_sgnf, bob_wtr_predict_rsf_sgnf, 
           coy_smr_predict_rsf_sgnf, coy_wtr_predict_rsf_sgnf)
@@ -2385,6 +2399,11 @@
     )
   Predicted_rsf_rescale <- as.data.frame(rbind(Predicted_rsf_NE_rescale, Predicted_rsf_OK_rescale))
  
+  
+  Predicted_Occ_RSF <- Predicted_occ %>%
+    full_join(Predicted_rsf, by = c("obs", "Area", "x", "y"))
+  write.csv(Predicted_Occ_RSF, "./Outputs/Tables/Predictions_OccMod_v_RSF.csv")  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs)
+  
 
   ####  Calculate Correlations between OccMod & RSF Predictions ####
   #'  Evaluate correlation between predicted space use for each paired set of models
@@ -2448,7 +2467,7 @@
   ####  MULE DEER  ####
   #'  Summer Occ
   md_smr_occ_fig <- ggplot() +
-    geom_tile(data = Predicted_occ_OK, aes(x = x, y = y, fill = cut(MD_smr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
+    geom_tile(data = Predicted_occ_OK, aes(x = x, y = y, fill = cut(MD_smr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) + 
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + #low = "azure" #low = "floralwhite"
     #'  Add study area outlines for reference
@@ -2462,9 +2481,8 @@
     ggtitle("Summer Occupancy Model") 
   #'  Summer RSF
   md_smr_rsf_fig <- ggplot() +
-    geom_tile(data = Predicted_rsf_OK_rescale, aes(x = x, y = y, fill = cut(MD_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
+    geom_tile(data = Predicted_rsf_OK_rescale, aes(x = x, y = y, fill = cut(MD_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) + 
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
-    # scale_fill_manual(breaks = c(0.25, 0.5, 0.75, 1.0), na.value = "seashell4")
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
