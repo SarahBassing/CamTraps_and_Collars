@@ -127,11 +127,22 @@
   AIC(mod1, mod2, mod3, mod4)
   #'  No good. 
   
-  #'  Try a more basic GLM
+  #'  Try a more basic GLM to estimate probability of an agreement
   mod1 <- glm(Agree ~ Mean_Det, family = binomial, data = dat_agree)
   mod2 <- glm(Agree ~ Mean_Occ , family = binomial, data = dat_agree)
   mod3 <- glm(Agree ~ Female_only, family = binomial, data = dat_agree)
   mod4 <- glm(Agree ~ Road, family = binomial, data = dat_agree)
+  summary(mod1)
+  summary(mod2)
+  summary(mod3)
+  summary(mod4)
+  AIC(mod1, mod2, mod3, mod4)
+  
+  #'  Should this be a Poisson regression instead? Estimating the number of agreements?
+  mod1 <- glm(Agree ~ Mean_Det, family = poisson, data = dat_agree)
+  mod2 <- glm(Agree ~ Mean_Occ , family = poisson, data = dat_agree)
+  mod3 <- glm(Agree ~ Female_only, family = poisson, data = dat_agree)
+  mod4 <- glm(Agree ~ Road, family = poisson, data = dat_agree)
   summary(mod1)
   summary(mod2)
   summary(mod3)
@@ -152,7 +163,7 @@
   AIC(mod1, mod2, mod3, mod4)
   #'  BAH! no good. Random effect definitely not necessary.
   
-  #'  Try a more basic GLM
+  #'  Try a more basic GLM: logistic model
   mod1 <- glm(Disagree ~ Mean_Det, family = binomial, data = dat_disagree)
   mod2 <- glm(Disagree ~ Mean_Occ , family = binomial, data = dat_disagree)
   mod3 <- glm(Disagree ~ Female_only, family = binomial, data = dat_disagree)
