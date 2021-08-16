@@ -2413,7 +2413,7 @@
       x = x,
       y = y
     )
-  NE_covs <- read.csv("./Outputs/Tables/StudyAreaWide_NE_Covariates_2021-08-09.csv") %>%
+  NE_covs <- read.csv("./Outputs/Tables/StudyAreaWide_NE_Covariates_2021-08-10.csv") %>%
     dplyr::select(-X) %>%
     transmute(
       obs = obs,
@@ -2465,7 +2465,7 @@
       B.grass = PercXGrass,
       B.shrub = PercXShrub,
       B.rd = RoadDensity,
-      B.hm = HumanMod,
+      # B.hm = HumanMod,
       B.area = AreaOK
     ) %>%
     #'  Change NAs to 0 (no effect) for coefficients not included in species-specific models
@@ -2502,7 +2502,7 @@
       B.grass = PercXGrass,
       B.shrub = PercXShrub,
       B.rd = RoadDensity,
-      B.hm = HumanMod,
+      # B.hm = HumanMod,
       B.area = AreaOK
     ) %>%
     #'  Change NAs to 0 (no effect) for coefficients not included in species-specific models
@@ -2521,7 +2521,7 @@
       predict_odds[i] <- exp(coef$alpha + coef$B.area*cov$Area[i] + coef$B.elev*cov$Elev[i] + 
                                coef$B.slope*cov$Slope[i]+ coef$B.for*cov$PercForMix[i] + 
                                coef$B.grass*cov$PercXGrass[i] + coef$B.shrub*cov$PercXShrub[i] + 
-                               coef$B.rd*cov$RoadDen[i] + coef$B.hm*cov$HumanMod[i])
+                               coef$B.rd*cov$RoadDen[i]) #+ coef$B.hm*cov$HumanMod[i]
       predict_prob[i] <- predict_odds[i] / (1 + predict_odds[i])
     }
     predict_prob <- as.data.frame(predict_prob) %>%
@@ -2627,7 +2627,7 @@
       B.grass = PercXGrass,
       B.shrub = PercXShrub,
       B.rd = RoadDen,
-      B.hm = HumanMod
+      # B.hm = HumanMod
     )
   
   #'  Version 2: Include ONLY significant coefficients
@@ -2658,7 +2658,7 @@
       B.grass = PercXGrass,
       B.shrub = PercXShrub,
       B.rd = RoadDen,
-      B.hm = HumanMod
+      # B.hm = HumanMod
     )
   
   #'  Function to predict across all grid cells based on RSF results
@@ -2678,8 +2678,7 @@
     for(i in 1:nrow(cov)) {
       predict_odds[i] <- exp(coef$B.elev*cov$Elev[i] + coef$B.slope*cov$Slope[i] + 
                                coef$B.for*cov$PercForMix[i] + coef$B.grass*cov$PercXGrass[i] + 
-                               coef$B.shrub*cov$PercXShrub[i] + coef$B.rd*cov$RoadDen[i] + 
-                               coef$B.hm*cov$HumanMod[i]) 
+                               coef$B.shrub*cov$PercXShrub[i] + coef$B.rd*cov$RoadDen[i]) #+ coef$B.hm*cov$HumanMod[i])
       #'  If we were back-transforming like a normal logistic regression
       predict_prob[i] <- predict_odds[i] / (1 + predict_odds[i])
     }
@@ -2818,7 +2817,7 @@
   
   Predicted_Occ_RSF <- Predicted_occ %>%
     full_join(Predicted_rsf, by = c("obs", "Area", "x", "y"))
-  write.csv(Predicted_Occ_RSF, "./Outputs/Tables/Predictions_OccMod_v_RSF.csv")  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs)
+  write.csv(Predicted_Occ_RSF, "./Outputs/Tables/Predictions_OccMod_v_RSF_noHM.csv")  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs)
   
 
   ####  Calculate Correlations between OccMod & RSF Predictions ####
@@ -2872,7 +2871,7 @@
     arrange(Species)
   
   #'  Save correlations
-  write.csv(corr_results, "./Outputs/Tables/Correlation_OccMod_RSF_Predictions.csv")  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs)
+  write.csv(corr_results, "./Outputs/Tables/Correlation_OccMod_RSF_Predictions_noHM.csv")  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs)
   
   ####  Plot predicted estimates  ####
   #'  Keep in mind the occupancy and RSF results are on very different scales
