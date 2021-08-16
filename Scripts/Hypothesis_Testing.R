@@ -27,7 +27,7 @@
   library(tidyverse)
   
   #'  Read in occupancy model results
-  OccMod_est <- read.csv("./Outputs/Tables/OccMod_Mean_Estimates.csv") %>%
+  OccMod_est <- read.csv("./Outputs/Tables/OccMod_Mean_Estimates_noHM_2021-08-15.csv") %>% # make sure you have the right file!
     dplyr::select(-c(X, SE))
   occ_mu <- OccMod_est %>%
     filter(Parameter == "Occupancy") %>%
@@ -45,7 +45,7 @@
     )
   
   #'  Read in estimated road v trail effect on detection probability 
-  detprob <- read.csv("./Outputs/Tables/OccMod_DetProb_Results_2021-07-23.csv") %>%
+  detprob <- read.csv("./Outputs/Tables/OccMod_DetProb_Results_noHM_2021-08-15.csv") %>%
     dplyr::select(c(Species, Season, Parameter, Estimate, Pval)) %>%
     filter(Parameter  == "(Intercept)" | Parameter == "TrailDirt road" | Parameter == "TrailDecommissioned road") %>%
     mutate(Parameter = ifelse(Parameter == "(Intercept)", "Trail_int", Parameter),
@@ -79,9 +79,11 @@
   #'  Counts are the number of covariates per species & season where we saw 
   #'  agreement (++ or --) or disagreement (+- or -+) between Occ & RSF estimates
   dat_y <- dplyr::select(dat_x, c(Species, Season))
-  #'  Be sure to follow correct order of how species & season are listed! 
-  Agree <- c(1,2,1,3,2,1,0,0,0,1,2,1,1,0)
-  Disagree <- c(0,0,1,0,0,1,0,0,1,0,0,0,1,0)
+  #'  Be sure to follow correct order of how species & season are listed!  ## MAKE SURE THESE ARE UP TO DATE!!!!! 
+  Agree <- c(1,0,1,2,2,1,0,0,1,1,2,1,1,0)  # WITHOUT HM in models
+  Disagree <- c(0,0,1,0,0,1,0,0,0,0,0,0,0,0)  # WITHOUT HM in models
+  # Agree <- c(1,1,1,3,2,1,0,0,0,1,2,1,1,0)  # WITH HM in models
+  # Disagree <- c(0,1,1,0,0,1,0,0,1,0,0,0,1,0)  # WITH HM in models
   #'  Format so each row is 1 instance of an agreement per species & season
   dat_a <- cbind(dat_y, Agree) %>%
     group_by(Species, Season) %>%
