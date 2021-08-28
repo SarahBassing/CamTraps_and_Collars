@@ -2515,6 +2515,7 @@
   
   ####  6. Mapping predicted habitat use/selection  ####
   #'  Read in extracted covariate data for entire study areas (based on 1km grids)
+  #'  Data generated in "Covariate_Extraction.R" script in WPPP_CameraTrapping Project
   OK_covs <- read.csv("./Outputs/Tables/StudyAreaWide_OK_Covariates_2021-08-10.csv") %>%
     dplyr::select(-X) %>%
     transmute(
@@ -2724,6 +2725,25 @@
   #'  Merge NE and OK predictions togther
   Predicted_occ <- as.data.frame(rbind(Predicted_occ_NE, Predicted_occ_OK))
   
+  #'  Save
+  write.csv(Predicted_occ, paste0("./Outputs/Tables/Predicted_Prob_Occupancy_", Sys.Date(), ".csv"))
+  
+  #'  Create raster of predictions
+  #'  First create a SpatialPointsDataFrame
+  #'  Only saving wolf data right now
+  predicted_occ <- Predicted_occ_OK[,c(3:4,7:8)]
+  coordinates(predicted_occ) <- ~ x + y
+  #'  Coerce to SpatialPixelsDataFrame
+  gridded(predicted_occ) <- TRUE
+  #'  Coerce to a raster stack (one layer for each column of data)
+  predicted <- raster::stack(predicted_occ)
+  #'  Set projection
+  crs(predicted) <- sa_proj
+  #'  Save as a series of rasters
+  writeRaster(predicted, filename = file.path("./Outputs/Prediction Rasters/predicted"), 
+              #'  bylayer creates separate rasters, suffix appends the layer name to each raster
+              bylayer = TRUE, suffix = names(predicted), format = "GTiff", overwrite = TRUE)
+  
   
   ####  Predict resource selection across study area  ####
   #'  Manipulate RSF result tables (read in above at 3. OccMod vs RSF plots)
@@ -2930,7 +2950,27 @@
     )
   Predicted_rsf_rescale <- as.data.frame(rbind(Predicted_rsf_NE_rescale, Predicted_rsf_OK_rescale))
  
+  #'  Save
+  write.csv(Predicted_rsf_rescale, paste0("./Outputs/Tables/Predicted_Relative_Selection_rescale_", Sys.Date(), ".csv"))
   
+  #'  Create raster of predictions
+  #'  First create a SpatialPointsDataFrame
+  #'  Only saving OK wolf data right now
+  predicted_rsf <- Predicted_rsf_OK[,c(3:4,7:8)]
+  coordinates(predicted_rsf) <- ~ x + y
+  #'  Coerce to SpatialPixelsDataFrame
+  gridded(predicted_rsf) <- TRUE
+  #'  Coerce to a raster stack (one layer for each column of data)
+  predicted <- raster::stack(predicted_rsf)
+  #'  Set projection
+  crs(predicted) <- sa_proj
+  #'  Save as a series of rasters
+  writeRaster(predicted, filename = file.path("./Outputs/Prediction Rasters/predicted"), 
+              #'  bylayer creates separate rasters, suffix appends the layer name to each raster
+              bylayer = TRUE, suffix = names(predicted), format = "GTiff", overwrite = TRUE)
+  
+  
+  #'  Merge all predictions together
   Predicted_Occ_RSF <- Predicted_occ %>%
     full_join(Predicted_rsf, by = c("obs", "Area", "x", "y"))
   write.csv(Predicted_Occ_RSF, paste0("./Outputs/Tables/Predictions_OccMod_v_RSF_noHM_", Sys.Date(), ".csv"))  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs)
