@@ -29,13 +29,13 @@
   # load("./Outputs/RSF_pts/bob_dat_all_2021-06-30.RData")
   # load("./Outputs/RSF_pts/coy_dat_all_2021-06-30.RData")
   #'  2nd Order Selection
-  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-08-10.RData")  # 2021-07-22 uses Lauren's road density raster data
-  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-09-13.RData")  # 2021-08-10 uses un-buffered and un-masked MCPs
+  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-09-13.RData")
   
   #'  Center & scale covariates 
   #'  Note: standardizing across all IDs & years, but separately by season & spp
@@ -119,14 +119,17 @@
   ####  Mule Deer RSF  ####
   #'  Global model with random effect for individual and year (winter only)
   #'  SUMMERS 2018 & 2019
-  md_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), # + HumanMod 
-                          data = mdData_smr, family = binomial(link = "logit"))
+  #'  Dropping PercXShrub due to high correlation with PercForMix
+  # md_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
+  #                         data = mdData_smr, family = binomial(link = "logit"))
+  md_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID), 
+                         data = mdData_smr, family = binomial(link = "logit"))
   summary(md_global_smr)
   #'  Singularity issues caused when year is included- probably because almost all collars deployed both summers so no variation
-  car::vif(md_global_smr) # highest VIF: Elev 3.10, Human Mod 3.44 when Human Mod is included in the model
+  car::vif(md_global_smr)
 
   #'  WINTERS 2018-2019 & 2019-2020
-  md_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), #+ HumanMod 
+  md_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year),
                           data = mdData_wtr, family = binomial(link = "logit"))
   summary(md_global_wtr)
   car::vif(md_global_wtr)
@@ -135,28 +138,31 @@
   ####  Elk RSF  ####
   #'  Global model with random effect for individual and year
   #'  SUMMERS 2018 & 2019
-  elk_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), # + HumanMod 
+  elk_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year),  
                         data = elkData_smr, family = binomial(link = "logit"))
   summary(elk_global_smr)
   car::vif(elk_global_smr)
   
-  #'  WINTERS 2018-2019 & 2019-2020
-  elk_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), # + HumanMod
-                      data = elkData_wtr, family = binomial(link = "logit"))
+  #'  WINTERS 2018-2019 & 2019-2020 
+  #'  Dropped PercXGrass and PercXShrub due to high correlations with PercForMix 
+  #'  causing problems with predictions
+  # elk_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), 
+  #                     data = elkData_wtr, family = binomial(link = "logit"))
+  elk_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID) + (1|Year), 
+                          data = elkData_wtr, family = binomial(link = "logit"))
   summary(elk_global_wtr)
   car::vif(elk_global_wtr)
-
   
   ####  White-tailed Deer RSF  ####
   #'  Global model with random effect for individual and year
   #'  SUMMERS 2018 & 2019
-  wtd_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), # + HumanMod
+  wtd_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), 
                           data = wtdData_smr, family = binomial(link = "logit"))
   summary(wtd_global_smr)
   car::vif(wtd_global_smr)
 
   #'  WINTERS 2018-2019 & 2019-2020
-  wtd_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), # + HumanMod
+  wtd_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), 
                           data = wtdData_wtr, family = binomial(link = "logit"))
   summary(wtd_global_wtr)
   car::vif(wtd_global_wtr)
@@ -165,14 +171,17 @@
   ####  Cougar RSF  ####
   #'  Random effect for individual & year
   #'  SUMMERS 2018 & 2019
-  coug_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), # + HumanMod
+  coug_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), 
                           data = cougData_smr, family = binomial(link = "logit"))
   summary(coug_global_smr)
   car::vif(coug_global_smr)
   
   #'  WINTERS 2018-2019 & 2019-2020
-  coug_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), # + HumanMod
-                          data = cougData_wtr, family = binomial(link = "logit"))
+  #'  Dropping PercXGrass due to high correlation with PercForMix
+  # coug_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), 
+  #                         data = cougData_wtr, family = binomial(link = "logit"))
+  coug_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXShrub + RoadDen + (1|ID) + (1|Year), 
+                           data = cougData_wtr, family = binomial(link = "logit"))
   summary(coug_global_wtr)
   car::vif(coug_global_wtr)
   
@@ -180,13 +189,16 @@
   ####  Wolf RSF  ####
   #'  Random effect for individual; too few collars active both years for year effect
   #'  SUMMERS 2018 & 2019
-  wolf_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), # + HumanMod
+  wolf_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
                        data = wolfData_smr, family = binomial(link = "logit"))  #1/9 collars active both years
   summary(wolf_global_smr)
   car::vif(wolf_global_smr)
   
-  #'  WINTERS 2018-2019 & 2019-2020  
-  wolf_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), # + HumanMod
+  #'  WINTERS 2018-2019 & 2019-2020
+  #'  Dropping PercXGrass due to high correlation with PercForMix  
+  # wolf_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
+  #                          data = wolfData_wtr, family = binomial(link = "logit")) #no collars active both years
+  wolf_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXShrub + RoadDen + (1|ID), 
                            data = wolfData_wtr, family = binomial(link = "logit")) #no collars active both years
   summary(wolf_global_wtr)
   car::vif(wolf_global_wtr)
@@ -195,14 +207,17 @@
   ####  Bobcat RSF  ####
   #'  Random effect for individual; too few collars active both years for year effect
   #'  SUMMERS 2018 & 2019
-  bob_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), # + HumanMod
+  bob_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
                            data = bobData_smr, family = binomial(link = "logit")) #1/10 collars active both years
   summary(bob_global_smr)
   car::vif(bob_global_smr)
   
   #'  WINTERS 2018-2019 & 2019-2020  
-  bob_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), # + HumanMod
-                           data = bobData_wtr, family = binomial(link = "logit")) #1/11 collars active both years
+  #'  Dropping PercXShrub due to high correlation with PercForMix
+  # bob_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
+  #                          data = bobData_wtr, family = binomial(link = "logit")) #1/11 collars active both years
+  bob_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID), 
+                          data = bobData_wtr, family = binomial(link = "logit")) #1/11 collars active both years
   summary(bob_global_wtr)
   car::vif(bob_global_wtr)
   #  Winter1920 MVBOB71M disperses somewhere on the Colville reservation between 
@@ -213,14 +228,17 @@
   ####  Coy RSF  ####
   #'  Random effect for individual and year
   #'  SUMMERS 2018 & 2019
-  coy_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), # + HumanMod
+  coy_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), 
                            data = coyData_smr, family = binomial(link = "logit"))  #5/16 collars active both years
   summary(coy_global_smr)
   car::vif(coy_global_smr)
   
   #'  WINTERS 2018-2019 & 2019-2020  
-  coy_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), # + HumanMod
-                           data = coyData_wtr, family = binomial(link = "logit")) #4/19 collars active both years
+  #'  Dropping PercXGrass due to high correlation with PercForMix
+  # coy_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID) + (1|Year), 
+  #                          data = coyData_wtr, family = binomial(link = "logit")) #4/19 collars active both years
+  coy_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXShrub + RoadDen + (1|ID) + (1|Year), 
+                          data = coyData_wtr, family = binomial(link = "logit")) #4/19 collars active both years
   summary(coy_global_wtr)
   car::vif(coy_global_wtr)
   
@@ -247,20 +265,20 @@
   #'  Functions extract outputs for each sub-model and appends species/season info
   
   #'  Pull out RSF results
-  load("./Outputs/RSF_output/md_RSF_smr_noHM_2021-08-15.RData")  #' Make sure I read in the right dataset
-  load("./Outputs/RSF_output/md_RSF_wtr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/elk_RSF_smr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/elk_RSF_wtr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/wtd_RSF_smr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/wtd_RSF_wtr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/coug_RSF_smr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/coug_RSF_wtr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/wolf_RSF_smr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/wolf_RSF_wtr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/bob_RSF_smr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/bob_RSF_wtr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/coy_RSF_smr_noHM_2021-08-15.RData")
-  load("./Outputs/RSF_output/coy_RSF_wtr_noHM_2021-08-15.RData")
+  load("./Outputs/RSF_output/md_RSF_smr_noHM_2021-09-23.RData")  #' Make sure I read in the right dataset 2021-09-13
+  load("./Outputs/RSF_output/md_RSF_wtr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/elk_RSF_smr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/elk_RSF_wtr_noHM_2021-09-23.RData") 
+  load("./Outputs/RSF_output/wtd_RSF_smr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/wtd_RSF_wtr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/coug_RSF_smr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/coug_RSF_wtr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/wolf_RSF_smr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/wolf_RSF_wtr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/bob_RSF_smr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/bob_RSF_wtr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/coy_RSF_smr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/coy_RSF_wtr_noHM_2021-09-23.RData")
   
 
   #'  Function to save parameter estimates & p-values
