@@ -165,7 +165,7 @@
 
   #  Save cleaned data
   clean_data <- list(md_skinny, elk_skinny, wtd_skinny, coug_skinny, wolf_skinny, meso_skinny)
-  save(clean_data, file = "./Data/Collar_AllSpecies_AllLocations_Clean.RData")
+  # save(clean_data, file = "./Data/Collar_AllSpecies_AllLocations_Clean.RData")
   
   # #  Migration times for Mule Deer--- use for 3rd-order RSF analyses
   # md_migtimes <- read.csv("./Data/MD_migrationtimes_to_exclude_2021-06-21.csv") %>%
@@ -244,7 +244,7 @@
   
   #  Save truncated (but not thinned or filtered) data
   trunk_data <- list(md_trunk, elk_trunk, wtd_trunk, coug_trunk, wolf_trunk, meso_trunk)
-  save(trunk_data, file = "./Data/Collar_AllSpecies_AllLocations_Truncated.RData")
+  # save(trunk_data, file = "./Data/Collar_AllSpecies_AllLocations_Truncated.RData")
   
   
   #  Thin data to correct fix schedule only
