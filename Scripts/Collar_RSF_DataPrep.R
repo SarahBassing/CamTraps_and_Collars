@@ -267,31 +267,32 @@
     return(rndpts_df)
   }
   #'  Run lists through by species, season, & study area... this is ugly
-  #'  Keep a close eye on those indices and study area MCPs   
+  #'  Keep a close eye on those indices and study area MCPs
+  #'  Using buffered MCPs with large water bodies masked out   
   #'  OKANOGAN COLLARS
-  md_smr_2nd_OK_df <- lapply(OK_split[[1]], avail_pts_2nd, mcps = md_mcp)
-  md_wtr_2nd_OK_df <- lapply(OK_split[[2]], avail_pts_2nd, mcps = md_mcp)
-  coug_smr_2nd_OK_df <- lapply(OK_split[[3]], avail_pts_2nd, mcps = coug_OK_mcp)
-  coug_wtr_2nd_OK_df <- lapply(OK_split[[4]], avail_pts_2nd, mcps = coug_OK_mcp)
-  wolf_smr_2nd_OK_df <- lapply(OK_split[[5]], avail_pts_2nd, mcps = wolf_OK_mcp)
-  wolf_wtr_2nd_OK_df <- lapply(OK_split[[6]], avail_pts_2nd, mcps = wolf_OK_mcp)
-  bob_smr_2nd_OK_df <- lapply(OK_split[[7]], avail_pts_2nd, mcps = bob_OK_mcp)
-  bob_wtr_2nd_OK_df <- lapply(OK_split[[8]], avail_pts_2nd, mcps = bob_OK_mcp)
-  coy_smr_2nd_OK_df <- lapply(OK_split[[9]], avail_pts_2nd, mcps = coy_OK_mcp)
-  coy_wtr_2nd_OK_df <- lapply(OK_split[[10]], avail_pts_2nd, mcps = coy_OK_mcp)
+  md_smr_2nd_OK_df <- lapply(OK_split[[1]], avail_pts_2nd, mcps = md_poly_clip)
+  md_wtr_2nd_OK_df <- lapply(OK_split[[2]], avail_pts_2nd, mcps = md_poly_clip)
+  coug_smr_2nd_OK_df <- lapply(OK_split[[3]], avail_pts_2nd, mcps = coug_OK_poly_clip)
+  coug_wtr_2nd_OK_df <- lapply(OK_split[[4]], avail_pts_2nd, mcps = coug_OK_poly_clip)
+  wolf_smr_2nd_OK_df <- lapply(OK_split[[5]], avail_pts_2nd, mcps = wolf_OK_poly_clip)
+  wolf_wtr_2nd_OK_df <- lapply(OK_split[[6]], avail_pts_2nd, mcps = wolf_OK_poly_clip)
+  bob_smr_2nd_OK_df <- lapply(OK_split[[7]], avail_pts_2nd, mcps = bob_OK_poly_clip)
+  bob_wtr_2nd_OK_df <- lapply(OK_split[[8]], avail_pts_2nd, mcps = bob_OK_poly_clip)
+  coy_smr_2nd_OK_df <- lapply(OK_split[[9]], avail_pts_2nd, mcps = coy_OK_poly_clip)
+  coy_wtr_2nd_OK_df <- lapply(OK_split[[10]], avail_pts_2nd, mcps = coy_OK_poly_clip)
   #'  NORTHEAST COLLARS
-  elk_smr_2nd_NE_df <- lapply(NE_split[[1]], avail_pts_2nd, mcps = elk_mcp)
-  elk_wtr_2nd_NE_df <- lapply(NE_split[[2]], avail_pts_2nd, mcps = elk_mcp)
-  wtd_smr_2nd_NE_df <- lapply(NE_split[[3]], avail_pts_2nd, mcps = wtd_mcp)
-  wtd_wtr_2nd_NE_df <- lapply(NE_split[[4]], avail_pts_2nd, mcps = wtd_mcp)
-  coug_smr_2nd_NE_df <- lapply(NE_split[[5]], avail_pts_2nd, mcps = coug_NE_mcp)
-  coug_wtr_2nd_NE_df <- lapply(NE_split[[6]], avail_pts_2nd, mcps = coug_NE_mcp)
-  wolf_smr_2nd_NE_df <- lapply(NE_split[[7]], avail_pts_2nd, mcps = wolf_NE_mcp)
-  wolf_wtr_2nd_NE_df <- lapply(NE_split[[8]], avail_pts_2nd, mcps = wolf_NE_mcp)
-  bob_smr_2nd_NE_df <- lapply(NE_split[[9]], avail_pts_2nd, mcps = bob_NE_mcp)
-  bob_wtr_2nd_NE_df <- lapply(NE_split[[10]], avail_pts_2nd, mcps = bob_NE_mcp)
-  coy_smr_2nd_NE_df <- lapply(NE_split[[11]], avail_pts_2nd, mcps = coy_NE_mcp)
-  coy_wtr_2nd_NE_df <- lapply(NE_split[[12]], avail_pts_2nd, mcps = coy_NE_mcp)
+  elk_smr_2nd_NE_df <- lapply(NE_split[[1]], avail_pts_2nd, mcps = elk_poly_clip)
+  elk_wtr_2nd_NE_df <- lapply(NE_split[[2]], avail_pts_2nd, mcps = elk_poly_clip)
+  wtd_smr_2nd_NE_df <- lapply(NE_split[[3]], avail_pts_2nd, mcps = wtd_poly_clip)
+  wtd_wtr_2nd_NE_df <- lapply(NE_split[[4]], avail_pts_2nd, mcps = wtd_poly_clip)
+  coug_smr_2nd_NE_df <- lapply(NE_split[[5]], avail_pts_2nd, mcps = coug_NE_poly_clip)
+  coug_wtr_2nd_NE_df <- lapply(NE_split[[6]], avail_pts_2nd, mcps = coug_NE_poly_clip)
+  wolf_smr_2nd_NE_df <- lapply(NE_split[[7]], avail_pts_2nd, mcps = wolf_NE_poly_clip)
+  wolf_wtr_2nd_NE_df <- lapply(NE_split[[8]], avail_pts_2nd, mcps = wolf_NE_poly_clip)
+  bob_smr_2nd_NE_df <- lapply(NE_split[[9]], avail_pts_2nd, mcps = bob_NE_poly_clip)
+  bob_wtr_2nd_NE_df <- lapply(NE_split[[10]], avail_pts_2nd, mcps = bob_NE_poly_clip)
+  coy_smr_2nd_NE_df <- lapply(NE_split[[11]], avail_pts_2nd, mcps = coy_NE_poly_clip)
+  coy_wtr_2nd_NE_df <- lapply(NE_split[[12]], avail_pts_2nd, mcps = coy_NE_poly_clip)
   
   #'  Convert to dataframes instead of lists
   #'  Okanogan
@@ -382,13 +383,13 @@
   # load("./Outputs/RSF_pts/bob_available_2021-06-22.RData")
   # load("./Outputs/RSF_pts/coy_available_2021-06-22.RData")
   #'  2nd Order Selection
-  load("./Outputs/RSF_pts/md_available_2nd_2021-07-22.RData") #2021-07-07
-  load("./Outputs/RSF_pts/elk_available_2nd_2021-07-22.RData")
-  load("./Outputs/RSF_pts/wtd_available_2nd_2021-07-22.RData")
-  load("./Outputs/RSF_pts/coug_available_2nd_2021-07-22.RData")
-  load("./Outputs/RSF_pts/wolf_available_2nd_2021-07-22.RData")
-  load("./Outputs/RSF_pts/bob_available_2nd_2021-07-22.RData")
-  load("./Outputs/RSF_pts/coy_available_2nd_2021-07-22.RData")
+  load("./Outputs/RSF_pts/md_available_2nd_2021-09-13.RData") #2021-07-22 uses un-buffered & un-masked MCPs
+  load("./Outputs/RSF_pts/elk_available_2nd_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wtd_available_2nd_2021-09-13.RData")
+  load("./Outputs/RSF_pts/coug_available_2nd_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wolf_available_2nd_2021-09-13.RData")
+  load("./Outputs/RSF_pts/bob_available_2nd_2021-09-13.RData")
+  load("./Outputs/RSF_pts/coy_available_2nd_2021-09-13.RData")
   
   #'  Read in spatial data
   wppp_bound <- st_read("./Shapefiles/WPPP_CovariateBoundary", layer = "WPPP_CovariateBoundary")
@@ -700,7 +701,7 @@
   
   # 2021-06-22 uses reprojected rasters
   # 2021-08-10 uses my road density raster (km of road length/1 sq-km)... other versions use Lauren's raster that I think is meters of road length/1 sq-km
-  
+  # 2021-09-13 uses the buffered MCPs with large water bodies masked out
   
   
   
