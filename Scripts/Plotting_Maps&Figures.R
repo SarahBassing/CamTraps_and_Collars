@@ -69,6 +69,9 @@
   cougurl <- "http://phylopic.org/assets/images/submissions/3f8eff77-2868-4121-8d7d-a55ebdd49e04.64.png"
   cougimg <- readPNG(getURLContent(cougurl))
   cougg <- rasterGrob(cougimg, interpolate = TRUE)
+  cougurl2 <- "http://phylopic.org/assets/images/submissions/87c44856-307d-4d1a-84fd-ec54f8591f1a.512.png"
+  cougimg2 <- readPNG(getURLContent(cougurl2))
+  cougg2 <- rasterGrob(cougimg2, interpolate = TRUE)
   wolfurl <- "http://phylopic.org/assets/images/submissions/8cad2b22-30d3-4cbd-86a3-a6d2d004b201.512.png"
   wolfimg <- readPNG(getURLContent(wolfurl))
   wolfg <- rasterGrob(wolfimg, interpolate = TRUE)
@@ -133,14 +136,14 @@
     geom_sf(data = OK_SA, fill = NA, color="black", size = 0.80) +
     #'  Note the hjust & vjust need to change based on font size and coord_sf
     #'  DEPENDS ON HOW BIG YOUR PLOT WINDOW IS TOO!!!!
-    geom_sf_text(data = OK_SA, aes(label = NAME, hjust = 1.3, vjust = -9.5), size = 4.5) +
+    geom_sf_text(data = OK_SA, aes(label = NAME, hjust = 1.3, vjust = 7), size = 7) + #vjust = -6.90
     geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    geom_sf_text(data = NE_SA, aes(label = NAME, hjust = 0.75, vjust = -6.75), size = 4.5) +
+    geom_sf_text(data = NE_SA, aes(label = NAME, hjust = 1.3, vjust = -6.5), size = 7) +
     #'  Add camera locations and vary color by deployment year
-    geom_sf(data = cams_reproj, aes(color = Year), shape = 16) +
+    geom_sf(data = cams_reproj, aes(color = Year), shape = 16, size = 3) +
     #'  Change camera data aesthetics (make sure it's colorblind friendly)
     scale_discrete_manual(aesthetics = "color", values = c("#a6611a", "#018571")) + #c("#dfc27d", "#80cdc1") #c("#601A4A", "#63ACBE")
-    labs(colour = "Camera\ndeployment") +
+    labs(colour = "Camera\nlocations") +
     #'  Constrain plot to two study areas plus some room on the side & bottom
     coord_sf(xlim = c(480000.0, 810000.0), ylim = c(39000.0, 218000.0), expand = FALSE) +
     #'  Constrain map to just the two study areas only
@@ -148,7 +151,10 @@
     #'  Get rid of lines and axis names
     theme_bw() +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-          axis.title.x=element_blank(), axis.title.y=element_blank()) +
+          axis.title.x = element_blank(), axis.title.y = element_blank(),
+          axis.text.x = element_text(size = 16), axis.text.y = element_text(size = 16),
+          legend.title = element_text(size = 18),
+          legend.text = element_text(size = 16)) +
     #'  Add north arrow
     annotation_north_arrow(location = "bl", which_north = "true", 
                            pad_x = unit(0.25, "in"), pad_y = unit(0.3, "in"),
@@ -162,8 +168,8 @@
   #'  Requires "cowplot" package
   #'  Don't use png or other calls to save while plotting- formatting gets messed up
   #'  Use export option in Plot window and formatting holds
-  # png(file = "./Outputs/Figures/Maps/StudyAreas_Cameras1820.png",
-  #     width = 1000, height = 691)
+  png(file = "./Outputs/Figures/Maps/StudyAreas_Cameras1820_102921.png",
+      width = 1000, height = 691)
   StudyArea_Map <- ggdraw(cam_SA_map) +
     draw_plot(
       {
@@ -175,13 +181,13 @@
       #'  Distance along a (0,1) x-axis to draw the left edge of the plot
       x = 0.60,
       #'  Distance along a (0,1) y-axis to draw the bottom edge of the plot
-      y = 0.19,
+      y = 0.20,
       #'  Width & height of the plot expressed as proportion of the entire ggdraw object
       #'  THIS DEPENDS ON HOW BIG YOUR PLOT WINDOW IS TOO!!!!
-      width = 0.25,
-      height = 0.25)
+      width = 0.22,
+      height = 0.22)
   plot(StudyArea_Map)
-  # dev.off()
+  dev.off()
   
   
   
@@ -262,22 +268,28 @@
     #'  Change colors of the raster
     scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
     #'  Add study area and MCP polygons
-    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
-    geom_sf(data = md_poly, fill = NA, color = "blue", size = 0.80) +
-    #'  Add camera locations and vary color by deployment year
-    geom_sf(data = mdstart, color = "black", shape = 16) +
+    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.75) + #0.80
+    geom_sf(data = md_poly, fill = NA, color = "blue", size = 0.75) + #0.80
+    #'  Add initial collar location per individual
+    geom_sf(data = mdstart, color = "black", shape = 16, size = 1) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
+    # theme_void() +
     theme(legend.position = "none",
           axis.text.x = element_blank(),
-          axis.ticks.x = element_blank()) +
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0,  # Top margin
+                               r = 0,  # Right margin
+                               b = 0,  # Bottom margin
+                               l = 0)) + # Left margin
     #'  Change camera data aesthetics (make sure it's colorblind friendly)
     # scale_discrete_manual(aesthetics = "color", values = c("#601A4A", "#63ACBE")) +
     # labs(colour = "Camera\ndeployment") +
     #'  Constrain plot to OK study area only  
     coord_sf(xlim = c(480000.0, 600000.0), ylim = c(102000.0, 250000.0)) + #ylim = c(102000.0, 240000.0)
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(mdg, xmin = 480000.0, xmax = 510000.0, ymin = 225000, ymax = 255000) #xmin = 480000.0, xmax = 505000.0, 
+    annotation_custom(mdg, xmin = 480000.0, xmax = 510000.0, ymin = 225000, ymax = 255000) + #xmin = 480000.0, xmax = 505000.0, 
+    theme(axis.text.y = element_text(size = 14)) 
   
   elk_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
@@ -287,19 +299,21 @@
     scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
     #'  Add study area and MCP polygons
     # geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
-    geom_sf(data = elk_poly, fill = NA, color = "blue", size = 0.80) +
-    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    #'  Add camera locations and vary color by deployment year
-    geom_sf(data = elkstart, color = "black", shape = 16) +
+    geom_sf(data = elk_poly, fill = NA, color = "blue", size = 0.75) +
+    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.75) +
+    #'  Add initial location per individual
+    geom_sf(data = elkstart, color = "black", shape = 16, size = 1) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
           axis.text.x = element_blank(),
-          axis.ticks.x = element_blank()) +
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) + 
     #'  Constrain plot to NE study area only 
     coord_sf(xlim = c(680000.0, 780000.0), ylim = c(102000.0, 250000.0)) + #ylim = c(102000.0, 200000.0)
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(elkmg, xmin = 680000.0, xmax = 710000.0, ymin = 225000, ymax = 255000) #xmin = 680000.0, xmax = 695000.0, ymin = 180000, ymax = 205000
+    annotation_custom(elkfg, xmin = 680000.0, xmax = 710000.0, ymin = 225000, ymax = 255000) + #xmin = 680000.0, xmax = 695000.0, ymin = 180000, ymax = 205000
+    theme(axis.text.y = element_text(size = 14))
   
   wtd_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
@@ -309,19 +323,21 @@
     scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
     #'  Add study area and MCP polygons
     # geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
-    geom_sf(data = wtd_poly, fill = NA, color = "blue", size = 0.80) +
-    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    #'  Add camera locations and vary color by deployment year
-    geom_sf(data = wtdstart, color = "black", shape = 16) +
+    geom_sf(data = wtd_poly, fill = NA, color = "blue", size = 0.75) +
+    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.75) +
+    #'  Add initial location per individual
+    geom_sf(data = wtdstart, color = "black", shape = 16, size = 1) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
           axis.text.x = element_blank(),
-          axis.ticks.x = element_blank()) +
+          axis.ticks.x = element_blank(),
+          pplot.margin = margin(t = 0, r = 0, b = 0, l = 0)) + 
     #'  Constrain plot to NE study area only 
     coord_sf(xlim = c(680000.0, 780000.0), ylim = c(102000.0, 250000.0)) + #ylim = c(102000.0, 200000.0)
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(wtdg, xmin = 680000.0, xmax = 710000.0, ymin = 225000, ymax = 255000) #xmin = 680000.0, xmax = 695000.0, ymin = 180000, ymax = 205000
+    annotation_custom(wtdg, xmin = 680000.0, xmax = 710000.0, ymin = 225000, ymax = 255000) + #xmin = 680000.0, xmax = 695000.0, ymin = 180000, ymax = 205000
+    theme(axis.text.y = element_text(size = 14))
   
   coug_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
@@ -330,23 +346,25 @@
     #'  Change colors of the raster
     scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
     #'  Add study area and MCP polygons
-    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
-    geom_sf(data = coug_OK_poly, fill = NA, color = "blue", size = 0.80) +
-    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    geom_sf(data = coug_NE_poly, fill = NA, color = "blue", size = 0.80) +
-    #'  Add camera locations and vary color by deployment year
-    geom_sf(data = cougstart, color = "black", shape = 16) +
+    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.75) +
+    geom_sf(data = coug_OK_poly, fill = NA, color = "blue", size = 0.75) +
+    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.75) +
+    geom_sf(data = coug_NE_poly, fill = NA, color = "blue", size = 0.75) +
+    #'  Add initial location per individual
+    geom_sf(data = cougstart, color = "black", shape = 16, size = 1) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank(),
           axis.text.y = element_blank(),
-          axis.ticks.y = element_blank()) +
+          axis.ticks.y = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) + 
     #'  Constrain plot to both study areas
     coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) +
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(cougg, xmin = 740000.0, xmax = 780000.0, ymin = 220000, ymax = 260000)
+    annotation_custom(cougg2, xmin = 755000.0, xmax = 790000.0, ymin = 220000, ymax = 255000)
+  
   
   wolf_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
@@ -355,23 +373,26 @@
     #'  Change colors of the raster
     scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
     #'  Add study area and MCP polygons
-    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
-    geom_sf(data = wolf_OK_poly, fill = NA, color = "blue", size = 0.80) +
-    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    geom_sf(data = wolf_NE_poly, fill = NA, color = "blue", size = 0.80) +
-    #'  Add camera locations and vary color by deployment year
-    geom_sf(data = wolfstart, color = "black", shape = 16) +
+    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.75) +
+    geom_sf(data = wolf_OK_poly, fill = NA, color = "blue", size = 0.75) +
+    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.75) +
+    geom_sf(data = wolf_NE_poly, fill = NA, color = "blue", size = 0.75) +
+    #'  Add initial location per individual
+    geom_sf(data = wolfstart, color = "black", shape = 16, size = 1) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank(),
           axis.text.y = element_blank(),
-          axis.ticks.y = element_blank()) +
+          axis.ticks.y = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) + 
     #'  Constrain plot to both study areas
-    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) +
+    # coord_sf(xlim = c(450000.0, 780000.0), ylim = c(102000.0, 270000.0)) +
+    coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) + 
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(wolfg, xmin = 750000.0, xmax = 780000.0, ymin = 220000, ymax = 260000)
+    # annotation_custom(wolfg, xmin = 740000.0, xmax = 780000.0, ymin = 240000, ymax = 280000)
+    annotation_custom(wolfg, xmin = 750000.0, xmax = 785000.0, ymin = 200000, ymax = 280000)
   
   bob_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
@@ -380,23 +401,24 @@
     #'  Change colors of the raster
     scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
     #'  Add study area and MCP polygons
-    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
-    geom_sf(data = bob_OK_poly, fill = NA, color = "blue", size = 0.80) +
-    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    geom_sf(data = bob_NE_poly, fill = NA, color = "blue", size = 0.80) +
-    #'  Add camera locations and vary color by deployment year
-    geom_sf(data = bobstart, color = "black", shape = 16) +
+    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.75) +
+    geom_sf(data = bob_OK_poly, fill = NA, color = "blue", size = 0.75) +
+    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.75) +
+    geom_sf(data = bob_NE_poly, fill = NA, color = "blue", size = 0.75) +
+    #'  Add initial location per individual
+    geom_sf(data = bobstart, color = "black", shape = 16, size = 1) +
     #'  Drop x and y-axis labels
     xlab("") + ylab("") +
     theme(legend.position = "none",
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank(),
           axis.text.y = element_blank(),
-          axis.ticks.y = element_blank()) +
+          axis.ticks.y = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) + 
     #'  Constrain plot to both study areas
     coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) +
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(bobg, xmin = 750000.0, xmax = 780000.0, ymin = 220000, ymax = 260000)
+    annotation_custom(bobg, xmin = 745000.0, xmax = 780000.0, ymin = 215000, ymax = 260000)
   
   coy_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
@@ -405,18 +427,21 @@
     #'  Change colors of the raster
     scale_fill_gradient2(low = "grey95", high = "tan4") + #gray20
     #'  Add study area and MCP polygons
-    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.80) +
-    geom_sf(data = coy_OK_poly, fill = NA, color = "blue", size = 0.80) +
-    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    geom_sf(data = coy_NE_poly, fill = NA, color = "blue", size = 0.80) +
-    #'  Add camera locations and vary color by deployment year
-    geom_sf(data = coystart, color = "black", shape = 16) +
+    geom_sf(data = OK_SA, fill = NA, color = "black", size = 0.75) +
+    geom_sf(data = coy_OK_poly, fill = NA, color = "blue", size = 0.75) +
+    geom_sf(data = NE_SA, fill = NA, color="black", size = 0.75) +
+    geom_sf(data = coy_NE_poly, fill = NA, color = "blue", size = 0.75) +
+    #'  Add initial location per individual
+    geom_sf(data = coystart, color = "black", shape = 16, size = 1) +
     #'  Give x and y-axis labels
     xlab("Longitude") + ylab("Latitude") +
     #'  Constrain plot to both study areas
     coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) + 
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(coyg, xmin = 760000.0, xmax = 780000.0, ymin = 220000, ymax = 260000)
+    annotation_custom(coyg, xmin = 750000.0, xmax = 780000.0, ymin = 215000, ymax = 255000) +
+    theme(axis.title.x = element_text(size = 18), axis.title.y = element_text(size = 18), 
+          axis.text.x = element_text(size = 14), axis.text.y = element_text(size = 14),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0))
   
   #'  Check 'em out!
   plot(md_map)
@@ -431,8 +456,9 @@
   capture_fig <- (md_map + elk_map + wtd_map) / (bob_map + coug_map) / (coy_map + wolf_map) 
   plot(capture_fig)
   
+  
   #'  Save
-  ggsave("./Outputs/Figures/Maps/CaptureEffort_fig.png", capture_fig)
+  ggsave("./Outputs/Figures/Maps/CaptureEffort_fig_102921b.png", capture_fig)
   ggsave("./Outputs/Figures/Maps/MuleDeerCaptureEffort.png", md_map)
   ggsave("./Outputs/Figures/Maps/ElkCaptureEffort.png", elk_map)
   ggsave("./Outputs/Figures/Maps/WTDeerCaptureEffort.png", wtd_map)
@@ -496,15 +522,15 @@
   #'  human modified landscape). Display in multiple panels by model and season.
   
   #'  Occupancy model output
-  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_noHM_2021-08-15.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_noHM_2021-09-12.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 90% confidence intervals to mirror alpha = 0.1
     mutate(
       l95 = (Estimate - (1.64 * SE)),  #### REMINDER: this is 90% CI even though column says l95/u95
       u95 = (Estimate + (1.64 * SE))   
     ) %>%
-    dplyr::select(-c(X, Model))
+    dplyr::select(-c(X)) #, Model
   #'  RSF results output
-  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_noHM_2021-08-15.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_noHM_2021-09-23.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 95% confidence intervals to mirror alpha = 0.05
     mutate(
       l95 = (Estimate - (1.96 * SE)),  #### REMINDER: this is 95% CI
@@ -575,13 +601,13 @@
   rdden_rsf <- filter(rsf_out, Parameter == "RoadDen")
   rdden_rsf_smr <- filter(rdden_rsf, Season == "Summer")
   rdden_rsf_wtr <- filter(rdden_rsf, Season == "Winter")
-  #'  Human Modified
-  hm_occ <- filter(occ_out, Parameter == "HumanMod")
-  hm_occ_smr <- filter(hm_occ, Season == "Summer")
-  hm_occ_wtr <- filter(hm_occ, Season == "Winter")
-  hm_rsf <- filter(rsf_out, Parameter == "HumanMod")
-  hm_rsf_smr <- filter(hm_rsf, Season == "Summer")
-  hm_rsf_wtr <- filter(hm_rsf, Season == "Winter")
+  #' #'  Human Modified
+  #' hm_occ <- filter(occ_out, Parameter == "HumanMod")
+  #' hm_occ_smr <- filter(hm_occ, Season == "Summer")
+  #' hm_occ_wtr <- filter(hm_occ, Season == "Winter")
+  #' hm_rsf <- filter(rsf_out, Parameter == "HumanMod")
+  #' hm_rsf_smr <- filter(hm_rsf, Season == "Summer")
+  #' hm_rsf_wtr <- filter(hm_rsf, Season == "Winter")
 
   
   #'  Plot effects by covariate, season, and model type for all species
@@ -750,31 +776,31 @@
     ylim(-2.5, 2) +
     coord_flip()
   
-  #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on Probability of Use (logit scale)
-  #'  Summer results
-  hm_occ_smr_fig <- ggplot(hm_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
-    geom_hline(yintercept = 0, linetype = "dashed") + 
-    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
-    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "Summer Human Modified", 
-         subtitle = "Occupancy") +
-    xlab("") + ylab("Estimates") +
-    theme(legend.position = "none") +
-    ylim(-2.5, 2) +
-    coord_flip()
-  #'  Winter results
-  hm_occ_wtr_fig <- ggplot(hm_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
-    geom_hline(yintercept = 0, linetype = "dashed") + 
-    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
-    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "Winter Human Modified", 
-         subtitle = "Occupancy") +
-    xlab("") + ylab("Estimates") +
-    theme(legend.position = "none", 
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank()) +
-    ylim(-2.5, 2) +
-    coord_flip()
+  #' #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on Probability of Use (logit scale)
+  #' #'  Summer results
+  #' hm_occ_smr_fig <- ggplot(hm_occ_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+  #'   geom_hline(yintercept = 0, linetype = "dashed") + 
+  #'   geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+  #'   geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+  #'   labs(title = "Summer Human Modified", 
+  #'        subtitle = "Occupancy") +
+  #'   xlab("") + ylab("Estimates") +
+  #'   theme(legend.position = "none") +
+  #'   ylim(-2.5, 2) +
+  #'   coord_flip()
+  #' #'  Winter results
+  #' hm_occ_wtr_fig <- ggplot(hm_occ_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+  #'   geom_hline(yintercept = 0, linetype = "dashed") + 
+  #'   geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+  #'   geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+  #'   labs(title = "Winter Human Modified", 
+  #'        subtitle = "Occupancy") +
+  #'   xlab("") + ylab("Estimates") +
+  #'   theme(legend.position = "none", 
+  #'         axis.text.y = element_blank(),
+  #'         axis.ticks.y = element_blank()) +
+  #'   ylim(-2.5, 2) +
+  #'   coord_flip()
   
   #'  -----------------------------------  
   ####  PLOT RESOURCE SELECTION RESULTS  ####
@@ -791,7 +817,7 @@
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    ylim(-0.75, 0.75) +
+    ylim(-0.5, 0.5) +
     coord_flip()
   #'  Winter results
   elev_rsf_wtr_fig <- ggplot(elev_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -804,7 +830,7 @@
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    ylim(-1.5, 0.5) +
+    ylim(-1.5, 0.7) +
     coord_flip() +
     add_phylopic(wolfimg, x = 7.05, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
     add_phylopic(wtdimg, x = 6.1, y = 0.3, ysize = 1, color = "black", alpha = 1) +
@@ -861,7 +887,7 @@
     theme(legend.position = "none", 
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    ylim(-0.5, 0.5) +
+    ylim(-0.5, 0.75) +
     coord_flip()
   #'  Winter results
   for_rsf_wtr_fig <- ggplot(for_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
@@ -996,40 +1022,40 @@
     add_phylopic(cougimg, x = 2, y = 0.7, ysize = 0.3, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.7, ysize = 0.4, color = "black", alpha = 1)
   
-  #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on relative probability of selection (logit scale)
-  #'  Summer results
-  hm_rsf_smr_fig <- ggplot(hm_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
-    geom_hline(yintercept = 0, linetype = "dashed") + 
-    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
-    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "", #"Percent of Human Modified Landscape", 
-         subtitle = "Resource Selection") +
-    xlab("") + ylab("Estimates") +
-    theme(legend.position = "none", 
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank()) +
-    ylim(-2.0, 1) +
-    coord_flip()
-  #'  Winter results
-  hm_rsf_wtr_fig <- ggplot(hm_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
-    geom_hline(yintercept = 0, linetype = "dashed") + 
-    geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
-    geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
-    labs(title = "", #"Percent of Human Modified Landscape", 
-         subtitle = "Resource Selection") +
-    xlab("") + ylab("Estimates") +
-    theme(legend.position = "none", 
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank()) +
-    ylim(-1, 0.5) +
-    coord_flip() +
-    add_phylopic(wolfimg, x = 7.05, y = 0.35, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(wtdimg, x = 6.1, y = 0.35, ysize = 1, color = "black", alpha = 1) +
-    add_phylopic(mdimg, x = 5.05, y = 0.35, ysize = 0.65, color = "black", alpha = 1) +
-    add_phylopic(elkmimg, x = 4.05, y = 0.35, ysize = 1, color = "black", alpha = 1) +
-    add_phylopic(coyimg, x = 3.05, y = 0.35, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(cougimg, x = 2, y = 0.35, ysize = 0.38, color = "black", alpha = 1) +
-    add_phylopic(bobimg, x = 1.05, y = 0.35, ysize = 0.4, color = "black", alpha = 1)
+  #' #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on relative probability of selection (logit scale)
+  #' #'  Summer results
+  #' hm_rsf_smr_fig <- ggplot(hm_rsf_smr, aes(x = Species, y = Estimate, label = Estimate)) + 
+  #'   geom_hline(yintercept = 0, linetype = "dashed") + 
+  #'   geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+  #'   geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+  #'   labs(title = "", #"Percent of Human Modified Landscape", 
+  #'        subtitle = "Resource Selection") +
+  #'   xlab("") + ylab("Estimates") +
+  #'   theme(legend.position = "none", 
+  #'         axis.text.y = element_blank(),
+  #'         axis.ticks.y = element_blank()) +
+  #'   ylim(-2.0, 1) +
+  #'   coord_flip()
+  #' #'  Winter results
+  #' hm_rsf_wtr_fig <- ggplot(hm_rsf_wtr, aes(x = Species, y = Estimate, label = Estimate)) + 
+  #'   geom_hline(yintercept = 0, linetype = "dashed") + 
+  #'   geom_errorbar(aes(ymin = l95, ymax = u95, col = Species), width = 0) +
+  #'   geom_point(stat = 'identity', aes(col = Species), size = 3.5) +
+  #'   labs(title = "", #"Percent of Human Modified Landscape", 
+  #'        subtitle = "Resource Selection") +
+  #'   xlab("") + ylab("Estimates") +
+  #'   theme(legend.position = "none", 
+  #'         axis.text.y = element_blank(),
+  #'         axis.ticks.y = element_blank()) +
+  #'   ylim(-1, 0.5) +
+  #'   coord_flip() +
+  #'   add_phylopic(wolfimg, x = 7.05, y = 0.35, ysize = 0.5, color = "black", alpha = 1) +
+  #'   add_phylopic(wtdimg, x = 6.1, y = 0.35, ysize = 1, color = "black", alpha = 1) +
+  #'   add_phylopic(mdimg, x = 5.05, y = 0.35, ysize = 0.65, color = "black", alpha = 1) +
+  #'   add_phylopic(elkmimg, x = 4.05, y = 0.35, ysize = 1, color = "black", alpha = 1) +
+  #'   add_phylopic(coyimg, x = 3.05, y = 0.35, ysize = 0.5, color = "black", alpha = 1) +
+  #'   add_phylopic(cougimg, x = 2, y = 0.35, ysize = 0.38, color = "black", alpha = 1) +
+  #'   add_phylopic(bobimg, x = 1.05, y = 0.35, ysize = 0.4, color = "black", alpha = 1)
   
   
   ####  Pair OccMod and RSF plots  ####
@@ -1040,7 +1066,7 @@
   grass_fig <- grass_occ_smr_fig + plot_annotation(title = "D") + grass_rsf_smr_fig + grass_occ_wtr_fig + grass_rsf_wtr_fig + plot_layout(ncol = 4)
   shrub_fig <- shrub_occ_smr_fig + plot_annotation(title = "E") + shrub_rsf_smr_fig + shrub_occ_wtr_fig + shrub_rsf_wtr_fig + plot_layout(ncol = 4)
   rdden_fig <- rdden_occ_smr_fig + plot_annotation(title = "F") + rdden_rsf_smr_fig + rdden_occ_wtr_fig + rdden_rsf_wtr_fig + plot_layout(ncol = 4)
-  hm_fig <- hm_occ_smr_fig + plot_annotation(title = "G") + hm_rsf_smr_fig + hm_occ_wtr_fig + hm_rsf_wtr_fig + plot_layout(ncol = 4)
+  # hm_fig <- hm_occ_smr_fig + plot_annotation(title = "G") + hm_rsf_smr_fig + hm_occ_wtr_fig + hm_rsf_wtr_fig + plot_layout(ncol = 4)
   
     
   plot(elev_fig)
@@ -1049,7 +1075,7 @@
   plot(grass_fig)
   plot(shrub_fig)
   plot(rdden_fig)
-  plot(hm_fig)
+  # plot(hm_fig)
   
   #'  Save different file formats
   #'  PNG
@@ -1675,13 +1701,13 @@
   coy_det_ndet <- DetNonDet(coy_det, stations)
   
   #'  RSF input data
-  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-08-10.RData") #2021-07-22
-  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-09-13.RData") 
+  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-09-13.RData")
   
   #'  Retain only the used locations and their covariate values
   md_used <- filter(md_dat_all, Used == 1) %>%
