@@ -52,16 +52,16 @@
   
   ####  Load Model Results  ####
   #'  Occupancy model output
-  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_noHM_2021-08-15.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_noHM_2021-09-12.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 90% confidence intervals to mirror alpha = 0.1
     mutate(
       l95 = (Estimate - (1.64 * SE)),  #### REMINDER: this is 90% CI even though column says l95/u95
       u95 = (Estimate + (1.64 * SE))   
     ) %>%
-    dplyr::select(-c(X, Model))
+    dplyr::select(-c(X)) #, Model
   
   #'  RSF results output
-  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_noHM_2021-08-15.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_noHM_2021-09-23.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE 2021-09-14
     #'  Calculate 95% confidence intervals to mirror alpha = 0.05
     mutate(
       l95 = (Estimate - (1.96 * SE)),  #### REMINDER: this is 95% CI
@@ -91,13 +91,13 @@
     arrange(Year) #NECESSARY TO MATCH DH's CAMERALOCATION ORDER 2021-08-10 version
   
   #'  Read in original covariate data from RSFs
-  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-08-10.RData")  
-  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-08-10.RData")
-  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-08-10.RData")
+  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-09-13.RData")  # 2021-08-10 un-buffered & un-masked
+  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-09-13.RData")
   
   #'  Function to find mean and standard deviation for each covariate
   #'  Used when center & scaling covariates for original models and will be used 
@@ -131,17 +131,26 @@
   summary_coy_smr <- cov_summary(coy_dat_all[coy_dat_all$Season == "Summer18" | coy_dat_all$Season == "Summer19",])
   summary_coy_wtr <- cov_summary(coy_dat_all[coy_dat_all$Season == "Winter1819" | coy_dat_all$Season == "Winter1920",])
   
-  #'  Read in & scale covariate data for entire study areas (based on 1km grids)
+  #'  Read in & scale covariate data for entire study areas (based on 30m & 1km grids)
   #'  Data generated in "Covariate_Extraction.R" script in WPPP_CameraTrapping Project
-  NE_covs_1km <- read.csv("./Outputs/Tables/StudyAreaWide_NE_Covariates_2021-08-10.csv") %>%
+  # NE_covs_30m <- read.csv("./Outputs/Tables/StudyAreaWide_NE_Covariates_30m_2021-09-15.csv") %>%
+  #   dplyr::select(-X) %>%
+  #   mutate(Area = 0)
+  # OK_covs_30m <- read.csv("./Outputs/Tables/StudyAreaWide_OK_Covariates_30m_2021-09-15.csv") %>%
+  #   dplyr::select(-X) %>%
+  #   mutate(Area = 1)
+  # all_covs_30m <- as.data.frame(rbind(NE_covs_30m, OK_covs_30m)) 
+  NE_covs_1km <- read.csv("./Outputs/Tables/StudyAreaWide_NE_Covariates_1km_2021-09-16.csv") %>% 
     dplyr::select(-X) %>%
     mutate(Area = 0)
-  OK_covs_1km <- read.csv("./Outputs/Tables/StudyAreaWide_OK_Covariates_2021-08-10.csv") %>%
+  OK_covs_1km <- read.csv("./Outputs/Tables/StudyAreaWide_OK_Covariates_1km_2021-09-16.csv") %>% 
   dplyr::select(-X) %>%
     mutate(Area = 1)
   all_covs_1km <- as.data.frame(rbind(NE_covs_1km, OK_covs_1km))
   
   #'  Exclude elevations >2150 for camera covariates since didn't sample above this elevation
+  # all_covs_adj_30m <- all_covs_30m %>%
+  #   mutate(Elev = ifelse(Elev > 2150, NA, Elev))
   all_covs_adj_1km <- all_covs_1km %>%
     mutate(Elev = ifelse(Elev > 2150, NA, Elev))
   
@@ -167,22 +176,22 @@
         Area = Area)
   }
   #'  Standardize covariate data based on camera covariate means & SDs
-  cam_zcovs_1km <- scaling_covs(all_covs_adj_1km, summary_occ_covs)
+  cam_zcovs <- scaling_covs(all_covs_adj_1km, summary_occ_covs)  # all_covs_adj_30m
   #'  Standardize covariate data based on collar covariate means & SDs for specific species & seasons
-  md_smr_zcovs_1km <- scaling_covs(all_covs_1km, summary_md_smr)
-  md_wtr_zcovs_1km <- scaling_covs(all_covs_1km, summary_md_wtr)
-  elk_smr_zcovs_1km <- scaling_covs(all_covs_1km, summary_elk_smr)
-  elk_wtr_zcovs_1km <- scaling_covs(all_covs_1km, summary_elk_wtr)
-  wtd_smr_zcovs_1km <- scaling_covs(all_covs_1km, summary_wtd_smr)
-  wtd_wtr_zcovs_1km <- scaling_covs(all_covs_1km, summary_wtd_wtr)
-  coug_smr_zcovs_1km <- scaling_covs(all_covs_1km, summary_coug_smr)
-  coug_wtr_zcovs_1km <- scaling_covs(all_covs_1km, summary_coug_wtr)
-  wolf_smr_zcovs_1km <- scaling_covs(all_covs_1km, summary_wolf_smr)
-  wolf_wtr_zcovs_1km <- scaling_covs(all_covs_1km, summary_wolf_wtr)
-  bob_smr_zcovs_1km <- scaling_covs(all_covs_1km, summary_bob_smr)
-  bob_wtr_zcovs_1km <- scaling_covs(all_covs_1km, summary_bob_wtr)
-  coy_smr_zcovs_1km <- scaling_covs(all_covs_1km, summary_coy_smr)
-  coy_wtr_zcovs_1km <- scaling_covs(all_covs_1km, summary_coy_wtr)
+  md_smr_zcovs <- scaling_covs(all_covs_1km, summary_md_smr)  # all_covs_30m
+  md_wtr_zcovs <- scaling_covs(all_covs_1km, summary_md_wtr)
+  elk_smr_zcovs <- scaling_covs(all_covs_1km, summary_elk_smr)
+  elk_wtr_zcovs <- scaling_covs(all_covs_1km, summary_elk_wtr)
+  wtd_smr_zcovs <- scaling_covs(all_covs_1km, summary_wtd_smr)
+  wtd_wtr_zcovs <- scaling_covs(all_covs_1km, summary_wtd_wtr)
+  coug_smr_zcovs <- scaling_covs(all_covs_1km, summary_coug_smr)
+  coug_wtr_zcovs <- scaling_covs(all_covs_1km, summary_coug_wtr)
+  wolf_smr_zcovs <- scaling_covs(all_covs_1km, summary_wolf_smr)
+  wolf_wtr_zcovs <- scaling_covs(all_covs_1km, summary_wolf_wtr)
+  bob_smr_zcovs <- scaling_covs(all_covs_1km, summary_bob_smr)
+  bob_wtr_zcovs <- scaling_covs(all_covs_1km, summary_bob_wtr)
+  coy_smr_zcovs <- scaling_covs(all_covs_1km, summary_coy_smr)
+  coy_wtr_zcovs <- scaling_covs(all_covs_1km, summary_coy_wtr)
   
   #'  Function to covert all covariate data into SpatialPointsDataFrames
   sp_covs <- function(covs) {
@@ -191,11 +200,11 @@
                                         proj4string = CRS(sa_proj))
   }
   #'  Gather all scaled covariate data into a monster list
-  zcovs <- list(cam_zcovs_1km, md_smr_zcovs_1km, md_wtr_zcovs_1km, 
-                elk_smr_zcovs_1km, elk_wtr_zcovs_1km, wtd_smr_zcovs_1km, 
-                wtd_wtr_zcovs_1km, coug_smr_zcovs_1km, coug_wtr_zcovs_1km, 
-                wolf_smr_zcovs_1km, wolf_wtr_zcovs_1km, bob_smr_zcovs_1km, 
-                bob_wtr_zcovs_1km, coy_smr_zcovs_1km, coy_wtr_zcovs_1km)
+  zcovs <- list(cam_zcovs, md_smr_zcovs, md_wtr_zcovs, 
+                elk_smr_zcovs, elk_wtr_zcovs, wtd_smr_zcovs, 
+                wtd_wtr_zcovs, coug_smr_zcovs, coug_wtr_zcovs, 
+                wolf_smr_zcovs, wolf_wtr_zcovs, bob_smr_zcovs, 
+                bob_wtr_zcovs, coy_smr_zcovs, coy_wtr_zcovs)
   #'  Run list of scaled covariates through spatial function
   sp_zcovs <- lapply(zcovs, sp_covs)
   
@@ -241,8 +250,12 @@
       B.area = AreaOK) %>% #B.hm = HumanMod
     #'  Change NAs to 0 (no effect) for coefficients not included in species-specific models
     mutate(
+      B.elev = ifelse(is.na(B.elev), 0, B.elev),
+      B.slope = ifelse(is.na(B.slope), 0, B.slope),
+      B.for = ifelse(is.na(B.for), 0, B.for),
       B.grass = ifelse(is.na(B.grass), 0, B.grass),
       B.shrub = ifelse(is.na(B.shrub), 0, B.shrub),
+      B.rd = ifelse(is.na(B.rd), 0, B.rd),
       B.area = ifelse(is.na(B.area), 0, B.area)
     )
   
@@ -284,7 +297,7 @@
   
   #'  Combine into a monster data frame
   #'  Start with predator data that spans both study areas
-  Predicted_occ <- as.data.frame(all_covs_1km) %>%
+  Predicted_occ <- as.data.frame(all_covs_1km) %>%  # NOTE WHICH GRID YOU'RE USING!
     dplyr::select(obs, Area, x, y) %>% 
     mutate(Area = ifelse(Area == 0, "Northeast", "Okanogan")) %>%
     cbind(coug_smr_predict_occ_sgnf, coug_wtr_predict_occ_sgnf, 
@@ -373,7 +386,15 @@
       B.for = PercForMix,
       B.grass = PercXGrass,
       B.shrub = PercXShrub,
-      B.rd = RoadDen) # B.hm = HumanMod
+      B.rd = RoadDen) %>% # B.hm = HumanMod
+    mutate(
+      B.elev = ifelse(is.na(B.elev), 0, B.elev),
+      B.slope = ifelse(is.na(B.slope), 0, B.slope),
+      B.for = ifelse(is.na(B.for), 0, B.for),
+      B.grass = ifelse(is.na(B.grass), 0, B.grass),
+      B.shrub = ifelse(is.na(B.shrub), 0, B.shrub),
+      B.rd = ifelse(is.na(B.rd), 0, B.rd)
+    )
   
   #'  Function to predict across all grid cells based on RSF results
   #'  Should end up with 1 predicted value per grid cell
@@ -425,7 +446,7 @@
   
   #'  Combine into a monster data frame
   #'  Start with predators
-  Predicted_rsf <- as.data.frame(all_covs_1km) %>%
+  Predicted_rsf <- as.data.frame(all_covs_1km) %>% # NOTE WHICH GRID YOU'RE USING!
     dplyr::select(obs, Area, x, y) %>% 
     mutate(Area = ifelse(Area == 0, "Northeast", "Okanogan")) %>%
     cbind(coug_smr_predict_rsf_sgnf, coug_wtr_predict_rsf_sgnf, # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs, w/ or w/o normalizing constant)
@@ -497,11 +518,16 @@
   #'  Exclude extreme outliers as identified by histograms & boxplots
   Predicted_rsf <- Predicted_rsf %>%
     mutate(
-      MD_smr_rsf2 = ifelse(MD_smr_rsf > 15, NA, MD_smr_rsf),
-      MD_wtr_rsf2 = ifelse(MD_wtr_rsf > 300, NA, MD_wtr_rsf),
-      ELK_wtr_rsf2 = ifelse(ELK_wtr_rsf > 25, NA, ELK_wtr_rsf),
-      WTD_smr_rsf2 = ifelse(WTD_smr_rsf > 10, NA, WTD_smr_rsf),
-      COUG_wtr_rsf2 = ifelse(COUG_wtr_rsf > 25, NA, COUG_wtr_rsf)
+      MD_smr_rsf2 = ifelse(MD_smr_rsf > 5, NA, MD_smr_rsf),
+      MD_wtr_rsf2 = ifelse(MD_wtr_rsf > 150, NA, MD_wtr_rsf), 
+      # ELK_wtr_rsf2 = ifelse(ELK_wtr_rsf > 3, NA, ELK_wtr_rsf),  
+      WTD_smr_rsf2 = ifelse(WTD_smr_rsf > 4, NA, WTD_smr_rsf),
+      WTD_wtr_rsf2 = ifelse(WTD_wtr_rsf > 6, NA, WTD_wtr_rsf),
+      COUG_wtr_rsf2 = ifelse(COUG_wtr_rsf > 10, NA, COUG_wtr_rsf), 
+      WOLF_smr_rsf2 = ifelse(WOLF_smr_rsf > 7, NA, WOLF_smr_rsf),
+      WOLF_wtr_rsf2 = ifelse(WOLF_wtr_rsf > 5, NA, WOLF_wtr_rsf),
+      BOB_wtr_rsf2 = ifelse(BOB_wtr_rsf > 12, NA, BOB_wtr_rsf),
+      COY_wtr_rsf2 = ifelse(COY_wtr_rsf > 5, NA, COY_wtr_rsf)
     )
 
  
@@ -532,20 +558,20 @@
     return(pred_corr)
   }
   #'  Run each predictions through function
-  md_smr_corr <- predict_corr(Predicted_occ$MD_smr_occ, Predicted_rsf$MD_smr_rsf2)  # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
-  md_wtr_corr <- predict_corr(Predicted_occ$MD_wtr_occ, Predicted_rsf$MD_wtr_rsf2)  # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
+  md_smr_corr <- predict_corr(Predicted_occ$MD_smr_occ, Predicted_rsf$MD_smr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+  md_wtr_corr <- predict_corr(Predicted_occ$MD_wtr_occ, Predicted_rsf$MD_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   elk_smr_corr <- predict_corr(Predicted_occ$ELK_smr_occ, Predicted_rsf$ELK_smr_rsf)  
-  elk_wtr_corr <- predict_corr(Predicted_occ$ELK_wtr_occ, Predicted_rsf$ELK_wtr_rsf2)  # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
-  wtd_smr_corr <- predict_corr(Predicted_occ$WTD_smr_occ, Predicted_rsf$WTD_smr_rsf2)  # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
-  wtd_wtr_corr <- predict_corr(Predicted_occ$WTD_wtr_occ, Predicted_rsf$WTD_wtr_rsf)
+  elk_wtr_corr <- predict_corr(Predicted_occ$ELK_wtr_occ, Predicted_rsf$ELK_wtr_rsf)  
+  wtd_smr_corr <- predict_corr(Predicted_occ$WTD_smr_occ, Predicted_rsf$WTD_smr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+  wtd_wtr_corr <- predict_corr(Predicted_occ$WTD_wtr_occ, Predicted_rsf$WTD_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   coug_smr_corr <- predict_corr(Predicted_occ$COUG_smr_occ, Predicted_rsf$COUG_smr_rsf)
-  coug_wtr_corr <- predict_corr(Predicted_occ$COUG_wtr_occ, Predicted_rsf$COUG_wtr_rsf2)  # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
-  wolf_smr_corr <- predict_corr(Predicted_occ$WOLF_smr_occ, Predicted_rsf$WOLF_smr_rsf)
-  wolf_wtr_corr <- predict_corr(Predicted_occ$WOLF_wtr_occ, Predicted_rsf$WOLF_wtr_rsf)
+  coug_wtr_corr <- predict_corr(Predicted_occ$COUG_wtr_occ, Predicted_rsf$COUG_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+  wolf_smr_corr <- predict_corr(Predicted_occ$WOLF_smr_occ, Predicted_rsf$WOLF_smr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+  wolf_wtr_corr <- predict_corr(Predicted_occ$WOLF_wtr_occ, Predicted_rsf$WOLF_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   bob_smr_corr <- predict_corr(Predicted_occ$BOB_smr_occ, Predicted_rsf$BOB_smr_rsf)
-  bob_wtr_corr <- predict_corr(Predicted_occ$BOB_wtr_occ, Predicted_rsf$BOB_wtr_rsf)
+  bob_wtr_corr <- predict_corr(Predicted_occ$BOB_wtr_occ, Predicted_rsf$BOB_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   coy_smr_corr <- predict_corr(Predicted_occ$COY_smr_occ, Predicted_rsf$COY_smr_rsf)
-  coy_wtr_corr <- predict_corr(Predicted_occ$COY_wtr_occ, Predicted_rsf$COY_wtr_rsf)
+  coy_wtr_corr <- predict_corr(Predicted_occ$COY_wtr_occ, Predicted_rsf$COY_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   
   #'  Wrangle results into a table
   spp <- rep(c("Mule Deer", "Elk", "White-tailed Deer", "Cougar", "Wolf", "Bobcat", "Coyote"), each = 2)
@@ -563,7 +589,7 @@
     arrange(Species)
   
   #'  Save correlations
-  write.csv(corr_results, paste0("./Outputs/Tables/Correlation_OccMod_RSF_Predictions_noHM_", Sys.Date(), ".csv"))  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o non-signif coeffs)
+  write.csv(corr_results, paste0("./Outputs/Tables/Correlation_OccMod_RSF_Predictions_noHM_", Sys.Date(), ".csv"))  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o outliers)
   
   
   ####  Re-scale RSF values between 0 & 1 for mapping  ####
@@ -575,24 +601,32 @@
       x = x,
       y = y,
       COUG_smr_rsf = round(COUG_smr_rsf/(max(COUG_smr_rsf, na.rm = T)), digits = 2),
-      COUG_wtr_rsf = round(COUG_wtr_rsf2/(max(COUG_wtr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
-      WOLF_smr_rsf = round(WOLF_smr_rsf/(max(WOLF_smr_rsf, na.rm = T)), digits = 2),
-      WOLF_wtr_rsf = round(WOLF_wtr_rsf/(max(WOLF_wtr_rsf, na.rm = T)), digits = 2),
+      COUG_wtr_rsf = round(COUG_wtr_rsf2/(max(COUG_wtr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+      WOLF_smr_rsf = round(WOLF_smr_rsf2/(max(WOLF_smr_rsf2, na.rm = T)), digits = 2),
+      WOLF_wtr_rsf = round(WOLF_wtr_rsf2/(max(WOLF_wtr_rsf2, na.rm = T)), digits = 2),
       BOB_smr_rsf = round(BOB_smr_rsf/(max(BOB_smr_rsf, na.rm = T)), digits = 2),
-      BOB_wtr_rsf = round(BOB_wtr_rsf/(max(BOB_wtr_rsf, na.rm = T)), digits = 2),
+      BOB_wtr_rsf = round(BOB_wtr_rsf2/(max(BOB_wtr_rsf2, na.rm = T)), digits = 2),
       COY_smr_rsf = round(COY_smr_rsf/(max(COY_smr_rsf, na.rm = T)), digits = 2),
-      COY_wtr_rsf = round(COY_wtr_rsf/(max(COY_wtr_rsf, na.rm = T)), digits = 2),
+      COY_wtr_rsf = round(COY_wtr_rsf2/(max(COY_wtr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
       ELK_smr_rsf = round(ELK_smr_rsf/(max(ELK_smr_rsf, na.rm = T)), digits = 2),
-      ELK_wtr_rsf = round(ELK_wtr_rsf2/(max(ELK_wtr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
-      WTD_smr_rsf = round(WTD_smr_rsf2/(max(WTD_smr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
-      WTD_wtr_rsf = round(WTD_wtr_rsf/(max(WTD_wtr_rsf, na.rm = T)), digits = 2),
-      MD_smr_rsf = round(MD_smr_rsf2/(max(MD_smr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
-      MD_wtr_rsf = round(MD_wtr_rsf2/(max(MD_wtr_rsf2, na.rm = T)), digits = 2)  # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
+      ELK_wtr_rsf = round(ELK_wtr_rsf/(max(ELK_wtr_rsf, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+      WTD_smr_rsf = round(WTD_smr_rsf2/(max(WTD_smr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+      WTD_wtr_rsf = round(WTD_wtr_rsf2/(max(WTD_wtr_rsf2, na.rm = T)), digits = 2),
+      MD_smr_rsf = round(MD_smr_rsf2/(max(MD_smr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+      MD_wtr_rsf = round(MD_wtr_rsf2/(max(MD_wtr_rsf2, na.rm = T)), digits = 2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
     )
   
   #'  Save
   write.csv(Predicted_rsf_rescale, paste0("./Outputs/Tables/Predicted_Relative_Selection_rescale_", Sys.Date(), ".csv"))
   
+  
+  #'  For some reason ggplot is freaking out over plotting actual 0 values and
+  #'  represents them as NA in maps. So for plotting purposes only I am changing
+  #'  all pixels with value 0 to 0.0001 so they are slightly >0 and will plot.
+  Predicted_rsf_rescale <- Predicted_rsf_rescale %>%
+    mutate(WOLF_smr_rsf = ifelse(WOLF_smr_rsf == 0, 0.00001, WOLF_smr_rsf),
+           BOB_smr_rsf = ifelse(BOB_smr_rsf == 0, 0.00001, BOB_smr_rsf),
+           MD_wtr_rsf = ifelse(MD_wtr_rsf == 0, 0.00001, MD_wtr_rsf))
   
   
   ####  Plot predicted estimates  ####
@@ -605,7 +639,7 @@
   #'  Summer Occ
   md_smr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ_OK, aes(x = x, y = y, fill = cut(MD_smr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) + 
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + #low = "azure" #low = "floralwhite"
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -619,7 +653,7 @@
   #'  Summer RSF
   md_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Okanogan",], aes(x = x, y = y, fill = cut(MD_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) + 
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -633,7 +667,7 @@
   #'  Winter Occ
   md_wtr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ_OK, aes(x = x, y = y, fill = cut(MD_wtr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -646,8 +680,8 @@
     ggtitle("Winter Occupancy Model") 
   #'  Winter RSF
   md_wtr_rsf_fig <- ggplot() +
-    geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Okanogan",], aes(x = x, y = y, fill =cut(MD_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Okanogan",], aes(x = x, y = y, fill = cut(MD_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -678,7 +712,7 @@
   #'  Summer Occ
   elk_smr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ_NE, aes(x = x, y = y, fill = cut(ELK_smr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20") +
@@ -692,7 +726,7 @@
   #'  Summer RSF
   elk_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Northeast",], aes(x = x, y = y, fill = cut(ELK_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20") +
@@ -706,7 +740,7 @@
   #'  Winter Occ
   elk_wtr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ_NE, aes(x = x, y = y, fill = cut(ELK_wtr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20") +
@@ -720,7 +754,7 @@
   #'  Winter RSF
   elk_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Northeast",], aes(x = x, y = y, fill = cut(ELK_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20") +
@@ -748,7 +782,7 @@
   #'  Summer Occ
   wtd_smr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ_NE, aes(x = x, y = y, fill = cut(WTD_smr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20") +
@@ -762,7 +796,7 @@
   #'  Summer RSF
   wtd_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Northeast",], aes(x = x, y = y, fill = cut(WTD_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20") +
@@ -776,7 +810,7 @@
   #'  Winter Occ
   wtd_wtr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ_NE, aes(x = x, y = y, fill = cut(WTD_wtr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20") +
@@ -790,7 +824,7 @@
   #'  Winter RSF
   wtd_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Northeast",], aes(x = x, y = y, fill = cut(WTD_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20") +
@@ -818,7 +852,7 @@
   #'  Summer Occ
   coug_smr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = cut(COUG_smr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -833,7 +867,7 @@
   #'  Summer RSF
   coug_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(COUG_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -848,7 +882,7 @@
   #'  Winter Occ
   coug_wtr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = cut(COUG_wtr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -863,7 +897,7 @@
   #'  Winter RSF
   coug_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(COUG_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -892,7 +926,7 @@
   #'  Summer Occ
   wolf_smr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = cut(WOLF_smr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -907,7 +941,7 @@
   #'  Summer RSF
   wolf_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(WOLF_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -922,7 +956,7 @@
   #'  Winter Occ
   wolf_wtr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = cut(WOLF_wtr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -937,7 +971,7 @@
   #'  Winter RSF
   wolf_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(WOLF_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -966,7 +1000,7 @@
   #'  Summer Occ
   bob_smr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = cut(BOB_smr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -981,7 +1015,7 @@
   #'  Summer RSF
   bob_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(BOB_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -996,7 +1030,7 @@
   #'  Winter Occ
   bob_wtr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = cut(BOB_wtr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -1011,7 +1045,7 @@
   #'  Winter RSF
   bob_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(BOB_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -1040,7 +1074,7 @@
   #'  Summer Occ
   coy_smr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = cut(COY_smr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -1055,7 +1089,7 @@
   #'  Summer RSF
   coy_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(COY_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -1070,7 +1104,7 @@
   #'  Winter Occ
   coy_wtr_occ_fig <- ggplot() +
     geom_tile(data = Predicted_occ, aes(x = x, y = y, fill = cut(COY_wtr_occ, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
@@ -1085,7 +1119,7 @@
   #'  Winter RSF
   coy_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(COY_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
-    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F) +
+    scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20") +
