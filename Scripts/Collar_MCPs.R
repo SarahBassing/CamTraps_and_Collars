@@ -38,6 +38,12 @@
   OK_wgs84 <- st_transform(OK_SA, sa_proj)
   NE_wgs84 <- st_transform(NE_SA, sa_proj)
   
+  #'  Load water bodies shapefile (needed to mask unavailable habitat)
+  waterbody <- sf::st_read("./Shapefiles/WA_DeptEcology_HydroWA", layer = "WPPP_waterbody") %>%
+    st_transform(crs = sa_proj)
+  #'  Identify large bodies of water (anything larger than 1 sq-km in size)
+  bigwater <- waterbody[waterbody$AreSqKm > 1,]
+  
   #'  Load cleaned data    ### NEED TO BREAK APART BY STUDY AREA!!!
   load("./Data/Collar_AllSpecies_AllLocations_Clean.RData")
   md_skinny <- clean_data[[1]] %>%
@@ -126,51 +132,77 @@
   coy_NE_poly <- gBuffer(coy_NE_mcp, width = 3000)
   coy_OK_poly <- gBuffer(coy_OK_mcp, width = 3000)
   
-    
-  #'  Plot to make sure these make sense
-  plot(md_mcp)
-  plot(md_sp, add = TRUE, pch = 16, col = "blue")
-  plot(md_poly, add = TRUE)
+  #'  Intersect and clip water body polygons from MCP polygons so large bodies
+  #'  of water are not available to collared animals
+  bigwater_sp <- as(st_geometry(bigwater), "Spatial")
+  md_poly_clip <- rgeos::gDifference(md_poly, bigwater_sp)
+  elk_poly_clip <- rgeos::gDifference(elk_poly, bigwater_sp)
+  wtd_poly_clip <- rgeos::gDifference(wtd_poly, bigwater_sp)
+  coug_NE_poly_clip <- rgeos::gDifference(coug_NE_poly, bigwater_sp)
+  coug_OK_poly_clip <- rgeos::gDifference(coug_OK_poly, bigwater_sp)
+  wolf_NE_poly_clip <- rgeos::gDifference(wolf_NE_poly, bigwater_sp)
+  wolf_OK_poly_clip <- rgeos::gDifference(wolf_OK_poly, bigwater_sp)
+  bob_NE_poly_clip <- rgeos::gDifference(bob_NE_poly, bigwater_sp)
+  bob_OK_poly_clip <- rgeos::gDifference(bob_OK_poly, bigwater_sp)
+  coy_NE_poly_clip <- rgeos::gDifference(coy_NE_poly, bigwater_sp)
+  coy_OK_poly_clip <- rgeos::gDifference(coy_OK_poly, bigwater_sp)
 
-  plot(elk_mcp)
-  plot(elk_sp, add = TRUE, pch = 16, col = "blue")
-  plot(elk_poly, add = TRUE)
-
-  plot(wtd_mcp)
-  plot(wtd_sp, add = TRUE, pch = 16, col = "blue")
-  plot(wtd_poly, add = TRUE)
-
-  plot(coug_OK_mcp)
-  plot(coug_OK_sp, add = TRUE, pch = 16, col = "red")
-  plot(coug_OK_poly, add = TRUE)
-
-  plot(coug_NE_mcp)
-  plot(coug_NE_sp, add = TRUE, pch = 16, col = "red")
-  plot(coug_NE_poly, add = TRUE)
-
-  plot(wolf_OK_mcp)
-  plot(wolf_OK_sp, add = TRUE, pch = 16, col = "red")
-  plot(wolf_OK_poly, add = TRUE)
-
-  plot(wolf_NE_mcp)
-  plot(wolf_NE_sp, add = TRUE, pch = 16, col = "red")
-  plot(wolf_NE_poly, add = TRUE)
-
-  plot(bob_OK_mcp)
-  plot(bob_OK_sp, add = TRUE, pch = 16, col = "red")
-  plot(bob_OK_poly, add = TRUE)
-
-  plot(bob_NE_mcp)
-  plot(bob_NE_sp, add = TRUE, pch = 16, col = "red")
-  plot(bob_NE_poly, add = TRUE)
-
-  plot(coy_OK_mcp)
-  plot(coy_OK_sp, add = TRUE, pch = 16, col = "red")
-  plot(coy_OK_poly, add = TRUE)
-
-  plot(coy_NE_mcp)
-  plot(coy_NE_sp, add = TRUE, pch = 16, col = "red")
-  plot(coy_NE_poly, add = TRUE)
+  
+  #' #'  Plot to make sure these make sense
+  #' plot(md_mcp)
+  #' plot(md_sp, add = TRUE, pch = 16, col = "blue")
+  #' plot(md_poly, add = TRUE)
+  #' plot(md_poly_clip, add = TRUE)
+  #' 
+  #' plot(elk_mcp)
+  #' plot(elk_sp, add = TRUE, pch = 16, col = "blue")
+  #' plot(elk_poly, add = TRUE)
+  #' plot(elk_poly_clip, add = TRUE)
+  #' 
+  #' plot(wtd_mcp)
+  #' plot(wtd_sp, add = TRUE, pch = 16, col = "blue")
+  #' plot(wtd_poly, add = TRUE)
+  #' plot(wtd_poly_clip, add = TRUE)
+  #' 
+  #' plot(coug_OK_mcp)
+  #' plot(coug_OK_sp, add = TRUE, pch = 16, col = "red")
+  #' plot(coug_OK_poly, add = TRUE)
+  #' plot(coug_OK_poly_clip, add = TRUE)
+  #' 
+  #' plot(coug_NE_mcp)
+  #' plot(coug_NE_sp, add = TRUE, pch = 16, col = "red")
+  #' plot(coug_NE_poly, add = TRUE)
+  #' plot(coug_NE_poly_clip, add = TRUE)
+  #' 
+  #' plot(wolf_OK_mcp)
+  #' plot(wolf_OK_sp, add = TRUE, pch = 16, col = "red")
+  #' plot(wolf_OK_poly, add = TRUE)
+  #' plot(wolf_OK_poly_clip, add = TRUE)
+  #' 
+  #' plot(wolf_NE_mcp)
+  #' plot(wolf_NE_sp, add = TRUE, pch = 16, col = "red")
+  #' plot(wolf_NE_poly, add = TRUE)
+  #' plot(wolf_NE_poly_clip, add = TRUE)
+  #' 
+  #' plot(bob_OK_mcp)
+  #' plot(bob_OK_sp, add = TRUE, pch = 16, col = "red")
+  #' plot(bob_OK_poly, add = TRUE)
+  #' plot(bob_OK_poly_clip, add = TRUE)
+  #' 
+  #' plot(bob_NE_mcp)
+  #' plot(bob_NE_sp, add = TRUE, pch = 16, col = "red")
+  #' plot(bob_NE_poly, add = TRUE)
+  #' plot(bob_NE_poly_clip, add = TRUE)
+  #' 
+  #' plot(coy_OK_mcp)
+  #' plot(coy_OK_sp, add = TRUE, pch = 16, col = "red")
+  #' plot(coy_OK_poly, add = TRUE)
+  #' plot(coy_OK_poly_clip, add = TRUE)
+  #' 
+  #' plot(coy_NE_mcp)
+  #' plot(coy_NE_sp, add = TRUE, pch = 16, col = "red")
+  #' plot(coy_NE_poly, add = TRUE)
+  #' plot(coy_NE_poly_clip, add = TRUE)
 
   #' #'  Coerce buffered MCP SpatialPolygons into SpatialPolygonDataFrames and save
   #' md_poly <- as(md_poly, "SpatialPolygonsDataFrame")
