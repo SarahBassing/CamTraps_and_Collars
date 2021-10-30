@@ -41,7 +41,14 @@
     dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
                   "StudyArea", "daytime", "Finaldt", "Floordt")
   # W91 has several extraterritorial forays starting 2019-10-31 & never returns
-  wolf_skinny_noDispersal <- wolf_skinny[!(wolf_skinny$ID == "W91F" & wolf_skinny$Floordt > "2019-10-31 02:00:00"),]
+  wolf_skinny <- wolf_skinny[!(wolf_skinny$ID == "W91F" & wolf_skinny$Floordt > "2019-10-31 02:00:00"),]
+  # W88M goes on a W Cascades walkabout (5/13/19 - 5/31/19)- Nix anything west of 120.75W Long
+  wolf_skinny <- wolf_skinny[!(wolf_skinny$ID == "W88M" & wolf_skinny$Longitude <= -120.75),]
+  # W88M goes on a secondary walkabout north- Nix anything north of 49.3 Lat
+  wolf_skinny <- wolf_skinny[!(wolf_skinny$ID == "W88M" & wolf_skinny$Latitude >= 49.3),]
+  # W70F dispered & established Onion Crk pack - Nix anything north of 48.7 Lat
+  wolf_skinny <- wolf_skinny[!(wolf_skinny$ID == "W70F" & wolf_skinny$Latitude >= 48.7),]
+  
   
   coug_skinny <- read.csv("./Data/Cougar_Vectronic_ATS_Spring2021_4hrs.csv") %>% #Cougar_Vectronic_ATS_Spring2021_4hrs_wDispersal.csv
     mutate(ID = as.factor(as.character(ID)),
@@ -76,7 +83,7 @@
   wolf_spdf <- st_as_sf(wolf_skinny, coords = c("Longitude", "Latitude"), crs = wgs84)
   
   
-  #  Plot all locations (takes forever!)
+  #  Plot all locations (takes a hot minute)
   ggplot() +
     geom_sf(data = coug_spdf, aes(colour = ID)) 
   ggplot() +
@@ -131,11 +138,11 @@
     return(plot_list)
   }
   
-  #  Feed meso data through function to map individual telemetry data in NE
+  #  Feed wolf/cougar data through function to map individual telemetry data in NE
   coug_NE_maps <- plot_telem_NE(coug_spdf[coug_spdf$StudyArea == "NE",])
   wolf_NE_maps <- plot_telem_NE(wolf_spdf[wolf_spdf$StudyArea == "NE",])
   
-  #  Feed meso through function to map individual telemetry data in OK
+  #  Feed wolf/cougar through function to map individual telemetry data in OK
   coug_OK_maps <- plot_telem_OK(coug_spdf[coug_spdf$StudyArea == "OK",])
   wolf_OK_maps <- plot_telem_OK(wolf_spdf[wolf_spdf$StudyArea == "OK",])
   
@@ -164,5 +171,8 @@
   }
   dev.off()
   
-
+  #'  Consider trimming W91F and W88M- looks like there were some big dispersal events
+  #'  Nix W88M west of 120.75W Long- extra-territorial adventure
+  #'  Nix W91F south of 48.2N Lat & east of 117.75W Long - dispersed & never returned
+  #'  Nix W70F north of 48.7 Lat - she dispersed starting May 20, 2017 & est. Onion Crk pack
   
