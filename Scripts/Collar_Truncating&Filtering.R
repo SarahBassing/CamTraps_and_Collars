@@ -161,6 +161,12 @@
             "StudyArea", "daytime", "Finaldt", "Floordt")
   # W91 has several extraterritorial forays starting 2019-10-31 & never returns
   wolf_skinny <- wolf_skinny[!(wolf_skinny$ID == "W91F" & wolf_skinny$Floordt > "2019-10-31 02:00:00"),]
+  # Nix anything west of 120.75W Long for W88M, he goes on a W Cascades walkabout (May 13, 2019 - May 31, 2019)
+  wolf_skinny <- wolf_skinny[!(wolf_skinny$ID == "W88M" & wolf_skinny$Longitude <= -120.75),]
+  # W88M goes on a secondary walkabout north- Nix anything north of 49.3 Lat
+  wolf_skinny <- wolf_skinny[!(wolf_skinny$ID == "W88M" & wolf_skinny$Latitude >= 49.3),]
+  # W70F dispered & established Onion Crk pack - Nix anything north of 48.7 Lat
+  wolf_skinny <- wolf_skinny[!(wolf_skinny$ID == "W70F" & wolf_skinny$Latitude >= 48.7),]
   
 
   #  Save cleaned data
