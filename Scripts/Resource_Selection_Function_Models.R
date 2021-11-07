@@ -33,7 +33,7 @@
   load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-09-13.RData")
   load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-09-13.RData")
   load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-10-29.RData") # excludes dispersals
   load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-09-13.RData")
   load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-09-13.RData")
   
@@ -273,8 +273,8 @@
   load("./Outputs/RSF_output/wtd_RSF_wtr_noHM_2021-09-23.RData")
   load("./Outputs/RSF_output/coug_RSF_smr_noHM_2021-09-23.RData")
   load("./Outputs/RSF_output/coug_RSF_wtr_noHM_2021-09-23.RData")
-  load("./Outputs/RSF_output/wolf_RSF_smr_noHM_2021-09-23.RData")
-  load("./Outputs/RSF_output/wolf_RSF_wtr_noHM_2021-09-23.RData")
+  load("./Outputs/RSF_output/wolf_RSF_smr_noHM_2021-10-30.RData") # note these are different
+  load("./Outputs/RSF_output/wolf_RSF_wtr_noHM_2021-10-30.RData") # excludes dispersal events
   load("./Outputs/RSF_output/bob_RSF_smr_noHM_2021-09-23.RData")
   load("./Outputs/RSF_output/bob_RSF_wtr_noHM_2021-09-23.RData")
   load("./Outputs/RSF_output/coy_RSF_smr_noHM_2021-09-23.RData")
