@@ -52,6 +52,10 @@
   extent(OK_SA)
   extent(NE_SA)
   
+  #'  Centroid of each polygon
+  st_centroid(OK_SA)
+  st_centroid(NE_SA)
+  
   #'  Reduce DEM raster resolution and prep new raster for ggplot
   # dem <- raster("./Shapefiles/WA DEM rasters/WPPP_DEM_30m_reproj.tif")
   # projection(dem)
@@ -66,12 +70,11 @@
   ####  Species silhouettes  ####
   #'  ------------------------
   #'  Silhouettes for each species from PhyloPic in two different formats (PNG & rastergrob)
-  cougurl <- "http://phylopic.org/assets/images/submissions/3f8eff77-2868-4121-8d7d-a55ebdd49e04.64.png"
-  cougimg <- readPNG(getURLContent(cougurl))
-  cougg <- rasterGrob(cougimg, interpolate = TRUE)
-  cougurl2 <- "http://phylopic.org/assets/images/submissions/87c44856-307d-4d1a-84fd-ec54f8591f1a.512.png"
-  cougimg2 <- readPNG(getURLContent(cougurl2))
-  cougg2 <- rasterGrob(cougimg2, interpolate = TRUE)
+  #'  Cougar, mule deer, and white-tailed deer silhouettes created by the talented 
+  #'  Gabriela Palomo-Munoz and uploaded to http://phylopic.org/
+  cougurlGB <- "http://phylopic.org/assets/images/submissions/cbe2a3c9-2c11-4f36-a51f-8a6c8de6a420.512.png"
+  cougimgGB <- readPNG(getURLContent(cougurlGB))
+  cougGB <- rasterGrob(cougimgGB, interpolate = TRUE)
   wolfurl <- "http://phylopic.org/assets/images/submissions/8cad2b22-30d3-4cbd-86a3-a6d2d004b201.512.png"
   wolfimg <- readPNG(getURLContent(wolfurl))
   wolfg <- rasterGrob(wolfimg, interpolate = TRUE)
@@ -81,19 +84,39 @@
   coyurl <- "http://phylopic.org/assets/images/submissions/5a0398e3-a455-4ca6-ba86-cf3f1b25977a.512.png"
   coyimg <- readPNG(getURLContent(coyurl)) 
   coyg <- rasterGrob(coyimg, interpolate = TRUE)
-  mdurl <- "http://phylopic.org/assets/images/submissions/f889b336-9e67-4154-bc96-db4095a55be2.512.png"
-  mdimg <- readPNG(getURLContent(mdurl))
-  mdg <- rasterGrob(mdimg, interpolate = TRUE)
-  elkmurl <- "http://phylopic.org/assets/images/submissions/72f2f997-e474-4caf-bbd5-72fc8dbcc40d.512.png"
-  elkmimg <- readPNG(getURLContent(elkmurl))
-  elkmg <- rasterGrob(elkmimg, interpolate = TRUE)
+  mdurlGB1 <- "http://phylopic.org/assets/images/submissions/833aec60-8e2d-4275-bd0d-101bf1a6e8e4.512.png"
+  mdimgGB1 <- readPNG(getURLContent(mdurlGB1))
+  mdGB1 <- rasterGrob(mdimgGB1, interpolate = TRUE)
+  mdurlGB2 <- "http://phylopic.org/assets/images/submissions/dee85d3e-fff9-4444-a51e-c049abf50f0d.512.png"
+  mdimgGB2 <- readPNG(getURLContent(mdurlGB2))
+  mdGB2 <- rasterGrob(mdimgGB2, interpolate = TRUE)
   elkfurl <- "http://phylopic.org/assets/images/submissions/97f83f5e-9afe-4ce8-812e-337f506ca841.512.png"
   elkfimg <- readPNG(getURLContent(elkfurl))
   elkfg <- rasterGrob(elkfimg, interpolate = TRUE)
-  wtdurl <- "http://phylopic.org/assets/images/submissions/56f6fdb2-15d0-43b5-b13f-714f2cb0f5d0.512.png"
-  wtdimg <- readPNG(getURLContent(wtdurl))
-  wtdg <- rasterGrob(wtdimg, interpolate = TRUE)
+  wtdurlGB1 <- "http://phylopic.org/assets/images/submissions/8569838c-c725-4772-b0a3-b5eb04baaada.512.png"
+  wtdimgGB1 <- readPNG(getURLContent(wtdurlGB1))
+  wtdGB1 <- rasterGrob(wtdimgGB1, interpolate = TRUE)
+  wtdurlGB2 <- "http://phylopic.org/assets/images/submissions/6038e80c-398d-47b2-9a69-2b9edf436f64.512.png"
+  wtdimgGB2 <- readPNG(getURLContent(wtdurlGB2))
+  wtdGB2 <- rasterGrob(wtdimgGB2, interpolate = TRUE)
 
+  #'  Unused silhouettes
+  # cougurl <- "http://phylopic.org/assets/images/submissions/3f8eff77-2868-4121-8d7d-a55ebdd49e04.64.png"
+  # cougimg <- readPNG(getURLContent(cougurl))
+  # cougg <- rasterGrob(cougimg, interpolate = TRUE)
+  # cougurl2 <- "http://phylopic.org/assets/images/submissions/87c44856-307d-4d1a-84fd-ec54f8591f1a.512.png"
+  # cougimg2 <- readPNG(getURLContent(cougurl2))
+  # cougg2 <- rasterGrob(cougimg2, interpolate = TRUE)
+  # elkmurl <- "http://phylopic.org/assets/images/submissions/72f2f997-e474-4caf-bbd5-72fc8dbcc40d.512.png"
+  # elkmimg <- readPNG(getURLContent(elkmurl))
+  # elkmg <- rasterGrob(elkmimg, interpolate = TRUE)
+  # mdurl <- "http://phylopic.org/assets/images/submissions/f889b336-9e67-4154-bc96-db4095a55be2.512.png"
+  # mdimg <- readPNG(getURLContent(mdurl))
+  # mdg <- rasterGrob(mdimg, interpolate = TRUE)
+  # wtdurl <- "http://phylopic.org/assets/images/submissions/56f6fdb2-15d0-43b5-b13f-714f2cb0f5d0.512.png"
+  # wtdimg <- readPNG(getURLContent(wtdurl))
+  # wtdg <- rasterGrob(wtdimg, interpolate = TRUE)
+  
 
   ####  1. Map study area and camera locations  ####
   #'  ==============================================
@@ -288,7 +311,7 @@
     #'  Constrain plot to OK study area only  
     coord_sf(xlim = c(480000.0, 600000.0), ylim = c(102000.0, 250000.0)) + #ylim = c(102000.0, 240000.0)
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(mdg, xmin = 480000.0, xmax = 510000.0, ymin = 225000, ymax = 255000) + #xmin = 480000.0, xmax = 505000.0, 
+    annotation_custom(mdGB2, xmin = 550000.0, xmax = 600000.0, ymin = 225000, ymax = 255000) + #xmin = 480000.0, xmax = 505000.0, 
     theme(axis.text.y = element_text(size = 14)) 
   
   elk_map <- ggplot() +
@@ -312,7 +335,7 @@
     #'  Constrain plot to NE study area only 
     coord_sf(xlim = c(680000.0, 780000.0), ylim = c(102000.0, 250000.0)) + #ylim = c(102000.0, 200000.0)
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(elkfg, xmin = 680000.0, xmax = 710000.0, ymin = 225000, ymax = 255000) + #xmin = 680000.0, xmax = 695000.0, ymin = 180000, ymax = 205000
+    annotation_custom(elkfg, xmin = 730000.0, xmax = 780000.0, ymin = 225000, ymax = 255000) + #xmin = 680000.0, xmax = 695000.0, ymin = 180000, ymax = 205000
     theme(axis.text.y = element_text(size = 14))
   
   wtd_map <- ggplot() +
@@ -332,11 +355,11 @@
     theme(legend.position = "none",
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank(),
-          pplot.margin = margin(t = 0, r = 0, b = 0, l = 0)) + 
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +  
     #'  Constrain plot to NE study area only 
     coord_sf(xlim = c(680000.0, 780000.0), ylim = c(102000.0, 250000.0)) + #ylim = c(102000.0, 200000.0)
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(wtdg, xmin = 680000.0, xmax = 710000.0, ymin = 225000, ymax = 255000) + #xmin = 680000.0, xmax = 695000.0, ymin = 180000, ymax = 205000
+    annotation_custom(wtdGB1, xmin = 725000.0, xmax = 780000.0, ymin = 225000, ymax = 255000) + #xmin = 680000.0, xmax = 695000.0, ymin = 180000, ymax = 205000
     theme(axis.text.y = element_text(size = 14))
   
   coug_map <- ggplot() +
@@ -363,7 +386,7 @@
     #'  Constrain plot to both study areas
     coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) +
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
-    annotation_custom(cougg2, xmin = 755000.0, xmax = 790000.0, ymin = 220000, ymax = 255000)
+    annotation_custom(cougGB, xmin = 740000.0, xmax = 790000.0, ymin = 220000, ymax = 265000)
   
   
   wolf_map <- ggplot() +
@@ -386,13 +409,13 @@
           axis.ticks.x = element_blank(),
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
-          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) + 
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +  
     #'  Constrain plot to both study areas
     # coord_sf(xlim = c(450000.0, 780000.0), ylim = c(102000.0, 270000.0)) +
     coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) + 
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
     # annotation_custom(wolfg, xmin = 740000.0, xmax = 780000.0, ymin = 240000, ymax = 280000)
-    annotation_custom(wolfg, xmin = 750000.0, xmax = 785000.0, ymin = 200000, ymax = 280000)
+    annotation_custom(wolfg, xmin = 745000.0, xmax = 785000.0, ymin = 195000, ymax = 280000)
   
   bob_map <- ggplot() +
     geom_raster(data = dem_p_df, aes(x = x, y = y, fill = value, alpha = value), show.legend = FALSE) +
@@ -414,7 +437,7 @@
           axis.ticks.x = element_blank(),
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
-          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) + 
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +  
     #'  Constrain plot to both study areas
     coord_sf(xlim = c(490000.0, 780000.0), ylim = c(102000.0, 250000.0)) +
     #'  Add rasterized silhouette in top left corner (min & max based on plot coordinates)
@@ -453,12 +476,12 @@
   plot(coy_map)
   
   ####  Panel of maps  ####
-  capture_fig <- (md_map + elk_map + wtd_map) / (bob_map + coug_map) / (coy_map + wolf_map) 
+  capture_fig <- (md_map + elk_map + wtd_map) / (bob_map + coug_map) / (coy_map + wolf_map) + plot_annotation(tag_levels = 'A') & theme(plot.tag.position = c(0.02, 0.96), plot.tag = element_text(hjust = 0, vjust = 0)) #& theme(plot.tag = element_text(size = 8))
   plot(capture_fig)
   
   
   #'  Save
-  ggsave("./Outputs/Figures/Maps/CaptureEffort_fig_102921b.png", capture_fig)
+  ggsave("./Outputs/Figures/Maps/CaptureEffort_fig.png", capture_fig)
   ggsave("./Outputs/Figures/Maps/MuleDeerCaptureEffort.png", md_map)
   ggsave("./Outputs/Figures/Maps/ElkCaptureEffort.png", elk_map)
   ggsave("./Outputs/Figures/Maps/WTDeerCaptureEffort.png", wtd_map)
@@ -530,7 +553,7 @@
     ) %>%
     dplyr::select(-c(X)) #, Model
   #'  RSF results output
-  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_noHM_2021-09-23.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_noHM_2021-10-30.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 95% confidence intervals to mirror alpha = 0.05
     mutate(
       l95 = (Estimate - (1.96 * SE)),  #### REMINDER: this is 95% CI
