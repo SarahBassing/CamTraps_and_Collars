@@ -387,7 +387,7 @@
   load("./Outputs/RSF_pts/elk_available_2nd_2021-09-13.RData")
   load("./Outputs/RSF_pts/wtd_available_2nd_2021-09-13.RData")
   load("./Outputs/RSF_pts/coug_available_2nd_2021-09-13.RData")
-  load("./Outputs/RSF_pts/wolf_available_2nd_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wolf_available_2nd_2021-10-29.RData") # excludes dispersals
   load("./Outputs/RSF_pts/bob_available_2nd_2021-09-13.RData")
   load("./Outputs/RSF_pts/coy_available_2nd_2021-09-13.RData")
   
@@ -702,6 +702,7 @@
   # 2021-06-22 uses reprojected rasters
   # 2021-08-10 uses my road density raster (km of road length/1 sq-km)... other versions use Lauren's raster that I think is meters of road length/1 sq-km
   # 2021-09-13 uses the buffered MCPs with large water bodies masked out
+  # 2021-10-29 uses updated wolf MCP with dispersal events excluded
   
   
   
