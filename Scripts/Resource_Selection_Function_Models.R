@@ -134,6 +134,24 @@
   summary(md_global_wtr)
   car::vif(md_global_wtr)
   
+  ####  Mule Deer Subset RSF  ####
+  #'  Run an RSF on summer mule deer data for ONLY locations within the OK study area
+  library(sf)
+  sa_proj <- st_crs("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
+  OK_SA <- st_read("./Shapefiles/fwdstudyareamaps", layer = "METHOW_SA")
+  OK_SA <- st_transform(OK_SA, sa_proj)
+  #'  Make mule deer input data spatial
+  md_pts <- st_as_sf(mdData_smr, coords = c("x", "y"), crs = sa_proj) 
+  #'  Crop mule deer used/available data to the extent of the OK study area
+  md_SA_only <- st_intersection(md_pts, OK_SA)
+  #'  Make study area only data non-spatial
+  md_SA_only_df <- as.data.frame(md_SA_only)
+  #'  Run exact same RSF as above but with only relocation data from within study area
+  md_SA_only_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID), 
+                         data = md_SA_only_df, family = binomial(link = "logit"))
+  summary(md_SA_only_smr)
+  car::vif(md_SA_only_smr)
+  
   
   ####  Elk RSF  ####
   #'  Global model with random effect for individual and year
@@ -259,6 +277,8 @@
   save(coy_global_smr, file = paste0("./Outputs/RSF_output/coy_RSF_smr_NoHM_", Sys.Date(), ".RData"))
   save(coy_global_wtr, file = paste0("./Outputs/RSF_output/coy_RSF_wtr_NoHM_", Sys.Date(), ".RData"))
   
+  save(md_SA_only_smr, file = paste0("./Outputs/RSF_output/md_RSF_smr_SAonly_", Sys.Date(), ".RData"))  
+  
   
   ####  Summary tables  ####
   #'  Save model outputs in table format 
@@ -279,6 +299,8 @@
   load("./Outputs/RSF_output/bob_RSF_wtr_noHM_2021-09-23.RData")
   load("./Outputs/RSF_output/coy_RSF_smr_noHM_2021-09-23.RData")
   load("./Outputs/RSF_output/coy_RSF_wtr_noHM_2021-09-23.RData")
+  
+  load("./Outputs/RSF_output/md_RSF_smr_SAonly_2021-11-10.RData")
   
 
   #'  Function to save parameter estimates & p-values
@@ -316,6 +338,10 @@
   bob_w1820_rsf <- rsf_out(bob_global_wtr, "Bobcat", "Winter")
   coy_s1819_rsf <- rsf_out(coy_global_smr, "Coyote", "Summer")
   coy_w1820_rsf <- rsf_out(coy_global_wtr, "Coyote", "Winter")
+  
+  md_sSAonly_rsf <- rsf_out(md_SA_only_smr, "Mule Deer", "Summer")
+  # write.csv(md_sSAonly_rsf, paste0("./Outputs/Tables/RSF_Results_MuleDeer_SAonly_", Sys.Date(), ".csv"))  
+  
   
 
   #'  Merge into larger data frames for easy comparison
