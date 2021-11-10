@@ -61,7 +61,7 @@
     dplyr::select(-c(X)) #, Model
   
   #'  RSF results output
-  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_noHM_2021-09-23.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE 2021-09-14
+  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_noHM_2021-10-30.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE 2021-09-14
     #'  Calculate 95% confidence intervals to mirror alpha = 0.05
     mutate(
       l95 = (Estimate - (1.96 * SE)),  #### REMINDER: this is 95% CI
@@ -95,7 +95,7 @@
   load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-09-13.RData")
   load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-09-13.RData")
   load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-10-29.RData")
   load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-09-13.RData")
   load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-09-13.RData")
   
@@ -524,7 +524,7 @@
       WTD_smr_rsf2 = ifelse(WTD_smr_rsf > 4, NA, WTD_smr_rsf),
       WTD_wtr_rsf2 = ifelse(WTD_wtr_rsf > 6, NA, WTD_wtr_rsf),
       COUG_wtr_rsf2 = ifelse(COUG_wtr_rsf > 10, NA, COUG_wtr_rsf), 
-      WOLF_smr_rsf2 = ifelse(WOLF_smr_rsf > 7, NA, WOLF_smr_rsf),
+      # WOLF_smr_rsf2 = ifelse(WOLF_smr_rsf > 7, NA, WOLF_smr_rsf),
       WOLF_wtr_rsf2 = ifelse(WOLF_wtr_rsf > 5, NA, WOLF_wtr_rsf),
       BOB_wtr_rsf2 = ifelse(BOB_wtr_rsf > 12, NA, BOB_wtr_rsf),
       COY_wtr_rsf2 = ifelse(COY_wtr_rsf > 5, NA, COY_wtr_rsf)
@@ -566,7 +566,7 @@
   wtd_wtr_corr <- predict_corr(Predicted_occ$WTD_wtr_occ, Predicted_rsf$WTD_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   coug_smr_corr <- predict_corr(Predicted_occ$COUG_smr_occ, Predicted_rsf$COUG_smr_rsf)
   coug_wtr_corr <- predict_corr(Predicted_occ$COUG_wtr_occ, Predicted_rsf$COUG_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-  wolf_smr_corr <- predict_corr(Predicted_occ$WOLF_smr_occ, Predicted_rsf$WOLF_smr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+  wolf_smr_corr <- predict_corr(Predicted_occ$WOLF_smr_occ, Predicted_rsf$WOLF_smr_rsf)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   wolf_wtr_corr <- predict_corr(Predicted_occ$WOLF_wtr_occ, Predicted_rsf$WOLF_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   bob_smr_corr <- predict_corr(Predicted_occ$BOB_smr_occ, Predicted_rsf$BOB_smr_rsf)
   bob_wtr_corr <- predict_corr(Predicted_occ$BOB_wtr_occ, Predicted_rsf$BOB_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
@@ -602,7 +602,7 @@
       y = y,
       COUG_smr_rsf = round(COUG_smr_rsf/(max(COUG_smr_rsf, na.rm = T)), digits = 2),
       COUG_wtr_rsf = round(COUG_wtr_rsf2/(max(COUG_wtr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-      WOLF_smr_rsf = round(WOLF_smr_rsf2/(max(WOLF_smr_rsf2, na.rm = T)), digits = 2),
+      WOLF_smr_rsf = round(WOLF_smr_rsf/(max(WOLF_smr_rsf, na.rm = T)), digits = 2),
       WOLF_wtr_rsf = round(WOLF_wtr_rsf2/(max(WOLF_wtr_rsf2, na.rm = T)), digits = 2),
       BOB_smr_rsf = round(BOB_smr_rsf/(max(BOB_smr_rsf, na.rm = T)), digits = 2),
       BOB_wtr_rsf = round(BOB_wtr_rsf2/(max(BOB_wtr_rsf2, na.rm = T)), digits = 2),
@@ -642,7 +642,7 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + #low = "azure" #low = "floralwhite"
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -656,7 +656,7 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -670,7 +670,7 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -684,7 +684,7 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -715,7 +715,7 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -729,7 +729,7 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -743,7 +743,7 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -757,7 +757,7 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -785,7 +785,7 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -799,7 +799,7 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -813,7 +813,7 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -827,7 +827,7 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -855,8 +855,8 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -870,8 +870,8 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -885,8 +885,8 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -900,8 +900,8 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -929,8 +929,8 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -944,8 +944,8 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -959,8 +959,8 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -974,8 +974,8 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -1003,8 +1003,8 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -1018,8 +1018,8 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -1033,8 +1033,8 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -1048,8 +1048,8 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -1077,8 +1077,8 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4", limits = c(0, 1)) + 
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -1092,8 +1092,8 @@
     scale_fill_brewer(type = "seq", palette = "YlGn", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "mintcream", high = "seagreen4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -1107,8 +1107,8 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4", limits = c(0, 1)) +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
@@ -1122,8 +1122,8 @@
     scale_fill_brewer(type = "seq", palette = "PuBu", na.translate = F, drop = FALSE) +
     # scale_fill_gradient(low = "azure", high = "dodgerblue4", na.value = "seashell4") +
     #'  Add study area outlines for reference
-    geom_sf(data = OK_SA, fill = NA, color = "grey20") +
-    geom_sf(data = NE_SA, fill = NA, color = "grey20") +
+    geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
+    geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
