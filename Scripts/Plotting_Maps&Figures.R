@@ -856,11 +856,11 @@
     ylim(-1.5, 0.7) +
     coord_flip() +
     add_phylopic(wolfimg, x = 7.05, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(wtdimg, x = 6.1, y = 0.3, ysize = 1, color = "black", alpha = 1) +
-    add_phylopic(mdimg, x = 5.05, y = 0.3, ysize = 0.65, color = "black", alpha = 1) +
-    add_phylopic(elkmimg, x = 4.05, y = 0.3, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(wtdimgGB1, x = 6.1, y = 0.3, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimgGB1, x = 5.05, y = 0.3, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkfimg, x = 4.05, y = 0.3, ysize = 1, color = "black", alpha = 1) +
     add_phylopic(coyimg, x = 3.05, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(cougimg, x = 2, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
+    add_phylopic(cougimgGB, x = 2, y = 0.3, ysize = 0.5, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.3, ysize = 0.4, color = "black", alpha = 1)
   
   #'  Effect of SLOPE on relative probability of selection (on logit scale)
@@ -891,11 +891,11 @@
     ylim(-0.25, 0.8) +
     coord_flip() +
     add_phylopic(wolfimg, x = 7.05, y = 0.7, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(wtdimg, x = 6.1, y = 0.7, ysize = 1, color = "black", alpha = 1) +
-    add_phylopic(mdimg, x = 5.05, y = 0.7, ysize = 0.65, color = "black", alpha = 1) +
-    add_phylopic(elkmimg, x = 4.05, y = 0.7, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(wtdimgGB1, x = 6.1, y = 0.7, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimgGB1, x = 5.05, y = 0.7, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkfimg, x = 4.05, y = 0.7, ysize = 1, color = "black", alpha = 1) +
     add_phylopic(coyimg, x = 3.05, y = 0.7, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(cougimg, x = 2, y = 0.7, ysize = 0.25, color = "black", alpha = 1) +
+    add_phylopic(cougimgGB, x = 2, y = 0.7, ysize = 0.25, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.7, ysize = 0.4, color = "black", alpha = 1)
   
   #'  Effect of PERCENT MIXED FOREST on relative probability of selection (logit scale)
@@ -926,11 +926,11 @@
     ylim(-1, 1.25) +
     coord_flip() +
     add_phylopic(wolfimg, x = 7.05, y = 1, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(wtdimg, x = 6.1, y = 1, ysize = 1, color = "black", alpha = 1) +
-    add_phylopic(mdimg, x = 5.05, y = 1, ysize = 0.65, color = "black", alpha = 1) +
-    add_phylopic(elkmimg, x = 4.05, y = 1, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(wtdimgGB1, x = 6.1, y = 1, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimgGB1, x = 5.05, y = 1, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkfimg, x = 4.05, y = 1, ysize = 1, color = "black", alpha = 1) +
     add_phylopic(coyimg, x = 3.05, y = 1, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(cougimg, x = 2, y = 1, ysize = 0.48, color = "black", alpha = 1) +
+    add_phylopic(cougimgGB, x = 2, y = 1, ysize = 0.48, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 1, ysize = 0.4, color = "black", alpha = 1)
   # add_phylopic(wolfimg, x = 7.05, y = 1.5, ysize = 2.1, color = "black", alpha = 1) +
   #   add_phylopic(wtdimg, x = 6.1, y = 1.5, ysize = 1.7, color = "black", alpha = 1) +
@@ -968,11 +968,11 @@
     ylim(-1, 1) +
     coord_flip() +
     add_phylopic(wolfimg, x = 7.05, y = 0.8, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(wtdimg, x = 6.1, y = 0.8, ysize = 1, color = "black", alpha = 1) +
-    add_phylopic(mdimg, x = 5.05, y = 0.8, ysize = 0.65, color = "black", alpha = 1) +
-    add_phylopic(elkmimg, x = 4.05, y = 0.8, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(wtdimgGB1, x = 6.1, y = 0.8, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimgGB1, x = 5.05, y = 0.8, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkfimg, x = 4.05, y = 0.8, ysize = 1, color = "black", alpha = 1) +
     add_phylopic(coyimg, x = 3.05, y = 0.8, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(cougimg, x = 2, y = 0.8, ysize = 0.45, color = "black", alpha = 1) +
+    add_phylopic(cougimgGB, x = 2, y = 0.8, ysize = 0.45, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.8, ysize = 0.4, color = "black", alpha = 1)
   
   #'  Effect of PERCENT SHRUB on relative probability of selection (logit scale)
@@ -1003,11 +1003,11 @@
     ylim(-0.5, 0.6) +
     coord_flip() +
     add_phylopic(wolfimg, x = 7.05, y = 0.5, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(wtdimg, x = 6.1, y = 0.5, ysize = 1, color = "black", alpha = 1) +
-    add_phylopic(mdimg, x = 5.05, y = 0.5, ysize = 0.65, color = "black", alpha = 1) +
-    add_phylopic(elkmimg, x = 4.05, y = 0.5, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(wtdimgGB1, x = 6.1, y = 0.5, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimgGB1, x = 5.05, y = 0.5, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkfimg, x = 4.05, y = 0.5, ysize = 1, color = "black", alpha = 1) +
     add_phylopic(coyimg, x = 3.05, y = 0.5, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(cougimg, x = 2, y = 0.5, ysize = 0.25, color = "black", alpha = 1) +
+    add_phylopic(cougimgGB, x = 2, y = 0.5, ysize = 0.25, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.5, ysize = 0.4, color = "black", alpha = 1)
   
   #'  Effect of ROAD DENSITY on relative probability of selection (logit scale)
@@ -1038,11 +1038,11 @@
     ylim(-0.5, 0.8) +
     coord_flip() +
     add_phylopic(wolfimg, x = 7.05, y = 0.7, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(wtdimg, x = 6.1, y = 0.7, ysize = 1, color = "black", alpha = 1) +
-    add_phylopic(mdimg, x = 5.05, y = 0.7, ysize = 0.65, color = "black", alpha = 1) +
-    add_phylopic(elkmimg, x = 4.05, y = 0.7, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(wtdimgGB1, x = 6.1, y = 0.7, ysize = 1, color = "black", alpha = 1) +
+    add_phylopic(mdimgGB1, x = 5.05, y = 0.7, ysize = 0.65, color = "black", alpha = 1) +
+    add_phylopic(elkfimg, x = 4.05, y = 0.7, ysize = 1, color = "black", alpha = 1) +
     add_phylopic(coyimg, x = 3.05, y = 0.7, ysize = 0.5, color = "black", alpha = 1) +
-    add_phylopic(cougimg, x = 2, y = 0.7, ysize = 0.3, color = "black", alpha = 1) +
+    add_phylopic(cougimgGB, x = 2, y = 0.7, ysize = 0.3, color = "black", alpha = 1) +
     add_phylopic(bobimg, x = 1.05, y = 0.7, ysize = 0.4, color = "black", alpha = 1)
   
   #' #'  Effect of PERCENT HUMAN MODIFIED LANDSCAPE on relative probability of selection (logit scale)
