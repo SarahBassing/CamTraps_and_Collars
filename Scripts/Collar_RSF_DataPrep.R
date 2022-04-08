@@ -194,19 +194,19 @@
   # spp_pts <- lapply(animal_split, lapply, avail_pts, T)
   #'  Run lists by species and season
   md_smr_df <- lapply(animal_split[[1]], avail_pts_3rd, navail = 20, T) #works when migrations are excluded
-  md_wtr_df <- lapply(animal_split[[2]], avail_pts_3rd, T) #works
-  elk_smr_df <- lapply(animal_split[[3]], avail_pts_3rd, T) #works
-  elk_wtr_df <- lapply(animal_split[[4]], avail_pts_3rd, T) #works
-  wtd_smr_df <- lapply(animal_split[[5]], avail_pts_3rd, T) #works when rando pt removed from 3144WTD18 smr19
-  wtd_wtr_df <- lapply(animal_split[[6]], avail_pts_3rd, T) #works
-  coug_smr_df <- lapply(animal_split[[7]], avail_pts_3rd, T) #works
-  coug_wtr_df <- lapply(animal_split[[8]], avail_pts_3rd, T) #works
-  wolf_smr_df <- lapply(animal_split[[9]], avail_pts_3rd, T) #works
-  wolf_wtr_df <- lapply(animal_split[[10]], avail_pts_3rd, T) #works
-  bob_smr_df <- lapply(animal_split[[11]], avail_pts_3rd, T) #works
-  bob_wtr_df <- lapply(animal_split[[12]], avail_pts_3rd, T) #works
-  coy_smr_df <- lapply(animal_split[[13]], avail_pts_3rd, T) #works
-  coy_wtr_df <- lapply(animal_split[[14]], avail_pts_3rd, T) #works
+  md_wtr_df <- lapply(animal_split[[2]], avail_pts_3rd, navail = 20, T) #works
+  elk_smr_df <- lapply(animal_split[[3]], avail_pts_3rd, navail = 20, T) #works
+  elk_wtr_df <- lapply(animal_split[[4]], avail_pts_3rd, navail = 20, T) #works
+  wtd_smr_df <- lapply(animal_split[[5]], avail_pts_3rd, navail = 20, T) #works when rando pt removed from 3144WTD18 smr19
+  wtd_wtr_df <- lapply(animal_split[[6]], avail_pts_3rd, navail = 20, T) #works
+  coug_smr_df <- lapply(animal_split[[7]], avail_pts_3rd, navail = 20, T) #works
+  coug_wtr_df <- lapply(animal_split[[8]], avail_pts_3rd, navail = 20, T) #works
+  wolf_smr_df <- lapply(animal_split[[9]], avail_pts_3rd, navail = 20, T) #works
+  wolf_wtr_df <- lapply(animal_split[[10]], avail_pts_3rd, navail = 20, T) #works
+  bob_smr_df <- lapply(animal_split[[11]], avail_pts_3rd, navail = 20, T) #works
+  bob_wtr_df <- lapply(animal_split[[12]], avail_pts_3rd, navail = 20, T) #works
+  coy_smr_df <- lapply(animal_split[[13]], avail_pts_3rd, navail = 20, T) #works
+  coy_wtr_df <- lapply(animal_split[[14]], avail_pts_3rd, navail = 20, T) #works
   
   #'  Convert to dataframes instead of lists
   md_smr_df <- do.call(rbind.data.frame, md_smr_df)
@@ -243,8 +243,73 @@
   save(coy_available, file = paste0("./Outputs/RSF_pts/coy_available_3rd_", Sys.Date(), ".RData"))
  
   
-  #'  2nd ORDER SELECTION Average 1:20 used:available
-  #'  -----------------------------------------------
+  #'  Calculation size of Home Range based on KDEs
+  HR_size <- function(locs, plotit = F) {
+    #'  1. Make each animal's locations spatial
+    #'  ---------------------------------------------------------
+    locs_sp <- SpatialPoints(locs[,c("x", "y")], proj4string = sa_proj)
+    #'  Estimate KDEs for each home range
+    UD <- kernelUD(locs_sp, kern = "bivnorm", extent = 1.5) 
+    #'  Get 95% KDE vertices
+    UD95 <- getverticeshr(UD, 95)
+    #'  Calculate area of 95% KDE home range (original units in meters so area
+    #'  expressed in hectares according to adehabitatHR documentation)
+    UD95_area <- kernel.area(UD, percent = 95)
+    #'  Plot to make sure vertices worked
+    if(plotit) {
+      plot(UD95, border = "darkgreen", col = NA)
+    }
+    return(UD95_area)
+  }
+  md_smr_df <- unlist(lapply(animal_split[[1]], HR_size, T)) # still throws error
+  md_wtr_df <- unlist(lapply(animal_split[[2]], HR_size, T))
+  elk_smr_df <- unlist(lapply(animal_split[[3]], HR_size, T)) 
+  elk_wtr_df <- unlist(lapply(animal_split[[4]], HR_size, T))
+  wtd_smr_df <- unlist(lapply(animal_split[[5]], HR_size, T)) # still throws error
+  wtd_wtr_df <- unlist(lapply(animal_split[[6]], HR_size, T))
+  coug_smr_df <- unlist(lapply(animal_split[[7]], HR_size, T))
+  coug_wtr_df <- unlist(lapply(animal_split[[8]], HR_size, T))
+  wolf_smr_df <- unlist(lapply(animal_split[[9]], HR_size, T))
+  wolf_wtr_df <- unlist(lapply(animal_split[[10]], HR_size, T))
+  bob_smr_df <- unlist(lapply(animal_split[[11]], HR_size, T))
+  bob_wtr_df <- unlist(lapply(animal_split[[12]], HR_size, T))
+  coy_smr_df <- unlist(lapply(animal_split[[13]], HR_size, T))
+  coy_wtr_df <- unlist(lapply(animal_split[[14]], HR_size, T))
+  
+  #'  Calculate mean area of home range for each species
+  mean_HR <- function(HR_area) {
+    #'  Mean area in hectares
+    mean_HR <- mean(HR_area)
+    #'  Divide by 100 to get area in square kilometers
+    mean_HR_km <- round(mean_HR/100, 2)
+    print(mean_HR_km)
+    #'  Approx. distance from HR center to edge if...
+    #'  home range was a perfect circle, radius would be...
+    print(sqrt(mean_HR_km/pi))
+    #'  home range was a perfect square, half of length of one side would be...
+    print(sqrt(mean_HR_km)/2)
+    #'  Essentially, would we expect >1 camera within a HR based on average 
+    #'  distance between cameras and home range size?
+    return(mean_HR_km)
+  }
+  md_smr_muHR <- mean_HR(md_smr_df) # no workie
+  md_wtr_muHR <- mean_HR(md_wtr_df)
+  elk_smr_muHR <- mean_HR(elk_smr_df)
+  elk_wtr_muHR <- mean_HR(elk_wtr_df)
+  wtd_smr_muHR <- mean_HR(wtd_smr_df) # no workie
+  wtd_wtr_muHR <- mean_HR(wtd_wtr_df)
+  coug_smr_muHR <- mean_HR(coug_smr_df)
+  coug_wtr_muHR <- mean_HR(coug_wtr_df)
+  wolf_smr_muHR <- mean_HR(wolf_smr_df)
+  wolf_wtr_muHR <- mean_HR(wolf_wtr_df)
+  bob_smr_muHR <- mean_HR(bob_smr_df)
+  bob_wtr_muHR <- mean_HR(bob_wtr_df)
+  coy_smr_muHR <- mean_HR(coy_smr_df)
+  coy_wtr_muHR <- mean_HR(coy_wtr_df)
+  
+  
+  #'  2nd ORDER SELECTION 1:20 used:available
+  #'  ---------------------------------------
   #'  Function to randomly select "Available" points within MCPs generated from
   #'  all individuals of a given species across seasons within a study area.
   #'  Sampling 20 available points to every 1 used point.
