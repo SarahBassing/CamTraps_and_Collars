@@ -85,49 +85,49 @@
   NE_split <- lapply(NE_tracks, split_animal)
   OK_split <- lapply(OK_tracks, split_animal)
   
-  #'  Function to calculate mean number of observations per species
-  #'  Used to decide how many "available" points to draw for each individual
-  #'  Using average across all individuals & species to be consistent across models
-  #'  Create empty dataframe to hold mean locations
-  avg_locs <- c()
-  mean_obs <- function(locs) {
-    mean_locs <- (nrow(locs))/(length(unique(locs$FullID))) #FullID? #AnimalID
-    avg_locs <- c(avg_locs, mean_locs)
-    return(avg_locs)
-  }
-  mean_locs <- lapply(spp_all_tracks, mean_obs)
-  # NE_mean_locs <- lapply(NE_tracks, mean_obs)
-  # OK_mean_locs <- lapply(OK_tracks, mean_obs)
-
-  #'  Calculate mean number of used locations for all species
-  mean_used <- mean(unlist(mean_locs)); sd_used <- sd(unlist(mean_locs))
-  # NE_mean_used <- mean(unlist(NE_mean_locs)); NE_sd_used <- sd(unlist(NE_mean_locs))
-  # OK_mean_used <- mean(unlist(OK_mean_locs)); OK_sd_used <- sd(unlist(OK_mean_locs))
-  #'  RSF literature suggests 1:20 ratio used:available
-  navailable <- mean_used*20
-  # NE_navailable <- NE_mean_used*20
-  # OK_navailable <- OK_mean_used*20
-
-  #'  Function to identify the number of used observations per individual
-  #'  Used to describe how many "available" points to draw for each animal
-  #'  following a 1:1, 1:10, and 1:20 ratio per individual instead of the 1:20
-  #'  ratio for the average number of observations per individual as above
-  nobs <- function(locs) {
-    indlocs <- locs %>%
-      group_by(AnimalID, Season) %>%
-      tally() %>%
-      ungroup()
-    nlocs <- as.data.frame(indlocs) %>%
-      mutate(n10 = n*10, n20 = n*20)
-    return(nlocs)
-  }
-  #'  Run each species through function
-  ind_nlocs <- lapply(spp_all_tracks, nobs)
-  #'  Create giant dataframe instead of species-specific lists
-  IDlocs <- ind_nlocs %>%
-    map(rownames_to_column) %>%
-    bind_rows() %>%
-    dplyr::select(c(AnimalID, Season, n, n10, n20))
+  #' #'  Function to calculate mean number of observations per species
+  #' #'  Used to decide how many "available" points to draw for each individual
+  #' #'  Using average across all individuals & species to be consistent across models
+  #' #'  Create empty dataframe to hold mean locations
+  #' avg_locs <- c()
+  #' mean_obs <- function(locs) {
+  #'   mean_locs <- (nrow(locs))/(length(unique(locs$FullID))) #FullID? #AnimalID
+  #'   avg_locs <- c(avg_locs, mean_locs)
+  #'   return(avg_locs)
+  #' }
+  #' mean_locs <- lapply(spp_all_tracks, mean_obs)
+  #' # NE_mean_locs <- lapply(NE_tracks, mean_obs)
+  #' # OK_mean_locs <- lapply(OK_tracks, mean_obs)
+  #' 
+  #' #'  Calculate mean number of used locations for all species
+  #' mean_used <- mean(unlist(mean_locs)); sd_used <- sd(unlist(mean_locs))
+  #' # NE_mean_used <- mean(unlist(NE_mean_locs)); NE_sd_used <- sd(unlist(NE_mean_locs))
+  #' # OK_mean_used <- mean(unlist(OK_mean_locs)); OK_sd_used <- sd(unlist(OK_mean_locs))
+  #' #'  RSF literature suggests 1:20 ratio used:available
+  #' navailable <- mean_used*20
+  #' # NE_navailable <- NE_mean_used*20
+  #' # OK_navailable <- OK_mean_used*20
+  #' 
+  #' #'  Function to identify the number of used observations per individual
+  #' #'  Used to describe how many "available" points to draw for each animal
+  #' #'  following a 1:1, 1:10, and 1:20 ratio per individual instead of the 1:20
+  #' #'  ratio for the average number of observations per individual as above
+  #' nobs <- function(locs) {
+  #'   indlocs <- locs %>%
+  #'     group_by(AnimalID, Season) %>%
+  #'     tally() %>%
+  #'     ungroup()
+  #'   nlocs <- as.data.frame(indlocs) %>%
+  #'     mutate(n10 = n*10, n20 = n*20)
+  #'   return(nlocs)
+  #' }
+  #' #'  Run each species through function
+  #' ind_nlocs <- lapply(spp_all_tracks, nobs)
+  #' #'  Create giant dataframe instead of species-specific lists
+  #' IDlocs <- ind_nlocs %>%
+  #'   map(rownames_to_column) %>%
+  #'   bind_rows() %>%
+  #'   dplyr::select(c(AnimalID, Season, n, n10, n20))
 
   
   #'  Generate random "Available" locations for each individual
@@ -140,7 +140,7 @@
   #'  -----------------------------------------------
   #'  Function to randomly select "Available" points within each animal's seasonal 
   #'  home range (utilization distributions)
-  avail_pts_3rd <- function(locs, plotit = F) {
+  avail_pts_3rd <- function(locs, navail, plotit = F) {
     #'  1. Make each animal's locations spatial
     #'  ---------------------------------------------------------
     locs_sp <- SpatialPoints(locs[,c("x", "y")], proj4string = sa_proj)
@@ -163,8 +163,13 @@
     
     #'  3. Randomly select points within each home range
     #'  ------------------------------------------------
-    #'  Sampling 20 available points to every 1 used point, on average.
-    set.seed(2021)
+    #'  Sampling 20 available points to every 1 used point
+    #'  Identify number of used points per individual
+    nused <- nrow(locs) 
+    #'  Multiply by 20 
+    navailable <- nused*navail#20
+    #'  Set seed for reproducibility
+    # set.seed(2021)
     rndpts <- spsample(UD95, navailable, type = "random")
     #'  Turn them into spatial points
     rndpts_sp <- SpatialPoints(rndpts, proj4string = sa_proj)
@@ -188,7 +193,7 @@
   #'  Run list of lists together
   # spp_pts <- lapply(animal_split, lapply, avail_pts, T)
   #'  Run lists by species and season
-  md_smr_df <- lapply(animal_split[[1]], avail_pts_3rd, T) #works when migrations are excluded
+  md_smr_df <- lapply(animal_split[[1]], avail_pts_3rd, navail = 20, T) #works when migrations are excluded
   md_wtr_df <- lapply(animal_split[[2]], avail_pts_3rd, T) #works
   elk_smr_df <- lapply(animal_split[[3]], avail_pts_3rd, T) #works
   elk_wtr_df <- lapply(animal_split[[4]], avail_pts_3rd, T) #works
@@ -242,18 +247,23 @@
   #'  -----------------------------------------------
   #'  Function to randomly select "Available" points within MCPs generated from
   #'  all individuals of a given species across seasons within a study area.
-  #'  Sampling 20 available points to every 1 used point, on average.
+  #'  Sampling 20 available points to every 1 used point.
   #'  MPCs created in Collar_MCPs.R script
-  avail_pts_2nd <- function(locs, mcps, plotit = F) {
+  avail_pts_2nd <- function(locs, mcps, navail, plotit = T) {
     #'  1. Randomly select points within each MCP
     #'  -----------------------------------------
-    set.seed(2021)
+    #'  Identify number of used points per individual
+    nused <- nrow(locs) 
+    #'  Multiply by desired number of available points 
+    navailable <- nused*navail#20
+    #'  Set seed for reproducibility
+    # set.seed(2021)
     rndpts <- spsample(mcps, navailable, type = "random")
     #'  Turn them into spatial points
     rndpts_sp <- SpatialPoints(rndpts, proj4string = sa_proj)
     #' Plot to make sure step 1 worked
     if(plotit) {
-      plot(rndpts_sp, col = "red", pch = 19)
+      plot(rndpts_sp, col = "red", pch = 19, cex = 0.70)
     }
     
     #'  2. Make list of locations non-spatial
@@ -270,29 +280,29 @@
   #'  Keep a close eye on those indices and study area MCPs
   #'  Using buffered MCPs with large water bodies masked out   
   #'  OKANOGAN COLLARS
-  md_smr_2nd_OK_df <- lapply(OK_split[[1]], avail_pts_2nd, mcps = md_poly_clip)
-  md_wtr_2nd_OK_df <- lapply(OK_split[[2]], avail_pts_2nd, mcps = md_poly_clip)
-  coug_smr_2nd_OK_df <- lapply(OK_split[[3]], avail_pts_2nd, mcps = coug_OK_poly_clip)
-  coug_wtr_2nd_OK_df <- lapply(OK_split[[4]], avail_pts_2nd, mcps = coug_OK_poly_clip)
-  wolf_smr_2nd_OK_df <- lapply(OK_split[[5]], avail_pts_2nd, mcps = wolf_OK_poly_clip)
-  wolf_wtr_2nd_OK_df <- lapply(OK_split[[6]], avail_pts_2nd, mcps = wolf_OK_poly_clip)
-  bob_smr_2nd_OK_df <- lapply(OK_split[[7]], avail_pts_2nd, mcps = bob_OK_poly_clip)
-  bob_wtr_2nd_OK_df <- lapply(OK_split[[8]], avail_pts_2nd, mcps = bob_OK_poly_clip)
-  coy_smr_2nd_OK_df <- lapply(OK_split[[9]], avail_pts_2nd, mcps = coy_OK_poly_clip)
-  coy_wtr_2nd_OK_df <- lapply(OK_split[[10]], avail_pts_2nd, mcps = coy_OK_poly_clip)
+  md_smr_2nd_OK_df <- lapply(OK_split[[1]], avail_pts_2nd, mcps = md_poly_clip, navail = 20)
+  md_wtr_2nd_OK_df <- lapply(OK_split[[2]], avail_pts_2nd, mcps = md_poly_clip, navail = 20)
+  coug_smr_2nd_OK_df <- lapply(OK_split[[3]], avail_pts_2nd, mcps = coug_OK_poly_clip, navail = 20)
+  coug_wtr_2nd_OK_df <- lapply(OK_split[[4]], avail_pts_2nd, mcps = coug_OK_poly_clip, navail = 20)
+  wolf_smr_2nd_OK_df <- lapply(OK_split[[5]], avail_pts_2nd, mcps = wolf_OK_poly_clip, navail = 20)
+  wolf_wtr_2nd_OK_df <- lapply(OK_split[[6]], avail_pts_2nd, mcps = wolf_OK_poly_clip, navail = 20)
+  bob_smr_2nd_OK_df <- lapply(OK_split[[7]], avail_pts_2nd, mcps = bob_OK_poly_clip, navail = 20)
+  bob_wtr_2nd_OK_df <- lapply(OK_split[[8]], avail_pts_2nd, mcps = bob_OK_poly_clip, navail = 20)
+  coy_smr_2nd_OK_df <- lapply(OK_split[[9]], avail_pts_2nd, mcps = coy_OK_poly_clip, navail = 20)
+  coy_wtr_2nd_OK_df <- lapply(OK_split[[10]], avail_pts_2nd, mcps = coy_OK_poly_clip, navail = 20)
   #'  NORTHEAST COLLARS
-  elk_smr_2nd_NE_df <- lapply(NE_split[[1]], avail_pts_2nd, mcps = elk_poly_clip)
-  elk_wtr_2nd_NE_df <- lapply(NE_split[[2]], avail_pts_2nd, mcps = elk_poly_clip)
-  wtd_smr_2nd_NE_df <- lapply(NE_split[[3]], avail_pts_2nd, mcps = wtd_poly_clip)
-  wtd_wtr_2nd_NE_df <- lapply(NE_split[[4]], avail_pts_2nd, mcps = wtd_poly_clip)
-  coug_smr_2nd_NE_df <- lapply(NE_split[[5]], avail_pts_2nd, mcps = coug_NE_poly_clip)
-  coug_wtr_2nd_NE_df <- lapply(NE_split[[6]], avail_pts_2nd, mcps = coug_NE_poly_clip)
-  wolf_smr_2nd_NE_df <- lapply(NE_split[[7]], avail_pts_2nd, mcps = wolf_NE_poly_clip)
-  wolf_wtr_2nd_NE_df <- lapply(NE_split[[8]], avail_pts_2nd, mcps = wolf_NE_poly_clip)
-  bob_smr_2nd_NE_df <- lapply(NE_split[[9]], avail_pts_2nd, mcps = bob_NE_poly_clip)
-  bob_wtr_2nd_NE_df <- lapply(NE_split[[10]], avail_pts_2nd, mcps = bob_NE_poly_clip)
-  coy_smr_2nd_NE_df <- lapply(NE_split[[11]], avail_pts_2nd, mcps = coy_NE_poly_clip)
-  coy_wtr_2nd_NE_df <- lapply(NE_split[[12]], avail_pts_2nd, mcps = coy_NE_poly_clip)
+  elk_smr_2nd_NE_df <- lapply(NE_split[[1]], avail_pts_2nd, mcps = elk_poly_clip, navail = 20)
+  elk_wtr_2nd_NE_df <- lapply(NE_split[[2]], avail_pts_2nd, mcps = elk_poly_clip, navail = 20)
+  wtd_smr_2nd_NE_df <- lapply(NE_split[[3]], avail_pts_2nd, mcps = wtd_poly_clip, navail = 20)
+  wtd_wtr_2nd_NE_df <- lapply(NE_split[[4]], avail_pts_2nd, mcps = wtd_poly_clip, navail = 20)
+  coug_smr_2nd_NE_df <- lapply(NE_split[[5]], avail_pts_2nd, mcps = coug_NE_poly_clip, navail = 20)
+  coug_wtr_2nd_NE_df <- lapply(NE_split[[6]], avail_pts_2nd, mcps = coug_NE_poly_clip, navail = 20)
+  wolf_smr_2nd_NE_df <- lapply(NE_split[[7]], avail_pts_2nd, mcps = wolf_NE_poly_clip, navail = 20)
+  wolf_wtr_2nd_NE_df <- lapply(NE_split[[8]], avail_pts_2nd, mcps = wolf_NE_poly_clip, navail = 20)
+  bob_smr_2nd_NE_df <- lapply(NE_split[[9]], avail_pts_2nd, mcps = bob_NE_poly_clip, navail = 20)
+  bob_wtr_2nd_NE_df <- lapply(NE_split[[10]], avail_pts_2nd, mcps = bob_NE_poly_clip, navail = 20)
+  coy_smr_2nd_NE_df <- lapply(NE_split[[11]], avail_pts_2nd, mcps = coy_NE_poly_clip, navail = 20)
+  coy_wtr_2nd_NE_df <- lapply(NE_split[[12]], avail_pts_2nd, mcps = coy_NE_poly_clip, navail = 20)
   
   #'  Convert to dataframes instead of lists
   #'  Okanogan
@@ -356,10 +366,6 @@
 
 
   
-  #### CURRENTLY STRUGGLING TO FIGURE OUT HOW TO DO THIS WITH THE 1:1, 1:10, AND 1:20 RATIOS I CREATED  ####
-  
-
-  
   #'  Extract covariate data for each available location
   #'  ==================================================
   #'  This will take awhile!
@@ -383,13 +389,13 @@
   # load("./Outputs/RSF_pts/bob_available_2021-06-22.RData")
   # load("./Outputs/RSF_pts/coy_available_2021-06-22.RData")
   #'  2nd Order Selection
-  load("./Outputs/RSF_pts/md_available_2nd_2021-09-13.RData") #2021-07-22 uses un-buffered & un-masked MCPs
-  load("./Outputs/RSF_pts/elk_available_2nd_2021-09-13.RData")
-  load("./Outputs/RSF_pts/wtd_available_2nd_2021-09-13.RData")
-  load("./Outputs/RSF_pts/coug_available_2nd_2021-09-13.RData")
-  load("./Outputs/RSF_pts/wolf_available_2nd_2021-10-29.RData") # excludes dispersals
-  load("./Outputs/RSF_pts/bob_available_2nd_2021-09-13.RData")
-  load("./Outputs/RSF_pts/coy_available_2nd_2021-09-13.RData")
+  load("./Outputs/RSF_pts/md_available_2nd_2022-04-06.RData") 
+  load("./Outputs/RSF_pts/elk_available_2nd_2022-04-06.RData")
+  load("./Outputs/RSF_pts/wtd_available_2nd_2022-04-06.RData")
+  load("./Outputs/RSF_pts/coug_available_2nd_2022-04-06.RData")
+  load("./Outputs/RSF_pts/wolf_available_2nd_2022-04-06.RData") 
+  load("./Outputs/RSF_pts/bob_available_2nd_2022-04-06.RData")
+  load("./Outputs/RSF_pts/coy_available_2nd_2022-04-06.RData")
   
   #'  Read in spatial data
   wppp_bound <- st_read("./Shapefiles/WPPP_CovariateBoundary", layer = "WPPP_CovariateBoundary")
@@ -458,11 +464,7 @@
   wolf_locs <- lapply(wolf_available_2nd, spatial_locs)
   bob_locs <- lapply(bob_available_2nd, spatial_locs)
   coy_locs <- lapply(coy_available_2nd, spatial_locs)
-  
-  
-  ####  KEEP TRACK OF WHICH VERSION OF THESE LOCS DATA I USE BELOW!  ####
-  #'  Am I using 3rd order available data or 2nd order available_2nd data?
-  
+ 
 
   #'  COVARIATE EXTRACTION & CALCULATIONS  
   #'  ===========================================
@@ -577,7 +579,10 @@
         Area = ifelse(grepl("ELK", ID), "NE", Area),
         Area = ifelse(grepl("WTD", ID), "NE", Area),
         #'  Indicate whether this location was used = 1 or available = 0
-        Used = 0
+        Used = 0,
+        #'  Add weights to used/available locations (used = 1, available = 5000 
+        #'  per Fieberg et al. 2021)
+        w = 5000
         )
     
     return(telem_covs)
@@ -588,12 +593,12 @@
   #'  This will take AWHILE even in parallel
   #'  Keep track of which order of selection is being extracted here!!!
   used_covs <- future_lapply(used_locs, cov_extract, future.seed = TRUE)
-  md_avail_covs <- future_lapply(md_locs, cov_extract, future.seed = TRUE)
-  elk_avail_covs <- future_lapply(elk_locs, cov_extract, future.seed = TRUE)
-  wtd_avail_covs <- future_lapply(wtd_locs, cov_extract, future.seed = TRUE)
-  coug_avail_covs <- future_lapply(coug_locs, cov_extract, future.seed = TRUE)
-  wolf_avail_covs <- future_lapply(wolf_locs, cov_extract, future.seed = TRUE)
-  bob_avail_covs <- future_lapply(bob_locs, cov_extract, future.seed = TRUE)
+  # md_avail_covs <- future_lapply(md_locs, cov_extract, future.seed = TRUE)
+  # elk_avail_covs <- future_lapply(elk_locs, cov_extract, future.seed = TRUE)
+  # wtd_avail_covs <- future_lapply(wtd_locs, cov_extract, future.seed = TRUE)
+  # coug_avail_covs <- future_lapply(coug_locs, cov_extract, future.seed = TRUE)
+  # wolf_avail_covs <- future_lapply(wolf_locs, cov_extract, future.seed = TRUE)
+  # bob_avail_covs <- future_lapply(bob_locs, cov_extract, future.seed = TRUE)
   coy_avail_covs <- future_lapply(coy_locs, cov_extract, future.seed = TRUE)
   
   #'  End time keeping
@@ -636,17 +641,19 @@
   coy_avail_dat <- combo_data(coy_available_2nd, coy_avail_covs)
   
   #'  Function to drop unneeded columns from list of used data sets and indicate 
-  #'  whether this location was used = 1 or available = 0
+  #'  whether this location was used = 1 or available = 0 and adjust weights for
+  #'  used locations
   select_cols <- function(dat) {
     used_skinny <- dat %>%
       dplyr::select(x, y, AnimalID, Season, ID, Season.1, Year, Elev, Slope, RoadDen, 
                     HumanMod, PercForMix, PercXGrass, PercXShrub, obs, Area) %>%
       mutate(
-        Used = 1)
+        Used = 1,
+        w = 1)
     colnames(used_skinny) <-  c("x", "y", "ID", "Season", "ID.1", "Season.1", 
                                 "Year", "Elev", "Slope", "RoadDen", "HumanMod", 
                                 "PercForMix", "PercXGrass", "PercXShrub", "obs", 
-                                "Area", "Used")
+                                "Area", "Used", "w")
     return(used_skinny)
   }
   #'  Run the list of used locations through function
@@ -703,6 +710,7 @@
   # 2021-08-10 uses my road density raster (km of road length/1 sq-km)... other versions use Lauren's raster that I think is meters of road length/1 sq-km
   # 2021-09-13 uses the buffered MCPs with large water bodies masked out
   # 2021-10-29 uses updated wolf MCP with dispersal events excluded
+  # 2022-04-06 updated available locations
   
   
   
