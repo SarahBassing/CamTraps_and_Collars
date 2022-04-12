@@ -22,21 +22,19 @@
   
   #'  Load libraries
   library(adehabitatHR)
-  library(sf)
+  # library(sf)
   library(sp)
   library(rgdal)
   library(rgeos)
   library(tidyverse)
   
+  #'  Load telemetry data
+  load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal_allSeasons.RData") #noDispMig
+  
   #'  Define coordinate projection
-  # wgs84 <- st_crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
   sa_proj <- CRS("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
   
   #'  Load study area shapefiles
-  OK_SA <- st_read("./Shapefiles/fwdstudyareamaps", layer = "METHOW_SA")
-  NE_SA <- st_read("./Shapefiles/fwdstudyareamaps", layer = "NE_SA")
-  OK_wgs84 <- st_transform(OK_SA, sa_proj)
-  NE_wgs84 <- st_transform(NE_SA, sa_proj)
   OK_SA_sp <- readOGR(dsn = "./Shapefiles/fwdstudyareamaps", layer = "METHOW_SA")
   NE_SA_sp <- readOGR(dsn = "./Shapefiles/fwdstudyareamaps", layer = "NE_SA")
   OK_SA_sp <- spTransform(OK_SA_sp, sa_proj)
@@ -47,11 +45,10 @@
     st_transform(crs = sa_proj)
   #'  Identify large bodies of water (anything larger than 1 sq-km in size)
   bigwater <- waterbody[waterbody$AreSqKm > 1,]
-  
-  #'  Load telemetry data
-  load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal_allSeasons.RData") #noDispMig
 
-  #'  Functions to filter species-specific data by study area
+  
+  #'  Filter data by study area
+  #'  =========================
   #'  NE study area collars
   NE_collars <- function(locs) {
     tracks <- filter(locs, StudyArea == "NE")
@@ -61,6 +58,7 @@
   noMD <- spp_all_tracks_all_seasons[-1]
   #'  Run list through function
   NE_tracks <- lapply(noMD, NE_collars)
+  
   #'  OK study area collars
   OK_collars <- function(locs) {
     tracks <- filter(locs, StudyArea == "OK")
@@ -71,8 +69,8 @@
   #'  Run list through function
   OK_tracks <- lapply(noELKWTD, OK_collars)
   
-  #'  Prep lists to generate available locations per individual
-  #'  =========================================================
+  #'  Prep lists to estimate annual home range per individual
+  #'  =======================================================
   #'  Function to pull out unique animal IDs
   unq_id <- function(locs) {
     animal <- as.data.frame(locs$AnimalID) %>%
@@ -95,7 +93,10 @@
   OK_split <- lapply(OK_tracks, split_animal)
   
   
+  #'  Function to estimate KDEs and create home range polygons
+  #'  ========================================================
   avail_pts <- function(locs, ex, plotit = F) { 
+    
     #'  1. Make each animal's locations spatial
     #'  ---------------------------------------------------------
     locs_sp <- SpatialPoints(locs[,c("x", "y")], proj4string = sa_proj) 
@@ -111,7 +112,7 @@
     
     #'  2. Create UDs for each animal following Bivariate normal utilization distributions
     #'  ----------------------------------------------------------
-    #'  Estimate KDEs for each home range, extend the spatial extent by 1.5
+    #'  Estimate KDEs for each home range, extend the spatial extent by 1.5 - 2.5
     #'  when estimating UDs (throws an error about grid being too small to
     #'  estimate home range otherwise)
     # MCP95 <- mcp(locs_sp, percent = 95) 
@@ -120,7 +121,7 @@
     UD50 <- getverticeshr(UD, 50)
     UD75 <- getverticeshr(UD, 75)
     UD90 <- getverticeshr(UD, 90)
-    
+
     #'  Calculate area of 95% UD
     UD95_area <- kernel.area(UD, percent = 95)
     #'  Convert area to square-kilometers
@@ -130,11 +131,11 @@
     #'  (pretending home range is a perfect circle)
     #'  Multiply by 1000 so buffer is measured in meters, not kilometers
     buff <- (sqrt(UD95_km2/pi)*2)*1000
-    
+
     #'  Buffer home range by the area of the 95% KDE
     buffered_poly <- gBuffer(UD95, width = buff)
-    
-    #'  Intersect and clip water body polygons from buffered polygons so large 
+
+    #'  Intersect and clip water body polygons from buffered polygons so large
     #'  bodies of water are not available to collared animals
     bigwater_sp <- as(st_geometry(bigwater), "Spatial")
     poly_clip <- rgeos::gDifference(buffered_poly, bigwater_sp)
@@ -142,57 +143,44 @@
     #'  Plot to make sure buffering and clipping worked
     if(plotit) {
       plot(poly_clip, border = "red", col = NA)
+      plot(OK_SA_sp, add = T)
+      plot(NE_SA_sp, add = T)
       plot(locs_sp, col = "blue", pch = 19, cex = 0.75, add = T)
       plot(UD50, border = "green", col = NA, add = T)
       plot(UD75, border = "green", col = NA, add = T)
       plot(UD90, border = "green", col = NA, add = T)
       plot(UD95, border = "darkgreen", col = NA, add = T)
+      
     }
-     
+    
     #'  Append AnimalID to polygon
     poly_clipDF <- SpatialPolygonsDataFrame(poly_clip, AnimalID)
     
-    
-    #' #'  3. Randomly select points within each home range
-    #' #'  ------------------------------------------------
-    #' #'  Sampling n available points to every 1 used point
-    #' #'  Identify number of used points per individual
-    #' nused <- nrow(locs)
-    #' #'  Multiply by desired number of available points set by navail
-    #' navailable <- nused*navail
-    #' #'  Set seed for reproducibility
-    #' # set.seed(2021)
-    #' rndpts <- spsample(poly_clipDF, navailable, type = "random")
-    #' #'  Turn them into spatial points
-    #' rndpts_sp <- SpatialPoints(rndpts, proj4string = sa_proj)
-    #' #' Plot to make sure step 3 worked
-    #' if(plotit) {
-    #'   plot(rndpts_sp, col = "red", pch = 19)
-    #'   plot(poly_clip, border = "red", col = NA, add = T)
-    #'   plot(UD95, border = "darkgreen", col = NA, add = T)
-    #' }
-    #' 
-    #' #'  4. Make list of locations non-spatial
-    #' #'  -------------------------------------
-    #' rndpts_df <- as.data.frame(rndpts_sp) 
-    #' ID <- unique(droplevels(locs$AnimalID))
-    #' Season <- unique(locs$Season)
-    #' rndpts_df$ID <- ID
-    #' rndpts_df$Season <- Season
-    #' 
-    #' return(rndpts_df)
     return(poly_clipDF)
-    
   }
-  md_poly <- lapply(animal_split[[1]], avail_pts, ex = 2.5, F) #ex = 2.5 for noDispMig
-  elk_poly <- lapply(animal_split[[2]], avail_pts, ex = 1.5, F)
-  wtd_poly <- lapply(animal_split[[3]], avail_pts, ex = 1.5, F)
-  coug_poly <- lapply(animal_split[[4]], avail_pts, ex = 1.5, F)
-  wolf_poly <- lapply(animal_split[[5]], avail_pts, ex = 1.5, F)
-  bob_poly <- lapply(animal_split[[6]], avail_pts, ex = 1.5, F)
-  coy_poly <- lapply(animal_split[[7]], avail_pts, ex = 1.5, F)
+  #'  Estimate annual home range for each individual per study area
+  md_OK_poly <- lapply(OK_split[[1]], avail_pts, ex = 2.5, T) #ex = 2.5 for noDispMig too
+  elk_NE_poly <- lapply(NE_split[[1]], avail_pts, ex = 1.5, T)
+  wtd_NE_poly <- lapply(NE_split[[2]], avail_pts, ex = 1.5, T)
+  coug_OK_poly <- lapply(OK_split[[2]], avail_pts, ex = 1.5, T)
+  coug_NE_poly <- lapply(NE_split[[3]], avail_pts, ex = 1.5, T)
+  wolf_OK_poly <- lapply(OK_split[[3]], avail_pts, ex = 1.5, T)
+  wolf_NE_poly <- lapply(NE_split[[4]], avail_pts, ex = 1.5, T)
+  bob_OK_poly <- lapply(OK_split[[4]], avail_pts, ex = 1.5, T)
+  bob_NE_poly <- lapply(NE_split[[5]], avail_pts, ex = 1.5, T)
+  coy_OK_poly <- lapply(OK_split[[5]], avail_pts, ex = 1.5, T)
+  coy_NE_poly <- lapply(NE_split[[6]], avail_pts, ex = 1.5, T)
+  
+  #'  List polygons together
+  HR_poly <- list(md_OK_poly, elk_NE_poly, wtd_NE_poly, coug_OK_poly, coug_NE_poly, 
+                  wolf_OK_poly, wolf_NE_poly, bob_OK_poly, bob_NE_poly, coy_OK_poly, 
+                  coy_NE_poly)
+  
+  #'  Save to use when sampling "available" resources
+  save(HR_poly, file = "./Outputs/MCPs/KDE_HomeRange_Polygons_allSpp.RData")
   
   #'  Use this to define available extent for each animal in RSF analyses
+  #'  Next: Collar_RSF_DataPrep.R
   
   
   
