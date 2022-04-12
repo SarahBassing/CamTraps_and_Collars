@@ -1,16 +1,16 @@
   #'  ========================================
-  #'  Minimum Convex Polygons
+  #'  Buffered Home Ranges
   #'  Washington Predator-Prey Project
   #'  Sarah Bassing
-  #'  July 3, 2021
+  #'  April 2022
   #'  ========================================
-  #'  Generate species-specific MCPs for all collared individuals within the 
-  #'  study. Ignoring individual home ranges and generating one per species based
-  #'  on ALL locations from that species. These MCPs will be used to select
+  #'  Generate individual home ranges for all collared individuals within the 
+  #'  study. Buffer each home range by diameter of home range and mask out areas
+  #'  unavailable to animals (waterbodies). These polygons will be used to select
   #'  random available locations for 2nd order RSF analyses. Using telemetry data
-  #'  that have been cleaned (spurious locations, dispersals, etc. removed) and  
-  #'  truncated around capture and mortality events but no further filtering done.
-  #'  These data do include any seasonal migration movement.
+  #'  that have been cleaned (spurious locations, dispersals, migrations removed)   
+  #'  & truncated around capture and mortality events but no further filtering done.
+  #'  These data exclude seasonal migration movements for mule deer.
   #'  
   #'  Ungulate data cleaned with Collar_DataCleaning.R script, meso-predator data
   #'  cleaned with Collar_DataCleaning_Mesopredator.R script, and large predator
@@ -147,7 +147,6 @@
       plot(UD75, border = "green", col = NA, add = T)
       plot(UD90, border = "green", col = NA, add = T)
       plot(UD95, border = "darkgreen", col = NA, add = T)
-      
     }
      
     #'  Append AnimalID to polygon
@@ -185,12 +184,16 @@
     return(poly_clipDF)
     
   }
-  md_poly <- lapply(animal_split[[1]], avail_pts, ex = 2.5, T) #ex = 2.5 for noDispMig
-  elk_poly <- lapply(animal_split[[2]], avail_pts, ex = 1.5, T)
-  wtd_poly <- lapply(animal_split[[3]], avail_pts, ex = 1.5, T)
-  coug_poly <- lapply(animal_split[[4]], avail_pts, ex = 1.5, T)
-  wolf_poly <- lapply(animal_split[[5]], avail_pts, ex = 1.5, T)
-  bob_poly <- lapply(animal_split[[6]], avail_pts, ex = 1.5, T)
-  coy_poly <- lapply(animal_split[[7]], avail_pts, ex = 1.5, T)
+  md_poly <- lapply(animal_split[[1]], avail_pts, ex = 2.5, F) #ex = 2.5 for noDispMig
+  elk_poly <- lapply(animal_split[[2]], avail_pts, ex = 1.5, F)
+  wtd_poly <- lapply(animal_split[[3]], avail_pts, ex = 1.5, F)
+  coug_poly <- lapply(animal_split[[4]], avail_pts, ex = 1.5, F)
+  wolf_poly <- lapply(animal_split[[5]], avail_pts, ex = 1.5, F)
+  bob_poly <- lapply(animal_split[[6]], avail_pts, ex = 1.5, F)
+  coy_poly <- lapply(animal_split[[7]], avail_pts, ex = 1.5, F)
   
   #'  Use this to define available extent for each animal in RSF analyses
+  
+  
+  
+  
