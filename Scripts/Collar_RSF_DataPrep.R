@@ -447,29 +447,29 @@
     do.call(rbind.data.frame, .)
   wtd_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[4]], buff_poly = wtd_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[3]], buff_poly = coug_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coug_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[3]], buff_poly = coug_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[4]], buff_poly = coug_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coug_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[4]], buff_poly = coug_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[5]], buff_poly = coug_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coug_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[5]], buff_poly = coug_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[6]], buff_poly = coug_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coug_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[6]], buff_poly = coug_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[5]], buff_poly = wolf_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  wolf_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[5]], buff_poly = wolf_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[6]], buff_poly = wolf_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  wolf_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[6]], buff_poly = wolf_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[7]], buff_poly = wolf_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  wolf_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[7]], buff_poly = wolf_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[8]], buff_poly = wolf_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  wolf_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[8]], buff_poly = wolf_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[7]], buff_poly = bob_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  bob_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[7]], buff_poly = bob_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[8]], buff_poly = bob_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  bob_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[8]], buff_poly = bob_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[9]], buff_poly = bob_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  bob_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[9]], buff_poly = bob_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[10]], buff_poly = bob_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  bob_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[10]], buff_poly = bob_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
   coy_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[9]], buff_poly = coy_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
