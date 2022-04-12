@@ -22,7 +22,7 @@
   
   #'  Load libraries
   library(adehabitatHR)
-  # library(sf)
+  library(sf)
   library(sp)
   library(rgdal)
   library(rgeos)
@@ -95,7 +95,7 @@
   
   #'  Function to estimate KDEs and create home range polygons
   #'  ========================================================
-  avail_pts <- function(locs, ex, plotit = F) { 
+  avail_pts <- function(locs, ex, h, plotit = F) { 
     
     #'  1. Make each animal's locations spatial
     #'  ---------------------------------------------------------
@@ -112,17 +112,21 @@
     
     #'  2. Create UDs for each animal following Bivariate normal utilization distributions
     #'  ----------------------------------------------------------
-    #'  Estimate KDEs for each home range, extend the spatial extent by 1.5 - 2.5
-    #'  when estimating UDs (throws an error about grid being too small to
-    #'  estimate home range otherwise)
+    #'  Notes about estimating KDEs for each home range: 
+    #'    1) extend the spatial extent by 1.5 - 2.5 when estimating UDs (throws 
+    #'    an error about grid being too small to estimate home range otherwise) 
+    #'    2) adjust the smoothing parameter (h) from the reference bandwidth 
+    #'    ("href") to least squares cross validation ("LSCV") if estimates are
+    #'    too large (oversmoothed) but LSCV is prone to convergence failure. 
+    #'    Explore LSCV convergence issues with plotLSCV(UD95)
     # MCP95 <- mcp(locs_sp, percent = 95) 
-    UD <- kernelUD(locs_sp, kern = "bivnorm", extent = ex)
+    UD <- kernelUD(locs_sp, kern = "bivnorm", extent = ex, h = h)
     UD95 <- getverticeshr(UD, 95)
     UD50 <- getverticeshr(UD, 50)
     UD75 <- getverticeshr(UD, 75)
     UD90 <- getverticeshr(UD, 90)
 
-    #'  Calculate area of 95% UD
+    #'  Calculate area of 95% UD (default of “m” in and “ha” for output)
     UD95_area <- kernel.area(UD, percent = 95)
     #'  Convert area to square-kilometers
     UD95_km2 <- round(UD95_area/100, 2)
@@ -159,17 +163,17 @@
     return(poly_clipDF)
   }
   #'  Estimate annual home range for each individual per study area
-  md_OK_poly <- lapply(OK_split[[1]], avail_pts, ex = 2.5, T) #ex = 2.5 for noDispMig too
-  elk_NE_poly <- lapply(NE_split[[1]], avail_pts, ex = 1.5, T)
-  wtd_NE_poly <- lapply(NE_split[[2]], avail_pts, ex = 1.5, T)
-  coug_OK_poly <- lapply(OK_split[[2]], avail_pts, ex = 1.5, T)
-  coug_NE_poly <- lapply(NE_split[[3]], avail_pts, ex = 1.5, T)
-  wolf_OK_poly <- lapply(OK_split[[3]], avail_pts, ex = 1.5, T)
-  wolf_NE_poly <- lapply(NE_split[[4]], avail_pts, ex = 1.5, T)
-  bob_OK_poly <- lapply(OK_split[[4]], avail_pts, ex = 1.5, T)
-  bob_NE_poly <- lapply(NE_split[[5]], avail_pts, ex = 1.5, T)
-  coy_OK_poly <- lapply(OK_split[[5]], avail_pts, ex = 1.5, T)
-  coy_NE_poly <- lapply(NE_split[[6]], avail_pts, ex = 1.5, T)
+  md_OK_poly <- lapply(OK_split[[1]], avail_pts, ex = 2.5, h = "LSCV", T) #ex = 2.5 for noDispMig too
+  elk_NE_poly <- lapply(NE_split[[1]], avail_pts, ex = 1.5, h = "href", T)
+  wtd_NE_poly <- lapply(NE_split[[2]], avail_pts, ex = 1.5, h = "href", T)
+  coug_OK_poly <- lapply(OK_split[[2]], avail_pts, ex = 1.5, h = "href", T)
+  coug_NE_poly <- lapply(NE_split[[3]], avail_pts, ex = 1.5, h = "href", T)
+  wolf_OK_poly <- lapply(OK_split[[3]], avail_pts, ex = 1.5, h = "href", T)
+  wolf_NE_poly <- lapply(NE_split[[4]], avail_pts, ex = 1.5, h = "href", T)
+  bob_OK_poly <- lapply(OK_split[[4]], avail_pts, ex = 1.5, h = "href", T)
+  bob_NE_poly <- lapply(NE_split[[5]], avail_pts, ex = 1.5, h = "href", T)
+  coy_OK_poly <- lapply(OK_split[[5]], avail_pts, ex = 1.5, h = "href", T)
+  coy_NE_poly <- lapply(NE_split[[6]], avail_pts, ex = 1.5, h = "href", T)
   
   #'  List polygons together
   HR_poly <- list(md_OK_poly, elk_NE_poly, wtd_NE_poly, coug_OK_poly, coug_NE_poly, 
