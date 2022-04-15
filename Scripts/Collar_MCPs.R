@@ -81,7 +81,6 @@
   coy_OK <- coy_skinny[coy_skinny$StudyArea == "OK",] %>%
     dplyr::select(-StudyArea)
 
-  #  SHOULD I SEPARATE THESE OUT BY YEAR TOO??? I THINK I NEED A FUNCTION FOR ALL OF THIS
   
   #'  Make telemetry locations spatial and transform projection to UTMs
   #'  I don't know why I can't get spTrnasform to work for me but whatever
