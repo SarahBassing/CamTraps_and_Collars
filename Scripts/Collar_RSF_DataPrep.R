@@ -25,6 +25,7 @@
 
   #'  Load packages for selecting available points
   library(tidyverse)
+  library(sf)
   library(sp)
   library(raster)
   library(lme4)
@@ -38,6 +39,9 @@
   #'  Load telemetry data
   load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal.RData")
   # load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispMig.RData")
+  
+  #'  Set projection for spatial analyses
+  sa_proj <- CRS("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
   
   #'  Functions to filter species-specific data by study area
   #'  NE study area collars
@@ -83,59 +87,13 @@
   NE_split <- lapply(NE_tracks, split_animal)
   OK_split <- lapply(OK_tracks, split_animal)
   
-  #' #'  Function to calculate mean number of observations per species
-  #' #'  Used to decide how many "available" points to draw for each individual
-  #' #'  Using average across all individuals & species to be consistent across models
-  #' #'  Create empty dataframe to hold mean locations
-  #' avg_locs <- c()
-  #' mean_obs <- function(locs) {
-  #'   mean_locs <- (nrow(locs))/(length(unique(locs$FullID))) #FullID? #AnimalID
-  #'   avg_locs <- c(avg_locs, mean_locs)
-  #'   return(avg_locs)
-  #' }
-  #' mean_locs <- lapply(spp_all_tracks, mean_obs)
-  #' # NE_mean_locs <- lapply(NE_tracks, mean_obs)
-  #' # OK_mean_locs <- lapply(OK_tracks, mean_obs)
-  #' 
-  #' #'  Calculate mean number of used locations for all species
-  #' mean_used <- mean(unlist(mean_locs)); sd_used <- sd(unlist(mean_locs))
-  #' # NE_mean_used <- mean(unlist(NE_mean_locs)); NE_sd_used <- sd(unlist(NE_mean_locs))
-  #' # OK_mean_used <- mean(unlist(OK_mean_locs)); OK_sd_used <- sd(unlist(OK_mean_locs))
-  #' #'  RSF literature suggests 1:20 ratio used:available
-  #' navailable <- mean_used*20
-  #' # NE_navailable <- NE_mean_used*20
-  #' # OK_navailable <- OK_mean_used*20
-  #' 
-  #' #'  Function to identify the number of used observations per individual
-  #' #'  Used to describe how many "available" points to draw for each animal
-  #' #'  following a 1:1, 1:10, and 1:20 ratio per individual instead of the 1:20
-  #' #'  ratio for the average number of observations per individual as above
-  #' nobs <- function(locs) {
-  #'   indlocs <- locs %>%
-  #'     group_by(AnimalID, Season) %>%
-  #'     tally() %>%
-  #'     ungroup()
-  #'   nlocs <- as.data.frame(indlocs) %>%
-  #'     mutate(n10 = n*10, n20 = n*20)
-  #'   return(nlocs)
-  #' }
-  #' #'  Run each species through function
-  #' ind_nlocs <- lapply(spp_all_tracks, nobs)
-  #' #'  Create giant dataframe instead of species-specific lists
-  #' IDlocs <- ind_nlocs %>%
-  #'   map(rownames_to_column) %>%
-  #'   bind_rows() %>%
-  #'   dplyr::select(c(AnimalID, Season, n, n10, n20))
-
   
   #'  Generate random "Available" locations for each individual
   #'  =========================================================
-  #'  Set projection for spatial analyses
-  sa_proj <- CRS("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
+  #'  Define availability based on 2nd or 3rd order selection
   
-  
-  #' #'  3rd ORDER SELECTION Average 1:20 used:available
-  #' #'  -----------------------------------------------
+  #' ####  3rd ORDER SELECTION Average 1:20 used:available  ####
+  #' #'  ---------------------------------------------------
   #' #'  Function to randomly select "Available" points within each animal's seasonal 
   #' #'  home range (utilization distributions)
   #' avail_pts_3rd <- function(locs, navail, plotit = F) {
@@ -307,8 +265,8 @@
   coy_wtr_muHR <- mean_HR(coy_wtr_df)
   
   
-  #'  2nd ORDER SELECTION using buffered individual "home range"
-  #'  ----------------------------------------------------------
+  ####  2nd ORDER SELECTION using buffered individual "home range"  ####
+  #'  --------------------------------------------------------------
   #'  Functions to...
   #'  1. Match buffered HR polygon with seasonal location per individual
   #'  HR_poly = annual home range for each animal per study area & includes
@@ -515,8 +473,8 @@
   save(coy_available_2nd_buffHR, file = paste0("./Outputs/RSF_pts/coy_available_2nd_buffHR_", Sys.Date(), ".RData"))
   
 
-  #'  2nd ORDER SELECTION using single MCP
-  #'  ------------------------------------
+  ####  2nd ORDER SELECTION using single MCP  ####
+  #'  ----------------------------------------
   #'  Function to randomly select "Available" points within MCPs generated from
   #'  all individuals of a given species across seasons within a study area.
   #'  MPCs created in Collar_MCPs.R script
