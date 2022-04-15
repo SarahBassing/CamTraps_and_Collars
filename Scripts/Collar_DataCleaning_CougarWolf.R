@@ -63,7 +63,13 @@
     dplyr::select("No", "ID", "CollarID", "Sex", "Latitude", "Longitude", "LMT_DateTime", 
                   "StudyArea", "daytime", "Finaldt", "Floordt")
    
-
+  #  Save subset of cougar collar data for Donovan's capstone project
+  # coug_for_Donovan <- coug_skinny %>%
+  #   filter(daytime > "2018-06-01 00:00:00" & daytime < "2020-09-01 00:00:00") %>%
+  #   dplyr::select(-c("LMT_DateTime", "Finaldt", "Floordt"))
+  # write.csv(coug_for_Donovan, "G:/My Drive/1 Volunteers/Capstone Projects/2021-2022/Donovan/Cougar_Collar_Locations.csv")
+  
+  
   ####  ============================================
   ####  Review individual collars for oddities  ####
   
