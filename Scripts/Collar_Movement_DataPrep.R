@@ -32,10 +32,8 @@
   library(tidyverse)
   
   #'  Source cleaned telemetry data
-  # source("./Scripts/Collar_Truncating&Filtering.R")
-  # load("./Data/Collar_Truncating&Filtering_2021-05-01.RData")
-  load("./Data/Collar_Truncating&Filtering_noDispersal_2021-07-22.RData") #2021-06-14
-  # load("./Data/Collar_Truncating&Filtering_noDispMig_2021-07-07.RData") #2021-06-22
+  load("./Data/Collar_Truncating&Filtering_noDispersal_2021-07-22.RData") 
+  # load("./Data/Collar_Truncating&Filtering_noDispMig_2021-07-07.RData") 
 
   ####  Data preparation  ####
   #'  Select relevant columns
@@ -222,6 +220,12 @@
   save(WOLF_track, file = "./Outputs/Telemetry_tracks/WOLF_track.RData")
   save(BOB_track, file = "./Outputs/Telemetry_tracks/BOB_track.RData")
   save(COY_track, file = "./Outputs/Telemetry_tracks/COY_track.RData")
+  
+  #'  Save a list of all tracks, not broken down by season
+  spp_all_tracks_all_seasons <- list(MD_track,ELK_track, WTD_track, COUG_track, WOLF_track, 
+                         BOB_track, COY_track)
+  save(spp_all_tracks_all_seasons, file = "./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal_allSeasons.RData")
+  # save(spp_all_tracks_all_seasons, file = "./Outputs/Telemetry_tracks/spp_all_tracks_noDispMig_allSeasons.RData")
   
   #'  Create season-specific data sets for crawlWrap function
   MD_smr_track <- MD_track[MD_track$Season == "Summer18" | MD_track$Season == "Summer19", ]
