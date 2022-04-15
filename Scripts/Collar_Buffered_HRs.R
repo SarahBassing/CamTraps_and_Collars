@@ -29,7 +29,7 @@
   library(tidyverse)
   
   #'  Load telemetry data
-  load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal_allSeasons.RData") #noDispMig
+  load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal_allSeasons.RData") 
   
   #'  Define coordinate projection
   sa_proj <- CRS("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
@@ -93,9 +93,9 @@
   OK_split <- lapply(OK_tracks, split_animal)
   
   
-  #'  Function to estimate KDEs and create home range polygons
-  #'  ========================================================
-  avail_pts <- function(locs, ex, h, plotit = F) { 
+  #'  Function to estimate home ranges & create buffered polygons
+  #'  ===========================================================
+  avail_pts <- function(locs, plotit = F) { #ex, h, if using KDEs
     
     #'  1. Make each animal's locations spatial
     #'  ---------------------------------------------------------
@@ -110,34 +110,39 @@
     AnimalID <- unique(locs[,"FullID"]) # FullID b/c split data based on this
     AnimalID <- as.data.frame(AnimalID)
     
-    #'  2. Create UDs for each animal following Bivariate normal utilization distributions
-    #'  ----------------------------------------------------------
-    #'  Notes about estimating KDEs for each home range: 
-    #'    1) extend the spatial extent by 1.5 - 2.5 when estimating UDs (throws 
-    #'    an error about grid being too small to estimate home range otherwise) 
-    #'    2) adjust the smoothing parameter (h) from the reference bandwidth 
-    #'    ("href") to least squares cross validation ("LSCV") if estimates are
-    #'    too large (oversmoothed) but LSCV is prone to convergence failure. 
-    #'    Explore LSCV convergence issues with plotLSCV(UD95)
-    # MCP95 <- mcp(locs_sp, percent = 95) 
-    UD <- kernelUD(locs_sp, kern = "bivnorm", extent = ex, h = h)
-    UD95 <- getverticeshr(UD, 95)
-    UD50 <- getverticeshr(UD, 50)
-    UD75 <- getverticeshr(UD, 75)
-    UD90 <- getverticeshr(UD, 90)
+    #'  2. Create MCPs for each animal 
+    #'  ------------------------------
+    MCP100 <- mcp(locs_sp, percent = 100, unin = "m", unout = "km2")
+    #' #'  Notes about estimating KDEs for each home range: 
+    #' #'    1) extend the spatial extent by 1.5 - 2.5 when estimating UDs (throws 
+    #' #'    an error about grid being too small to estimate home range otherwise) 
+    #' #'    2) adjust the smoothing parameter (h) from the reference bandwidth 
+    #' #'    ("href") to least squares cross validation ("LSCV") if estimates are
+    #' #'    too large (oversmoothed) but LSCV is prone to convergence failure. 
+    #' #'    Explore LSCV convergence issues with plotLSCV(UD95)
+    #' UD <- kernelUD(locs_sp, kern = "bivnorm", extent = ex, h = h)
+    #' UD95 <- getverticeshr(UD, 95)
+    #' UD50 <- getverticeshr(UD, 50)
+    #' UD75 <- getverticeshr(UD, 75)
+    #' UD90 <- getverticeshr(UD, 90)
 
-    #'  Calculate area of 95% UD (default of “m” in and “ha” for output)
-    UD95_area <- kernel.area(UD, percent = 95)
-    #'  Convert area to square-kilometers
-    UD95_km2 <- round(UD95_area/100, 2)
-    print(UD95_km2)
+    #'  Calculate area of 100% MCP (default of “m” in and “ha” for output)
+    MCP100_area <- mcp.area(locs_sp, percent = 100, unin = "m", unout = "km2", plotit = FALSE) 
+    MCP100_area <- round(MCP100_area$a, 2)
+    print(MCP100_area)
+    # UD95_area <- kernel.area(UD, percent = 95, unin = "m", unout = "km2")
+    # UD95_km2 <- round(UD95_area, 2)
+    # print(UD95_km2)
+    
     #'  Create buffer around home range based on approx. diameter of home range
     #'  (pretending home range is a perfect circle)
     #'  Multiply by 1000 so buffer is measured in meters, not kilometers
-    buff <- (sqrt(UD95_km2/pi)*2)*1000
+    buff <- (sqrt(MCP100_area/pi)*2)*1000 
+    # buff <- (sqrt(UD95_km2/pi)*2)*1000
 
-    #'  Buffer home range by the area of the 95% KDE
-    buffered_poly <- gBuffer(UD95, width = buff)
+    #'  Buffer home range polygon by diameter of home range
+    buffered_poly <- gBuffer(MCP100, width = buff)
+    # buffered_poly <- gBuffer(UD95, width = buff)
 
     #'  Intersect and clip water body polygons from buffered polygons so large
     #'  bodies of water are not available to collared animals
@@ -150,10 +155,11 @@
       plot(OK_SA_sp, add = T)
       plot(NE_SA_sp, add = T)
       plot(locs_sp, col = "blue", pch = 19, cex = 0.75, add = T)
-      plot(UD50, border = "green", col = NA, add = T)
-      plot(UD75, border = "green", col = NA, add = T)
-      plot(UD90, border = "green", col = NA, add = T)
-      plot(UD95, border = "darkgreen", col = NA, add = T)
+      plot(MCP100, border = "darkgreen", col = NA, add = T)
+      # plot(UD50, border = "green", col = NA, add = T)
+      # plot(UD75, border = "green", col = NA, add = T)
+      # plot(UD90, border = "green", col = NA, add = T)
+      # plot(UD95, border = "darkgreen", col = NA, add = T)
       
     }
     
@@ -163,17 +169,18 @@
     return(poly_clipDF)
   }
   #'  Estimate annual home range for each individual per study area
-  md_OK_poly <- lapply(OK_split[[1]], avail_pts, ex = 2.5, h = "LSCV", T) #ex = 2.5 for noDispMig too
-  elk_NE_poly <- lapply(NE_split[[1]], avail_pts, ex = 1.5, h = "href", T)
-  wtd_NE_poly <- lapply(NE_split[[2]], avail_pts, ex = 1.5, h = "href", T)
-  coug_OK_poly <- lapply(OK_split[[2]], avail_pts, ex = 1.5, h = "href", T)
-  coug_NE_poly <- lapply(NE_split[[3]], avail_pts, ex = 1.5, h = "href", T)
-  wolf_OK_poly <- lapply(OK_split[[3]], avail_pts, ex = 1.5, h = "href", T)
-  wolf_NE_poly <- lapply(NE_split[[4]], avail_pts, ex = 1.5, h = "href", T)
-  bob_OK_poly <- lapply(OK_split[[4]], avail_pts, ex = 1.5, h = "href", T)
-  bob_NE_poly <- lapply(NE_split[[5]], avail_pts, ex = 1.5, h = "href", T)
-  coy_OK_poly <- lapply(OK_split[[5]], avail_pts, ex = 1.5, h = "href", T)
-  coy_NE_poly <- lapply(NE_split[[6]], avail_pts, ex = 1.5, h = "href", T)
+  #'  Add ex = 2.5, h = "href" if creating KDEs for mule deer; ex = 1.5 for other spp
+  md_OK_poly <- lapply(OK_split[[1]], avail_pts, T) 
+  elk_NE_poly <- lapply(NE_split[[1]], avail_pts, T)
+  wtd_NE_poly <- lapply(NE_split[[2]], avail_pts, T)
+  coug_OK_poly <- lapply(OK_split[[2]], avail_pts, T)
+  coug_NE_poly <- lapply(NE_split[[3]], avail_pts, T)
+  wolf_OK_poly <- lapply(OK_split[[3]], avail_pts, T)
+  wolf_NE_poly <- lapply(NE_split[[4]], avail_pts, T)
+  bob_OK_poly <- lapply(OK_split[[4]], avail_pts, T)
+  bob_NE_poly <- lapply(NE_split[[5]], avail_pts, T)
+  coy_OK_poly <- lapply(OK_split[[5]], avail_pts, T)
+  coy_NE_poly <- lapply(NE_split[[6]], avail_pts, T)
   
   #'  List polygons together
   HR_poly <- list(md_OK_poly, elk_NE_poly, wtd_NE_poly, coug_OK_poly, coug_NE_poly, 
