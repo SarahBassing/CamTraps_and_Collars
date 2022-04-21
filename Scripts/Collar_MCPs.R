@@ -17,8 +17,8 @@
   #'  data cleaned by L.Satterfield.
   #'  ========================================
   
-  #'  Clean workspace
-  rm(list = ls())
+  #' #'  Clean workspace
+  #' rm(list = ls())
 
   #'  Load libraries
   library(adehabitatHR)
