@@ -31,11 +31,6 @@
   library(lme4)
   library(adehabitatHR)
   
-  #'  Load KDEs which represent all locations from each individual's home range
-  # source("./Scripts/Collar_MCPs.R")
-  # source("./Scripts/Collar_Buffered_HRs.R")
-  load("./Outputs/MCPs/KDE_HomeRange_Polygons_allSpp.RData")
-  
   #'  Load telemetry data
   load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispersal.RData")
   # load("./Outputs/Telemetry_tracks/spp_all_tracks_noDispMig.RData")
@@ -267,13 +262,19 @@
   
   ####  2nd ORDER SELECTION using buffered individual "home range"  ####
   #'  --------------------------------------------------------------
-  #'  Functions to...
-  #'  1. Match buffered HR polygon with seasonal location per individual
-  #'  HR_poly = annual home range for each animal per study area & includes
-  #'  OK list No. 1) md, 4) OK coug, 6) OK wolf, 8) OK bob, 10) OK coy, and 
-  #'  NE list No. 2) elk, 3) wtd, 5) NE coug, 7) NE wolf, 9) NE bob, 11) NE coy
-  #'  spp_all_tracks = animal locations for each animal per season and includes 
-  #'  14 lists that are species and season specific, but not study area specific
+  #'  Load polygons which represent all locations from each individual's home range
+  #'  source("./Scripts/Collar_Buffered_HRs.R")
+  load("./Outputs/MCPs/KDE_HomeRange_Polygons_allSpp.RData")
+  #'  Functions to
+  #'    1. Match buffered HR polygon with seasonal location per individual
+  #'       HR_poly = annual home range for each animal per study area & includes
+  #'       OK list No. 1) md, 4) OK coug, 6) OK wolf, 8) OK bob, 10) OK coy, and 
+  #'       NE list No. 2) elk, 3) wtd, 5) NE coug, 7) NE wolf, 9) NE bob, 11) NE coy 
+  #'       spp_all_tracks = animal locations for each animal per season and 
+  #'       includes 14 lists that are species and season specific, but not study 
+  #'       area specific
+  #'    2. Generate available locations within the extent of each individuals'
+  #'       buffered home range.
   
   #'  Functions to subset lists of HR polygons to match animals in each season
   #'  OKANOGAN DATA 
@@ -475,6 +476,9 @@
 
   ####  2nd ORDER SELECTION using single MCP  ####
   #'  ----------------------------------------
+  #'  Create MCPs based on all locations from all individuals per species per study area
+  source("./Scripts/Collar_MCPs.R")
+  
   #'  Function to randomly select "Available" points within MCPs generated from
   #'  all individuals of a given species across seasons within a study area.
   #'  MPCs created in Collar_MCPs.R script
@@ -509,29 +513,29 @@
   #'  Keep a close eye on those indices and study area MCPs
   #'  Using buffered MCPs with large water bodies masked out   
   #'  OKANOGAN COLLARS
-  md_smr_2nd_OK_df <- lapply(OK_split[[1]], avail_pts_2nd, mcps = md_poly_clip, navail = 20)
-  md_wtr_2nd_OK_df <- lapply(OK_split[[2]], avail_pts_2nd, mcps = md_poly_clip, navail = 20)
-  coug_smr_2nd_OK_df <- lapply(OK_split[[3]], avail_pts_2nd, mcps = coug_OK_poly_clip, navail = 20)
-  coug_wtr_2nd_OK_df <- lapply(OK_split[[4]], avail_pts_2nd, mcps = coug_OK_poly_clip, navail = 20)
-  wolf_smr_2nd_OK_df <- lapply(OK_split[[5]], avail_pts_2nd, mcps = wolf_OK_poly_clip, navail = 20)
-  wolf_wtr_2nd_OK_df <- lapply(OK_split[[6]], avail_pts_2nd, mcps = wolf_OK_poly_clip, navail = 20)
-  bob_smr_2nd_OK_df <- lapply(OK_split[[7]], avail_pts_2nd, mcps = bob_OK_poly_clip, navail = 20)
-  bob_wtr_2nd_OK_df <- lapply(OK_split[[8]], avail_pts_2nd, mcps = bob_OK_poly_clip, navail = 20)
-  coy_smr_2nd_OK_df <- lapply(OK_split[[9]], avail_pts_2nd, mcps = coy_OK_poly_clip, navail = 20)
-  coy_wtr_2nd_OK_df <- lapply(OK_split[[10]], avail_pts_2nd, mcps = coy_OK_poly_clip, navail = 20)
+  md_smr_2nd_OK_df <- lapply(OK_split[[1]], avail_pts_2nd, mcps = md_poly_clip, navail = 200)
+  md_wtr_2nd_OK_df <- lapply(OK_split[[2]], avail_pts_2nd, mcps = md_poly_clip, navail = 200)
+  coug_smr_2nd_OK_df <- lapply(OK_split[[3]], avail_pts_2nd, mcps = coug_OK_poly_clip, navail = 200)
+  coug_wtr_2nd_OK_df <- lapply(OK_split[[4]], avail_pts_2nd, mcps = coug_OK_poly_clip, navail = 200)
+  wolf_smr_2nd_OK_df <- lapply(OK_split[[5]], avail_pts_2nd, mcps = wolf_OK_poly_clip, navail = 200)
+  wolf_wtr_2nd_OK_df <- lapply(OK_split[[6]], avail_pts_2nd, mcps = wolf_OK_poly_clip, navail = 200)
+  bob_smr_2nd_OK_df <- lapply(OK_split[[7]], avail_pts_2nd, mcps = bob_OK_poly_clip, navail = 200)
+  bob_wtr_2nd_OK_df <- lapply(OK_split[[8]], avail_pts_2nd, mcps = bob_OK_poly_clip, navail = 200)
+  coy_smr_2nd_OK_df <- lapply(OK_split[[9]], avail_pts_2nd, mcps = coy_OK_poly_clip, navail = 200)
+  coy_wtr_2nd_OK_df <- lapply(OK_split[[10]], avail_pts_2nd, mcps = coy_OK_poly_clip, navail = 200)
   #'  NORTHEAST COLLARS
-  elk_smr_2nd_NE_df <- lapply(NE_split[[1]], avail_pts_2nd, mcps = elk_poly_clip, navail = 20)
-  elk_wtr_2nd_NE_df <- lapply(NE_split[[2]], avail_pts_2nd, mcps = elk_poly_clip, navail = 20)
-  wtd_smr_2nd_NE_df <- lapply(NE_split[[3]], avail_pts_2nd, mcps = wtd_poly_clip, navail = 20)
-  wtd_wtr_2nd_NE_df <- lapply(NE_split[[4]], avail_pts_2nd, mcps = wtd_poly_clip, navail = 20)
-  coug_smr_2nd_NE_df <- lapply(NE_split[[5]], avail_pts_2nd, mcps = coug_NE_poly_clip, navail = 20)
-  coug_wtr_2nd_NE_df <- lapply(NE_split[[6]], avail_pts_2nd, mcps = coug_NE_poly_clip, navail = 20)
-  wolf_smr_2nd_NE_df <- lapply(NE_split[[7]], avail_pts_2nd, mcps = wolf_NE_poly_clip, navail = 20)
-  wolf_wtr_2nd_NE_df <- lapply(NE_split[[8]], avail_pts_2nd, mcps = wolf_NE_poly_clip, navail = 20)
-  bob_smr_2nd_NE_df <- lapply(NE_split[[9]], avail_pts_2nd, mcps = bob_NE_poly_clip, navail = 20)
-  bob_wtr_2nd_NE_df <- lapply(NE_split[[10]], avail_pts_2nd, mcps = bob_NE_poly_clip, navail = 20)
-  coy_smr_2nd_NE_df <- lapply(NE_split[[11]], avail_pts_2nd, mcps = coy_NE_poly_clip, navail = 20)
-  coy_wtr_2nd_NE_df <- lapply(NE_split[[12]], avail_pts_2nd, mcps = coy_NE_poly_clip, navail = 20)
+  elk_smr_2nd_NE_df <- lapply(NE_split[[1]], avail_pts_2nd, mcps = elk_poly_clip, navail = 200)
+  elk_wtr_2nd_NE_df <- lapply(NE_split[[2]], avail_pts_2nd, mcps = elk_poly_clip, navail = 200)
+  wtd_smr_2nd_NE_df <- lapply(NE_split[[3]], avail_pts_2nd, mcps = wtd_poly_clip, navail = 200)
+  wtd_wtr_2nd_NE_df <- lapply(NE_split[[4]], avail_pts_2nd, mcps = wtd_poly_clip, navail = 200)
+  coug_smr_2nd_NE_df <- lapply(NE_split[[5]], avail_pts_2nd, mcps = coug_NE_poly_clip, navail = 200)
+  coug_wtr_2nd_NE_df <- lapply(NE_split[[6]], avail_pts_2nd, mcps = coug_NE_poly_clip, navail = 200)
+  wolf_smr_2nd_NE_df <- lapply(NE_split[[7]], avail_pts_2nd, mcps = wolf_NE_poly_clip, navail = 200)
+  wolf_wtr_2nd_NE_df <- lapply(NE_split[[8]], avail_pts_2nd, mcps = wolf_NE_poly_clip, navail = 200)
+  bob_smr_2nd_NE_df <- lapply(NE_split[[9]], avail_pts_2nd, mcps = bob_NE_poly_clip, navail = 200)
+  bob_wtr_2nd_NE_df <- lapply(NE_split[[10]], avail_pts_2nd, mcps = bob_NE_poly_clip, navail = 200)
+  coy_smr_2nd_NE_df <- lapply(NE_split[[11]], avail_pts_2nd, mcps = coy_NE_poly_clip, navail = 200)
+  coy_wtr_2nd_NE_df <- lapply(NE_split[[12]], avail_pts_2nd, mcps = coy_NE_poly_clip, navail = 200)
   
   #'  Convert to dataframes instead of lists
   #'  Okanogan
@@ -585,13 +589,13 @@
   coy_available_2nd <- list(coy_smr_2nd_df, coy_wtr_2nd_df)
   
   #'  Save available points based on individual home ranges
-  save(md_available_2nd, file = paste0("./Outputs/RSF_pts/md_available_2nd_", Sys.Date(), ".RData"))
-  save(elk_available_2nd, file = paste0("./Outputs/RSF_pts/elk_available_2nd_", Sys.Date(), ".RData"))
-  save(wtd_available_2nd, file = paste0("./Outputs/RSF_pts/wtd_available_2nd_", Sys.Date(), ".RData"))
-  save(coug_available_2nd, file = paste0("./Outputs/RSF_pts/coug_available_2nd_", Sys.Date(), ".RData"))
-  save(wolf_available_2nd, file = paste0("./Outputs/RSF_pts/wolf_available_2nd_", Sys.Date(), ".RData"))
-  save(bob_available_2nd, file = paste0("./Outputs/RSF_pts/bob_available_2nd_", Sys.Date(), ".RData"))
-  save(coy_available_2nd, file = paste0("./Outputs/RSF_pts/coy_available_2nd_", Sys.Date(), ".RData"))
+  save(md_available_2nd, file = paste0("./Outputs/RSF_pts/md_available_2nd_200avail_", Sys.Date(), ".RData"))
+  save(elk_available_2nd, file = paste0("./Outputs/RSF_pts/elk_available_2nd_200avail_", Sys.Date(), ".RData"))
+  save(wtd_available_2nd, file = paste0("./Outputs/RSF_pts/wtd_available_2nd_200avail_", Sys.Date(), ".RData"))
+  save(coug_available_2nd, file = paste0("./Outputs/RSF_pts/coug_available_2nd_200avail_", Sys.Date(), ".RData"))
+  save(wolf_available_2nd, file = paste0("./Outputs/RSF_pts/wolf_available_2nd_200avail_", Sys.Date(), ".RData"))
+  save(bob_available_2nd, file = paste0("./Outputs/RSF_pts/bob_available_2nd_200avail_", Sys.Date(), ".RData"))
+  save(coy_available_2nd, file = paste0("./Outputs/RSF_pts/coy_available_2nd_200avail_", Sys.Date(), ".RData"))
 
 
   
@@ -618,13 +622,13 @@
   # load("./Outputs/RSF_pts/bob_available_2021-06-22.RData")
   # load("./Outputs/RSF_pts/coy_available_2021-06-22.RData")
   #'  2nd Order Selection (buffered HR approach)
-  load("./Outputs/RSF_pts/md_available_2nd_buffHR_2022-04-12.RData") 
-  load("./Outputs/RSF_pts/elk_available_2nd_buffHR_2022-04-12.RData")
-  load("./Outputs/RSF_pts/wtd_available_2nd_buffHR_2022-04-12.RData")
-  load("./Outputs/RSF_pts/coug_available_2nd_buffHR_2022-04-12.RData")
-  load("./Outputs/RSF_pts/wolf_available_2nd_buffHR_2022-04-12.RData") 
-  load("./Outputs/RSF_pts/bob_available_2nd_buffHR_2022-04-12.RData")
-  load("./Outputs/RSF_pts/coy_available_2nd_buffHR_2022-04-12.RData")
+  load("./Outputs/RSF_pts/md_available_2nd_buffHR_2022-04-15.RData") 
+  load("./Outputs/RSF_pts/elk_available_2nd_buffHR_2022-04-15.RData")
+  load("./Outputs/RSF_pts/wtd_available_2nd_buffHR_2022-04-15.RData")
+  load("./Outputs/RSF_pts/coug_available_2nd_buffHR_2022-04-15.RData")
+  load("./Outputs/RSF_pts/wolf_available_2nd_buffHR_2022-04-15.RData") 
+  load("./Outputs/RSF_pts/bob_available_2nd_buffHR_2022-04-15.RData")
+  load("./Outputs/RSF_pts/coy_available_2nd_buffHR_2022-04-15.RData")
   #' #'  2nd Order Selection (MCP-based)
   #' load("./Outputs/RSF_pts/md_available_2nd_2022-04-06.RData") 
   #' load("./Outputs/RSF_pts/elk_available_2nd_2022-04-06.RData")
@@ -634,6 +638,9 @@
   #' load("./Outputs/RSF_pts/bob_available_2nd_2022-04-06.RData")
   #' load("./Outputs/RSF_pts/coy_available_2nd_2022-04-06.RData")
   
+  
+  ####  Extract Covariates at Used & Available Locations  ####
+  #'  ----------------------------------------------------
   #'  Read in spatial data
   wppp_bound <- st_read("./Shapefiles/WPPP_CovariateBoundary", layer = "WPPP_CovariateBoundary")
   #'  Terrain rasters
@@ -665,13 +672,13 @@
   sa_proj <- projection("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
   wgs84 <- projection("+proj=longlat +datum=WGS84 +no_defs")
   
-  #'  Function to make available points data a spatial sf object
-  #'  Actually make it a SpatialPointsDF with sp if running in parallel
+  
+  #'  Function to make used and available points data a spatial sp object
+  #'  Must be a SpatialPointsDF with sp if running in parallel
   #'  No clue why it won't work as an sf object but whatever
   spatial_locs <- function(locs) {
-    sf_locs <- SpatialPointsDataFrame(data = locs, coords = locs[,c("x", "y")], proj4string = CRS(sa_proj))
-    # sf_locs <- st_as_sf(locs, coords = c("x", "y"), crs = sa_proj)
-    return(sf_locs)
+    sp_locs <- SpatialPointsDataFrame(data = locs, coords = locs[,c("x", "y")], proj4string = CRS(sa_proj))
+    return(sp_locs)
   }
   #'  Run used & available locations through function
   used_locs <- lapply(spp_all_tracks, spatial_locs)
@@ -683,14 +690,6 @@
   #' wolf_locs <- lapply(wolf_available, spatial_locs)
   #' bob_locs <- lapply(bob_available, spatial_locs)
   #' coy_locs <- lapply(coy_available, spatial_locs)
-  #'  2nd Order Selection Covariates (buffered HR)
-  md_locs <- lapply(md_available_2nd_buffHR, spatial_locs)
-  elk_locs <- lapply(elk_available_2nd_buffHR, spatial_locs)
-  wtd_locs <- lapply(wtd_available_2nd_buffHR, spatial_locs)
-  coug_locs <- lapply(coug_available_2nd_buffHR, spatial_locs)
-  wolf_locs <- lapply(wolf_available_2nd_buffHR, spatial_locs)
-  bob_locs <- lapply(bob_available_2nd_buffHR, spatial_locs)
-  coy_locs <- lapply(coy_available_2nd_buffHR, spatial_locs)
   #' #'  2nd Order Selection Covariates (MCP)
   #' md_locs <- lapply(md_available_2nd, spatial_locs)
   #' elk_locs <- lapply(elk_available_2nd, spatial_locs)
@@ -699,7 +698,25 @@
   #' wolf_locs <- lapply(wolf_available_2nd, spatial_locs)
   #' bob_locs <- lapply(bob_available_2nd, spatial_locs)
   #' coy_locs <- lapply(coy_available_2nd, spatial_locs)
+  
+  #'  Function to make available points into a sp object 
+  #'  Necessary b/c buffered 2nd order available data are currently structured 
+  #'  to be made into an sf object but need these to be an sp object instead
+  sp_locs <- function(locs) {
+    locs$ID <- locs$AnimalID
+    sp_locs <- as(locs, "Spatial")
+    return(sp_locs)
+  }
+  #'  Run 2nd Order Selection Covariates (buffered HR) through function
+  md_locs <- lapply(md_available_2nd_buffHR, sp_locs)
+  elk_locs <- lapply(elk_available_2nd_buffHR, sp_locs)
+  wtd_locs <- lapply(wtd_available_2nd_buffHR, sp_locs)
+  coug_locs <- lapply(coug_available_2nd_buffHR, sp_locs)
+  wolf_locs <- lapply(wolf_available_2nd_buffHR, sp_locs)
+  bob_locs <- lapply(bob_available_2nd_buffHR, sp_locs)
+  coy_locs <- lapply(coy_available_2nd_buffHR, sp_locs)
  
+  
 
   #'  COVARIATE EXTRACTION & CALCULATIONS  
   #'  ===========================================
@@ -850,6 +867,7 @@
   }
   #'  Run used and available locations and covariates through
   used_dat <- combo_data(used_locs, used_covs)
+  #'  2nd order (with MCPs)
   md_avail_dat <- combo_data(md_available_2nd, md_avail_covs)
   elk_avail_dat <- combo_data(elk_available_2nd, elk_avail_covs)
   wtd_avail_dat <- combo_data(wtd_available_2nd, wtd_avail_covs)
@@ -857,6 +875,14 @@
   wolf_avail_dat <- combo_data(wolf_available_2nd, wolf_avail_covs)
   bob_avail_dat <- combo_data(bob_available_2nd, bob_avail_covs)
   coy_avail_dat <- combo_data(coy_available_2nd, coy_avail_covs)
+  #'  2nd order (with buffered home ranges)
+  md_avail_dat <- combo_data(md_available_2nd_buffHR, md_avail_covs)
+  elk_avail_dat <- combo_data(elk_available_2nd_buffHR, elk_avail_covs)
+  wtd_avail_dat <- combo_data(wtd_available_2nd_buffHR, wtd_avail_covs)
+  coug_avail_dat <- combo_data(coug_available_2nd_buffHR, coug_avail_covs)
+  wolf_avail_dat <- combo_data(wolf_available_2nd_buffHR, wolf_avail_covs)
+  bob_avail_dat <- combo_data(bob_available_2nd_buffHR, bob_avail_covs)
+  coy_avail_dat <- combo_data(coy_available_2nd_buffHR, coy_avail_covs)
   
   #'  Function to drop unneeded columns from list of used data sets and indicate 
   #'  whether this location was used = 1 or available = 0 and adjust weights for
@@ -876,6 +902,36 @@
   }
   #'  Run the list of used locations through function
   used_dat <- lapply(used_dat, select_cols)
+  
+  #'  Function to drop unneeded columns from list of available data sets when
+  #'  generated from the buffered home ranges
+  select_avail_cols <- function(dat) {
+    avail_skinny <- dat %>%
+      #'  Drop unneeded columns
+      dplyr::select(geometry, ID, Season, AnimalID, Season.1, Year, Elev, Slope, RoadDen, 
+                    HumanMod, PercForMix, PercXGrass, PercXShrub, obs, Area, Used, w) %>%
+      #'  Split geometry column (remnant of sf object) into x & y columns
+      mutate(geom = gsub(geometry,pattern="(\\))|(\\()|c",replacement = "")) %>%
+      tidyr::separate(geom,into=c("x","y"),sep=",") %>%
+      #'  Reorder the coordinates to match used datasets
+      relocate(x, .before = ID) %>%
+      relocate(y, .after = x) %>%
+      #'  Remove the unneeded geometry column
+      dplyr::select(-c(geometry))
+    colnames(avail_skinny) <-  c("x", "y", "ID", "Season", "ID.1", "Season.1",
+                                 "Year", "Elev", "Slope", "RoadDen", "HumanMod",
+                                 "PercForMix", "PercXGrass", "PercXShrub", "obs",
+                                 "Area", "Used", "w")
+    return(avail_skinny)
+  }
+  md_avail_dat <- lapply(md_avail_dat, select_avail_cols)
+  elk_avail_dat <- lapply(elk_avail_dat, select_avail_cols)
+  wtd_avail_dat <- lapply(wtd_avail_dat, select_avail_cols)
+  coug_avail_dat <- lapply(coug_avail_dat, select_avail_cols)
+  wolf_avail_dat <- lapply(wolf_avail_dat, select_avail_cols)
+  bob_avail_dat <- lapply(bob_avail_dat, select_avail_cols)
+  coy_avail_dat <- lapply(coy_avail_dat, select_avail_cols)
+  
     
   #'  Save used and available data separately
   #'  Adjust between 3rd, 2nd, and 2nd_buffHR order depending on version of available locs used above
@@ -929,7 +985,7 @@
   # 2021-09-13 uses the buffered MCPs with large water bodies masked out
   # 2021-10-29 uses updated wolf MCP with dispersal events excluded
   # 2022-04-06 updated available locations
-  # 2022-04-?? updated extent of availability to buffered home range per individual
+  # 2022-04-15 updated extent of availability to buffered home range per individual
   
   
   
