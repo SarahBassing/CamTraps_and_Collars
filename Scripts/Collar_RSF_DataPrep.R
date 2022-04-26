@@ -393,50 +393,50 @@
   #'  Generate "available" points for each individual per season and study area 
   #'  where extent of availability is based on buffered annual home range of 
   #'  that individual
-  md_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[1]], buff_poly = md_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  md_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[1]], buff_poly = md_smr_OK_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     #'  Converts list of sf objects to a single data frame with all locations
     do.call(rbind.data.frame, .)
-  md_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[2]], buff_poly = md_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  md_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[2]], buff_poly = md_wtr_OK_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  elk_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[1]], buff_poly = elk_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  elk_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[1]], buff_poly = elk_smr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  elk_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[2]], buff_poly = elk_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  elk_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[2]], buff_poly = elk_wtr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  wtd_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[3]], buff_poly = wtd_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  wtd_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[3]], buff_poly = wtd_smr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  wtd_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[4]], buff_poly = wtd_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  wtd_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[4]], buff_poly = wtd_wtr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coug_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[3]], buff_poly = coug_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coug_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[3]], buff_poly = coug_smr_OK_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coug_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[4]], buff_poly = coug_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coug_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[4]], buff_poly = coug_wtr_OK_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coug_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[5]], buff_poly = coug_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coug_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[5]], buff_poly = coug_smr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coug_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[6]], buff_poly = coug_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coug_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[6]], buff_poly = coug_wtr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  wolf_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[5]], buff_poly = wolf_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  wolf_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[5]], buff_poly = wolf_smr_OK_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  wolf_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[6]], buff_poly = wolf_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  wolf_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[6]], buff_poly = wolf_wtr_OK_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  wolf_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[7]], buff_poly = wolf_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  wolf_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[7]], buff_poly = wolf_smr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  wolf_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[8]], buff_poly = wolf_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  wolf_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[8]], buff_poly = wolf_wtr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  bob_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[7]], buff_poly = bob_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  bob_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[7]], buff_poly = bob_smr_OK_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  bob_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[8]], buff_poly = bob_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  bob_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[8]], buff_poly = bob_wtr_OK_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  bob_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[9]], buff_poly = bob_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  bob_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[9]], buff_poly = bob_smr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  bob_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[10]], buff_poly = bob_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  bob_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[10]], buff_poly = bob_wtr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[9]], buff_poly = coy_smr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coy_smr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[9]], buff_poly = coy_smr_OK_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[10]], buff_poly = coy_wtr_OK_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coy_wtr_2nd_buff_OK_df <- mapply(avail_pts_buff_2nd, locs = OK_split[[10]], buff_poly = coy_wtr_OK_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[11]], buff_poly = coy_smr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coy_smr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[11]], buff_poly = coy_smr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
-  coy_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[12]], buff_poly = coy_wtr_NE_poly, navail = 20, SIMPLIFY = FALSE, T) %>%
+  coy_wtr_2nd_buff_NE_df <- mapply(avail_pts_buff_2nd, locs = NE_split[[12]], buff_poly = coy_wtr_NE_poly, navail = 2000, SIMPLIFY = FALSE, T) %>%
     do.call(rbind.data.frame, .)
   
   #'  Merge species-specific data by season
@@ -474,128 +474,128 @@
   save(coy_available_2nd_buffHR, file = paste0("./Outputs/RSF_pts/coy_available_2nd_buffHR_", Sys.Date(), ".RData"))
   
 
-  ####  2nd ORDER SELECTION using single MCP  ####
-  #'  ----------------------------------------
-  #'  Create MCPs based on all locations from all individuals per species per study area
-  source("./Scripts/Collar_MCPs.R")
-  
-  #'  Function to randomly select "Available" points within MCPs generated from
-  #'  all individuals of a given species across seasons within a study area.
-  #'  MPCs created in Collar_MCPs.R script
-  avail_pts_2nd <- function(locs, mcps, navail, plotit = T) {
-    #'  1. Randomly select points within each MCP
-    #'  -----------------------------------------
-    #'  Identify number of used points per individual
-    nused <- nrow(locs) 
-    #'  Multiply by desired number of available points 
-    navailable <- nused*navail
-    #'  Set seed for reproducibility
-    # set.seed(2021)
-    rndpts <- spsample(mcps, navailable, type = "random")
-    #'  Turn them into spatial points
-    rndpts_sp <- SpatialPoints(rndpts, proj4string = sa_proj)
-    #' Plot to make sure step 1 worked
-    if(plotit) {
-      plot(rndpts_sp, col = "red", pch = 19, cex = 0.70)
-    }
-    
-    #'  2. Make list of locations non-spatial
-    #'  -------------------------------------
-    rndpts_df <- as.data.frame(rndpts_sp) 
-    ID <- unique(droplevels(locs$AnimalID))
-    Season <- unique(locs$Season)
-    rndpts_df$ID <- ID
-    rndpts_df$Season <- Season
-    
-    return(rndpts_df)
-  }
-  #'  Run lists through by species, season, & study area... this is ugly
-  #'  Keep a close eye on those indices and study area MCPs
-  #'  Using buffered MCPs with large water bodies masked out   
-  #'  OKANOGAN COLLARS
-  md_smr_2nd_OK_df <- lapply(OK_split[[1]], avail_pts_2nd, mcps = md_poly_clip, navail = 200)
-  md_wtr_2nd_OK_df <- lapply(OK_split[[2]], avail_pts_2nd, mcps = md_poly_clip, navail = 200)
-  coug_smr_2nd_OK_df <- lapply(OK_split[[3]], avail_pts_2nd, mcps = coug_OK_poly_clip, navail = 200)
-  coug_wtr_2nd_OK_df <- lapply(OK_split[[4]], avail_pts_2nd, mcps = coug_OK_poly_clip, navail = 200)
-  wolf_smr_2nd_OK_df <- lapply(OK_split[[5]], avail_pts_2nd, mcps = wolf_OK_poly_clip, navail = 200)
-  wolf_wtr_2nd_OK_df <- lapply(OK_split[[6]], avail_pts_2nd, mcps = wolf_OK_poly_clip, navail = 200)
-  bob_smr_2nd_OK_df <- lapply(OK_split[[7]], avail_pts_2nd, mcps = bob_OK_poly_clip, navail = 200)
-  bob_wtr_2nd_OK_df <- lapply(OK_split[[8]], avail_pts_2nd, mcps = bob_OK_poly_clip, navail = 200)
-  coy_smr_2nd_OK_df <- lapply(OK_split[[9]], avail_pts_2nd, mcps = coy_OK_poly_clip, navail = 200)
-  coy_wtr_2nd_OK_df <- lapply(OK_split[[10]], avail_pts_2nd, mcps = coy_OK_poly_clip, navail = 200)
-  #'  NORTHEAST COLLARS
-  elk_smr_2nd_NE_df <- lapply(NE_split[[1]], avail_pts_2nd, mcps = elk_poly_clip, navail = 200)
-  elk_wtr_2nd_NE_df <- lapply(NE_split[[2]], avail_pts_2nd, mcps = elk_poly_clip, navail = 200)
-  wtd_smr_2nd_NE_df <- lapply(NE_split[[3]], avail_pts_2nd, mcps = wtd_poly_clip, navail = 200)
-  wtd_wtr_2nd_NE_df <- lapply(NE_split[[4]], avail_pts_2nd, mcps = wtd_poly_clip, navail = 200)
-  coug_smr_2nd_NE_df <- lapply(NE_split[[5]], avail_pts_2nd, mcps = coug_NE_poly_clip, navail = 200)
-  coug_wtr_2nd_NE_df <- lapply(NE_split[[6]], avail_pts_2nd, mcps = coug_NE_poly_clip, navail = 200)
-  wolf_smr_2nd_NE_df <- lapply(NE_split[[7]], avail_pts_2nd, mcps = wolf_NE_poly_clip, navail = 200)
-  wolf_wtr_2nd_NE_df <- lapply(NE_split[[8]], avail_pts_2nd, mcps = wolf_NE_poly_clip, navail = 200)
-  bob_smr_2nd_NE_df <- lapply(NE_split[[9]], avail_pts_2nd, mcps = bob_NE_poly_clip, navail = 200)
-  bob_wtr_2nd_NE_df <- lapply(NE_split[[10]], avail_pts_2nd, mcps = bob_NE_poly_clip, navail = 200)
-  coy_smr_2nd_NE_df <- lapply(NE_split[[11]], avail_pts_2nd, mcps = coy_NE_poly_clip, navail = 200)
-  coy_wtr_2nd_NE_df <- lapply(NE_split[[12]], avail_pts_2nd, mcps = coy_NE_poly_clip, navail = 200)
-  
-  #'  Convert to dataframes instead of lists
-  #'  Okanogan
-  md_smr_2nd_OK_df <- do.call(rbind.data.frame, md_smr_2nd_OK_df)
-  md_wtr_2nd_OK_df <- do.call(rbind.data.frame, md_wtr_2nd_OK_df)
-  coug_smr_2nd_OK_df <- do.call(rbind.data.frame, coug_smr_2nd_OK_df)
-  coug_wtr_2nd_OK_df <- do.call(rbind.data.frame, coug_wtr_2nd_OK_df)
-  wolf_smr_2nd_OK_df <- do.call(rbind.data.frame, wolf_smr_2nd_OK_df)
-  wolf_wtr_2nd_OK_df <- do.call(rbind.data.frame, wolf_wtr_2nd_OK_df)
-  bob_smr_2nd_OK_df <- do.call(rbind.data.frame, bob_smr_2nd_OK_df)
-  bob_wtr_2nd_OK_df <- do.call(rbind.data.frame, bob_wtr_2nd_OK_df)
-  coy_smr_2nd_OK_df <- do.call(rbind.data.frame, coy_smr_2nd_OK_df)
-  coy_wtr_2nd_OK_df <- do.call(rbind.data.frame, coy_wtr_2nd_OK_df)
-  #'  Northeast
-  elk_smr_2nd_NE_df <- do.call(rbind.data.frame, elk_smr_2nd_NE_df)
-  elk_wtr_2nd_NE_df <- do.call(rbind.data.frame, elk_wtr_2nd_NE_df)
-  wtd_smr_2nd_NE_df <- do.call(rbind.data.frame, wtd_smr_2nd_NE_df)
-  wtd_wtr_2nd_NE_df <- do.call(rbind.data.frame, wtd_wtr_2nd_NE_df)
-  coug_smr_2nd_NE_df <- do.call(rbind.data.frame, coug_smr_2nd_NE_df)
-  coug_wtr_2nd_NE_df <- do.call(rbind.data.frame, coug_wtr_2nd_NE_df)
-  wolf_smr_2nd_NE_df <- do.call(rbind.data.frame, wolf_smr_2nd_NE_df)
-  wolf_wtr_2nd_NE_df <- do.call(rbind.data.frame, wolf_wtr_2nd_NE_df)
-  bob_smr_2nd_NE_df <- do.call(rbind.data.frame, bob_smr_2nd_NE_df)
-  bob_wtr_2nd_NE_df <- do.call(rbind.data.frame, bob_wtr_2nd_NE_df)
-  coy_smr_2nd_NE_df <- do.call(rbind.data.frame, coy_smr_2nd_NE_df)
-  coy_wtr_2nd_NE_df <- do.call(rbind.data.frame, coy_wtr_2nd_NE_df)
-  
-  #'  Merge species-specific data by season
-  md_smr_2nd_df <- md_smr_2nd_OK_df
-  md_wtr_2nd_df <- md_wtr_2nd_OK_df
-  elk_smr_2nd_df <- elk_smr_2nd_NE_df
-  elk_wtr_2nd_df <- elk_wtr_2nd_NE_df
-  wtd_smr_2nd_df <- wtd_smr_2nd_NE_df
-  wtd_wtr_2nd_df <- wtd_wtr_2nd_NE_df
-  coug_smr_2nd_df <- rbind(coug_smr_2nd_OK_df, coug_smr_2nd_NE_df)
-  coug_wtr_2nd_df <- rbind(coug_wtr_2nd_OK_df, coug_wtr_2nd_NE_df)
-  wolf_smr_2nd_df <- rbind(wolf_smr_2nd_OK_df, wolf_smr_2nd_NE_df)
-  wolf_wtr_2nd_df <- rbind(wolf_wtr_2nd_OK_df, wolf_wtr_2nd_NE_df)
-  bob_smr_2nd_df <- rbind(bob_smr_2nd_OK_df, bob_smr_2nd_NE_df)
-  bob_wtr_2nd_df <- rbind(bob_wtr_2nd_OK_df, bob_wtr_2nd_NE_df)
-  coy_smr_2nd_df <- rbind(coy_smr_2nd_OK_df, coy_smr_2nd_NE_df)
-  coy_wtr_2nd_df <- rbind(coy_wtr_2nd_OK_df, coy_wtr_2nd_NE_df)
-  
-  #'  Gather into one big list per species
-  md_available_2nd <- list(md_smr_2nd_df, md_wtr_2nd_df)
-  elk_available_2nd <- list(elk_smr_2nd_df, elk_wtr_2nd_df)
-  wtd_available_2nd <- list(wtd_smr_2nd_df, wtd_wtr_2nd_df)
-  coug_available_2nd <- list(coug_smr_2nd_df, coug_wtr_2nd_df)
-  wolf_available_2nd <- list(wolf_smr_2nd_df, wolf_wtr_2nd_df)
-  bob_available_2nd <- list(bob_smr_2nd_df, bob_wtr_2nd_df)
-  coy_available_2nd <- list(coy_smr_2nd_df, coy_wtr_2nd_df)
-  
-  #'  Save available points based on individual home ranges
-  save(md_available_2nd, file = paste0("./Outputs/RSF_pts/md_available_2nd_200avail_", Sys.Date(), ".RData"))
-  save(elk_available_2nd, file = paste0("./Outputs/RSF_pts/elk_available_2nd_200avail_", Sys.Date(), ".RData"))
-  save(wtd_available_2nd, file = paste0("./Outputs/RSF_pts/wtd_available_2nd_200avail_", Sys.Date(), ".RData"))
-  save(coug_available_2nd, file = paste0("./Outputs/RSF_pts/coug_available_2nd_200avail_", Sys.Date(), ".RData"))
-  save(wolf_available_2nd, file = paste0("./Outputs/RSF_pts/wolf_available_2nd_200avail_", Sys.Date(), ".RData"))
-  save(bob_available_2nd, file = paste0("./Outputs/RSF_pts/bob_available_2nd_200avail_", Sys.Date(), ".RData"))
-  save(coy_available_2nd, file = paste0("./Outputs/RSF_pts/coy_available_2nd_200avail_", Sys.Date(), ".RData"))
+  #' ####  2nd ORDER SELECTION using single MCP  ####
+  #' #'  ----------------------------------------
+  #' #'  Create MCPs based on all locations from all individuals per species per study area
+  #' source("./Scripts/Collar_MCPs.R")
+  #' 
+  #' #'  Function to randomly select "Available" points within MCPs generated from
+  #' #'  all individuals of a given species across seasons within a study area.
+  #' #'  MPCs created in Collar_MCPs.R script
+  #' avail_pts_2nd <- function(locs, mcps, navail, plotit = T) {
+  #'   #'  1. Randomly select points within each MCP
+  #'   #'  -----------------------------------------
+  #'   #'  Identify number of used points per individual
+  #'   nused <- nrow(locs) 
+  #'   #'  Multiply by desired number of available points 
+  #'   navailable <- nused*navail
+  #'   #'  Set seed for reproducibility
+  #'   # set.seed(2021)
+  #'   rndpts <- spsample(mcps, navailable, type = "random")
+  #'   #'  Turn them into spatial points
+  #'   rndpts_sp <- SpatialPoints(rndpts, proj4string = sa_proj)
+  #'   #' Plot to make sure step 1 worked
+  #'   if(plotit) {
+  #'     plot(rndpts_sp, col = "red", pch = 19, cex = 0.70)
+  #'   }
+  #'   
+  #'   #'  2. Make list of locations non-spatial
+  #'   #'  -------------------------------------
+  #'   rndpts_df <- as.data.frame(rndpts_sp) 
+  #'   ID <- unique(droplevels(locs$AnimalID))
+  #'   Season <- unique(locs$Season)
+  #'   rndpts_df$ID <- ID
+  #'   rndpts_df$Season <- Season
+  #'   
+  #'   return(rndpts_df)
+  #' }
+  #' #'  Run lists through by species, season, & study area... this is ugly
+  #' #'  Keep a close eye on those indices and study area MCPs
+  #' #'  Using buffered MCPs with large water bodies masked out   
+  #' #'  OKANOGAN COLLARS
+  #' md_smr_2nd_OK_df <- lapply(OK_split[[1]], avail_pts_2nd, mcps = md_poly_clip, navail = 200)
+  #' md_wtr_2nd_OK_df <- lapply(OK_split[[2]], avail_pts_2nd, mcps = md_poly_clip, navail = 200)
+  #' coug_smr_2nd_OK_df <- lapply(OK_split[[3]], avail_pts_2nd, mcps = coug_OK_poly_clip, navail = 200)
+  #' coug_wtr_2nd_OK_df <- lapply(OK_split[[4]], avail_pts_2nd, mcps = coug_OK_poly_clip, navail = 200)
+  #' wolf_smr_2nd_OK_df <- lapply(OK_split[[5]], avail_pts_2nd, mcps = wolf_OK_poly_clip, navail = 200)
+  #' wolf_wtr_2nd_OK_df <- lapply(OK_split[[6]], avail_pts_2nd, mcps = wolf_OK_poly_clip, navail = 200)
+  #' bob_smr_2nd_OK_df <- lapply(OK_split[[7]], avail_pts_2nd, mcps = bob_OK_poly_clip, navail = 200)
+  #' bob_wtr_2nd_OK_df <- lapply(OK_split[[8]], avail_pts_2nd, mcps = bob_OK_poly_clip, navail = 200)
+  #' coy_smr_2nd_OK_df <- lapply(OK_split[[9]], avail_pts_2nd, mcps = coy_OK_poly_clip, navail = 200)
+  #' coy_wtr_2nd_OK_df <- lapply(OK_split[[10]], avail_pts_2nd, mcps = coy_OK_poly_clip, navail = 200)
+  #' #'  NORTHEAST COLLARS
+  #' elk_smr_2nd_NE_df <- lapply(NE_split[[1]], avail_pts_2nd, mcps = elk_poly_clip, navail = 200)
+  #' elk_wtr_2nd_NE_df <- lapply(NE_split[[2]], avail_pts_2nd, mcps = elk_poly_clip, navail = 200)
+  #' wtd_smr_2nd_NE_df <- lapply(NE_split[[3]], avail_pts_2nd, mcps = wtd_poly_clip, navail = 200)
+  #' wtd_wtr_2nd_NE_df <- lapply(NE_split[[4]], avail_pts_2nd, mcps = wtd_poly_clip, navail = 200)
+  #' coug_smr_2nd_NE_df <- lapply(NE_split[[5]], avail_pts_2nd, mcps = coug_NE_poly_clip, navail = 200)
+  #' coug_wtr_2nd_NE_df <- lapply(NE_split[[6]], avail_pts_2nd, mcps = coug_NE_poly_clip, navail = 200)
+  #' wolf_smr_2nd_NE_df <- lapply(NE_split[[7]], avail_pts_2nd, mcps = wolf_NE_poly_clip, navail = 200)
+  #' wolf_wtr_2nd_NE_df <- lapply(NE_split[[8]], avail_pts_2nd, mcps = wolf_NE_poly_clip, navail = 200)
+  #' bob_smr_2nd_NE_df <- lapply(NE_split[[9]], avail_pts_2nd, mcps = bob_NE_poly_clip, navail = 200)
+  #' bob_wtr_2nd_NE_df <- lapply(NE_split[[10]], avail_pts_2nd, mcps = bob_NE_poly_clip, navail = 200)
+  #' coy_smr_2nd_NE_df <- lapply(NE_split[[11]], avail_pts_2nd, mcps = coy_NE_poly_clip, navail = 200)
+  #' coy_wtr_2nd_NE_df <- lapply(NE_split[[12]], avail_pts_2nd, mcps = coy_NE_poly_clip, navail = 200)
+  #' 
+  #' #'  Convert to dataframes instead of lists
+  #' #'  Okanogan
+  #' md_smr_2nd_OK_df <- do.call(rbind.data.frame, md_smr_2nd_OK_df)
+  #' md_wtr_2nd_OK_df <- do.call(rbind.data.frame, md_wtr_2nd_OK_df)
+  #' coug_smr_2nd_OK_df <- do.call(rbind.data.frame, coug_smr_2nd_OK_df)
+  #' coug_wtr_2nd_OK_df <- do.call(rbind.data.frame, coug_wtr_2nd_OK_df)
+  #' wolf_smr_2nd_OK_df <- do.call(rbind.data.frame, wolf_smr_2nd_OK_df)
+  #' wolf_wtr_2nd_OK_df <- do.call(rbind.data.frame, wolf_wtr_2nd_OK_df)
+  #' bob_smr_2nd_OK_df <- do.call(rbind.data.frame, bob_smr_2nd_OK_df)
+  #' bob_wtr_2nd_OK_df <- do.call(rbind.data.frame, bob_wtr_2nd_OK_df)
+  #' coy_smr_2nd_OK_df <- do.call(rbind.data.frame, coy_smr_2nd_OK_df)
+  #' coy_wtr_2nd_OK_df <- do.call(rbind.data.frame, coy_wtr_2nd_OK_df)
+  #' #'  Northeast
+  #' elk_smr_2nd_NE_df <- do.call(rbind.data.frame, elk_smr_2nd_NE_df)
+  #' elk_wtr_2nd_NE_df <- do.call(rbind.data.frame, elk_wtr_2nd_NE_df)
+  #' wtd_smr_2nd_NE_df <- do.call(rbind.data.frame, wtd_smr_2nd_NE_df)
+  #' wtd_wtr_2nd_NE_df <- do.call(rbind.data.frame, wtd_wtr_2nd_NE_df)
+  #' coug_smr_2nd_NE_df <- do.call(rbind.data.frame, coug_smr_2nd_NE_df)
+  #' coug_wtr_2nd_NE_df <- do.call(rbind.data.frame, coug_wtr_2nd_NE_df)
+  #' wolf_smr_2nd_NE_df <- do.call(rbind.data.frame, wolf_smr_2nd_NE_df)
+  #' wolf_wtr_2nd_NE_df <- do.call(rbind.data.frame, wolf_wtr_2nd_NE_df)
+  #' bob_smr_2nd_NE_df <- do.call(rbind.data.frame, bob_smr_2nd_NE_df)
+  #' bob_wtr_2nd_NE_df <- do.call(rbind.data.frame, bob_wtr_2nd_NE_df)
+  #' coy_smr_2nd_NE_df <- do.call(rbind.data.frame, coy_smr_2nd_NE_df)
+  #' coy_wtr_2nd_NE_df <- do.call(rbind.data.frame, coy_wtr_2nd_NE_df)
+  #' 
+  #' #'  Merge species-specific data by season
+  #' md_smr_2nd_df <- md_smr_2nd_OK_df
+  #' md_wtr_2nd_df <- md_wtr_2nd_OK_df
+  #' elk_smr_2nd_df <- elk_smr_2nd_NE_df
+  #' elk_wtr_2nd_df <- elk_wtr_2nd_NE_df
+  #' wtd_smr_2nd_df <- wtd_smr_2nd_NE_df
+  #' wtd_wtr_2nd_df <- wtd_wtr_2nd_NE_df
+  #' coug_smr_2nd_df <- rbind(coug_smr_2nd_OK_df, coug_smr_2nd_NE_df)
+  #' coug_wtr_2nd_df <- rbind(coug_wtr_2nd_OK_df, coug_wtr_2nd_NE_df)
+  #' wolf_smr_2nd_df <- rbind(wolf_smr_2nd_OK_df, wolf_smr_2nd_NE_df)
+  #' wolf_wtr_2nd_df <- rbind(wolf_wtr_2nd_OK_df, wolf_wtr_2nd_NE_df)
+  #' bob_smr_2nd_df <- rbind(bob_smr_2nd_OK_df, bob_smr_2nd_NE_df)
+  #' bob_wtr_2nd_df <- rbind(bob_wtr_2nd_OK_df, bob_wtr_2nd_NE_df)
+  #' coy_smr_2nd_df <- rbind(coy_smr_2nd_OK_df, coy_smr_2nd_NE_df)
+  #' coy_wtr_2nd_df <- rbind(coy_wtr_2nd_OK_df, coy_wtr_2nd_NE_df)
+  #' 
+  #' #'  Gather into one big list per species
+  #' md_available_2nd <- list(md_smr_2nd_df, md_wtr_2nd_df)
+  #' elk_available_2nd <- list(elk_smr_2nd_df, elk_wtr_2nd_df)
+  #' wtd_available_2nd <- list(wtd_smr_2nd_df, wtd_wtr_2nd_df)
+  #' coug_available_2nd <- list(coug_smr_2nd_df, coug_wtr_2nd_df)
+  #' wolf_available_2nd <- list(wolf_smr_2nd_df, wolf_wtr_2nd_df)
+  #' bob_available_2nd <- list(bob_smr_2nd_df, bob_wtr_2nd_df)
+  #' coy_available_2nd <- list(coy_smr_2nd_df, coy_wtr_2nd_df)
+  #' 
+  #' #'  Save available points based on individual home ranges
+  #' save(md_available_2nd, file = paste0("./Outputs/RSF_pts/md_available_2nd_200avail_", Sys.Date(), ".RData"))
+  #' save(elk_available_2nd, file = paste0("./Outputs/RSF_pts/elk_available_2nd_200avail_", Sys.Date(), ".RData"))
+  #' save(wtd_available_2nd, file = paste0("./Outputs/RSF_pts/wtd_available_2nd_200avail_", Sys.Date(), ".RData"))
+  #' save(coug_available_2nd, file = paste0("./Outputs/RSF_pts/coug_available_2nd_200avail_", Sys.Date(), ".RData"))
+  #' save(wolf_available_2nd, file = paste0("./Outputs/RSF_pts/wolf_available_2nd_200avail_", Sys.Date(), ".RData"))
+  #' save(bob_available_2nd, file = paste0("./Outputs/RSF_pts/bob_available_2nd_200avail_", Sys.Date(), ".RData"))
+  #' save(coy_available_2nd, file = paste0("./Outputs/RSF_pts/coy_available_2nd_200avail_", Sys.Date(), ".RData"))
 
 
   
@@ -624,7 +624,7 @@
   #'  2nd Order Selection (buffered HR approach)
   load("./Outputs/RSF_pts/md_available_2nd_buffHR_2022-04-15.RData") 
   load("./Outputs/RSF_pts/elk_available_2nd_buffHR_2022-04-15.RData")
-  load("./Outputs/RSF_pts/wtd_available_2nd_buffHR_2022-04-15.RData")
+  load("./Outputs/RSF_pts/wtd_available_2nd_buffHR_2022-04-22.RData")
   load("./Outputs/RSF_pts/coug_available_2nd_buffHR_2022-04-15.RData")
   load("./Outputs/RSF_pts/wolf_available_2nd_buffHR_2022-04-15.RData") 
   load("./Outputs/RSF_pts/bob_available_2nd_buffHR_2022-04-15.RData")
@@ -944,8 +944,9 @@
   save(bob_avail_dat, file = paste0("./Outputs/RSF_pts/bob_avail_2nd_buffHR_dat_", Sys.Date(), ".RData"))
   save(coy_avail_dat, file = paste0("./Outputs/RSF_pts/coy_avail_2nd_buffHR_dat_", Sys.Date(), ".RData"))
   
-  
+ 
   #'  Merge used & available data per species
+  #'  List order: summer used, summer available, winter used, winter available
   md_dat_all <- rbind(used_dat[[1]], md_avail_dat[[1]], used_dat[[2]], md_avail_dat[[2]])  %>%
     arrange(ID, Season, Used) %>%
     dplyr::select(-c("Season.1", "ID.1"))
@@ -979,6 +980,97 @@
   save(coy_dat_all, file = paste0("./Outputs/RSF_pts/coy_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
 
   
+  #'  Sub-sample data sets to fewer available locations (20, 200, 1000) to evaluate 
+  #'  what a sufficient number of locations is for RSF coefficients to stabilize.
+  subsample_avial <- function(used, avail, navail) {
+    #'  Merge all used and available locations together
+    full_dat <- rbind(used, avail) %>%  
+      arrange(ID, Season, Year) %>%
+      #'  Generate new ID for each grouping of locations based on observations 
+      #'  from each unique individual, season, and year
+      group_by(ID, Season, Year) %>%
+      mutate(NewID = cur_group_id()) %>%
+      ungroup()
+    #'  Count number of used locations per individual/season/year
+    used_locs <- full_dat %>%
+      filter(Used == "1") %>%
+      group_by(NewID) %>%
+      summarise(n = n()) %>%
+      ungroup()
+    #'  Pull out available locations, included NewID column
+    avail_locs <- filter(full_dat, Used == "0")
+    #'  Sub-sample number of available locations based on the number of used locations
+    #'  per individual/season/year and a desired ratio of used:available locations
+    sub_locs <- data.frame()
+    for(i in 1:nrow(used_locs)) {
+      #'  Grab the number of used locations for each individual
+      nused <- used_locs$n[i]
+      #'  Subset available locations to that same individual
+      avail_pts <- subset(avail_locs, NewID == used_locs$NewID[i])
+      #'  Sub-sample available locations based on ratio of used:available locations
+      subsamp <- sample_n(avail_pts, nused*navail)
+      #'  Append sub-sampled available locations together
+      sub_locs <- rbind(sub_locs, subsamp) 
+    }
+    #'  Drop unneeded columns and merge with used locations
+    sub_locs <- dplyr::select(sub_locs, -NewID)
+    useavail <- rbind(sub_locs, used) %>%
+      dplyr::select(-c("Season.1", "ID.1"))
+    
+    return(useavail)
+  }
+  #'  Sub-sample summer available points 10 times for species with smallest (wtd) 
+  #'  & largest (wolf) home ranges for varying number of available points
+  library(purrr)
+  wtd_smr_dat_all_20 <- rerun(10, subsample_avial(used_dat[[5]], wtd_avail_dat[[1]], navail = 20))
+  wtd_smr_dat_all_200 <- rerun(10, subsample_avial(used_dat[[5]], wtd_avail_dat[[1]], navail = 200))
+  wtd_smr_dat_all_1000 <- rerun(10, subsample_avial(used_dat[[5]], wtd_avail_dat[[1]], navail = 1000))
+  wolf_smr_dat_all_20 <- rerun(10, subsample_avial(used_dat[[9]], wolf_avail_dat[[1]], navail = 20))
+  wolf_smr_dat_all_200 <- rerun(10, subsample_avial(used_dat[[9]], wolf_avail_dat[[1]], navail = 200))
+  wolf_smr_dat_all_1000 <- rerun(10, subsample_avial(used_dat[[9]], wolf_avail_dat[[1]], navail = 1000))
+  
+  #' #'  Sub-sample data sets to fewer available locations (20, 200, 1000) to evaluate 
+  #' #'  what a sufficient number of locations is for RSF coefficients to stabilize.
+  #' library(purrr)
+  #' 
+  #' subsample_avial <- function(avail, navail) {
+  #'   sub_locs <- avail %>%
+  #'     group_by(ID, Season, Year) %>%
+  #'     sample_n(., navail) %>%
+  #'     ungroup()
+  #'   return(sub_locs)
+  #' }
+  #' #'  Sub-sample summer available points 10 times for species with smallest (wtd) 
+  #' #'  & largest (wolf) home ranges for varying number of available points
+  #' wtd_smr_avail_dat_20 <- rerun(10, subsample_avial(wtd_avail_dat[[1]], navail = 20))
+  #' wtd_smr_avail_dat_200 <- rerun(10, subsample_avial(wtd_avail_dat[[1]], navail = 200))
+  #' wtd_smr_avail_dat_1000 <- rerun(10, subsample_avial(wtd_avail_dat[[1]], navail = 1000))
+  #' wolf_smr_avail_dat_20 <- rerun(10, subsample_avial(wolf_avail_dat[[1]], navail = 20))
+  #' wolf_smr_avail_dat_200 <- rerun(10, subsample_avial(wolf_avail_dat[[1]], navail = 200))
+  #' wolf_smr_avail_dat_1000 <- rerun(10, subsample_avial(wolf_avail_dat[[1]], navail = 1000))
+  #' 
+  #' #'  Merge 10 sub-samples of available locations with used locations
+  #' merge_use_avail <- function(used, avail) {
+  #'   full_dat <- rbind(used, avail) %>%
+  #'     arrange(ID, Season, Used) %>%
+  #'     dplyr::select(-c("Season.1", "ID.1"))
+  #'   return(full_dat)
+  #' }
+  #' #'  Bind same used locations to each resample of available points
+  #' wtd_smr_dat_all_20 <- lapply(wtd_smr_avail_dat_20, merge_use_avail, used = used_dat[[5]])
+  #' wtd_smr_dat_all_200 <- lapply(wtd_smr_avail_dat_200, merge_use_avail, used = used_dat[[5]])
+  #' wtd_smr_dat_all_1000 <- lapply(wtd_smr_avail_dat_1000, merge_use_avail, used = used_dat[[5]])
+  #' wolf_smr_dat_all_20 <- lapply(wolf_smr_avail_dat_20, merge_use_avail, used = used_dat[[9]])
+  #' wolf_smr_dat_all_200 <- lapply(wolf_smr_avail_dat_200, merge_use_avail, used = used_dat[[9]])
+  #' wolf_smr_dat_all_1000 <- lapply(wolf_smr_avail_dat_1000, merge_use_avail, used = used_dat[[9]])
+  
+  #'  Save
+  save(wtd_smr_dat_all_20, file = paste0("./Outputs/RSF_pts/wtd_smr_dat_all_20_", Sys.Date(), ".RData"))
+  save(wtd_smr_dat_all_200, file = paste0("./Outputs/RSF_pts/wtd_smr_dat_all_200_", Sys.Date(), ".RData"))
+  save(wtd_smr_dat_all_1000, file = paste0("./Outputs/RSF_pts/wtd_smr_dat_all_1000_", Sys.Date(), ".RData"))
+  save(wolf_smr_dat_all_20, file = paste0("./Outputs/RSF_pts/wolf_smr_dat_all_20_", Sys.Date(), ".RData"))
+  save(wolf_smr_dat_all_200, file = paste0("./Outputs/RSF_pts/wolf_smr_dat_all_200_", Sys.Date(), ".RData"))
+  save(wolf_smr_dat_all_1000, file = paste0("./Outputs/RSF_pts/wolf_smr_dat_all_1000_", Sys.Date(), ".RData"))
   
   # 2021-06-22 uses reprojected rasters
   # 2021-08-10 uses my road density raster (km of road length/1 sq-km)... other versions use Lauren's raster that I think is meters of road length/1 sq-km
