@@ -943,41 +943,6 @@
   save(wolf_avail_dat, file = paste0("./Outputs/RSF_pts/wolf_avail_2nd_buffHR_dat_", Sys.Date(), ".RData"))
   save(bob_avail_dat, file = paste0("./Outputs/RSF_pts/bob_avail_2nd_buffHR_dat_", Sys.Date(), ".RData"))
   save(coy_avail_dat, file = paste0("./Outputs/RSF_pts/coy_avail_2nd_buffHR_dat_", Sys.Date(), ".RData"))
-  
- 
-  #'  Merge used & available data per species
-  #'  List order: summer used, summer available, winter used, winter available
-  md_dat_all <- rbind(used_dat[[1]], md_avail_dat[[1]], used_dat[[2]], md_avail_dat[[2]])  %>%
-    arrange(ID, Season, Used) %>%
-    dplyr::select(-c("Season.1", "ID.1"))
-  elk_dat_all <- rbind(used_dat[[3]], elk_avail_dat[[1]], used_dat[[4]], elk_avail_dat[[2]]) %>%
-    arrange(ID, Season, Used) %>%
-    dplyr::select(-c("Season.1", "ID.1"))
-  wtd_dat_all <- rbind(used_dat[[5]], wtd_avail_dat[[1]], used_dat[[6]], wtd_avail_dat[[2]]) %>%
-    arrange(ID, Season, Used) %>%
-    dplyr::select(-c("Season.1", "ID.1"))
-  coug_dat_all <- rbind(used_dat[[7]], coug_avail_dat[[1]], used_dat[[8]], coug_avail_dat[[2]]) %>%
-    arrange(ID, Season, Used) %>%
-    dplyr::select(-c("Season.1", "ID.1"))
-  wolf_dat_all <- rbind(used_dat[[9]], wolf_avail_dat[[1]], used_dat[[10]], wolf_avail_dat[[2]]) %>%
-    arrange(ID, Season, Used) %>%
-    dplyr::select(-c("Season.1", "ID.1"))
-  bob_dat_all <- rbind(used_dat[[11]], bob_avail_dat[[1]], used_dat[[12]], bob_avail_dat[[2]]) %>%
-    arrange(ID, Season, Used) %>%
-    dplyr::select(-c("Season.1", "ID.1"))
-  coy_dat_all <- rbind(used_dat[[13]], coy_avail_dat[[1]], used_dat[[14]], coy_avail_dat[[2]]) %>%
-    arrange(ID, Season, Used) %>%
-    dplyr::select(-c("Season.1", "ID.1"))
-
-  #'  Save combined data for final RSFs
-  #'  Adjust between 3rd, 2nd & 2nd_buffHR order depending on version of available locs used above
-  save(md_dat_all, file = paste0("./Outputs/RSF_pts/md_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
-  save(elk_dat_all, file = paste0("./Outputs/RSF_pts/elk_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
-  save(wtd_dat_all, file = paste0("./Outputs/RSF_pts/wtd_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
-  save(coug_dat_all, file = paste0("./Outputs/RSF_pts/coug_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
-  save(wolf_dat_all, file = paste0("./Outputs/RSF_pts/wolf_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
-  save(bob_dat_all, file = paste0("./Outputs/RSF_pts/bob_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
-  save(coy_dat_all, file = paste0("./Outputs/RSF_pts/coy_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
 
   
   #'  Sub-sample data sets to fewer available locations (20, 200, 1000) to evaluate 
@@ -1071,6 +1036,56 @@
   save(wolf_smr_dat_all_20, file = paste0("./Outputs/RSF_pts/wolf_smr_dat_all_20_", Sys.Date(), ".RData"))
   save(wolf_smr_dat_all_200, file = paste0("./Outputs/RSF_pts/wolf_smr_dat_all_200_", Sys.Date(), ".RData"))
   save(wolf_smr_dat_all_1000, file = paste0("./Outputs/RSF_pts/wolf_smr_dat_all_1000_", Sys.Date(), ".RData"))
+  
+  
+  #'  Save the used and full available data set (2000 sampled locations) 
+  wtd_smr_dat_all_2K <- rbind(used_dat[[5]], wtd_avail_dat[[1]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  wolf_smr_dat_all_2K <- rbind(used_dat[[9]], wolf_avail_dat[[1]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  
+  save(wtd_smr_dat_all_2K, file = paste0("./Outputs/RSF_pts/wtd_smr_dat_2nd_2Kavail_all_", Sys.Date(), ".RData"))
+  save(wolf_smr_dat_all_2K, file = paste0("./Outputs/RSF_pts/wolf_smr_dat_2nd_2Kavail_all_", Sys.Date(), ".RData"))
+  
+  
+  #'  Merge used & available data per species with all available locations
+  #'  List order: summer used, summer available, winter used, winter available
+  md_dat_all <- rbind(used_dat[[1]], md_avail_dat[[1]], used_dat[[2]], md_avail_dat[[2]])  %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  elk_dat_all <- rbind(used_dat[[3]], elk_avail_dat[[1]], used_dat[[4]], elk_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  wtd_dat_all <- rbind(used_dat[[5]], wtd_avail_dat[[1]], used_dat[[6]], wtd_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  coug_dat_all <- rbind(used_dat[[7]], coug_avail_dat[[1]], used_dat[[8]], coug_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  wolf_dat_all <- rbind(used_dat[[9]], wolf_avail_dat[[1]], used_dat[[10]], wolf_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  bob_dat_all <- rbind(used_dat[[11]], bob_avail_dat[[1]], used_dat[[12]], bob_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  coy_dat_all <- rbind(used_dat[[13]], coy_avail_dat[[1]], used_dat[[14]], coy_avail_dat[[2]]) %>%
+    arrange(ID, Season, Used) %>%
+    dplyr::select(-c("Season.1", "ID.1"))
+  
+  #'  Save combined data for final RSFs
+  #'  Adjust between 3rd, 2nd & 2nd_buffHR order depending on version of available locs used above
+  save(md_dat_all, file = paste0("./Outputs/RSF_pts/md_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
+  save(elk_dat_all, file = paste0("./Outputs/RSF_pts/elk_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
+  save(wtd_dat_all, file = paste0("./Outputs/RSF_pts/wtd_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
+  save(coug_dat_all, file = paste0("./Outputs/RSF_pts/coug_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
+  save(wolf_dat_all, file = paste0("./Outputs/RSF_pts/wolf_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
+  save(bob_dat_all, file = paste0("./Outputs/RSF_pts/bob_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
+  save(coy_dat_all, file = paste0("./Outputs/RSF_pts/coy_dat_2nd_buffHR_all_", Sys.Date(), ".RData"))
+  
+  
+  
   
   # 2021-06-22 uses reprojected rasters
   # 2021-08-10 uses my road density raster (km of road length/1 sq-km)... other versions use Lauren's raster that I think is meters of road length/1 sq-km
