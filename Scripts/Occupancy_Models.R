@@ -507,7 +507,9 @@
 
   ####  BOBCAT MODELS  ####                   
   #'  SUMMERS 2018 & 2019
-  (bob_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, bob_s1819_UMF))
+  (bob_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height 
+                            ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, 
+                            bob_s1819_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(bob_s1819_global, type = "state")
   unmarked::vif(bob_s1819_global, type = "det")
@@ -523,8 +525,11 @@
   #' (bob_s1819_top <- occu(formula = ~Distance + Height + Trail + Distance:Height  ~Elev + PercForMix + Slope, data = bob_s1819_UMF))
   
   
-  #'  WINTERS 2018-2019 & 2019-2020           
-  (bob_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, bob_w1820_UMF))
+  #'  WINTERS 2018-2019 & 2019-2020
+  #'  Dropping PercXShrub to be consistent with RSF           
+  (bob_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height 
+                            ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + Area, 
+                            bob_w1820_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(bob_w1820_global, type = "state")
   unmarked::vif(bob_w1820_global, type = "det")
@@ -543,11 +548,10 @@
 
   
   ####  COUGAR MODELS  ####
-  #'  Dropped NearestRd from models because causing problems in dredge (probably
-  #'  too correlated with Road level of the Trail covariate, leading to singularity 
-  #'  in the hessian matrix?)
   #'  SUMMERS 2018 & 2019
-  (coug_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, coug_s1819_UMF))
+  (coug_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Height*Distance 
+                             ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, 
+                             coug_s1819_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(coug_s1819_global, type = "state")
   unmarked::vif(coug_s1819_global, type = "det")
@@ -560,19 +564,20 @@
   #' coug_s1819_all <- get.models(coug_s1819_dd, subset = delta < 2,)
   #' coug_s1819_all[[1]]
   #' #'  Dredge identified top model
-  #' (coug_s1819_top <- occu(formula = ~Height + Trail + Year ~Area + Elev + PercForMix, data = coug_s1819_UMF))
+  #' (coug_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + PercForMix, data = coug_s1819_UMF))
   #' #'  Uni-variate model (on occupancy) for elevation to make sure opposing OccMod & RSF effects aren't due to over-parameterization or confounding variables in OccMod
-  #' (coug_s1819_elev <- occu(formula = ~Trail + Temp_smr + Height + Distance + Height*Distance + Year ~Elev, data = coug_s1819_UMF)) # elev has + effect
+  #' (coug_s1819_elev <- occu(formula = ~Trail + Temp_smr + Height + Distance + Height*Distance ~Elev, data = coug_s1819_UMF)) # elev has + effect
 
-  #'  WINTERS 2018-2019 & 2019-2020           
-  (coug_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, coug_w1820_UMF))
+  #'  WINTERS 2018-2019 & 2019-2020     
+  #'  Dropping PercXGrass due to high correlation with PercForMix in RSF      
+  (coug_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height 
+                             ~Elev + Slope + PercForMix + PercXShrub + RoadDensity + Area, 
+                             coug_w1820_UMF))
   #'  Calculate variance inflation factor for each sub-model
-  unmarked::vif(coug_w1820_global, type = "state") # Forest VIF 5.8044
+  unmarked::vif(coug_w1820_global, type = "state") 
   unmarked::vif(coug_w1820_global, type = "det")
-  #' #'  Dredge the global model for all possible combinations  ----------- WHAT'S UP WITH THIS SINGULARITY ISSUE ALL OF A SUDDEN?
+  #' #'  Dredge the global model for all possible combinations  
   #' coug_w1820_dd <- dredge(coug_w1820_global, rank = "AIC")
-  #' #'  Error in h(simpleError(msg, call)) : 
-  #' #'    error in evaluating the argument 'x' in selecting a method for function 'diag': Lapack routine dgesv: system is exactly singular: U[2,2] = 0
   #' #'  Count the number of dredged models
   #' tot_cg_wtr_dd <- nrow(coug_w1820_dd)
   #' print(coug_w1820_dd[1:5,])
@@ -584,7 +589,9 @@
   
   ####  COYOTE MODELS  ####
   #'  SUMMERS 2018 & 2019
-  (coy_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, coy_s1819_UMF))
+  (coy_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height 
+                            ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, 
+                            coy_s1819_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(coy_s1819_global, type = "state") 
   unmarked::vif(coy_s1819_global, type = "det")
@@ -599,8 +606,11 @@
   #' #'  Dredge identified top model
   #' (coy_s1819_top <- occu(formula = ~Height + Trail ~Area + Elev + Slope, data = coy_s1819_UMF))
    
-  #'  #'  WINTERS 2018-2019 & 2019-2020              
-  (coy_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, coy_w1820_UMF))
+  #'  WINTERS 2018-2019 & 2019-2020    
+  #'  Dropping PercXGrass to be consistent with RSF          
+  (coy_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height 
+                            ~Elev + Slope + PercForMix + PercXShrub + RoadDensity + Area, 
+                            coy_w1820_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(coy_w1820_global, type = "state") 
   unmarked::vif(coy_w1820_global, type = "det")
@@ -619,8 +629,10 @@
   
   ####  WOLF MODELS  ####
   #'  SUMMERS 2018 & 2019    
-  #'  Removed PercXShrub in global2 models due to poor convergence, esp. summer model                 
-  (wolf_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + Area, wolf_s1819_UMF))
+  #'  Removed PercXShrub due to poor convergence                 
+  (wolf_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height 
+                              ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + Area, 
+                              wolf_s1819_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(wolf_s1819_global2, type = "state") 
   unmarked::vif(wolf_s1819_global2, type = "det")
@@ -633,13 +645,14 @@
   #' wolf_s1819_all <- get.models(wolf_s1819_dd, subset = delta < 2,)
   #' wolf_s1819_all[[1]]
   #' #'  Dredge identified top model
-  #' (wolf_s1819_top <- occu(formula = ~Trail + Temp_smr ~Area + Elev, data = wolf_s1819_UMF)) # used to contain NearestRd
+  #' (wolf_s1819_top <- occu(formula = ~Trail + Temp_smr ~Area + Elev, data = wolf_s1819_UMF)) 
   
-  #'  WINTERS 2018-2019 & 2019-2020     
-  #'  Dropped Elevation from global model due to problems with dredge (seemed to
-  #'  arise when Elevation & Area were in the model; excluded Elevation b/c not
-  #'  significant in global or dredged models but Area was)       
-  (wolf_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + RoadDensity + Area, wolf_w1820_UMF))
+  #'  WINTERS 2018-2019 & 2019-2020 
+  #'  Removed PercXShrub due to poor convergence 
+  #'  Removed PercXGrass to be consistent with RSF   
+  (wolf_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height 
+                              ~Elev + Slope + PercForMix + RoadDensity + Area, 
+                              wolf_w1820_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(wolf_w1820_global2, type = "state") 
   unmarked::vif(wolf_w1820_global2, type = "det")
@@ -658,8 +671,10 @@
   ####  ELK MODELS ####                          
   #'  SUMMERS 2018 & 2019
   #'  NE study area only so no Area effect 
-  #'  Removed PercXGrass and PercXShrub in global2 models due to poor convergence                             
-  (elk_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + RoadDensity, elk_s1819_UMF))
+  #'  Removed PercXGrass and PercXShrub models due to poor convergence                             
+  (elk_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height 
+                             ~Elev + Slope + PercForMix + RoadDensity, 
+                             elk_s1819_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(elk_s1819_global2, type = "state") 
   unmarked::vif(elk_s1819_global2, type = "det")
@@ -676,8 +691,10 @@
   
   #'  WINTERS 2018-2019 & 2019-2020
   #'  NE study area only so no Area effect 
-  #'  Removed PercXGrass and PercXShrub in global2 models due to poor convergence               
-  (elk_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + RoadDensity, elk_w1820_UMF))
+  #'  Removed PercXGrass and PercXShrub due to poor convergence               
+  (elk_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height 
+                             ~Elev + Slope + PercForMix + RoadDensity, 
+                             elk_w1820_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(elk_w1820_global2, type = "state") 
   unmarked::vif(elk_w1820_global2, type = "det")
@@ -696,7 +713,10 @@
   ####  MULE DEER MODELS  ####
   #'  SUMMERS 2018 & 2019
   #'  OK study area only so no Area effect
-  (md_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity, md_s1819_UMF))
+  #'  Dropped PercXShrub b/c excluded in RSF due to correlation with PercForMix
+  (md_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height 
+                           ~Elev + Slope + PercForMix + PercXGrass + RoadDensity, #PercXShrub + 
+                           md_s1819_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(md_s1819_global, type = "state") 
   unmarked::vif(md_s1819_global, type = "det")
@@ -712,7 +732,9 @@
   #' (md_s1819_top <- occu(formula = ~Distance + Temp_smr ~PercForMix, data = md_s1819_UMF))
 
   #'  WINTERS 2018-2019 & 2019-2020, OK study area only so no Area effect                    
-  (md_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity, md_w1820_UMF))  
+  (md_w1820_global <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height 
+                           ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity, 
+                           md_w1820_UMF))  
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(md_w1820_global, type = "state") 
   unmarked::vif(md_w1820_global, type = "det")
@@ -725,14 +747,16 @@
   #' md_w1820_all <- get.models(md_w1820_dd, subset = delta < 2,)
   #' md_w1820_all[[1]]
   #' #'  Dredge identified top model
-  #' (md_w1820_top <- occu(formula = ~Distance + Height + Trail + Year + Distance:Height ~PercXGrass + PercXShrub, data = md_w1820_UMF))
+  #' (md_w1820_top <- occu(formula = ~Distance + Height + Trail + Distance:Height ~PercXGrass + PercXShrub, data = md_w1820_UMF))
   
   
   ####  WHITE-TAILED DEER MODELS  ####
   #'  SUMMERS 2018 & 2019
   #'  NE study area only so no Area effect 
-  #'  Removed PercXShrub in global2 models due to poor convergence, esp. on winter model
-  (wtd_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + RoadDensity, wtd_s1819_UMF))
+  #'  Removed PercXGrass & PercXShrub due to poor convergence
+  (wtd_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height 
+                             ~Elev + Slope + PercForMix +  RoadDensity, 
+                             wtd_s1819_UMF))
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(wtd_s1819_global2, type = "state") 
   unmarked::vif(wtd_s1819_global2, type = "det")
@@ -747,11 +771,14 @@
   #' #'  Dredge identified top model
   #' (wtd_s1819_top <- occu(formula = ~Height + Trail ~Elev + PercForMix, data = wtd_s1819_UMF))
   
-  #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect              
-  (wtd_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height + Year ~Elev + Slope + PercForMix + RoadDensity, wtd_w1820_UMF))
+  #'  WINTERS 2018-2019 & 2019-2020, NE study area only so no Area effect     
+  #'  Removed PercXGrass & PercXShrub due to poor convergence         
+  (wtd_w1820_global2 <- occu(~Trail + Temp_wtr + Height + Distance + Distance*Height 
+                             ~Elev + Slope + PercForMix + RoadDensity, 
+                             wtd_w1820_UMF))
   #'  Calculate variance inflation factor for each sub-model
-  unmarked::vif(wtd_s1819_global2, type = "state") 
-  unmarked::vif(wtd_s1819_global2, type = "det")
+  unmarked::vif(wtd_w1820_global2, type = "state") 
+  unmarked::vif(wtd_w1820_global2, type = "det")
   #' #'  Dredge the global model for all possible combinations
   #' wtd_w1820_dd <- dredge(wtd_w1820_global2, rank = "AIC")
   #' #'  Count the number of dredged models
@@ -911,8 +938,8 @@
     arrange(match(Season, c("Summer", "Winter")))
   
   #'  Save!
-  write.csv(results_psi, paste0("./Outputs/Tables/OccMod_OccProb_Results_NoHM_", Sys.Date(), ".csv"))  #'  KEEP TRACK of whether HumanMod was excluded from models
-  write.csv(results_psi_wide, paste0("./Outputs/Tables/OccMod_OccProb_Results_wide_NoHM_", Sys.Date(), ".csv"))
+  write.csv(results_psi, paste0("./Outputs/Tables/OccMod_OccProb_Results_matchRSF_", Sys.Date(), ".csv"))  
+  write.csv(results_psi_wide, paste0("./Outputs/Tables/OccMod_OccProb_Results_wide_matchRSF_", Sys.Date(), ".csv"))
   
  
   #'  Function to save detection results
@@ -1037,13 +1064,13 @@
     separate("Temp_wtr", c("Winter Temp (SE)", "Wtr Temp Pval"), sep = "_") %>%
     separate("Distance", c("Distance (SE)", "Distance Pval"), sep = "_") %>%
     separate("Height:Distance", c("Height*Distance (SE)", "Height*Distance Pval"), sep = "_") %>%
-    separate("YearYear2", c("Year2 (SE)", "Year2 Pval"), sep = "_") %>%
+    # separate("YearYear2", c("Year2 (SE)", "Year2 Pval"), sep = "_") %>%
     arrange(match(Species, c("Bobcat", "Cougar", "Wolf", "Coyote", "Mule Deer", "Elk", "White-tailed Deer"))) %>%
     arrange(match(Season, c("Summer", "Winter")))
 
   #'  Save!
-  write.csv(results_det, paste0("./Outputs/Tables/OccMod_DetProb_Results_NoHM_", Sys.Date(), ".csv"))  #'  KEEP TRACK of whether human mod was excluded from models
-  write.csv(results_det_wide, paste0("./Outputs/Tables/OccMod_DetProb_Results_NoHM_wide", Sys.Date(), ".csv"))
+  write.csv(results_det, paste0("./Outputs/Tables/OccMod_DetProb_Results_matchRSF_", Sys.Date(), ".csv"))  
+  write.csv(results_det_wide, paste0("./Outputs/Tables/OccMod_DetProb_Results_matchRSF_wide", Sys.Date(), ".csv"))
 
 
   #'  Predict probability of occupancy across sites
@@ -1093,7 +1120,7 @@
     arrange(Parameter, Mean, Species)
   
   #'  Save
-  write.csv(Mean_tbl, paste0("./Outputs/Tables/OccMod_Mean_Estimates_NoHM_", Sys.Date(), ".csv"))  #"  Keep track of whether human mod was excluded from analyses
+  write.csv(Mean_tbl, paste0("./Outputs/Tables/OccMod_Mean_Estimates_matchRSF_", Sys.Date(), ".csv"))  
 
  
   #'  Save workspace
