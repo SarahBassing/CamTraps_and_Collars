@@ -52,7 +52,7 @@
   
   ####  Load Model Results  ####
   #'  Occupancy model output
-  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_noHM_2021-09-12.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_matchRSF_2022-05-03.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 90% confidence intervals to mirror alpha = 0.1
     mutate(
       l95 = (Estimate - (1.64 * SE)),  #### REMINDER: this is 90% CI even though column says l95/u95
@@ -61,7 +61,7 @@
     dplyr::select(-c(X)) #, Model
   
   #'  RSF results output
-  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_noHM_2021-10-30.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE 2021-09-14
+  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_BuffHR_2022-05-03.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE 2021-09-14
     #'  Calculate 95% confidence intervals to mirror alpha = 0.05
     mutate(
       l95 = (Estimate - (1.96 * SE)),  #### REMINDER: this is 95% CI
@@ -91,13 +91,13 @@
     arrange(Year) #NECESSARY TO MATCH DH's CAMERALOCATION ORDER 2021-08-10 version
   
   #'  Read in original covariate data from RSFs
-  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-09-13.RData")  # 2021-08-10 un-buffered & un-masked
-  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-10-29.RData")
-  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/md_dat_2nd_buffHR_all_2022-04-18.RData")  
+  load("./Outputs/RSF_pts/elk_dat_2nd_buffHR_all_2022-04-18.RData")
+  load("./Outputs/RSF_pts/wtd_dat_2nd_buffHR_all_2022-04-18.RData")
+  load("./Outputs/RSF_pts/coug_dat_2nd_buffHR_all_2022-04-18.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_buffHR_all_2022-04-18.RData") 
+  load("./Outputs/RSF_pts/bob_dat_2nd_buffHR_all_2022-04-18.RData")
+  load("./Outputs/RSF_pts/coy_dat_2nd_buffHR_all_2022-04-18.RData")
   
   #'  Function to find mean and standard deviation for each covariate
   #'  Used when center & scaling covariates for original models and will be used 
