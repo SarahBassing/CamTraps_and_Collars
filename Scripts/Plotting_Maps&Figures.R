@@ -545,7 +545,7 @@
   #'  human modified landscape). Display in multiple panels by model and season.
   
   #'  Occupancy model output
-  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_noHM_2021-09-12.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_matchRSF_2022-05-03.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 90% confidence intervals to mirror alpha = 0.1
     mutate(
       l95 = (Estimate - (1.64 * SE)),  #### REMINDER: this is 90% CI even though column says l95/u95
@@ -553,7 +553,7 @@
     ) %>%
     dplyr::select(-c(X)) #, Model
   #'  RSF results output
-  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_noHM_2021-10-30.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  rsf_out <- read.csv("./Outputs/Tables/RSF_Results_BuffHR_2022-05-03.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 95% confidence intervals to mirror alpha = 0.05
     mutate(
       l95 = (Estimate - (1.96 * SE)),  #### REMINDER: this is 95% CI
@@ -590,7 +590,11 @@
   elk_wtr <- c("Elk", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
   wtd_smr <- c("White-tailed Deer", "Summer", "PercXGrass", NA, NA, NA, NA, NA, NA)
   wtd_wtr <- c("White-tailed Deer", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
-  grass_occ <- rbind(grass_occ, elk_smr, elk_wtr, wtd_smr, wtd_wtr) %>%
+  coug_wtr <- c("Cougar", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  wolf_wtr <- c("Wolf", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  coy_wtr <- c("Coyote", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  grass_occ <- rbind(grass_occ, elk_smr, elk_wtr, wtd_smr, wtd_wtr, coug_wtr, 
+                     wolf_wtr, coy_wtr) %>%
     mutate(Estimate = as.numeric(as.character(Estimate)),
            l95 = as.numeric(as.character(l95)),
            u95 = as.numeric(as.character(u95)))
@@ -602,13 +606,16 @@
   #'  Percent Shrub
   shrub_occ <- filter(occ_out, Parameter == "PercXShrub")
   #'  Add in species that did not test for effect of percent shrub in OccMods
+  md_smr <- c("Mule Deer", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
   elk_smr <- c("Elk", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
   elk_wtr <- c("Elk", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
   wtd_smr <- c("White-tailed Deer", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
   wtd_wtr <- c("White-tailed Deer", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
   wolf_smr <- c("Wolf", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
   wolf_wtr <- c("Wolf", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
-  shrub_occ <- rbind(shrub_occ, elk_smr, elk_wtr, wtd_smr, wtd_wtr, wolf_smr, wolf_wtr) %>%
+  bob_wtr <- c("Bobcat", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  shrub_occ <- rbind(shrub_occ, md_smr, elk_smr, elk_wtr, wtd_smr, wtd_wtr, 
+                     wolf_smr, wolf_wtr, bob_wtr) %>%
     mutate(Estimate = as.numeric(as.character(Estimate)),
            l95 = as.numeric(as.character(l95)),
            u95 = as.numeric(as.character(u95)))
@@ -624,13 +631,6 @@
   rdden_rsf <- filter(rsf_out, Parameter == "RoadDen")
   rdden_rsf_smr <- filter(rdden_rsf, Season == "Summer")
   rdden_rsf_wtr <- filter(rdden_rsf, Season == "Winter")
-  #' #'  Human Modified
-  #' hm_occ <- filter(occ_out, Parameter == "HumanMod")
-  #' hm_occ_smr <- filter(hm_occ, Season == "Summer")
-  #' hm_occ_wtr <- filter(hm_occ, Season == "Winter")
-  #' hm_rsf <- filter(rsf_out, Parameter == "HumanMod")
-  #' hm_rsf_smr <- filter(hm_rsf, Season == "Summer")
-  #' hm_rsf_wtr <- filter(hm_rsf, Season == "Winter")
 
   
   #'  Plot effects by covariate, season, and model type for all species
@@ -1149,8 +1149,8 @@
   combo_ci <- full_join(occmod_90ci, rsf_95ci, by = c("Species", "Season", "Parameter"))
   
   #'  Identify min and max values of confidence intervals
-  min(combo_ci$l95_occ, na.rm = TRUE); max(combo_ci$u95_occ, na.rm = TRUE) # -3.89 to 10.877
-  min(combo_ci$l95_rsf, na.rm = TRUE); max(combo_ci$u95_rsf, na.rm = TRUE) # -2.91 to 0.63
+  min(combo_ci$l95_occ, na.rm = TRUE); max(combo_ci$u95_occ, na.rm = TRUE) # -3.21 to 2.32
+  min(combo_ci$l95_rsf, na.rm = TRUE); max(combo_ci$u95_rsf, na.rm = TRUE) # -1.17 to 0.68
   
   #'  Separate CIs by Covariate
   elev_ci <- combo_ci[combo_ci$Parameter == "Elev",]
@@ -1159,7 +1159,6 @@
   grass_ci <- combo_ci[combo_ci$Parameter == "PercXGrass",]
   shrub_ci <- combo_ci[combo_ci$Parameter == "PercXShrub",]
   rdden_ci <- combo_ci[combo_ci$Parameter == "RoadDensity",]
-  # hm_ci <- combo_ci[combo_ci$Parameter == "HumanMod",]
   #'  Separate CIs by Species
   md_ci <- combo_ci[combo_ci$Species == "Mule Deer",]
   elk_ci <- combo_ci[combo_ci$Species == "Elk",]
@@ -1176,82 +1175,133 @@
   elev_ci_fig <- ggplot(elev_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Species)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    # geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) + 
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Effect of Elevation") +
-    xlab("RSF") + ylab("Occupancy") 
+    labs(title = "Elevation") +
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    theme(text = element_text(size = 14)) +
+    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    theme(legend.box = "horizontal") 
+  # elev_ci_figa <- elev_ci_fig + theme(legend.position = "none")
   slope_ci_fig <- ggplot(slope_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    # geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
     geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) +  
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Effect of Slope") +
-    xlab("RSF") + ylab("Occupancy")
+    labs(title = "Slope") +
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
+    theme(text = element_text(size = 14))  + 
+    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    theme(legend.position = "none")
   for_ci_fig <- ggplot(for_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    # geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
     geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Effect of Percent Forest") +
-    xlab("RSF") + ylab("Occupancy")
+    labs(title = "Percent Forest") +
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
+    theme(text = element_text(size = 14))  + 
+    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    theme(legend.position = "none")
   grass_ci_fig <- ggplot(grass_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    # geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
     geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) +
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Effect of Percent Grass") +
-    xlab("RSF") + ylab("Occupancy")
+    labs(title = "Percent Grass") +
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
+    theme(text = element_text(size = 14)) + 
+    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    theme(legend.position = "none")
   shrub_ci_fig <- ggplot(shrub_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    # geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
     geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) +
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Effect of Percent Shrub") +
-    xlab("RSF") + ylab("Occupancy")
+    labs(title = "Percent Shrub") +
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
+    theme(text = element_text(size = 14)) + 
+    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    theme(legend.position = "none")
   rdden_ci_fig <- ggplot(rdden_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, col = "darkgray") +
+    # geom_abline(slope = 1, intercept = 0, col = "darkgray") +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
     geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Effect of Road Density") +
-    xlab("RSF") + ylab("Occupancy")
-  # hm_ci_fig <- ggplot(hm_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
-  #   geom_hline(yintercept = 0, linetype = "dashed") + 
-  #   geom_vline(xintercept = 0, linetype = "dashed") +
-  #   geom_abline(slope = 1, intercept = 0, col = "darkgray") +
-  #   geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Species), width = 0.01) +
-  #   geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
-  #   geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) + 
-  #   scale_shape_manual(values = c(19, 23)) +
-  #   labs(title = "Effect of Human Modified Landscape") +
-  #   xlab("RSF") + ylab("Occupancy")
+    labs(title = "Road Density") +
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
+    theme(text = element_text(size = 14))  + 
+    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    theme(legend.position = "none")
   
-  #'  Save as PNG images
+  # elev_legend <- get_legend(elev_ci_fig)
+  
+  #'  Pull out the y-axis title, then remove it from individual plots
+  ytitle  <- elev_ci_fig$labels$y
+  elev_ci_fig$labels$y  <- slope_ci_fig$labels$y <- " "
+  grass_ci_fig$labels$y <- slope_ci_fig$labels$y <- " "
+  for_ci_fig$labels$y <- slope_ci_fig$labels$y <- " "
+  shrub_ci_fig$labels$y <- slope_ci_fig$labels$y <- " "
+  
+  #'  Pull out the x-axis title, then remove it from some individual plots
+  xtitle  <- elev_ci_fig$labels$x
+  elev_ci_fig$labels$x  <- grass_ci_fig$labels$x <- " "
+  grass_ci_fig$labels$x <- grass_ci_fig$labels$x <- " "
+  for_ci_fig$labels$x <- grass_ci_fig$labels$x <- " "
+  # shrub_ci_fig$labels$x <- grass_ci_fig$labels$x <- " "
+  
+  #'  Panel figure of all covariates (excluding road density b/c not significant in occ mod)
+  corr_plot <- elev_ci_fig + for_ci_fig + grass_ci_fig + shrub_ci_fig + 
+    slope_ci_fig + guide_area() + plot_layout(guides = 'collect') + 
+    plot_layout(ncol = 2) + 
+    plot_annotation(title = "Correlation between Estimated Occupancy and RSF Coefficients") + 
+    plot_annotation(tag_levels = 'A') & theme(plot.tag = element_text(size = 12)) +
+    theme(legend.box = 'horizontal')
+  
+  #' #'  Remove y-axis titles from each plot, x-axis titles from most
+  #' corr_plot[[1]] <- corr_plot[[1]] + theme(axis.title.x=element_blank(),
+  #'                                          axis.title.y=element_blank())
+  #' corr_plot[[2]] <- corr_plot[[2]] + theme(axis.title.x=element_blank(),
+  #'                                          axis.title.y=element_blank())
+  #' corr_plot[[3]] <- corr_plot[[3]] + theme(axis.title.x=element_blank(),
+  #'                                          axis.title.y=element_blank())
+  #' corr_plot[[4]] <- corr_plot[[4]] + theme(axis.title.y=element_blank())
+  #' corr_plot[[5]] <- corr_plot[[5]] + theme(axis.title.y=element_blank())
+  
+  #'  Save figure panel
+  tiff("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel.tiff", units="in", width=8.5, height=11, res=600, compression = 'lzw') 
+  #'  Plot panel
+  corr_plot
+  #'  Adds the y-axis title in middle of stacked plots
+  grid::grid.draw(grid::textGrob(ytitle, x = 0.02, rot = 90))
+  grid::grid.draw(grid::textGrob(ytitle, x = 0.515, rot = 90))
+  dev.off()
+  
+  #'  Save individual plots as PNG images
   ggsave("./Outputs/Figures/Occu-RSF-Correlation/Elevation_Occ-by-RSF_plot.png", elev_ci_fig, width = 9.3, units = "in")
   ggsave("./Outputs/Figures/Occu-RSF-Correlation/Slope_Occ-by-RSF_plot.png", slope_ci_fig, width = 9.3, units = "in")
   ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentForest_Occ-by-RSF_plot.png", for_ci_fig, width = 9.3, units = "in")
   ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentGrass_Occ-by-RSF_plot.png", grass_ci_fig, width = 9.3, units = "in")
   ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentShrub_Occ-by-RSF_plot.png", shrub_ci_fig, width = 9.3, units = "in")
   ggsave("./Outputs/Figures/Occu-RSF-Correlation/RoadDensity_Occ-by-RSF_plot.png", rdden_ci_fig, width = 9.3, units = "in")
-  # ggsave("./Outputs/Figures/Occu-RSF-Correlation/HumanMod_Occ-by-RSF_plot.png", hm_ci_fig, width = 9.3, units = "in")
   
   #'  -------------------------
   ####  By Species and Season  ####
