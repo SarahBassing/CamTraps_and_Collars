@@ -45,6 +45,75 @@
   load("./Outputs/RSF_pts/bob_dat_2nd_buffHR_all_2022-04-18.RData")
   load("./Outputs/RSF_pts/coy_dat_2nd_buffHR_all_2022-04-18.RData")
   
+  
+  #'  Exclude used/available locations above 2100m
+  high_elev_locs <- function(locs, spp, season) {
+    #'  How many locations total?
+    nlocs <- nrow(locs)
+    #'  How many locations actually fall above this range?
+    n_hi_elev <- nrow(locs[locs$Elev > 2100,])
+    #'  What proportion of the total locations are above 2100m?
+    prop_hi_elev <- round(n_hi_elev/nlocs, 2)
+    
+    #'  How many used locationts total?
+    nused <- nrow(locs[locs$Used == 1,])
+    #'  How many of those locations are used?
+    nused_hi_elev <- nrow(locs[locs$Elev > 2100 & locs$Used == 1,])
+    #'  What proportion of the total used locations are above 2100m?
+    prop_used_hi_elev <- round(nused_hi_elev/nused, 2)
+    
+    #'  What's the maximum elevation included in the data set (used or available)
+    max_elev <- max(locs$Elev)
+    max_used_elev <- max(locs$Elev[locs$Used == 1])
+    #'  Combine data and rename
+    hi_elev <- cbind(spp, season, nlocs, n_hi_elev, prop_hi_elev, nused, nused_hi_elev, 
+                     prop_used_hi_elev, max_elev, max_used_elev)
+    colnames(hi_elev) <- c("Species", "Season", "total locs", "total high elev locs", 
+                           "proportion high elev", "total used locs", "n used high elev locs", "proportion used high elev", 
+                           "maximum elev", "maximum used elev")
+    
+    return(hi_elev)
+  }
+  md_smr_elev <- high_elev_locs(md_dat_all[md_dat_all$Season == "Summer18" | md_dat_all$Season == "Summer19",], spp = "Mule Deer", season = "Summer")
+  md_wtr_elev <- high_elev_locs(md_dat_all[md_dat_all$Season == "Winter1819" | md_dat_all$Season == "Winter1920",], spp = "Mule Deer", season = "Winter")
+  elk_smr_elev <- high_elev_locs(elk_dat_all[elk_dat_all$Season == "Summer18" | elk_dat_all$Season == "Summer19",], spp = "Elk", season = "Summer")
+  elk_wtr_elev <- high_elev_locs(elk_dat_all[elk_dat_all$Season == "Winter1819" | elk_dat_all$Season == "Winter1920",], spp = "Elk", season = "Winter")
+  wtd_smr_elev <- high_elev_locs(wtd_dat_all[wtd_dat_all$Season == "Summer18" | wtd_dat_all$Season == "Summer19",], spp = "White-tailed Deer", season = "Summer")
+  wtd_wtr_elev <- high_elev_locs(wtd_dat_all[wtd_dat_all$Season == "Winter1819" | wtd_dat_all$Season == "Winter1920",], spp = "White-tailed Deer", season = "Winter")
+  coug_smr_elev <- high_elev_locs(coug_dat_all[coug_dat_all$Season == "Summer18" | coug_dat_all$Season == "Summer19",], spp = "Cougar", season = "Summer")
+  coug_wtr_elev <- high_elev_locs(coug_dat_all[coug_dat_all$Season == "Winter1819" | coug_dat_all$Season == "Winter1920",], spp = "Cougar", season = "Winter")
+  wolf_smr_elev <- high_elev_locs(wolf_dat_all[wolf_dat_all$Season == "Summer18" | wolf_dat_all$Season == "Summer19",], spp = "Wolf", season = "Summer")
+  wolf_wtr_elev <- high_elev_locs(wolf_dat_all[wolf_dat_all$Season == "Winter1819" | wolf_dat_all$Season == "Winter1920",], spp = "Wolf", season = "Winter")
+  bob_smr_elev <- high_elev_locs(bob_dat_all[bob_dat_all$Season == "Summer18" | bob_dat_all$Season == "Summer19",], spp = "Bobcat", season = "Summer")
+  bob_wtr_elev <- high_elev_locs(bob_dat_all[bob_dat_all$Season == "Winter1819" | bob_dat_all$Season == "Winter1920",], spp = "Bobcat", season = "Winter")
+  coy_smr_elev <- high_elev_locs(coy_dat_all[coy_dat_all$Season == "Summer18" | coy_dat_all$Season == "Summer19",], spp = "Coyote", season = "Summer")
+  coy_wtr_elev <- high_elev_locs(coy_dat_all[coy_dat_all$Season == "Winter1819" | coy_dat_all$Season == "Winter1920",], spp = "Coyote", season = "Winter")
+  
+  #'  Create one data frame with all results and save
+  high_elev_deets <- as.data.frame(rbind(bob_smr_elev, bob_wtr_elev, coug_smr_elev, coug_wtr_elev,
+                           coy_smr_elev, coy_wtr_elev, elk_smr_elev, elk_wtr_elev,
+                           md_smr_elev, md_wtr_elev, wtd_smr_elev, wtd_wtr_elev,
+                           wolf_smr_elev, wolf_wtr_elev))
+  
+  # write.csv(high_elev_deets, paste0("./Outputs/Tables/High_Elevation_Stats_BuffHR_", Sys.Date(), ".csv"))
+  
+  #'  Based on the above results, filter out high elevation sites for select species
+  no_high_elev_locs <- function(locs) {
+    drop_hi_elev <- locs %>%
+      filter(locs$Elev < 2100)
+    return(drop_hi_elev)
+  }
+  mdData_smr_low <- no_high_elev_locs(md_dat_all[md_dat_all$Season == "Summer18" | md_dat_all$Season == "Summer19",])
+  mdData_wtr_low <- no_high_elev_locs(md_dat_all[md_dat_all$Season == "Winter1819" | md_dat_all$Season == "Winter1920",])
+  cougData_smr_low <- no_high_elev_locs(coug_dat_all[coug_dat_all$Season == "Summer18" | coug_dat_all$Season == "Summer19",])
+  cougData_wtr_low <- no_high_elev_locs(coug_dat_all[coug_dat_all$Season == "Winter1819" | coug_dat_all$Season == "Winter1920",])
+  wolfData_smr_low <- no_high_elev_locs(wolf_dat_all[wolf_dat_all$Season == "Summer18" | wolf_dat_all$Season == "Summer19",])
+  wolfData_wtr_low <- no_high_elev_locs(wolf_dat_all[wolf_dat_all$Season == "Winter1819" | wolf_dat_all$Season == "Winter1920",])
+  bobData_smr_low <- no_high_elev_locs(bob_dat_all[bob_dat_all$Season == "Summer18" | bob_dat_all$Season == "Summer19",])
+  bobData_wtr_low <- no_high_elev_locs(bob_dat_all[bob_dat_all$Season == "Winter1819" | bob_dat_all$Season == "Winter1920",])
+  
+  
+  
   #'  Center & scale covariates 
   #'  Note: standardizing across all IDs & years, but separately by season & spp
   spp_dataPrep <- function(locs){
@@ -87,6 +156,16 @@
   coyData_smr <- spp_dataPrep(coy_dat_all[coy_dat_all$Season == "Summer18" | coy_dat_all$Season == "Summer19",])
   coyData_wtr <- spp_dataPrep(coy_dat_all[coy_dat_all$Season == "Winter1819" | coy_dat_all$Season == "Winter1920",])
   
+  #'  Format datasets with high elevation locations excluded
+  mdData_smr_low <- spp_dataPrep(mdData_smr_low)
+  mdData_wtr_low <- spp_dataPrep(mdData_wtr_low)
+  cougData_smr_low <- spp_dataPrep(cougData_smr_low)
+  cougData_wtr_low <- spp_dataPrep(cougData_wtr_low)
+  wolfData_smr_low <- spp_dataPrep(wolfData_smr_low)
+  wolfData_wtr_low <- spp_dataPrep(wolfData_wtr_low)
+  bobData_smr_low <- spp_dataPrep(bobData_smr_low)
+  bobData_wtr_low <- spp_dataPrep(bobData_wtr_low)
+  
   #'  Function to create correlation matrix for all covariates at once
   cov_correlation <- function(dat) {
     used <- dat[dat$Used == 1,]
@@ -111,6 +190,15 @@
   (coy_wtr_corr <- cov_correlation(coyData_wtr)) # Elev & HM -0.7479; Forest & Grass -0.6146
   #'  Human Modified is definitely out
 
+  cov_correlation(mdData_smr_low)
+  cov_correlation(mdData_wtr_low)
+  cov_correlation(cougData_smr_low)
+  cov_correlation(cougData_wtr_low)
+  cov_correlation(wolfData_smr_low)
+  cov_correlation(wolfData_wtr_low)
+  cov_correlation(bobData_smr_low)
+  cov_correlation(bobData_wtr_low)
+  
   
   #'  Resource Selection Function Models
   #'  ==================================
@@ -140,7 +228,7 @@
   summary(md_global_wtr)
   car::vif(md_global_wtr)
   
-  ####  Mule Deer Subset RSF  ####
+  ####  Mule Deer Subset RSFs  ####
   #'  Run RSF on summer mule deer data for ONLY locations within the OK study area
   library(sf)
   sa_proj <- st_crs("+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs ")
@@ -157,6 +245,19 @@
                          data = md_SA_only_df, weight = w, family = binomial(link = "logit"))
   summary(md_SA_only_smr)
   car::vif(md_SA_only_smr)
+  
+  #'  HIGH ELEVATION LOCATIONS EXCLUDED: Mule deer summer
+  #'  Run exact same RSF as above but with only locations <2100m
+  md_lowElev_only_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID),
+                          data = mdData_smr_low, weight = w, family = binomial(link = "logit"))
+  summary(md_lowElev_only_smr)
+  car::vif(md_lowElev_only_smr)
+  
+  #'  HIGH ELEVATION LOCATIONS EXCLUDED: Mule deer winter
+  md_lowElev_only_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID),
+                         data = mdData_wtr_low, weight = w, family = binomial(link = "logit"))  
+  summary(md_lowElev_only_wtr)
+  car::vif(md_lowElev_only_wtr)
   
   
   ####  Elk RSF  ####
@@ -219,6 +320,20 @@
   summary(coug_global_wtr)
   car::vif(coug_global_wtr)
   
+  ####  Cougar Subset RSFs  ####
+  #'  HIGH ELEVATION LOCATIONS EXCLUDED: Cougar summer
+  #'  Run exact same RSF as above but with only locations <2100m
+  coug_lowElev_only_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
+                                 data = cougData_smr_low, weight = w, family = binomial(link = "logit"))
+  summary(coug_lowElev_only_smr)
+  car::vif(coug_lowElev_only_smr)
+  
+  #'  HIGH ELEVATION LOCATIONS EXCLUDED: Cougar winter
+  coug_lowElev_only_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXShrub + RoadDen + (1|ID), 
+                                 data = cougData_wtr_low, weight = w, family = binomial(link = "logit"))  
+  summary(coug_lowElev_only_wtr)
+  car::vif(coug_lowElev_only_wtr)
+  
   
   ####  Wolf RSF  ####
   #'  SUMMERS 2018 & 2019
@@ -236,6 +351,20 @@
   summary(wolf_global_wtr)
   car::vif(wolf_global_wtr)
 
+  ####  Wolf Subset RSFs  ####
+  #'  HIGH ELEVATION LOCATIONS EXCLUDED: Wolf summer
+  #'  Run exact same RSF as above but with only locations <2100m
+  wolf_lowElev_only_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID),  
+                                 data = wolfData_smr_low, weight = w, family = binomial(link = "logit"))
+  summary(wolf_lowElev_only_smr)
+  car::vif(wolf_lowElev_only_smr)
+  
+  #'  HIGH ELEVATION LOCATIONS EXCLUDED: Wolf winter
+  wolf_lowElev_only_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID), #+ PercXShrub 
+                                 data = wolfData_wtr_low, weight = w, family = binomial(link = "logit"))  
+  summary(wolf_lowElev_only_wtr)
+  car::vif(wolf_lowElev_only_wtr)
+  
   
   ####  Bobcat RSF  ####
   #'  SUMMERS 2018 & 2019
@@ -250,6 +379,20 @@
                           data = bobData_wtr, weight = w, family = binomial(link = "logit")) 
   summary(bob_global_wtr)
   car::vif(bob_global_wtr)
+  
+  ####  Bobcat Subset RSFs  ####
+  #'  HIGH ELEVATION LOCATIONS EXCLUDED: bobcat summer
+  #'  Run exact same RSF as above but with only locations <2100m
+  bob_lowElev_only_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
+                                 data = bobData_smr_low, weight = w, family = binomial(link = "logit"))
+  summary(bob_lowElev_only_smr)
+  car::vif(bob_lowElev_only_smr)
+  
+  #'  HIGH ELEVATION LOCATIONS EXCLUDED: Wolf winter
+  bob_lowElev_only_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID), 
+                                 data = bobData_wtr_low, weight = w, family = binomial(link = "logit"))  
+  summary(bob_lowElev_only_wtr)
+  car::vif(bob_lowElev_only_wtr)
   
   
   ####  Coy RSF  ####
@@ -283,7 +426,16 @@
   save(coy_global_smr, file = paste0("./Outputs/RSF_output/coy_RSF_smr_BuffHR_", Sys.Date(), ".RData"))
   save(coy_global_wtr, file = paste0("./Outputs/RSF_output/coy_RSF_wtr_BuffHR_", Sys.Date(), ".RData"))
   
-  save(md_SA_only_smr, file = paste0("./Outputs/RSF_output/md_RSF_smr_BuffHR_", Sys.Date(), ".RData"))  
+  save(md_SA_only_smr, file = paste0("./Outputs/RSF_output/md_RSF_smr_BuffHR_SAonly_", Sys.Date(), ".RData"))
+  
+  save(md_lowElev_only_smr, file = paste0("./Outputs/RSF_output/md_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  save(md_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/md_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  save(coug_lowElev_only_smr, file = paste0("./Outputs/RSF_output/coug_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  save(coug_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/coug_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  save(wolf_lowElev_only_smr, file = paste0("./Outputs/RSF_output/wolf_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  save(wolf_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/wolf_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  save(bob_lowElev_only_smr, file = paste0("./Outputs/RSF_output/bob_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  save(bob_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/bob_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
   
   
   ####  Summary tables  ####
@@ -314,8 +466,10 @@
   rounddig <- 2
   
   rsf_out <- function(mod, spp, season){
-    betas <- mod@beta
-    se <- sqrt(diag(vcov(mod)))
+    # betas <- mod@beta
+    # se <- sqrt(diag(vcov(mod)))
+    betas <- summary(mod)$coef[,1]
+    se <- summary(mod)$coef[,2]
     z <- summary(mod)$coef[,3]
     pval <- summary(mod)$coef[,4]
     out <- as.data.frame(cbind(betas, se, pval)) %>%
@@ -347,8 +501,6 @@
   
   md_sSAonly_rsf <- rsf_out(md_SA_only_smr, "Mule Deer", "Summer")
   # write.csv(md_sSAonly_rsf, paste0("./Outputs/Tables/RSF_Results_MuleDeer_SAonly_", Sys.Date(), ".csv"))  
-  
-  
 
   #'  Merge into larger data frames for easy comparison
   summer_rsf <- rbind(bob_s1819_rsf, coug_s1819_rsf, coy_s1819_rsf, wolf_s1819_rsf,
@@ -387,7 +539,7 @@
   
   
   #'  Save!
-  write.csv(rsf_results, paste0("./Outputs/Tables/RSF_Results_BuffHR_", Sys.Date(), ".csv"))  #'  KEEP TRACK of whether Human Modified was excluded from models!
+  write.csv(rsf_results, paste0("./Outputs/Tables/RSF_Results_BuffHR_", Sys.Date(), ".csv"))  
   write.csv(rsf_results_wide, paste0("./Outputs/Tables/RSF_Results_wide_BuffHR_", Sys.Date(), ".csv"))
   
   save.image("./Outputs/RSF_script_results.RData")
