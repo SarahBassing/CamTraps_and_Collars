@@ -1291,8 +1291,8 @@
   #'  Plot panel
   corr_plot
   #'  Adds the y-axis title in middle of stacked plots
-  grid::grid.draw(grid::textGrob(ytitle, x = 0.02, rot = 90))
-  grid::grid.draw(grid::textGrob(ytitle, x = 0.515, rot = 90))
+  grid::grid.draw(grid::textGrob(ytitle, x = 0.02, rot = 90, gp = gpar(col = "black", fontsize = 16)))
+  grid::grid.draw(grid::textGrob(ytitle, x = 0.515, rot = 90, gp = gpar(col = "black", fontsize = 16)))
   dev.off()
   
   #'  Save individual plots as PNG images
