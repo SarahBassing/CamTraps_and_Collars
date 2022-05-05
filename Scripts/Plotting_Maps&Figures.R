@@ -1183,7 +1183,9 @@
     labs(title = "Elevation") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
     theme(text = element_text(size = 14)) +
-    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
     theme(legend.box = "horizontal") 
   # elev_ci_figa <- elev_ci_fig + theme(legend.position = "none")
   slope_ci_fig <- ggplot(slope_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
@@ -1197,7 +1199,9 @@
     labs(title = "Slope") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
     theme(text = element_text(size = 14))  + 
-    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
     theme(legend.position = "none")
   for_ci_fig <- ggplot(for_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
@@ -1210,7 +1214,9 @@
     labs(title = "Percent Forest") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
     theme(text = element_text(size = 14))  + 
-    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
     theme(legend.position = "none")
   grass_ci_fig <- ggplot(grass_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
@@ -1223,7 +1229,9 @@
     labs(title = "Percent Grass") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
     theme(text = element_text(size = 14)) + 
-    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
     theme(legend.position = "none")
   shrub_ci_fig <- ggplot(shrub_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
@@ -1236,7 +1244,9 @@
     labs(title = "Percent Shrub") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
     theme(text = element_text(size = 14)) + 
-    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
     theme(legend.position = "none")
   rdden_ci_fig <- ggplot(rdden_ci, aes(x = Estimate_rsf, y = Estimate_occ)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
@@ -1249,10 +1259,10 @@
     labs(title = "Road Density") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
     theme(text = element_text(size = 14))  + 
-    # labs(tag = 'A)') + theme(plot.tag.position = "topleft") +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
     theme(legend.position = "none")
-  
-  # elev_legend <- get_legend(elev_ci_fig)
   
   #'  Pull out the y-axis title, then remove it from individual plots
   ytitle  <- elev_ci_fig$labels$y
@@ -1272,19 +1282,10 @@
   corr_plot <- elev_ci_fig + for_ci_fig + grass_ci_fig + shrub_ci_fig + 
     slope_ci_fig + guide_area() + plot_layout(guides = 'collect') + 
     plot_layout(ncol = 2) + 
-    plot_annotation(title = "Correlation between Estimated Occupancy and RSF Coefficients") + 
+    plot_annotation(title = "Correlation between Estimated Occupancy and RSF Coefficients",
+                    theme = theme(plot.title = element_text(size = 18))) + 
     plot_annotation(tag_levels = 'A') & theme(plot.tag = element_text(size = 12)) +
     theme(legend.box = 'horizontal')
-  
-  #' #'  Remove y-axis titles from each plot, x-axis titles from most
-  #' corr_plot[[1]] <- corr_plot[[1]] + theme(axis.title.x=element_blank(),
-  #'                                          axis.title.y=element_blank())
-  #' corr_plot[[2]] <- corr_plot[[2]] + theme(axis.title.x=element_blank(),
-  #'                                          axis.title.y=element_blank())
-  #' corr_plot[[3]] <- corr_plot[[3]] + theme(axis.title.x=element_blank(),
-  #'                                          axis.title.y=element_blank())
-  #' corr_plot[[4]] <- corr_plot[[4]] + theme(axis.title.y=element_blank())
-  #' corr_plot[[5]] <- corr_plot[[5]] + theme(axis.title.y=element_blank())
   
   #'  Save figure panel
   tiff("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel.tiff", units="in", width=8.5, height=11, res=600, compression = 'lzw') 
