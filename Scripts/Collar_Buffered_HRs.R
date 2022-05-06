@@ -188,7 +188,7 @@
                   coy_NE_poly)
   
   #'  Save to use when sampling "available" resources
-  save(HR_poly, file = "./Outputs/MCPs/KDE_HomeRange_Polygons_allSpp.RData")
+  save(HR_poly, file = "./Outputs/MCPs/MCP_HomeRange_Polygons_allSpp.RData")
   
   #'  Use this to define available extent for each animal in RSF analyses
   #'  Next: Collar_RSF_DataPrep.R
