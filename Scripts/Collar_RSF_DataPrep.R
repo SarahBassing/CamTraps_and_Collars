@@ -264,7 +264,7 @@
   #'  --------------------------------------------------------------
   #'  Load polygons which represent all locations from each individual's home range
   #'  source("./Scripts/Collar_Buffered_HRs.R")
-  load("./Outputs/MCPs/KDE_HomeRange_Polygons_allSpp.RData")
+  load("./Outputs/MCPs/MCP_HomeRange_Polygons_allSpp.RData")
   #'  Functions to
   #'    1. Match buffered HR polygon with seasonal location per individual
   #'       HR_poly = annual home range for each animal per study area & includes
