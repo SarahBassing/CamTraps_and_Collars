@@ -591,7 +591,7 @@
   #'  SUMMERS 2018 & 2019
   (coy_s1819_global <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height 
                             ~Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDensity + Area, 
-                            coy_s1819_UMF))
+                            coy_s1819_UMF)) # + I(Elev^2)
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(coy_s1819_global, type = "state") 
   unmarked::vif(coy_s1819_global, type = "det")
@@ -756,7 +756,7 @@
   #'  Removed PercXGrass & PercXShrub due to poor convergence
   (wtd_s1819_global2 <- occu(~Trail + Temp_smr + Height + Distance + Distance*Height 
                              ~Elev + Slope + PercForMix +  RoadDensity, 
-                             wtd_s1819_UMF))
+                             wtd_s1819_UMF)) # + I(Elev^2)
   #'  Calculate variance inflation factor for each sub-model
   unmarked::vif(wtd_s1819_global2, type = "state") 
   unmarked::vif(wtd_s1819_global2, type = "det")
