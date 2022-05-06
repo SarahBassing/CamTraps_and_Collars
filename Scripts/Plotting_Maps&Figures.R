@@ -1627,7 +1627,7 @@
   #'  Occupancy input data
   source("./Scripts/CameraTrap_DetectionHistories.R")
   #'  Sex-specific DH for elk
-  source("./Scripts/CameraTrap_DetectionHistories_bySex.R")
+  # source("./Scripts/CameraTrap_DetectionHistories_bySex.R")
   # DH_elk_smr1819F <- read.csv("./Data/Detection_Histories/DH_elk_smr1819F.csv") %>%
   #   dplyr::select(-X)
   # DH_elk_smr1819M <- read.csv("./Data/Detection_Histories/DH_elk_smr1819M.csv") %>%
@@ -1696,8 +1696,8 @@
   summer_DHs <- list(DH_md_smr1819, DH_elk_smr1819, DH_wtd_smr1819, DH_coug_smr1819, 
                      DH_wolf_smr1819, DH_bob_smr1819, DH_coy_smr1819)
   summer_det <- lapply(summer_DHs, smr_det)
-  summer_elkDHs <- list(DH_elk_smr1819F, DH_elk_smr1819M)
-  summer_elkdet <- lapply(summer_elkDHs, smr_det)
+  # summer_elkDHs <- list(DH_elk_smr1819F, DH_elk_smr1819M)
+  # summer_elkdet <- lapply(summer_elkDHs, smr_det)
   #'  Winter detection histories
   wtr_det <- function(wtr_DH) {
     DH <- as.data.frame(wtr_DH)
@@ -1719,8 +1719,8 @@
   winter_DHs <- list(DH_md_wtr1820, DH_elk_wtr1820, DH_wtd_wtr1820, DH_coug_wtr1820, 
                      DH_wolf_wtr1820, DH_bob_wtr1820, DH_coy_wtr1820)
   winter_det <- lapply(winter_DHs, wtr_det)
-  winter_elkDHs <- list(DH_elk_wtr1820F, DH_elk_wtr1820M)
-  winter_elkdet <- lapply(winter_elkDHs, wtr_det)
+  # winter_elkDHs <- list(DH_elk_wtr1820F, DH_elk_wtr1820M)
+  # winter_elkdet <- lapply(winter_elkDHs, wtr_det)
   
   
   #'  Combine seasonal data by species
@@ -1732,8 +1732,8 @@
   bob_det <- rbind(summer_det[[6]], winter_det[[6]]) 
   coy_det <- rbind(summer_det[[7]], winter_det[[7]]) 
   
-  elk_detF <- rbind(summer_elkdet[[1]], winter_elkdet[[1]])
-  elk_detM <- rbind(summer_elkdet[[2]], winter_elkdet[[2]])
+  # elk_detF <- rbind(summer_elkdet[[1]], winter_elkdet[[1]])
+  # elk_detM <- rbind(summer_elkdet[[2]], winter_elkdet[[2]])
   
   #'  Create data frames that include covariate data for all sites where 
   #'  detections occurred vs covariate data for all camera sites
@@ -1775,13 +1775,13 @@
   coy_det_ndet <- DetNonDet(coy_det, stations)
   
   #'  RSF input data
-  load("./Outputs/RSF_pts/md_dat_2nd_all_2021-09-13.RData") 
-  load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/wtd_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/coug_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-09-13.RData")
-  load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-09-13.RData")
+  load("./Outputs/RSF_pts/md_dat_2nd_buffHR_all_2022-04-18.RData")  
+  load("./Outputs/RSF_pts/elk_dat_2nd_buffHR_all_2022-04-18.RData")
+  load("./Outputs/RSF_pts/wtd_dat_2nd_buffHR_all_2022-04-18.RData")
+  load("./Outputs/RSF_pts/coug_dat_2nd_buffHR_all_2022-04-18.RData")
+  load("./Outputs/RSF_pts/wolf_dat_2nd_buffHR_all_2022-04-18.RData") 
+  load("./Outputs/RSF_pts/bob_dat_2nd_buffHR_all_2022-04-18.RData")
+  load("./Outputs/RSF_pts/coy_dat_2nd_buffHR_all_2022-04-18.RData")
   
   #'  Retain only the used locations and their covariate values
   md_used <- filter(md_dat_all, Used == 1) %>%
@@ -2100,6 +2100,41 @@
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_all_cam_obs[[1]]$Elev[4], linetype = "dashed", color = "#d95f02") +
     geom_vline(xintercept = mu_all_cam_avail[[1]]$Elev[4], linetype = "dashed", color = "#7570b3")
+  
+  #'  WHITE-TAILED DEER
+  wtd_elev_detndet_smr <- ggplot(wtd_det_ndet[wtd_det_ndet$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    scale_fill_manual(values = c("Detection" = "#e7298a", "Camera" = "#1b9e77"), name = "Camera Site Data", labels = c("Camera Sites", "Detections")) + 
+    scale_color_manual(values = c("Detection" = "#e7298a", "Camera" = "#1b9e77"), name = "Camera Site Data", labels = c("Camera Sites", "Detections")) +
+    labs(title = "All NE Camera Sites vs Summer WTD Detections", x = "Elevation (m)", y = "Proportion of Observations") + 
+    coord_cartesian(xlim = c(300, 2500)) +
+    geom_vline(xintercept = mu_cam_det[[3]]$Elev[3], linetype = "dashed", color = "#e7298a") +
+    geom_vline(xintercept = mu_cam_det[[3]]$Elev[1], linetype = "dashed", color = "#1b9e77")
+  wtd_elev_allcams_smr <- ggplot(wtd_all_cams_obs[wtd_all_cams_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    scale_fill_manual(values = c("Camera" = "#1b9e77", "Collar" = "#d95f02"), name = "Location Data", labels = c("Camera Sites", "Used Telemetry")) +
+    scale_color_manual(values = c("Camera" = "#1b9e77", "Collar" = "#d95f02"), name = "Location Data", labels = c("Camera Sites", "Used Telemetry")) +
+    labs(title = "All NE Camera Sites vs Summer WTD Used Locations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
+    coord_cartesian(xlim = c(300, 2500)) + 
+    geom_vline(xintercept = mu_all_cam_obs[[3]]$Elev[1], linetype = "dashed", color = "#1b9e77") +
+    geom_vline(xintercept = mu_all_cam_obs[[3]]$Elev[3], linetype = "dashed", color = "#d95f02")
+  wtd_availelev_allcams_smr <- ggplot(wtd_all_cams_sampled[wtd_all_cams_sampled$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
+    geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    scale_fill_manual(values = c("Camera" = "#1b9e77", "Collar" = "#7570b3"), name = "Location Data", labels = c("Camera Sites", "Available Telemetry")) +
+    scale_color_manual(values = c("Camera" = "#1b9e77", "Collar" = "#7570b3"), name = "Location Data", labels = c("Camera Sites", "Available Telemetry")) +
+    labs(title = "NE Camera Sites vs Summer WTD Available Locations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
+    coord_cartesian(xlim = c(300, 2500)) + 
+    geom_vline(xintercept = mu_all_cam_avail[[3]]$Elev[1], linetype = "dashed", color = "#1b9e77") +
+    geom_vline(xintercept = mu_all_cam_avail[[3]]$Elev[3], linetype = "dashed", color = "#7570b3")
+  wtd_useavail_elev_smr <- ggplot(wtd_useavail[wtd_useavail$Season == "Summer",], aes(x = Elev, color = Used, fill = Used)) + 
+    geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
+    labs(title = "WTD Used vs Summer Available Locations", x = "Elevation (m)", y = "Proportion of Telemetry Locations") + 
+    scale_fill_manual(values = c("Available" = "#7570b3", "Used" = "#d95f02"), name = "Telemetry \nLocations") +
+    scale_color_manual(values = c("Available" = "#7570b3", "Used" = "#d95f02"), name = "Telemetry \nLocations") +
+    coord_cartesian(xlim = c(300, 2500)) + 
+    geom_vline(xintercept = mu_all_cam_obs[[3]]$Elev[3], linetype = "dashed", color = "#d95f02") +
+    geom_vline(xintercept = mu_all_cam_avail[[3]]$Elev[3], linetype = "dashed", color = "#7570b3")
+  
   #'  COUGAR
   coug_elev_detndet_smr <- ggplot(coug_det_ndet[coug_det_ndet$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
@@ -2161,6 +2196,7 @@
     scale_color_manual(values = c("Available" = "#7570b3", "Used" = "#d95f02"), name = "Telemetry \nLocations") +
     geom_vline(xintercept = mu_all_cam_obs[[4]]$PercForMix[3], linetype = "dashed", color = "#d95f02") +
     geom_vline(xintercept = mu_all_cam_avail[[4]]$PercForMix[3], linetype = "dashed", color = "#7570b3")
+  
   #'  WOLF
   wolf_elev_detndet_smr <- ggplot(wolf_det_ndet[wolf_det_ndet$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
@@ -2194,6 +2230,7 @@
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_all_cam_obs[[5]]$Elev[3], linetype = "dashed", color = "#d95f02") +
     geom_vline(xintercept = mu_all_cam_avail[[5]]$Elev[3], linetype = "dashed", color = "#7570b3")
+  
   #'  COYOTE
   coy_grass_detndet_wtr <- ggplot(coy_det_ndet[coy_det_ndet$Season == "Winter",], aes(x = PercXericGrass, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 0.05, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
@@ -2223,38 +2260,39 @@
     scale_color_manual(values = c("Available" = "#7570b3", "Used" = "#d95f02"), name = "Telemetry \nLocations") +
     geom_vline(xintercept = mu_all_cam_obs[[7]]$PercXGrass[4], linetype = "dashed", color = "#d95f02") +
     geom_vline(xintercept = mu_all_cam_avail[[7]]$PercXGrass[4], linetype = "dashed", color = "#7570b3")
-  coy_elev_detndet_wtr <- ggplot(coy_det_ndet[coy_det_ndet$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+  coy_elev_detndet_smr <- ggplot(coy_det_ndet[coy_det_ndet$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
-    scale_fill_manual(values = c("Detection" = "#e7298a", "Camera" = "#1b9e77"), name = "Camera Site Data", labels = c("Camera Sites", "Detections")) + #, labels = c("Camera Sites", "Detections")
-    scale_color_manual(values = c("Detection" = "#e7298a", "Camera" = "#1b9e77"), name = "Camera Site Data", labels = c("Camera Sites", "Detections")) +
-    labs(title = "All Camera Sites vs Winter Coyote Detections", x = "Elevation (m)", y = "Proportion of Observations") + 
+    scale_fill_manual(values = c("Detection" = "#e7298a", "Camera" = "#1b9e77"), name = "Camera Site Data", labels = c("Detections", "Camera Sites")) + #, labels = c("Camera Sites", "Detections")
+    scale_color_manual(values = c("Detection" = "#e7298a", "Camera" = "#1b9e77"), name = "Camera Site Data", labels = c("Detections", "Camera Sites")) +
+    labs(title = "All Camera Sites vs Summer Coyote Detections", x = "Elevation (m)", y = "Proportion of Observations") + 
     coord_cartesian(xlim = c(300, 2500)) +
     geom_vline(xintercept = mu_cam_det[[7]]$Elev[3], linetype = "dashed", color = "#e7298a") +
     geom_vline(xintercept = mu_cam_det[[7]]$Elev[1], linetype = "dashed", color = "#1b9e77")
-  coy_elev_allcams_wtr <- ggplot(coy_all_cams_obs[coy_all_cams_obs$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+  coy_elev_allcams_smr <- ggplot(coy_all_cams_obs[coy_all_cams_obs$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     scale_fill_manual(values = c("Camera" = "#1b9e77", "Collar" = "#d95f02"), name = "Location Data", labels = c("Camera Sites", "Used Telemetry")) +
     scale_color_manual(values = c("Camera" = "#1b9e77", "Collar" = "#d95f02"), name = "Location Data", labels = c("Camera Sites", "Used Telemetry")) +
-    labs(title = "All Camera Sites vs Winter Coyote Used Locations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
+    labs(title = "All Camera Sites vs Summer Coyote Used Locations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_all_cam_obs[[7]]$Elev[1], linetype = "dashed", color = "#1b9e77") +
     geom_vline(xintercept = mu_all_cam_obs[[7]]$Elev[3], linetype = "dashed", color = "#d95f02")
-  coy_availelev_allcams_wtr <- ggplot(coy_all_cams_sampled[coy_all_cams_sampled$Season == "Winter",], aes(x = Elev, color = Data, fill = Data)) + 
+  coy_availelev_allcams_smr <- ggplot(coy_all_cams_sampled[coy_all_cams_sampled$Season == "Summer",], aes(x = Elev, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
     scale_fill_manual(values = c("Camera" = "#1b9e77", "Collar" = "#7570b3"), name = "Location Data", labels = c("Camera Sites", "Available Telemetry")) +
     scale_color_manual(values = c("Camera" = "#1b9e77", "Collar" = "#7570b3"), name = "Location Data", labels = c("Camera Sites", "Available Telemetry")) +
-    labs(title = "All Camera Sites vs Winter Coyote Available Locations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
+    labs(title = "All Camera Sites vs Summer Coyote Available Locations", x = "Elevation (m)", y = "Proportion of Observations per Data Type") + 
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_all_cam_avail[[7]]$Elev[1], linetype = "dashed", color = "#1b9e77") +
     geom_vline(xintercept = mu_all_cam_avail[[7]]$Elev[3], linetype = "dashed", color = "#7570b3")
-  coy_useavail_elev_wtr <- ggplot(coy_useavail[coy_useavail$Season == "Winter",], aes(x = Elev, color = Used, fill = Used)) + 
+  coy_useavail_elev_smr <- ggplot(coy_useavail[coy_useavail$Season == "Summer",], aes(x = Elev, color = Used, fill = Used)) + 
     geom_histogram(binwidth = 100, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
-    labs(title = "Winter Used vs Available Locations", x = "Elevation (m)", y = "Proportion of Telemetry Locations") + 
+    labs(title = "Summer Used vs Available Locations", x = "Elevation (m)", y = "Proportion of Telemetry Locations") + 
     scale_fill_manual(values = c("Available" = "#7570b3", "Used" = "#d95f02"), name = "Telemetry \nLocations") +
     scale_color_manual(values = c("Available" = "#7570b3", "Used" = "#d95f02"), name = "Telemetry \nLocations") +
     coord_cartesian(xlim = c(300, 2500)) + 
     geom_vline(xintercept = mu_all_cam_obs[[7]]$Elev[3], linetype = "dashed", color = "#d95f02") +
     geom_vline(xintercept = mu_all_cam_avail[[7]]$Elev[3], linetype = "dashed", color = "#7570b3")
+  
   #'  BOBCAT
   bob_rd_detndet_wtr <- ggplot(bob_det_ndet[bob_det_ndet$Season == "Winter",], aes(x = RoadDensity, color = Data, fill = Data)) + 
     geom_histogram(binwidth = 0.5, alpha = 0.5, position = "identity", mapping = aes(y = stat(ncount))) + 
@@ -2299,6 +2337,11 @@
   ggsave("./Outputs/Figures/Histograms/MuleDeer_CamSites_AvailLoc_Elev_wtr.png", md_availelev_allcams_wtr, width = 7.3, units = "in")
   ggsave("./Outputs/Figures/Histograms/MuleDeer_UsedAvailLoc_Elev_wtr.png", md_useavail_elev_wtr, width = 7.3, units = "in")
     
+  ggsave("./Outputs/Figures/Histograms/WhiteTailDeer_CamDetections_Elev_smr.png", wtd_elev_detndet_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/WhiteTailDeer_CamSites_UsedLoc_Elev_smr.png", wtd_elev_allcams_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/WhiteTailDeer_CamSites_AvailLoc_Elev_smr.png", wtd_availelev_allcams_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/WhiteTailDeer_UsedAvailLoc_Elev_smr.png", wtd_useavail_elev_smr, width = 7.3, units = "in")
+  
   ggsave("./Outputs/Figures/Histograms/Cougar_CamDetections_Elev_smr.png", coug_elev_detndet_smr, width = 7.3, units = "in")
   ggsave("./Outputs/Figures/Histograms/Cougar_CamSites_UsedLoc_Elev_smr.png", coug_elev_allcams_smr, width = 7.3, units = "in")
   ggsave("./Outputs/Figures/Histograms/Cougar_CamSites_AvailLoc_Elev_smr.png", coug_availelev_allcams_smr, width = 7.3, units = "in")
@@ -2313,10 +2356,10 @@
   ggsave("./Outputs/Figures/Histograms/Coyote_CamSites_UsedLoc_Grass_wtr.png", coy_grass_allcams_wtr, width = 7.3, units = "in")
   ggsave("./Outputs/Figures/Histograms/Coyote_CamSites_AvailLoc_Grass_wtr.png", coy_availgrass_allcams_wtr, width = 7.3, units = "in")
   ggsave("./Outputs/Figures/Histograms/Coyote_UsedAvailLoc_Grass_wtr.png", coy_useavail_grass_wtr, width = 7.3, units = "in")
-  ggsave("./Outputs/Figures/Histograms/Coyote_CamDetections_Elev_wtr.png", coy_elev_detndet_wtr, width = 7.3, units = "in")
-  ggsave("./Outputs/Figures/Histograms/Coyote_CamSites_UsedLoc_Elev_wtr.png", coy_elev_allcams_wtr, width = 7.3, units = "in")
-  ggsave("./Outputs/Figures/Histograms/Coyote_CamSites_AvailLoc_Elev_wtr.png", coy_availelev_allcams_wtr, width = 7.3, units = "in")
-  ggsave("./Outputs/Figures/Histograms/Coyote_UsedAvailLoc_Elev_wtr.png", coy_useavail_elev_wtr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Coyote_CamDetections_Elev_smr.png", coy_elev_detndet_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Coyote_CamSites_UsedLoc_Elev_smr.png", coy_elev_allcams_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Coyote_CamSites_AvailLoc_Elev_smr.png", coy_availelev_allcams_smr, width = 7.3, units = "in")
+  ggsave("./Outputs/Figures/Histograms/Coyote_UsedAvailLoc_Elev_smr.png", coy_useavail_elev_smr, width = 7.3, units = "in")
   
   ggsave("./Outputs/Figures/Histograms/Bobcat_CamDetections_RoadDen_wtr.png", bob_rd_detndet_wtr, width = 7.3, units = "in")
   ggsave("./Outputs/Figures/Histograms/Bobcat_CamSites_UsedLoc_RoadDen_wtr.png", bob_rd_allcams_wtr, width = 7.3, units = "in")
