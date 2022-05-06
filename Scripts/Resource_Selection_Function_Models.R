@@ -266,7 +266,7 @@
   #'  DROPPING RANDOM EFFECT (AND USING GLM) due to singularity issue 
   elk_global_smr <- glm(Used ~ 1 + Elev + Slope + PercForMix + RoadDen,  #+ (1|ID)
                         data = elkData_smr, weight = w, family = binomial(link = "logit")) 
-  ####  WHY?!?!?! boundary (singular) fit: see ?isSingular   ---- runs ok if I drop random effect 
+  #' GAH! warning: boundary (singular) fit: see ?isSingular   ---- OK if I drop random effect
   summary(elk_global_smr)
   car::vif(elk_global_smr)
   
@@ -294,7 +294,7 @@
   #'  SUMMERS 2018 & 2019
   #'  Dropping PercXGrass & PercXShurb to be consistent with occupancy model
   wtd_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID),   
-                          data = wtdData_smr, weight = w, family = binomial(link = "logit")) 
+                          data = wtdData_smr, weight = w, family = binomial(link = "logit"))  # + I(Elev^2)
   summary(wtd_global_smr)
   car::vif(wtd_global_smr)
 
@@ -398,7 +398,7 @@
   ####  Coy RSF  ####
   #'  SUMMERS 2018 & 2019
   coy_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
-                           data = coyData_smr, weight = w, family = binomial(link = "logit")) 
+                           data = coyData_smr, weight = w, family = binomial(link = "logit")) #+ I(Elev^2)
   summary(coy_global_smr)
   car::vif(coy_global_smr)
   
