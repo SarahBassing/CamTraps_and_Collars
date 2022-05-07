@@ -1145,20 +1145,59 @@
     ) %>%
     dplyr::select(-c(Estimate, l95, u95)) %>%
     filter(Parameter != "(Intercept)")
+  
+  #'  Missing covariates
+  missing_bob_wtr1 <- c("Bobcat", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  missing_coug_wtr1 <- c("Cougar", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  missing_coy_wtr1 <- c("Coyote", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  missing_elk_smr1 <- c("Elk", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  missing_elk_smr2 <- c("Elk", "Summer", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  missing_elk_wtr1 <- c("Elk", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  missing_elk_wtr2 <- c("Elk", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  missing_md_smr1 <- c("Mule Deer", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  missing_wtd_smr1 <- c("White-tailed Deer", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  missing_wtd_smr2 <- c("White-tailed Deer", "Summer", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  missing_wtd_wtr2 <- c("White-tailed Deer", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  missing_wtd_wtr1 <- c("White-tailed Deer", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  missing_wolf_smr1 <- c("Wolf", "Summer", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  missing_wolf_wtr1 <- c("Wolf", "Winter", "PercXShrub", NA, NA, NA, NA, NA, NA)
+  missing_wwolf_wtr2 <- c("Wolf", "Winter", "PercXGrass", NA, NA, NA, NA, NA, NA)
+  
+  missing_covs <- as.data.frame(rbind(missing_bob_wtr1, missing_coug_wtr1, missing_coy_wtr1, 
+                        missing_elk_smr1, missing_elk_smr2, missing_elk_wtr1,
+                        missing_elk_wtr2, missing_md_smr1, missing_wtd_smr1,
+                        missing_wtd_smr2, missing_wtd_wtr1, missing_wtd_wtr2,
+                        missing_wolf_smr1, missing_wolf_wtr1, missing_wwolf_wtr2))
+  colnames(missing_covs) <- c("Species", "Season", "Parameter", "Estimate_occ", "l95_occ", "u95_occ", "Estimate_rsf", "l95_rsf", "u95_rsf")
+  rownames(missing_covs) <- NULL
+  
   #'  Merge CI data from different models into single table
-  combo_ci <- full_join(occmod_90ci, rsf_95ci, by = c("Species", "Season", "Parameter"))
+  combo_ci <- full_join(occmod_90ci, rsf_95ci, by = c("Species", "Season", "Parameter")) %>%
+    rbind(missing_covs) %>%
+    arrange(Species, Season, Parameter) %>%
+    mutate(Estimate_occ = as.numeric(Estimate_occ),
+           l95_occ = as.numeric(l95_occ),
+           u95_occ = as.numeric(u95_occ),
+           Estimate_rsf = as.numeric(Estimate_rsf),
+           l95_rsf = as.numeric(l95_rsf),
+           u95_rsf = as.numeric(u95_rsf),
+           Parameter = ifelse(Parameter == "Elev", "Elevation", Parameter),
+           Parameter = ifelse(Parameter == "PercForMix", "Percent Forest", Parameter),
+           Parameter = ifelse(Parameter == "PercXGrass", "Percent Grass", Parameter),
+           Parameter = ifelse(Parameter == "PercXShrub", "Percent Shrub", Parameter),
+           Parameter = ifelse(Parameter == "RoadDensity", "Road Density", Parameter))
   
   #'  Identify min and max values of confidence intervals
   min(combo_ci$l95_occ, na.rm = TRUE); max(combo_ci$u95_occ, na.rm = TRUE) # -3.21 to 2.32
   min(combo_ci$l95_rsf, na.rm = TRUE); max(combo_ci$u95_rsf, na.rm = TRUE) # -1.17 to 0.68
   
   #'  Separate CIs by Covariate
-  elev_ci <- combo_ci[combo_ci$Parameter == "Elev",]
+  elev_ci <- combo_ci[combo_ci$Parameter == "Elevation",]
   slope_ci <- combo_ci[combo_ci$Parameter == "Slope",]
-  for_ci <- combo_ci[combo_ci$Parameter == "PercForMix",]
-  grass_ci <- combo_ci[combo_ci$Parameter == "PercXGrass",]
-  shrub_ci <- combo_ci[combo_ci$Parameter == "PercXShrub",]
-  rdden_ci <- combo_ci[combo_ci$Parameter == "RoadDensity",]
+  for_ci <- combo_ci[combo_ci$Parameter == "Percent Forest",]
+  grass_ci <- combo_ci[combo_ci$Parameter == "Percent Grass",]
+  shrub_ci <- combo_ci[combo_ci$Parameter == "Percent Shrub",]
+  rdden_ci <- combo_ci[combo_ci$Parameter == "Road Density",]
   #'  Separate CIs by Species
   md_ci <- combo_ci[combo_ci$Species == "Mule Deer",]
   elk_ci <- combo_ci[combo_ci$Species == "Elk",]
@@ -1182,7 +1221,8 @@
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Elevation") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
-    theme(text = element_text(size = 14)) +
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
     # theme_light() +
     # theme(axis.line = element_line(),
     #       panel.border = element_blank()) +
@@ -1198,7 +1238,8 @@
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Slope") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
-    theme(text = element_text(size = 14))  + 
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
     # theme_light() +
     # theme(axis.line = element_line(),
     #       panel.border = element_blank()) +
@@ -1213,7 +1254,8 @@
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Percent Forest") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
-    theme(text = element_text(size = 14))  + 
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) + 
     # theme_light() +
     # theme(axis.line = element_line(),
     #       panel.border = element_blank()) +
@@ -1228,7 +1270,8 @@
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Percent Grass") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
-    theme(text = element_text(size = 14)) + 
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
     # theme_light() +
     # theme(axis.line = element_line(),
     #       panel.border = element_blank()) +
@@ -1243,7 +1286,8 @@
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Percent Shrub") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
-    theme(text = element_text(size = 14)) + 
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
     # theme_light() +
     # theme(axis.line = element_line(),
     #       panel.border = element_blank()) +
@@ -1258,24 +1302,36 @@
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Road Density") +
     xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
-    theme(text = element_text(size = 14))  + 
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
     # theme_light() +
     # theme(axis.line = element_line(),
     #       panel.border = element_blank()) +
     theme(legend.position = "none")
   
+  #'  Save individual plots as PNG images
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Elevation_Occ-by-RSF_plot.png", elev_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Slope_Occ-by-RSF_plot.png", slope_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentForest_Occ-by-RSF_plot.png", for_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentGrass_Occ-by-RSF_plot.png", grass_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentShrub_Occ-by-RSF_plot.png", shrub_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/RoadDensity_Occ-by-RSF_plot.png", rdden_ci_fig, height = 4, width = 6, units = "in")
+  
+  
+  #'  Create single panel with all plots together
+  
   #'  Pull out the y-axis title, then remove it from individual plots
   ytitle  <- elev_ci_fig$labels$y
-  elev_ci_fig$labels$y  <- slope_ci_fig$labels$y <- " "
-  grass_ci_fig$labels$y <- slope_ci_fig$labels$y <- " "
-  for_ci_fig$labels$y <- slope_ci_fig$labels$y <- " "
-  shrub_ci_fig$labels$y <- slope_ci_fig$labels$y <- " "
+  # elev_ci_fig$labels$y  <- slope_ci_fig$labels$y <- NULL
+  # grass_ci_fig$labels$y <- slope_ci_fig$labels$y <- NULL
+  # for_ci_fig$labels$y <- slope_ci_fig$labels$y <- NULL
+  shrub_ci_fig$labels$y <- for_ci_fig$labels$y <- NULL
   
   #'  Pull out the x-axis title, then remove it from some individual plots
   xtitle  <- elev_ci_fig$labels$x
-  elev_ci_fig$labels$x  <- grass_ci_fig$labels$x <- " "
-  grass_ci_fig$labels$x <- grass_ci_fig$labels$x <- " "
-  for_ci_fig$labels$x <- grass_ci_fig$labels$x <- " "
+  elev_ci_fig$labels$x  <- grass_ci_fig$labels$x <- NULL
+  grass_ci_fig$labels$x <- grass_ci_fig$labels$x <- NULL
+  for_ci_fig$labels$x <- grass_ci_fig$labels$x <- NULL
   # shrub_ci_fig$labels$x <- grass_ci_fig$labels$x <- " "
   
   #'  Panel figure of all covariates (excluding road density b/c not significant in occ mod)
@@ -1287,6 +1343,9 @@
     plot_annotation(tag_levels = 'A') & theme(plot.tag = element_text(size = 12)) +
     theme(legend.box = 'horizontal')
   
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel_byCov_9x15.png", corr_plot, width = 9, height = 15, units = "in")
+  
+  
   #'  Save figure panel
   tiff("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel.tiff", units="in", width=8.5, height=11, res=600, compression = 'lzw') 
   #'  Plot panel
@@ -1296,13 +1355,7 @@
   grid::grid.draw(grid::textGrob(ytitle, x = 0.515, rot = 90, gp = gpar(col = "black", fontsize = 16)))
   dev.off()
   
-  #'  Save individual plots as PNG images
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Elevation_Occ-by-RSF_plot.png", elev_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Slope_Occ-by-RSF_plot.png", slope_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentForest_Occ-by-RSF_plot.png", for_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentGrass_Occ-by-RSF_plot.png", grass_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/PercentShrub_Occ-by-RSF_plot.png", shrub_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/RoadDensity_Occ-by-RSF_plot.png", rdden_ci_fig, width = 9.3, units = "in")
+  
   
   #'  -------------------------
   ####  By Species and Season  ####
@@ -1311,96 +1364,166 @@
   md_ci_fig <- ggplot(md_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    # geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Mule Deer") +
-    xlab("RSF") + ylab("Occupancy") 
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
+    theme(legend.box = "horizontal")
   elk_ci_fig <- ggplot(elk_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    # geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Elk") +
-    xlab("RSF") + ylab("Occupancy")
-  #'  NOT PLOTTING SHRUB AND GRASS RESULTS FOR RSFs
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
+    theme(legend.position = "none")
   wtd_ci_fig <- ggplot(wtd_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    # geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "White-tailed Deer") +
-    xlab("RSF") + ylab("Occupancy")
-  #'  NOT PLOTTING SHRUB AND GRASS RESULTS FOR RSFs
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
+    theme(legend.position = "none")
   coug_ci_fig <- ggplot(coug_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    # geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Cougar") +
-    xlab("RSF") + ylab("Occupancy")
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
+    theme(legend.position = "none")
   wolf_ci_fig <- ggplot(wolf_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    # geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Wolf") +
-    xlim(-1.0, 0.5) +
-    xlab("RSF") + ylab("Occupancy")   # NOT PLOTTING SOMETHING
+    # xlim(-1.0, 0.5) +
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
+    theme(legend.position = "none")
   bob_ci_fig <- ggplot(bob_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    # geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Bobcat") +
-    xlab("RSF") + ylab("Occupancy") 
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
+    theme(legend.position = "none") 
   coy_ci_fig <- ggplot(coy_ci, aes(x = Estimate_rsf, y = Estimate_occ, col = Parameter)) +
     geom_hline(yintercept = 0, linetype = "dashed") + 
     geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
+    # geom_abline(slope = 1, intercept = 0, alpha = 0.5) +
     geom_errorbar(aes(ymin = l95_occ, ymax = u95_occ, col = Parameter), width = 0.01) + 
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Coyote") +
-    xlab("RSF") + ylab("Occupancy") 
+    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    theme(text = element_text(size = 18),
+          plot.title = element_text(size = 18)) +
+    # theme_light() +
+    # theme(axis.line = element_line(),
+    #       panel.border = element_blank()) +
+    theme(legend.position = "none") 
   
+  #'  Save individual plots as PNG images
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/MuleDeer_Occ-by-RSF_plot.png", md_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Elk_Occ-by-RSF_plot.png", elk_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/WTD_Occ-by-RSF_plot.png", wtd_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Cougar_Occ-by-RSF_plot.png", coug_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Wolf_Occ-by-RSF_plot.png", wolf_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Bobcat_Occ-by-RSF_plot.png", bob_ci_fig, height = 4, width = 6, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Coyote_Occ-by-RSF_plot.png", coy_ci_fig, height = 4, width = 6, units = "in")
+  
+  
+  #'  Create figure panel with all plots
+  
+  #'  Pull out the y-axis title, then remove it from individual plots
+  ytitle  <- md_ci_fig$labels$y
+  # md_ci_fig$labels$y  <- elk_ci_fig$labels$y <- " "
+  wtd_ci_fig$labels$y <- elk_ci_fig$labels$y <- NULL
+  coug_ci_fig$labels$y <- elk_ci_fig$labels$y <- NULL
+  # wolf_ci_fig$labels$y <- elk_ci_fig$labels$y <- " "
+  # coy_ci_fig$labels$y <- elk_ci_fig$labels$y <- " "
+  # bob_ci_fig$labels$y <- elk_ci_fig$labels$y <- " "
+  
+  #'  Pull out the x-axis title, then remove it from some individual plots
+  xtitle  <- md_ci_fig$labels$x
+  md_ci_fig$labels$x  <- elk_ci_fig$labels$x <- NULL
+  # wtd_ci_fig$labels$x <- elk_ci_fig$labels$x <- " "
+  coug_ci_fig$labels$x <- elk_ci_fig$labels$x <- NULL
+  # wolf_ci_fig$labels$x <- elk_ci_fig$labels$x <- " "
+  coy_ci_fig$labels$x <- elk_ci_fig$labels$x <- NULL
+  bob_ci_fig$labels$x <- elk_ci_fig$labels$x <- NULL
+
   #'  Panel figure of all species
-  corr_plot <- bob_ci_fig + coug_ci_fig + coy_ci_fig + elk_ci_fig + 
-    md_ci_fig + wtd_ci_fig + wolf_ci_fig + guide_area() + 
-    plot_layout(guides = 'collect') + plot_layout(ncol = 2) + 
-    plot_annotation(title = "Correlation between Occupancy Model and RSF covariate effects") + 
-    plot_annotation(tag_levels = 'A') & theme(plot.tag = element_text(size = 10)) +
+  corr_plot_spp <- bob_ci_fig + coug_ci_fig + coy_ci_fig + elk_ci_fig + md_ci_fig +
+    wtd_ci_fig + wolf_ci_fig + guide_area() + plot_layout(guides = 'collect') + 
+    plot_layout(ncol = 2) +  
+    plot_annotation(title = "Correlation between Estimated Occupancy and RSF Coefficients",
+                    theme = theme(plot.title = element_text(size = 18))) + 
+    plot_annotation(tag_levels = 'A') & theme(plot.tag = element_text(size = 14)) +
     theme(legend.box = 'horizontal')
   
-  plot(corr_plot)
-  
-  #'  Save as PNG images
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/MuleDeer_Occ-by-RSF_plot.png", md_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Elk_Occ-by-RSF_plot.png", elk_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/WTD_Occ-by-RSF_plot.png", wtd_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Cougar_Occ-by-RSF_plot.png", coug_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Wolf_Occ-by-RSF_plot.png", wolf_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Bobcat_Occ-by-RSF_plot.png", bob_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Coyote_Occ-by-RSF_plot.png", coy_ci_fig, width = 9.3, units = "in")
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Occ-by-RSF_plot.png", corr_plot, width = 8, height = 15, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel_bySpp_9x15.png", corr_plot_spp, width = 9, height = 15, units = "in")
+   
+  #' #'  Save figure panel
+  #' tiff("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel_bySpp.tiff", units="in", width=8.5, height=11, res=600, compression = 'lzw') 
+  #' #'  Plot panel
+  #' corr_plot_spp
+  #' #'  Adds the y-axis title in middle of stacked plots
+  #' grid::grid.draw(grid::textGrob(ytitle, x = 0.021, rot = 90, gp = gpar(col = "black", fontsize = 16)))
+  #' grid::grid.draw(grid::textGrob(ytitle, x = 0.52, rot = 90, gp = gpar(col = "black", fontsize = 16)))
+  #' dev.off()
   
   #'  ------------------------------
   ####  Stand alone seasonal plots  ####
