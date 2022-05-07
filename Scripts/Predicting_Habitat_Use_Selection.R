@@ -88,7 +88,7 @@
       RoadDen = RoadDen, 
       HumanMod = HumanMod 
     ) %>%
-    arrange(Year) #NECESSARY TO MATCH DH's CAMERALOCATION ORDER 2021-08-10 version
+    arrange(Year)
   
   #'  Read in original covariate data from RSFs
   load("./Outputs/RSF_pts/md_dat_2nd_buffHR_all_2022-04-18.RData")  
@@ -493,42 +493,82 @@
   #'  Merge NE and OK predictions togther
   Predicted_rsf <- as.data.frame(rbind(Predicted_rsf_NE, Predicted_rsf_OK))
   
-  #'  Identify any outliers
-  outliers <- function(predicted, title) {
-    print(summary(predicted))
+  
+  #'  Function to identify any outliers
+  outliers <- function(predicted, title) { #, covs_list
+    #'  Summarize predicted values
     hist(predicted, breaks = 100, main = title)
     boxplot(predicted, main = title)
+    #'  What value represents the 99th percentile in the predicted RSF values
+    quant <- quantile(predicted, c(0.99), na.rm = TRUE)
+    #'  Print that value and maximum prediction
+    print(quant); print(max(predicted, na.rm = TRUE))
+    #'  Identify the 1% most extreme values and set to 99th percentile value
+    predicted <- as.data.frame(predicted) %>%
+      mutate(outlier = ifelse(predicted > quant, "outlier", "not_outlier"),
+             adjusted_rsf = ifelse(outlier == "outlier", quant, predicted))
+    #'  How many predicted values are above the 99th percentile?
+    outlier <- predicted[predicted$outlier == "outlier",]
+    outlier <- filter(outlier, !is.na(outlier))
+    print(nrow(outlier))
+    adjusted_rsf <- predicted$adjusted_rsf
+    
+    return(adjusted_rsf)
   }
-  #'  Identify outlier perdictions
-  outliers(Predicted_rsf$MD_smr_rsf, "Mule Deer Summer RSF Predictions")
-  outliers(Predicted_rsf$MD_wtr_rsf, "Mule Deer Winter RSF Prediction")
-  outliers(Predicted_rsf$ELK_smr_rsf, "Elk Summer RSF Predictions")
-  outliers(Predicted_rsf$ELK_wtr_rsf, "Elk Winter RSF Prediction")
-  outliers(Predicted_rsf$WTD_smr_rsf, "White-tailed Deer Summer RSF Predictions")
-  outliers(Predicted_rsf$WTD_wtr_rsf, "White-tailed Deer Winter RSF Prediction")
-  outliers(Predicted_rsf$COUG_smr_rsf, "Cougar Summer RSF Predictions")
-  outliers(Predicted_rsf$COUG_wtr_rsf, "Cougar Winter RSF Prediction")
-  outliers(Predicted_rsf$WOLF_smr_rsf, "Wolf Summer RSF Predictions")
-  outliers(Predicted_rsf$WOLF_wtr_rsf, "Wolf Winter RSF Prediction")
-  outliers(Predicted_rsf$BOB_smr_rsf, "Bobcat Summer RSF Predictions")
-  outliers(Predicted_rsf$BOB_wtr_rsf, "Bobcat Winter RSF Prediction")
-  outliers(Predicted_rsf$COY_smr_rsf, "Coyote Summer RSF Predictions")
-  outliers(Predicted_rsf$COY_wtr_rsf, "Coyote Winter RSF Prediction")
+  #'  Identify outlier predictions and possible covariates associated with those
+  #'  Be sure to used standardized covariates for evaluation
+  Predicted_rsf$MD_smr_rsf2 <- outliers(Predicted_rsf$MD_smr_rsf, "Mule Deer Summer RSF Predictions")
+  Predicted_rsf$MD_wtr_rsf2 <- outliers(Predicted_rsf$MD_wtr_rsf, "Mule Deer Winter RSF Predictions")
+  Predicted_rsf$ELK_smr_rsf2 <- outliers(Predicted_rsf$ELK_smr_rsf, "Elk Summer RSF Predictions")
+  Predicted_rsf$ELK_wtr_rsf2 <- outliers(Predicted_rsf$ELK_wtr_rsf, "Elk Winter RSF Predictions")
+  Predicted_rsf$WTD_smr_rsf2 <- outliers(Predicted_rsf$WTD_smr_rsf, "White-tailed Deer Summer RSF Predictions")
+  Predicted_rsf$WTD_wtr_rsf2 <- outliers(Predicted_rsf$WTD_wtr_rsf, "White-tailed Deer Winter RSF Predictions")
+  Predicted_rsf$COUG_smr_rsf2 <- outliers(Predicted_rsf$COUG_smr_rsf, "Cougar Summer RSF Predictions")
+  Predicted_rsf$COUG_wtr_rsf2 <- outliers(Predicted_rsf$COUG_wtr_rsf, "Cougar Winter RSF Predictions")
+  Predicted_rsf$WOLF_smr_rsf2 <- outliers(Predicted_rsf$WOLF_smr_rsf, "Wolf Summer RSF Predictions")
+  Predicted_rsf$WOLF_wtr_rsf2 <- outliers(Predicted_rsf$WOLF_wtr_rsf, "Wolf Winter RSF Predictions")
+  Predicted_rsf$COY_smr_rsf2 <- outliers(Predicted_rsf$COY_smr_rsf, "Coyote Summer RSF Predictions")
+  Predicted_rsf$COY_wtr_rsf2 <- outliers(Predicted_rsf$COY_wtr_rsf, "Coyote Winter RSF Predictions")
+  Predicted_rsf$BOB_smr_rsf2 <- outliers(Predicted_rsf$BOB_smr_rsf, "Bobcat Summer RSF Predictions")
+  Predicted_rsf$BOB_wtr_rsf2 <- outliers(Predicted_rsf$BOB_wtr_rsf, "Bobcat Winter RSF Predictions")
   
-  #'  Exclude extreme outliers as identified by histograms & boxplots
-  Predicted_rsf <- Predicted_rsf %>%
-    mutate(
-      MD_smr_rsf2 = ifelse(MD_smr_rsf > 5, NA, MD_smr_rsf),
-      MD_wtr_rsf2 = ifelse(MD_wtr_rsf > 150, NA, MD_wtr_rsf), 
-      # ELK_wtr_rsf2 = ifelse(ELK_wtr_rsf > 3, NA, ELK_wtr_rsf),  
-      WTD_smr_rsf2 = ifelse(WTD_smr_rsf > 4, NA, WTD_smr_rsf),
-      WTD_wtr_rsf2 = ifelse(WTD_wtr_rsf > 6, NA, WTD_wtr_rsf),
-      COUG_wtr_rsf2 = ifelse(COUG_wtr_rsf > 10, NA, COUG_wtr_rsf), 
-      # WOLF_smr_rsf2 = ifelse(WOLF_smr_rsf > 7, NA, WOLF_smr_rsf),
-      WOLF_wtr_rsf2 = ifelse(WOLF_wtr_rsf > 5, NA, WOLF_wtr_rsf),
-      BOB_wtr_rsf2 = ifelse(BOB_wtr_rsf > 12, NA, BOB_wtr_rsf),
-      COY_wtr_rsf2 = ifelse(COY_wtr_rsf > 5, NA, COY_wtr_rsf)
-    )
+  #' #'  Identify any outliers
+  #' outliers <- function(predicted, title) {
+  #'   print(summary(predicted))
+  #'   hist(predicted, breaks = 100, main = title)
+  #'   boxplot(predicted, main = title)
+  #' }
+  #' #'  Identify outlier perdictions
+  #' outliers(Predicted_rsf$MD_smr_rsf, "Mule Deer Summer RSF Predictions")
+  #' outliers(Predicted_rsf$MD_wtr_rsf, "Mule Deer Winter RSF Prediction")
+  #' outliers(Predicted_rsf$ELK_smr_rsf, "Elk Summer RSF Predictions")
+  #' outliers(Predicted_rsf$ELK_wtr_rsf, "Elk Winter RSF Prediction")
+  #' outliers(Predicted_rsf$WTD_smr_rsf, "White-tailed Deer Summer RSF Predictions")
+  #' outliers(Predicted_rsf$WTD_wtr_rsf, "White-tailed Deer Winter RSF Prediction")
+  #' outliers(Predicted_rsf$COUG_smr_rsf, "Cougar Summer RSF Predictions")
+  #' outliers(Predicted_rsf$COUG_wtr_rsf, "Cougar Winter RSF Prediction")
+  #' outliers(Predicted_rsf$WOLF_smr_rsf, "Wolf Summer RSF Predictions")
+  #' outliers(Predicted_rsf$WOLF_wtr_rsf, "Wolf Winter RSF Prediction")
+  #' outliers(Predicted_rsf$BOB_smr_rsf, "Bobcat Summer RSF Predictions")
+  #' outliers(Predicted_rsf$BOB_wtr_rsf, "Bobcat Winter RSF Prediction")
+  #' outliers(Predicted_rsf$COY_smr_rsf, "Coyote Summer RSF Predictions")
+  #' outliers(Predicted_rsf$COY_wtr_rsf, "Coyote Winter RSF Prediction")
+  #' 
+  #' #'  Exclude extreme outliers as identified by histograms & boxplots
+  #' Predicted_rsf <- Predicted_rsf %>%
+  #'   mutate(
+  #'     MD_smr_rsf2 = ifelse(MD_smr_rsf > 5, NA, MD_smr_rsf),
+  #'     MD_wtr_rsf2 = ifelse(MD_wtr_rsf > 15, NA, MD_wtr_rsf), 
+  #'     # ELK_wtr_rsf2 = ifelse(ELK_wtr_rsf > 3, NA, ELK_wtr_rsf),  
+  #'     WTD_smr_rsf2 = ifelse(WTD_smr_rsf > 6, NA, WTD_smr_rsf),
+  #'     WTD_wtr_rsf2 = ifelse(WTD_wtr_rsf > 6, NA, WTD_wtr_rsf),
+  #'     COUG_wtr_rsf2 = ifelse(COUG_wtr_rsf > 10, NA, COUG_wtr_rsf), 
+  #'     WOLF_smr_rsf2 = ifelse(WOLF_smr_rsf > 9, NA, WOLF_smr_rsf),
+  #'     # WOLF_wtr_rsf2 = ifelse(WOLF_wtr_rsf > 5, NA, WOLF_wtr_rsf),
+  #'     BOB_smr_rsf2 = ifelse(BOB_smr_rsf > 6, NA, BOB_smr_rsf),
+  #'     BOB_wtr_rsf2 = ifelse(BOB_wtr_rsf > 6, NA, BOB_wtr_rsf),
+  #'     COY_wtr_rsf2 = ifelse(COY_wtr_rsf > 5, NA, COY_wtr_rsf)
+  #'   )
 
  
   #'  Merge all predictions together (with unscaled RSF predictions)
@@ -560,17 +600,17 @@
   #'  Run each predictions through function
   md_smr_corr <- predict_corr(Predicted_occ$MD_smr_occ, Predicted_rsf$MD_smr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   md_wtr_corr <- predict_corr(Predicted_occ$MD_wtr_occ, Predicted_rsf$MD_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-  elk_smr_corr <- predict_corr(Predicted_occ$ELK_smr_occ, Predicted_rsf$ELK_smr_rsf)  
-  elk_wtr_corr <- predict_corr(Predicted_occ$ELK_wtr_occ, Predicted_rsf$ELK_wtr_rsf)  
+  elk_smr_corr <- predict_corr(Predicted_occ$ELK_smr_occ, Predicted_rsf$ELK_smr_rsf2)  
+  elk_wtr_corr <- predict_corr(Predicted_occ$ELK_wtr_occ, Predicted_rsf$ELK_wtr_rsf2)  
   wtd_smr_corr <- predict_corr(Predicted_occ$WTD_smr_occ, Predicted_rsf$WTD_smr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   wtd_wtr_corr <- predict_corr(Predicted_occ$WTD_wtr_occ, Predicted_rsf$WTD_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-  coug_smr_corr <- predict_corr(Predicted_occ$COUG_smr_occ, Predicted_rsf$COUG_smr_rsf)
+  coug_smr_corr <- predict_corr(Predicted_occ$COUG_smr_occ, Predicted_rsf$COUG_smr_rsf2)
   coug_wtr_corr <- predict_corr(Predicted_occ$COUG_wtr_occ, Predicted_rsf$COUG_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-  wolf_smr_corr <- predict_corr(Predicted_occ$WOLF_smr_occ, Predicted_rsf$WOLF_smr_rsf)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-  wolf_wtr_corr <- predict_corr(Predicted_occ$WOLF_wtr_occ, Predicted_rsf$WOLF_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-  bob_smr_corr <- predict_corr(Predicted_occ$BOB_smr_occ, Predicted_rsf$BOB_smr_rsf)
+  wolf_smr_corr <- predict_corr(Predicted_occ$WOLF_smr_occ, Predicted_rsf$WOLF_smr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+  wolf_wtr_corr <- predict_corr(Predicted_occ$WOLF_wtr_occ, Predicted_rsf$WOLF_wtr_rsf2)  
+  bob_smr_corr <- predict_corr(Predicted_occ$BOB_smr_occ, Predicted_rsf$BOB_smr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   bob_wtr_corr <- predict_corr(Predicted_occ$BOB_wtr_occ, Predicted_rsf$BOB_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-  coy_smr_corr <- predict_corr(Predicted_occ$COY_smr_occ, Predicted_rsf$COY_smr_rsf)
+  coy_smr_corr <- predict_corr(Predicted_occ$COY_smr_occ, Predicted_rsf$COY_smr_rsf2)
   coy_wtr_corr <- predict_corr(Predicted_occ$COY_wtr_occ, Predicted_rsf$COY_wtr_rsf2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
   
   #'  Wrangle results into a table
@@ -589,7 +629,7 @@
     arrange(Species)
   
   #'  Save correlations
-  write.csv(corr_results, paste0("./Outputs/Tables/Correlation_OccMod_RSF_Predictions_noHM_", Sys.Date(), ".csv"))  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o outliers)
+  write.csv(corr_results, paste0("./Outputs/Tables/Correlation_OccMod_RSF_Predictions_BuffHR_1km_", Sys.Date(), ".csv"))  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o outliers)
   
   
   ####  Re-scale RSF values between 0 & 1 for mapping  ####
@@ -600,32 +640,36 @@
       Area = Area,
       x = x,
       y = y,
-      COUG_smr_rsf = round(COUG_smr_rsf/(max(COUG_smr_rsf, na.rm = T)), digits = 2),
+      COUG_smr_rsf = round(COUG_smr_rsf/(max(COUG_smr_rsf2, na.rm = T)), digits = 2),
       COUG_wtr_rsf = round(COUG_wtr_rsf2/(max(COUG_wtr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-      WOLF_smr_rsf = round(WOLF_smr_rsf/(max(WOLF_smr_rsf, na.rm = T)), digits = 2),
+      WOLF_smr_rsf = round(WOLF_smr_rsf/(max(WOLF_smr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
       WOLF_wtr_rsf = round(WOLF_wtr_rsf2/(max(WOLF_wtr_rsf2, na.rm = T)), digits = 2),
-      BOB_smr_rsf = round(BOB_smr_rsf/(max(BOB_smr_rsf, na.rm = T)), digits = 2),
+      BOB_smr_rsf = round(BOB_smr_rsf/(max(BOB_smr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
       BOB_wtr_rsf = round(BOB_wtr_rsf2/(max(BOB_wtr_rsf2, na.rm = T)), digits = 2),
-      COY_smr_rsf = round(COY_smr_rsf/(max(COY_smr_rsf, na.rm = T)), digits = 2),
+      COY_smr_rsf = round(COY_smr_rsf/(max(COY_smr_rsf2, na.rm = T)), digits = 2),
       COY_wtr_rsf = round(COY_wtr_rsf2/(max(COY_wtr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-      ELK_smr_rsf = round(ELK_smr_rsf/(max(ELK_smr_rsf, na.rm = T)), digits = 2),
-      ELK_wtr_rsf = round(ELK_wtr_rsf/(max(ELK_wtr_rsf, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+      ELK_smr_rsf = round(ELK_smr_rsf/(max(ELK_smr_rsf2, na.rm = T)), digits = 2),
+      ELK_wtr_rsf = round(ELK_wtr_rsf/(max(ELK_wtr_rsf2, na.rm = T)), digits = 2), 
       WTD_smr_rsf = round(WTD_smr_rsf2/(max(WTD_smr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-      WTD_wtr_rsf = round(WTD_wtr_rsf2/(max(WTD_wtr_rsf2, na.rm = T)), digits = 2),
+      WTD_wtr_rsf = round(WTD_wtr_rsf2/(max(WTD_wtr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
       MD_smr_rsf = round(MD_smr_rsf2/(max(MD_smr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
       MD_wtr_rsf = round(MD_wtr_rsf2/(max(MD_wtr_rsf2, na.rm = T)), digits = 2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
     )
   
   #'  Save
-  write.csv(Predicted_rsf_rescale, paste0("./Outputs/Tables/Predicted_Relative_Selection_rescale_", Sys.Date(), ".csv"))
+  write.csv(Predicted_rsf_rescale, paste0("./Outputs/Tables/Predicted_Relative_Selection_rescale_1km_", Sys.Date(), ".csv"))
   
   
   #'  For some reason ggplot is freaking out over plotting actual 0 values and
   #'  represents them as NA in maps. So for plotting purposes only I am changing
   #'  all pixels with value 0 to 0.0001 so they are slightly >0 and will plot.
   Predicted_rsf_rescale <- Predicted_rsf_rescale %>%
-    mutate(WOLF_smr_rsf = ifelse(WOLF_smr_rsf == 0, 0.00001, WOLF_smr_rsf),
+    mutate(COUG_smr_rsf = ifelse(COUG_smr_rsf == 0, 0.00001, COUG_smr_rsf),
+           WOLF_smr_rsf = ifelse(WOLF_smr_rsf == 0, 0.00001, WOLF_smr_rsf),
            BOB_smr_rsf = ifelse(BOB_smr_rsf == 0, 0.00001, BOB_smr_rsf),
+           BOB_wtr_rsf = ifelse(BOB_wtr_rsf == 0, 0.00001, BOB_wtr_rsf),
+           ELK_smr_rsf = ifelse(ELK_smr_rsf == 0, 0.00001, ELK_smr_rsf),
+           WTD_smr_rsf = ifelse(WTD_smr_rsf == 0, 0.00001, WTD_smr_rsf),
            MD_wtr_rsf = ifelse(MD_wtr_rsf == 0, 0.00001, MD_wtr_rsf))
   
   
