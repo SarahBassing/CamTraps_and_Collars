@@ -193,20 +193,21 @@
   coy_smr_zcovs <- scaling_covs(all_covs_1km, summary_coy_smr)
   coy_wtr_zcovs <- scaling_covs(all_covs_1km, summary_coy_wtr)
   
-  #'  Function to covert all covariate data into SpatialPointsDataFrames
-  sp_covs <- function(covs) {
-    xy <- covs[,c(10,11)]
-    covs_spdf <- SpatialPointsDataFrame(data = covs, coords = xy,
-                                        proj4string = CRS(sa_proj))
-  }
+  #' #'  Function to covert all covariate data into SpatialPointsDataFrames
+  #' sp_covs <- function(covs) {
+  #'   xy <- covs[,c(10,11)]
+  #'   # xy <- covs[,c(9,10)]
+  #'   covs_spdf <- SpatialPointsDataFrame(data = covs, coords = xy,
+  #'                                       proj4string = CRS(sa_proj))
+  #' }
   #'  Gather all scaled covariate data into a monster list
   zcovs <- list(cam_zcovs, md_smr_zcovs, md_wtr_zcovs, 
                 elk_smr_zcovs, elk_wtr_zcovs, wtd_smr_zcovs, 
                 wtd_wtr_zcovs, coug_smr_zcovs, coug_wtr_zcovs, 
                 wolf_smr_zcovs, wolf_wtr_zcovs, bob_smr_zcovs, 
                 bob_wtr_zcovs, coy_smr_zcovs, coy_wtr_zcovs)
-  #'  Run list of scaled covariates through spatial function
-  sp_zcovs <- lapply(zcovs, sp_covs)
+  #' #'  Run list of scaled covariates through spatial function
+  #' sp_zcovs <- lapply(zcovs, sp_covs)
   
   
 
@@ -280,24 +281,24 @@
   #'  Run estimates from occupancy sub-model through function to predict probability of use
   #'  BE SURE TO USE THE RIGHT COVARIATE DATA! sp_zcovs[[1]] are covariates from camera sites
   #'  Includes ONLY significant coefficients per species and season
-  md_smr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]][sp_zcovs[[1]]$Area == 1,], occ_coefs_signif[occ_coefs_signif$Species == "Mule Deer" & occ_coefs_signif$Season == "Summer",])
-  md_wtr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]][sp_zcovs[[1]]$Area == 1,], occ_coefs_signif[occ_coefs_signif$Species == "Mule Deer" & occ_coefs_signif$Season == "Winter",])
-  elk_smr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]][sp_zcovs[[1]]$Area == 0,], occ_coefs_signif[occ_coefs_signif$Species == "Elk" & occ_coefs_signif$Season == "Summer",])
-  elk_wtr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]][sp_zcovs[[1]]$Area == 0,], occ_coefs_signif[occ_coefs_signif$Species == "Elk" & occ_coefs_signif$Season == "Winter",])
-  wtd_smr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]][sp_zcovs[[1]]$Area == 0,], occ_coefs_signif[occ_coefs_signif$Species == "White-tailed Deer" & occ_coefs_signif$Season == "Summer",])
-  wtd_wtr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]][sp_zcovs[[1]]$Area == 0,], occ_coefs_signif[occ_coefs_signif$Species == "White-tailed Deer" & occ_coefs_signif$Season == "Winter",])
-  coug_smr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Cougar" & occ_coefs_signif$Season == "Summer",])
-  coug_wtr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Cougar" & occ_coefs_signif$Season == "Winter",])
-  wolf_smr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Wolf" & occ_coefs_signif$Season == "Summer",])
-  wolf_wtr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Wolf" & occ_coefs_signif$Season == "Winter",])
-  bob_smr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Bobcat" & occ_coefs_signif$Season == "Summer",])
-  bob_wtr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Bobcat" & occ_coefs_signif$Season == "Winter",])
-  coy_smr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Coyote" & occ_coefs_signif$Season == "Summer",])
-  coy_wtr_predict_occ_sgnf <- predict_occ(sp_zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Coyote" & occ_coefs_signif$Season == "Winter",])
+  md_smr_predict_occ_sgnf <- predict_occ(zcovs[[1]][zcovs[[1]]$Area == 1,], occ_coefs_signif[occ_coefs_signif$Species == "Mule Deer" & occ_coefs_signif$Season == "Summer",])
+  md_wtr_predict_occ_sgnf <- predict_occ(zcovs[[1]][zcovs[[1]]$Area == 1,], occ_coefs_signif[occ_coefs_signif$Species == "Mule Deer" & occ_coefs_signif$Season == "Winter",])
+  elk_smr_predict_occ_sgnf <- predict_occ(zcovs[[1]][zcovs[[1]]$Area == 0,], occ_coefs_signif[occ_coefs_signif$Species == "Elk" & occ_coefs_signif$Season == "Summer",])
+  elk_wtr_predict_occ_sgnf <- predict_occ(zcovs[[1]][zcovs[[1]]$Area == 0,], occ_coefs_signif[occ_coefs_signif$Species == "Elk" & occ_coefs_signif$Season == "Winter",])
+  wtd_smr_predict_occ_sgnf <- predict_occ(zcovs[[1]][zcovs[[1]]$Area == 0,], occ_coefs_signif[occ_coefs_signif$Species == "White-tailed Deer" & occ_coefs_signif$Season == "Summer",])
+  wtd_wtr_predict_occ_sgnf <- predict_occ(zcovs[[1]][zcovs[[1]]$Area == 0,], occ_coefs_signif[occ_coefs_signif$Species == "White-tailed Deer" & occ_coefs_signif$Season == "Winter",])
+  coug_smr_predict_occ_sgnf <- predict_occ(zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Cougar" & occ_coefs_signif$Season == "Summer",])
+  coug_wtr_predict_occ_sgnf <- predict_occ(zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Cougar" & occ_coefs_signif$Season == "Winter",])
+  wolf_smr_predict_occ_sgnf <- predict_occ(zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Wolf" & occ_coefs_signif$Season == "Summer",])
+  wolf_wtr_predict_occ_sgnf <- predict_occ(zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Wolf" & occ_coefs_signif$Season == "Winter",])
+  bob_smr_predict_occ_sgnf <- predict_occ(zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Bobcat" & occ_coefs_signif$Season == "Summer",])
+  bob_wtr_predict_occ_sgnf <- predict_occ(zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Bobcat" & occ_coefs_signif$Season == "Winter",])
+  coy_smr_predict_occ_sgnf <- predict_occ(zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Coyote" & occ_coefs_signif$Season == "Summer",])
+  coy_wtr_predict_occ_sgnf <- predict_occ(zcovs[[1]], occ_coefs_signif[occ_coefs_signif$Species == "Coyote" & occ_coefs_signif$Season == "Winter",])
   
   #'  Combine into a monster data frame
   #'  Start with predator data that spans both study areas
-  Predicted_occ <- as.data.frame(all_covs_1km) %>%  # NOTE WHICH GRID YOU'RE USING!
+  Predicted_occ <- as.data.frame(zcovs[[1]]) %>%  # NOTE WHICH GRID YOU'RE USING!
     dplyr::select(obs, Area, x, y) %>% 
     mutate(Area = ifelse(Area == 0, "Northeast", "Okanogan")) %>%
     cbind(coug_smr_predict_occ_sgnf, coug_wtr_predict_occ_sgnf, 
@@ -311,17 +312,17 @@
                                "BOB_wtr_occ", "COY_smr_occ", "COY_wtr_occ")
   
   #'  Okanogan-only data (mule deer)
-  OK_rows <- seq(1:nrow(md_smr_predict_occ_sgnf))
-  Area <- rep("Okanogan", length(OK_rows))
-  OK_occ <- as.data.frame(cbind(OK_rows, Area, md_smr_predict_occ_sgnf, md_wtr_predict_occ_sgnf)) 
-  colnames(OK_occ) <- c("obs", "Area", "MD_smr_occ", "MD_wtr_occ")
+  # OK_rows <- seq(1:nrow(md_smr_predict_occ_sgnf))
+  # Area <- rep("Okanogan", length(OK_rows))
+  OK_occ <- as.data.frame(cbind(md_smr_predict_occ_sgnf, md_wtr_predict_occ_sgnf)) # OK_rows, Area, 
+  colnames(OK_occ) <- c("MD_smr_occ", "MD_wtr_occ") #"obs", "Area", 
   
   #'  Northeast-only data (elk & white-tailed deer)
-  NE_rows <- seq(1:nrow(elk_smr_predict_occ_sgnf))
-  Area <- rep("Northeast", length(NE_rows))
-  NE_occ <- as.data.frame(cbind(NE_rows, Area, elk_smr_predict_occ_sgnf, elk_wtr_predict_occ_sgnf, 
-                                wtd_smr_predict_occ_sgnf, wtd_wtr_predict_occ_sgnf)) 
-  colnames(NE_occ) <- c("obs", "Area", "ELK_smr_occ", "ELK_wtr_occ", "WTD_smr_occ", "WTD_wtr_occ")
+  # NE_rows <- seq(1:nrow(elk_smr_predict_occ_sgnf))
+  # Area <- rep("Northeast", length(NE_rows))
+  NE_occ <- as.data.frame(cbind(elk_smr_predict_occ_sgnf, elk_wtr_predict_occ_sgnf, 
+                                wtd_smr_predict_occ_sgnf, wtd_wtr_predict_occ_sgnf)) # NE_rows, Area,  
+  colnames(NE_occ) <- c("ELK_smr_occ", "ELK_wtr_occ", "WTD_smr_occ", "WTD_wtr_occ") # "obs", "Area", 
   
   #'  Merge ungulate & predator data by study area
   Predicted_occ_OK <- Predicted_occ[Predicted_occ$Area == "Okanogan",] %>%
@@ -332,9 +333,9 @@
       WTD_smr_occ = NA,
       WTD_wtr_occ = NA
     ) %>%
-    full_join(OK_occ, by = c("obs", "Area")) 
+    cbind(OK_occ) 
   Predicted_occ_NE <- Predicted_occ[Predicted_occ$Area == "Northeast",] %>%
-    full_join(NE_occ, by = c("obs", "Area")) %>%
+    cbind(NE_occ) %>%
     #'  Need to account for columns that are present in other study area dataframe
     mutate(
       MD_smr_occ = NA,
@@ -342,7 +343,10 @@
     )
   
   #'  Merge NE and OK predictions together
-  Predicted_occ <- as.data.frame(rbind(Predicted_occ_NE, Predicted_occ_OK))
+  Predicted_occ <- as.data.frame(rbind(Predicted_occ_NE, Predicted_occ_OK)) %>%
+    mutate(Obs = seq(1:nrow(.))) %>%
+    dplyr::select(-obs) %>%
+    relocate(Obs, .before = "Area")
   
   #'  Save
   write.csv(Predicted_occ, paste0("./Outputs/Tables/Predicted_Prob_Occupancy_", Sys.Date(), ".csv"))
@@ -429,20 +433,20 @@
   #'  e.g., sp_zcovs[[2]] = covs standardized based on summer mule deer mean & SDs (includes both study areas)
   #'  e.g., sp_zcovs[[15]] = covs standardized based on winter coyote mean & SDs (inclused both study areas)
   #'  Includes ONLY significant coefficients per species and season
-  md_smr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[2]][sp_zcovs[[2]]$Area == 1,], rsf_coefs_signif[rsf_coefs_signif$Species == "Mule Deer" & rsf_coefs_signif$Season == "Summer",])
-  md_wtr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[3]][sp_zcovs[[3]]$Area == 1,], rsf_coefs_signif[rsf_coefs_signif$Species == "Mule Deer" & rsf_coefs_signif$Season == "Winter",])
-  elk_smr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[4]][sp_zcovs[[4]]$Area == 0,], rsf_coefs_signif[rsf_coefs_signif$Species == "Elk" & rsf_coefs_signif$Season == "Summer",])
-  elk_wtr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[5]][sp_zcovs[[5]]$Area == 0,], rsf_coefs_signif[rsf_coefs_signif$Species == "Elk" & rsf_coefs_signif$Season == "Winter",])
-  wtd_smr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[6]][sp_zcovs[[6]]$Area == 0,], rsf_coefs_signif[rsf_coefs_signif$Species == "White-tailed Deer" & rsf_coefs_signif$Season == "Summer",])
-  wtd_wtr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[7]][sp_zcovs[[7]]$Area == 0,], rsf_coefs_signif[rsf_coefs_signif$Species == "White-tailed Deer" & rsf_coefs_signif$Season == "Winter",])
-  coug_smr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[8]], rsf_coefs_signif[rsf_coefs_signif$Species == "Cougar" & rsf_coefs_signif$Season == "Summer",])
-  coug_wtr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[9]], rsf_coefs_signif[rsf_coefs_signif$Species == "Cougar" & rsf_coefs_signif$Season == "Winter",])
-  wolf_smr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[10]], rsf_coefs_signif[rsf_coefs_signif$Species == "Wolf" & rsf_coefs_signif$Season == "Summer",])
-  wolf_wtr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[11]], rsf_coefs_signif[rsf_coefs_signif$Species == "Wolf" & rsf_coefs_signif$Season == "Winter",])
-  bob_smr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[12]], rsf_coefs_signif[rsf_coefs_signif$Species == "Bobcat" & rsf_coefs_signif$Season == "Summer",])
-  bob_wtr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[13]], rsf_coefs_signif[rsf_coefs_signif$Species == "Bobcat" & rsf_coefs_signif$Season == "Winter",])
-  coy_smr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[14]], rsf_coefs_signif[rsf_coefs_signif$Species == "Coyote" & rsf_coefs_signif$Season == "Summer",])
-  coy_wtr_predict_rsf_sgnf <- predict_rsf(sp_zcovs[[15]], rsf_coefs_signif[rsf_coefs_signif$Species == "Coyote" & rsf_coefs_signif$Season == "Winter",])
+  md_smr_predict_rsf_sgnf <- predict_rsf(zcovs[[2]][zcovs[[2]]$Area == 1,], rsf_coefs_signif[rsf_coefs_signif$Species == "Mule Deer" & rsf_coefs_signif$Season == "Summer",])
+  md_wtr_predict_rsf_sgnf <- predict_rsf(zcovs[[3]][zcovs[[3]]$Area == 1,], rsf_coefs_signif[rsf_coefs_signif$Species == "Mule Deer" & rsf_coefs_signif$Season == "Winter",])
+  elk_smr_predict_rsf_sgnf <- predict_rsf(zcovs[[4]][zcovs[[4]]$Area == 0,], rsf_coefs_signif[rsf_coefs_signif$Species == "Elk" & rsf_coefs_signif$Season == "Summer",])
+  elk_wtr_predict_rsf_sgnf <- predict_rsf(zcovs[[5]][zcovs[[5]]$Area == 0,], rsf_coefs_signif[rsf_coefs_signif$Species == "Elk" & rsf_coefs_signif$Season == "Winter",])
+  wtd_smr_predict_rsf_sgnf <- predict_rsf(zcovs[[6]][zcovs[[6]]$Area == 0,], rsf_coefs_signif[rsf_coefs_signif$Species == "White-tailed Deer" & rsf_coefs_signif$Season == "Summer",])
+  wtd_wtr_predict_rsf_sgnf <- predict_rsf(zcovs[[7]][zcovs[[7]]$Area == 0,], rsf_coefs_signif[rsf_coefs_signif$Species == "White-tailed Deer" & rsf_coefs_signif$Season == "Winter",])
+  coug_smr_predict_rsf_sgnf <- predict_rsf(zcovs[[8]], rsf_coefs_signif[rsf_coefs_signif$Species == "Cougar" & rsf_coefs_signif$Season == "Summer",])
+  coug_wtr_predict_rsf_sgnf <- predict_rsf(zcovs[[9]], rsf_coefs_signif[rsf_coefs_signif$Species == "Cougar" & rsf_coefs_signif$Season == "Winter",])
+  wolf_smr_predict_rsf_sgnf <- predict_rsf(zcovs[[10]], rsf_coefs_signif[rsf_coefs_signif$Species == "Wolf" & rsf_coefs_signif$Season == "Summer",])
+  wolf_wtr_predict_rsf_sgnf <- predict_rsf(zcovs[[11]], rsf_coefs_signif[rsf_coefs_signif$Species == "Wolf" & rsf_coefs_signif$Season == "Winter",])
+  bob_smr_predict_rsf_sgnf <- predict_rsf(zcovs[[12]], rsf_coefs_signif[rsf_coefs_signif$Species == "Bobcat" & rsf_coefs_signif$Season == "Summer",])
+  bob_wtr_predict_rsf_sgnf <- predict_rsf(zcovs[[13]], rsf_coefs_signif[rsf_coefs_signif$Species == "Bobcat" & rsf_coefs_signif$Season == "Winter",])
+  coy_smr_predict_rsf_sgnf <- predict_rsf(zcovs[[14]], rsf_coefs_signif[rsf_coefs_signif$Species == "Coyote" & rsf_coefs_signif$Season == "Summer",])
+  coy_wtr_predict_rsf_sgnf <- predict_rsf(zcovs[[15]], rsf_coefs_signif[rsf_coefs_signif$Species == "Coyote" & rsf_coefs_signif$Season == "Winter",])
   
   #'  Combine into a monster data frame
   #'  Start with predators
@@ -460,17 +464,17 @@
                                "BOB_wtr_rsf", "COY_smr_rsf", "COY_wtr_rsf")
   
   #'  Okanogan-only data (mule deer)
-  OK_rows <- seq(1:nrow(md_smr_predict_rsf_sgnf))
-  Area <- rep("Okanogan", length(OK_rows))
-  OK_rsf <- as.data.frame(cbind(OK_rows, Area, md_smr_predict_rsf_sgnf, md_wtr_predict_rsf_sgnf)) # KEEP TRACK of which version of the predicted results I'm using
-  colnames(OK_rsf) <- c("obs", "Area", "MD_smr_rsf", "MD_wtr_rsf")
+  # OK_rows <- seq(1:nrow(md_smr_predict_rsf_sgnf))
+  # Area <- rep("Okanogan", length(OK_rows))
+  OK_rsf <- as.data.frame(cbind(md_smr_predict_rsf_sgnf, md_wtr_predict_rsf_sgnf)) # OK_rows, Area, 
+  colnames(OK_rsf) <- c("MD_smr_rsf", "MD_wtr_rsf") #"obs", "Area", 
   
   #'  Northeast-only data (elk & white-tailed deer)
-  NE_rows <- seq(1:nrow(elk_smr_predict_rsf_sgnf))
-  Area <- rep("Northeast", length(NE_rows))
-  NE_rsf <- as.data.frame(cbind(NE_rows, Area, elk_smr_predict_rsf_sgnf, elk_wtr_predict_rsf_sgnf, # KEEP TRACK of which version of the predicted results I'm using
+  # NE_rows <- seq(1:nrow(elk_smr_predict_rsf_sgnf))
+  # Area <- rep("Northeast", length(NE_rows))
+  NE_rsf <- as.data.frame(cbind(elk_smr_predict_rsf_sgnf, elk_wtr_predict_rsf_sgnf, # NE_rows, Area, 
                                 wtd_smr_predict_rsf_sgnf, wtd_wtr_predict_rsf_sgnf)) 
-  colnames(NE_rsf) <- c("obs", "Area", "ELK_smr_rsf", "ELK_wtr_rsf", "WTD_smr_rsf", "WTD_wtr_rsf")
+  colnames(NE_rsf) <- c("ELK_smr_rsf", "ELK_wtr_rsf", "WTD_smr_rsf", "WTD_wtr_rsf") #"obs", "Area", 
   
   #'  Merge ungulate & predator data by study area
   Predicted_rsf_OK <- Predicted_rsf[Predicted_rsf$Area == "Okanogan",] %>%
@@ -481,9 +485,9 @@
       WTD_smr_rsf = NA,
       WTD_wtr_rsf = NA
     ) %>%
-    full_join(OK_rsf, by = c("obs", "Area")) 
+    cbind(OK_rsf) 
   Predicted_rsf_NE <- Predicted_rsf[Predicted_rsf$Area == "Northeast",] %>%
-    full_join(NE_rsf, by = c("obs", "Area")) %>%
+    cbing(NE_rsf) %>%
     #'  Need to account for columns that are present in other study area dataframe
     mutate(
       MD_smr_rsf = NA,
@@ -491,7 +495,10 @@
     )
   
   #'  Merge NE and OK predictions togther
-  Predicted_rsf <- as.data.frame(rbind(Predicted_rsf_NE, Predicted_rsf_OK))
+  Predicted_rsf <- as.data.frame(rbind(Predicted_rsf_NE, Predicted_rsf_OK)) %>%
+    mutate(Obs = seq(1:nrow(.))) %>%
+    dplyr::select(-obs) %>%
+    relocate(Obs, .before = "Area")
   
   
   #'  Function to identify any outliers
@@ -573,8 +580,8 @@
  
   #'  Merge all predictions together (with unscaled RSF predictions)
   Predicted_Occ_RSF <- Predicted_occ %>%
-    full_join(Predicted_rsf, by = c("obs", "Area", "x", "y"))
-  write.csv(Predicted_Occ_RSF, paste0("./Outputs/Tables/Predictions_OccMod_v_RSF_noHM_", Sys.Date(), ".csv"))  
+    full_join(Predicted_rsf, by = c("Obs", "Area", "x", "y"))
+  write.csv(Predicted_Occ_RSF, paste0("./Outputs/Tables/Predictions_OccMod_v_RSF_buffHR_", Sys.Date(), ".csv"))  
   
   
   
@@ -619,11 +626,12 @@
   corr <- c(md_smr_corr, md_wtr_corr, elk_smr_corr, elk_wtr_corr, wtd_smr_corr, 
             wtd_wtr_corr, coug_smr_corr, coug_wtr_corr, wolf_smr_corr, wolf_wtr_corr,
             bob_smr_corr, bob_wtr_corr, coy_smr_corr, coy_wtr_corr)
+  corr <- as.data.frame(corr)
   corr_results <- as.data.frame(cbind(spp, season, corr)) %>%
     transmute(
       Species = spp,
       Season = season,
-      Correlation = as.numeric(corr),
+      #Correlation = as.numeric(corr),
       Correlation = round(Correlation, digits = 2)
     ) %>%
     arrange(Species)
@@ -636,24 +644,24 @@
   #'  Re-scale RSF values so they range 0 - 1 to match occupancy predictions
   Predicted_rsf_rescale <- Predicted_rsf %>%
     transmute(
-      obs = obs,
+      Obs = Obs,
       Area = Area,
       x = x,
       y = y,
-      COUG_smr_rsf = round(COUG_smr_rsf/(max(COUG_smr_rsf2, na.rm = T)), digits = 2),
-      COUG_wtr_rsf = round(COUG_wtr_rsf2/(max(COUG_wtr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-      WOLF_smr_rsf = round(WOLF_smr_rsf/(max(WOLF_smr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+      COUG_smr_rsf = round(COUG_smr_rsf2/(max(COUG_smr_rsf2, na.rm = T)), digits = 2),
+      COUG_wtr_rsf = round(COUG_wtr_rsf2/(max(COUG_wtr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
+      WOLF_smr_rsf = round(WOLF_smr_rsf2/(max(WOLF_smr_rsf2, na.rm = T)), digits = 2),
       WOLF_wtr_rsf = round(WOLF_wtr_rsf2/(max(WOLF_wtr_rsf2, na.rm = T)), digits = 2),
-      BOB_smr_rsf = round(BOB_smr_rsf/(max(BOB_smr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+      BOB_smr_rsf = round(BOB_smr_rsf2/(max(BOB_smr_rsf2, na.rm = T)), digits = 2),
       BOB_wtr_rsf = round(BOB_wtr_rsf2/(max(BOB_wtr_rsf2, na.rm = T)), digits = 2),
-      COY_smr_rsf = round(COY_smr_rsf/(max(COY_smr_rsf2, na.rm = T)), digits = 2),
-      COY_wtr_rsf = round(COY_wtr_rsf2/(max(COY_wtr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-      ELK_smr_rsf = round(ELK_smr_rsf/(max(ELK_smr_rsf2, na.rm = T)), digits = 2),
-      ELK_wtr_rsf = round(ELK_wtr_rsf/(max(ELK_wtr_rsf2, na.rm = T)), digits = 2), 
-      WTD_smr_rsf = round(WTD_smr_rsf2/(max(WTD_smr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-      WTD_wtr_rsf = round(WTD_wtr_rsf2/(max(WTD_wtr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-      MD_smr_rsf = round(MD_smr_rsf2/(max(MD_smr_rsf2, na.rm = T)), digits = 2), # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
-      MD_wtr_rsf = round(MD_wtr_rsf2/(max(MD_wtr_rsf2, na.rm = T)), digits = 2)  # NOTE WHETHER EXCLUDING OUTLIER PREDICTIONS HERE
+      COY_smr_rsf = round(COY_smr_rsf2/(max(COY_smr_rsf2, na.rm = T)), digits = 2),
+      COY_wtr_rsf = round(COY_wtr_rsf2/(max(COY_wtr_rsf2, na.rm = T)), digits = 2),
+      ELK_smr_rsf = round(ELK_smr_rsf2/(max(ELK_smr_rsf2, na.rm = T)), digits = 2),
+      ELK_wtr_rsf = round(ELK_wtr_rsf2/(max(ELK_wtr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
+      WTD_smr_rsf = round(WTD_smr_rsf2/(max(WTD_smr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
+      WTD_wtr_rsf = round(WTD_wtr_rsf2/(max(WTD_wtr_rsf2, na.rm = T)), digits = 2),
+      MD_smr_rsf = round(MD_smr_rsf2/(max(MD_smr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
+      MD_wtr_rsf = round(MD_wtr_rsf2/(max(MD_wtr_rsf2, na.rm = T)), digits = 2)  # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
     )
   
   #'  Save
