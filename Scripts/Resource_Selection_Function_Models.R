@@ -20,14 +20,6 @@
   library(lme4)
   
   #'  Load used and available locations, and covariate data
-  #' #'  3rd Order Selection
-  #' load("./Outputs/RSF_pts/md_dat_all_2021-06-30.RData")
-  #' load("./Outputs/RSF_pts/elk_dat_all_2021-06-30.RData")
-  #' load("./Outputs/RSF_pts/wtd_dat_all_2021-06-30.RData")
-  #' load("./Outputs/RSF_pts/coug_dat_all_2021-06-30.RData")
-  #' load("./Outputs/RSF_pts/wolf_dat_all_2021-06-30.RData")
-  #' load("./Outputs/RSF_pts/bob_dat_all_2021-06-30.RData")
-  #' load("./Outputs/RSF_pts/coy_dat_all_2021-06-30.RData")
   #' #'  2nd Order Selection (based on single large MCP)
   #' load("./Outputs/RSF_pts/md_dat_2nd_all_2021-09-13.RData")
   #' load("./Outputs/RSF_pts/elk_dat_2nd_all_2021-09-13.RData")
@@ -36,14 +28,22 @@
   #' load("./Outputs/RSF_pts/wolf_dat_2nd_all_2021-10-29.RData")
   #' load("./Outputs/RSF_pts/bob_dat_2nd_all_2021-09-13.RData")
   #' load("./Outputs/RSF_pts/coy_dat_2nd_all_2021-09-13.RData")
-  #'  2nd Order Selection (based on buffered home ranges)
-  load("./Outputs/RSF_pts/md_dat_2nd_buffHR_all_2022-04-18.RData")  
+  #'  2nd Order Selection (based on buffered home ranges) 1:20 ratio
+  load("./Outputs/RSF_pts/md_dat_2nd_buffHR_all_2022-04-18.RData")
   load("./Outputs/RSF_pts/elk_dat_2nd_buffHR_all_2022-04-18.RData")
   load("./Outputs/RSF_pts/wtd_dat_2nd_buffHR_all_2022-04-18.RData")
   load("./Outputs/RSF_pts/coug_dat_2nd_buffHR_all_2022-04-18.RData")
-  load("./Outputs/RSF_pts/wolf_dat_2nd_buffHR_all_2022-04-18.RData") 
+  load("./Outputs/RSF_pts/wolf_dat_2nd_buffHR_all_2022-04-18.RData")
   load("./Outputs/RSF_pts/bob_dat_2nd_buffHR_all_2022-04-18.RData")
   load("./Outputs/RSF_pts/coy_dat_2nd_buffHR_all_2022-04-18.RData")
+  #' #'  2nd Order Selection (based on buffered home ranges) 1:200 ratio
+  #' load("./Outputs/RSF_pts/Subsampled_pts/md_dat_2nd_200avail_all_2022-05-11.RData")  
+  #' load("./Outputs/RSF_pts/Subsampled_pts/elk_dat_2nd_200avail_all_2022-05-11.RData")
+  #' load("./Outputs/RSF_pts/Subsampled_pts/wtd_dat_2nd_200avail_all_2022-05-11.RData")
+  #' load("./Outputs/RSF_pts/Subsampled_pts/coug_dat_2nd_200avail_all_2022-05-10.RData")
+  #' load("./Outputs/RSF_pts/Subsampled_pts/wolf_dat_2nd_200avail_all_2022-05-10.RData") 
+  #' load("./Outputs/RSF_pts/Subsampled_pts/bob_dat_2nd_200avail_all_2022-05-10.RData")
+  #' load("./Outputs/RSF_pts/Subsampled_pts/coy_dat_2nd_200avail_all_2022-05-10.RData")
   
   
   #'  Exclude used/available locations above 2100m
@@ -216,7 +216,7 @@
   
   ####  Mule Deer RSF  ####
   #'  SUMMERS 2018 & 2019
-  #'  Dropping PercXShrub due to high correlation with PercForMix
+  #'  Dropping PercXShrub due to high correlation with PercForMix/Elev
   md_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID), 
                          data = mdData_smr, weight = w, family = binomial(link = "logit")) 
   summary(md_global_smr)
@@ -346,7 +346,7 @@
   #'  WINTERS 2018-2019 & 2019-2020
   #'  Dropping PercXShrub to be consistent with wolf occupancy model
   #'  Dropping PercXGrass due to high correlation with PercForMix  
-  wolf_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID), #+ PercXShrub 
+  wolf_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID), 
                            data = wolfData_wtr, weight = w, family = binomial(link = "logit"))  
   summary(wolf_global_wtr)
   car::vif(wolf_global_wtr)
@@ -360,7 +360,7 @@
   car::vif(wolf_lowElev_only_smr)
   
   #'  HIGH ELEVATION LOCATIONS EXCLUDED: Wolf winter
-  wolf_lowElev_only_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID), #+ PercXShrub 
+  wolf_lowElev_only_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID),  
                                  data = wolfData_wtr_low, weight = w, family = binomial(link = "logit"))  
   summary(wolf_lowElev_only_wtr)
   car::vif(wolf_lowElev_only_wtr)
