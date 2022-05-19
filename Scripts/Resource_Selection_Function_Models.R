@@ -218,13 +218,13 @@
   #'  SUMMERS 2018 & 2019
   #'  Dropping PercXShrub due to high correlation with PercForMix/Elev
   md_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID), 
-                         data = mdData_smr, weight = w, family = binomial(link = "logit")) 
+                         data = mdData_smr, weights = w, family = binomial(link = "logit")) 
   summary(md_global_smr)
   car::vif(md_global_smr)
 
   #'  WINTERS 2018-2019 & 2019-2020
   md_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID),
-                          data = mdData_wtr, weight = w, family = binomial(link = "logit"))  
+                          data = mdData_wtr, weights = w, family = binomial(link = "logit"))  
   summary(md_global_wtr)
   car::vif(md_global_wtr)
   
@@ -242,20 +242,20 @@
   md_SA_only_df <- as.data.frame(md_SA_only)
   #'  Run exact same RSF as above but with only relocation data from within study area
   md_SA_only_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID),
-                         data = md_SA_only_df, weight = w, family = binomial(link = "logit"))
+                         data = md_SA_only_df, weights = w, family = binomial(link = "logit"))
   summary(md_SA_only_smr)
   car::vif(md_SA_only_smr)
   
   #'  HIGH ELEVATION LOCATIONS EXCLUDED: Mule deer summer
   #'  Run exact same RSF as above but with only locations <2100m
   md_lowElev_only_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID),
-                          data = mdData_smr_low, weight = w, family = binomial(link = "logit"))
+                          data = mdData_smr_low, weights = w, family = binomial(link = "logit"))
   summary(md_lowElev_only_smr)
   car::vif(md_lowElev_only_smr)
   
   #'  HIGH ELEVATION LOCATIONS EXCLUDED: Mule deer winter
   md_lowElev_only_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID),
-                         data = mdData_wtr_low, weight = w, family = binomial(link = "logit"))  
+                         data = mdData_wtr_low, weights = w, family = binomial(link = "logit"))  
   summary(md_lowElev_only_wtr)
   car::vif(md_lowElev_only_wtr)
   
@@ -265,7 +265,7 @@
   #'  Dropped PercXGrass & PercXShrub to be consistent with occupancy model 
   #'  DROPPING RANDOM EFFECT (AND USING GLM) due to singularity issue 
   elk_global_smr <- glm(Used ~ 1 + Elev + Slope + PercForMix + RoadDen,  #+ (1|ID)
-                        data = elkData_smr, weight = w, family = binomial(link = "logit")) 
+                        data = elkData_smr, weights = w, family = binomial(link = "logit")) 
   #' GAH! warning: boundary (singular) fit: see ?isSingular   ---- OK if I drop random effect
   summary(elk_global_smr)
   car::vif(elk_global_smr)
@@ -286,7 +286,7 @@
   #'  Dropped PercXGrass and PercXShrub due to high correlations with PercForMix 
   #'  and to be consistent with occupancy model
   elk_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID), 
-                          data = elkData_wtr, weight = w, family = binomial(link = "logit"))  
+                          data = elkData_wtr, weights = w, family = binomial(link = "logit"))  
   summary(elk_global_wtr)
   car::vif(elk_global_wtr)
   
@@ -294,14 +294,14 @@
   #'  SUMMERS 2018 & 2019
   #'  Dropping PercXGrass & PercXShurb to be consistent with occupancy model
   wtd_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID),   
-                          data = wtdData_smr, weight = w, family = binomial(link = "logit"))  # + I(Elev^2)
+                          data = wtdData_smr, weights = w, family = binomial(link = "logit"))  # + I(Elev^2)
   summary(wtd_global_smr)
   car::vif(wtd_global_smr)
 
   #'  WINTERS 2018-2019 & 2019-2020
   #'  Dropping PercXGrass & PercXShurb to be consistent with occupancy model
   wtd_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID),  
-                          data = wtdData_wtr, weight = w, family = binomial(link = "logit")) 
+                          data = wtdData_wtr, weights = w, family = binomial(link = "logit")) 
   summary(wtd_global_wtr)
   car::vif(wtd_global_wtr)
   
@@ -309,14 +309,14 @@
   ####  Cougar RSF  ####
   #'  SUMMERS 2018 & 2019
   coug_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
-                          data = cougData_smr, weight = w, family = binomial(link = "logit")) 
+                          data = cougData_smr, weights = w, family = binomial(link = "logit")) 
   summary(coug_global_smr)
   car::vif(coug_global_smr)
   
   #'  WINTERS 2018-2019 & 2019-2020
   #'  Dropping PercXGrass due to high correlation with PercForMix
   coug_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXShrub + RoadDen + (1|ID), 
-                           data = cougData_wtr, weight = w, family = binomial(link = "logit")) 
+                           data = cougData_wtr, weights = w, family = binomial(link = "logit")) 
   summary(coug_global_wtr)
   car::vif(coug_global_wtr)
   
@@ -324,13 +324,13 @@
   #'  HIGH ELEVATION LOCATIONS EXCLUDED: Cougar summer
   #'  Run exact same RSF as above but with only locations <2100m
   coug_lowElev_only_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
-                                 data = cougData_smr_low, weight = w, family = binomial(link = "logit"))
+                                 data = cougData_smr_low, weights = w, family = binomial(link = "logit"))
   summary(coug_lowElev_only_smr)
   car::vif(coug_lowElev_only_smr)
   
   #'  HIGH ELEVATION LOCATIONS EXCLUDED: Cougar winter
   coug_lowElev_only_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXShrub + RoadDen + (1|ID), 
-                                 data = cougData_wtr_low, weight = w, family = binomial(link = "logit"))  
+                                 data = cougData_wtr_low, weights = w, family = binomial(link = "logit"))  
   summary(coug_lowElev_only_wtr)
   car::vif(coug_lowElev_only_wtr)
   
@@ -339,7 +339,7 @@
   #'  SUMMERS 2018 & 2019
   #'  Dropping PercXShrub to be consistent with occupancy model 
   wolf_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID),  
-                       data = wolfData_smr, weight = w, family = binomial(link = "logit"))
+                       data = wolfData_smr, weights = w, family = binomial(link = "logit"))
   summary(wolf_global_smr)
   car::vif(wolf_global_smr)
   
@@ -347,7 +347,7 @@
   #'  Dropping PercXShrub to be consistent with wolf occupancy model
   #'  Dropping PercXGrass due to high correlation with PercForMix  
   wolf_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID), 
-                           data = wolfData_wtr, weight = w, family = binomial(link = "logit"))  
+                           data = wolfData_wtr, weights = w, family = binomial(link = "logit"))  
   summary(wolf_global_wtr)
   car::vif(wolf_global_wtr)
 
@@ -355,13 +355,13 @@
   #'  HIGH ELEVATION LOCATIONS EXCLUDED: Wolf summer
   #'  Run exact same RSF as above but with only locations <2100m
   wolf_lowElev_only_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID),  
-                                 data = wolfData_smr_low, weight = w, family = binomial(link = "logit"))
+                                 data = wolfData_smr_low, weights = w, family = binomial(link = "logit"))
   summary(wolf_lowElev_only_smr)
   car::vif(wolf_lowElev_only_smr)
   
   #'  HIGH ELEVATION LOCATIONS EXCLUDED: Wolf winter
   wolf_lowElev_only_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + RoadDen + (1|ID),  
-                                 data = wolfData_wtr_low, weight = w, family = binomial(link = "logit"))  
+                                 data = wolfData_wtr_low, weights = w, family = binomial(link = "logit"))  
   summary(wolf_lowElev_only_wtr)
   car::vif(wolf_lowElev_only_wtr)
   
@@ -369,14 +369,14 @@
   ####  Bobcat RSF  ####
   #'  SUMMERS 2018 & 2019
   bob_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
-                           data = bobData_smr, weight = w, family = binomial(link = "logit")) 
+                           data = bobData_smr, weights = w, family = binomial(link = "logit")) 
   summary(bob_global_smr)
   car::vif(bob_global_smr)
   
   #'  WINTERS 2018-2019 & 2019-2020  
   #'  Dropping PercXShrub due to high correlation with PercForMix
   bob_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID), 
-                          data = bobData_wtr, weight = w, family = binomial(link = "logit")) 
+                          data = bobData_wtr, weights = w, family = binomial(link = "logit")) 
   summary(bob_global_wtr)
   car::vif(bob_global_wtr)
   
@@ -384,13 +384,13 @@
   #'  HIGH ELEVATION LOCATIONS EXCLUDED: bobcat summer
   #'  Run exact same RSF as above but with only locations <2100m
   bob_lowElev_only_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
-                                 data = bobData_smr_low, weight = w, family = binomial(link = "logit"))
+                                 data = bobData_smr_low, weights = w, family = binomial(link = "logit"))
   summary(bob_lowElev_only_smr)
   car::vif(bob_lowElev_only_smr)
   
   #'  HIGH ELEVATION LOCATIONS EXCLUDED: Wolf winter
   bob_lowElev_only_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + RoadDen + (1|ID), 
-                                 data = bobData_wtr_low, weight = w, family = binomial(link = "logit"))  
+                                 data = bobData_wtr_low, weights = w, family = binomial(link = "logit"))  
   summary(bob_lowElev_only_wtr)
   car::vif(bob_lowElev_only_wtr)
   
@@ -398,14 +398,14 @@
   ####  Coy RSF  ####
   #'  SUMMERS 2018 & 2019
   coy_global_smr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXGrass + PercXShrub + RoadDen + (1|ID), 
-                           data = coyData_smr, weight = w, family = binomial(link = "logit")) #+ I(Elev^2)
+                           data = coyData_smr, weights = w, family = binomial(link = "logit")) #+ I(Elev^2)
   summary(coy_global_smr)
   car::vif(coy_global_smr)
   
   #'  WINTERS 2018-2019 & 2019-2020  
   #'  Dropping PercXGrass due to high correlation with PercForMix
   coy_global_wtr <- glmer(Used ~ 1 + Elev + Slope + PercForMix + PercXShrub + RoadDen + (1|ID), 
-                          data = coyData_wtr, weight = w, family = binomial(link = "logit")) 
+                          data = coyData_wtr, weights = w, family = binomial(link = "logit")) 
   summary(coy_global_wtr)
   car::vif(coy_global_wtr)
   
