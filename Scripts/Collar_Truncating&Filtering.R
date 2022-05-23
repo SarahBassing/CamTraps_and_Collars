@@ -291,16 +291,6 @@
         Year = "Year2",
         FullID = paste0(ID, "_", Year)
       )
-    # #  Summer 2020: 07/01/2020 - 10/31/2020
-    # #  For Beth only
-    # telem_summer20 <- telem %>%
-    #   filter(Floordt > "2019-07-01 00:00:00") %>%
-    #   filter(Floordt < "2019-11-01 00:00:00") %>%
-    #   mutate(
-    #     Season = "Summer20",
-    #     Year = "Year2",
-    #     FullID = paste0(ID, "_", Year)
-    #   )
     #  Winter 2018-2019: 12/1/2018 - 03/1/2019
     telem_winter1819 <- telem %>%
       filter(Floordt > "2018-12-01 00:00:00") %>%
@@ -320,7 +310,7 @@
         FullID = paste0(ID, "_", Year)
       )
     #  Combine into single file
-    telem_smwtr <- rbind(telem_summer18, telem_winter1819, telem_summer19, telem_winter1920) #, telem_summer20
+    telem_smwtr <- rbind(telem_summer18, telem_winter1819, telem_summer19, telem_winter1920) 
     return(telem_smwtr)
   }
 
