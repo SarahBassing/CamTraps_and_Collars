@@ -201,7 +201,8 @@
                                    retrievalCol = "Retrieval_date",
                                    hasProblems = TRUE,
                                    dateFormat = "%m/%d/%Y", # Define date format here!
-                                   writecsv = FALSE) 
+                                   # writecsv = TRUE,
+                                   outDir = "./Data/Detection_Histories") 
 
   probs <- as.data.frame(camop_problem)
   head(probs)
@@ -213,8 +214,9 @@
                                       setupCol = "Setup_date",
                                       retrievalCol = "Retrieval_date",
                                       hasProblems = TRUE,
-                                      dateFormat = "%m/%d/%Y", 
-                                      writecsv = FALSE) 
+                                      dateFormat = "%m/%d/%Y",
+                                      # writecsv = TRUE,
+                                      outDir = "./Data/Detection_Histories") 
 
   OKcams <- filter(cam_stations, grepl("OK", CameraLocation))
   camop_problem_OK <- cameraOperation(CTtable = OKcams,
@@ -222,8 +224,9 @@
                                       setupCol = "Setup_date",
                                       retrievalCol = "Retrieval_date",
                                       hasProblems = TRUE,
-                                      dateFormat = "%m/%d/%Y", 
-                                      writecsv = FALSE) 
+                                      dateFormat = "%m/%d/%Y",
+                                      # writecsv = TRUE,
+                                      outDir = "./Data/Detection_Histories") 
   
   
   ####  Detection Histories  ####
@@ -341,8 +344,10 @@
   
   #'  Merge summer 2018 and summer 2019 data together
   DH_bob_smr1819 <- rbind(DH_bob_smr18, DH_bob_smr19)
+  write.csv(DH_bob_smr1819, file = "./Data/Detection_Histories/Bobcat_summer_detection_history_7_days_per_occasion.csv")
   #'  Merge winter 2018/2019 and winter 2019/2020 data together
   DH_bob_wtr1820 <- rbind(DH_bob_wtr1819, DH_bob_wtr1920)
+  write.csv(DH_bob_wtr1820, file = "./Data/Detection_Histories/Bobcat_winter_detection_history_7_days_per_occasion.csv")
 
   
   ####  SAMPLING EFFORT  ####
@@ -355,7 +360,9 @@
   Effort_wtr1920 <- bob_wtr1920[[2]][126:242,1:13]
   
   Effort_smr1819 <- rbind(Effort_smr18, Effort_smr19)
+  write.csv(Effort_smr1819, file = "./Data/Detection_Histories/Sampling_effort_summer_7_days_per_occasion.csv")
   Effort_wtr1820 <- rbind(Effort_wtr1819, Effort_wtr1920)
+  write.csv(Effort_wtr1820, file = "./Data/Detection_Histories/Sampling_effort_winter_7_days_per_occasion.csv")
   
   #'  Summary stats on trap nights (active sites only)
   #'  Remove rows of all NAs (inactive camera stations)
@@ -389,10 +396,6 @@
   nrow(eff_wtr1820[grepl("NE", CameraLocation),])
   nrow(eff_wtr1820[grepl("OK", CameraLocation),])
   
-  
-  
-  
-
   #'  How many sampling occasions had incomplete sampling effort
   #'  Ignoring sampling occasions when camera was inactive
   loweff_smr <- sum(Effort_smr1819 < 7, na.rm = TRUE)
@@ -490,8 +493,10 @@
 
   #'  Merge summer 2018 and summer 2019 data together
   DH_coug_smr1819 <- rbind(DH_coug_smr18, DH_coug_smr19)
+  write.csv(DH_coug_smr1819, file = "./Data/Detection_Histories/Cougar_summer_detection_history_7_days_per_occasion.csv")
   #'  Merge winter 2018/2019 and winter 2019/2020 data together
   DH_coug_wtr1820 <- rbind(DH_coug_wtr1819, DH_coug_wtr1920)
+  write.csv(DH_coug_wtr1820, file = "./Data/Detection_Histories/Cougar_winter_detection_history_7_days_per_occasion.csv")
 
   
   ####  COYOTES  ####
@@ -575,9 +580,10 @@
   
   #'  Merge summer 2018 and summer 2019 data together
   DH_coy_smr1819 <- rbind(DH_coy_smr18, DH_coy_smr19)
+  write.csv(DH_coy_smr1819, file = "./Data/Detection_Histories/Coyote_summer_detection_history_7_days_per_occasion.csv")
   #'  Merge winter 2018/2019 and winter 2019/2020 data together
   DH_coy_wtr1820 <- rbind(DH_coy_wtr1819, DH_coy_wtr1920)
-  
+  write.csv(DH_coy_wtr1820, file = "./Data/Detection_Histories/Coyote_winter_detection_history_7_days_per_occasion.csv")
   
   ####  WOLVES  ####
   DH_wolf_smr18 <- detectionHistory(recordTable = images_summer18,
@@ -660,8 +666,10 @@
   
   #'  Merge summer 2018 and summer 2019 data together
   DH_wolf_smr1819 <- rbind(DH_wolf_smr18, DH_wolf_smr19)
+  write.csv(DH_wolf_smr1819, file = "./Data/Detection_Histories/Wolf_summer_detection_history_7_days_per_occasion.csv")
   #'  Merge winter 2018/2019 and winter 2019/2020 data together
   DH_wolf_wtr1820 <- rbind(DH_wolf_wtr1819, DH_wolf_wtr1920)
+  write.csv(DH_wolf_wtr1820, file = "./Data/Detection_Histories/Wolf_winter_detection_history_7_days_per_occasion.csv")
   
   
   ####  ELK  ####
@@ -746,8 +754,10 @@
   
   #'  Merge summer 2018 and summer 2019 data together
   DH_elk_smr1819 <- rbind(DH_elk_smr18, DH_elk_smr19)
+  write.csv(DH_elk_smr1819, file = "./Data/Detection_Histories/Elk_NE_summer_detection_history_7_days_per_occasion.csv")
   #'  Merge winter 2018/2019 and winter 2019/2020 data together
   DH_elk_wtr1820 <- rbind(DH_elk_wtr1819, DH_elk_wtr1920)
+  write.csv(DH_elk_wtr1820, file = "./Data/Detection_Histories/Elk_NE_winter_detection_history_7_days_per_occasion.csv")
   
   
   ####  MULE DEER  ####
@@ -832,9 +842,10 @@
   
   #'  Merge summer 2018 and summer 2019 data together
   DH_md_smr1819 <- rbind(DH_md_smr18, DH_md_smr19)
+  write.csv(DH_md_smr1819, file = "./Data/Detection_Histories/MuleDeer_OK_summer_detection_history_7_days_per_occasion.csv")
   #'  Merge winter 2018/2019 and winter 2019/2020 data together
   DH_md_wtr1820 <- rbind(DH_md_wtr1819, DH_md_wtr1920)
-  
+  write.csv(DH_md_wtr1820, file = "./Data/Detection_Histories/MuleDeer_OK_winter_detection_history_7_days_per_occasion.csv")
   
   ####  WHITE-TAILED DEER  ####
   #'  Using the NE camera & detection data only
@@ -918,8 +929,10 @@
 
   #'  Merge summer 2018 and summer 2019 data together
   DH_wtd_smr1819 <- rbind(DH_wtd_smr18, DH_wtd_smr19)
+  write.csv(DH_wtd_smr1819, file = "./Data/Detection_Histories/WhiteTailedDeer_NE_summer_detection_history_7_days_per_occasion.csv")
   #'  Merge winter 2018/2019 and winter 2019/2020 data together
   DH_wtd_wtr1820 <- rbind(DH_wtd_wtr1819, DH_wtd_wtr1920)
+  write.csv(DH_wtd_wtr1820, file = "./Data/Detection_Histories/WhiteTailedDeer_NE_winter_detection_history_7_days_per_occasion.csv")
 
 
   #' #'  Is it worth keeping data from Year1 cameras collected in 2019?
