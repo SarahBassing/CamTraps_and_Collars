@@ -139,8 +139,8 @@
     arrange(Year, CameraLocation)
   #'  Format for UMFs and standardize each column
   Temp_smr <- temp_smr %>%
-    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) %>%
-    scale(.)
+    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) #%>%
+    #scale(.)
     
   temp_wtr <- filter(temp, Season == "Winter1819" | Season == "Winter1920") 
   #'  Create rows for cameras that are missing from seasonal temp data
@@ -156,8 +156,23 @@
     arrange(Year, CameraLocation)
   #'  Format for UMFs and standardize each column
   Temp_wtr <- temp_wtr %>%
-    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) %>%
-    scale(.)
+    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) #%>%
+    #scale(.)
+  
+  #'  Scale survey-level covariates
+  scale_srvy_cov <- function(srvycov) {
+    #'  Find mean & standard deviation of covariates across all sites & occasions
+    mu <- mean(as.matrix(srvycov), na.rm = TRUE)
+    sd <- sd(as.matrix(srvycov), na.rm = TRUE)
+    
+    #'  Z-transform (center observations around mean & scale by 1 SD)
+    scaled <- ((srvycov - mu) / sd)
+    
+    return(scaled)
+  }
+  #'  Scale each survey-level covariate
+  Temp_smr_scaled <- scale_srvy_cov(Temp_smr)
+  Temp_wtr_scaled <- scale_srvy_cov(Temp_wtr)
   
   
   #'  Create survey-level covariate matrix
@@ -182,8 +197,8 @@
                         Dist11 = stations$Distance, Dist12 = stations$Distance,
                         Dist13 = stations$Distance),
                       nrow = nrows, ncol = ncols, byrow = FALSE),
-    Temp_smr = Temp_smr,
-    Temp_wtr = Temp_wtr
+    Temp_smr = Temp_smr_scaled,
+    Temp_wtr = Temp_wtr_scaled
     )
   # Effort_smr = matrix(Effort_smr1819, nrow = nrows, ncol = ncols, byrow = FALSE),
   # Effort_wtr = matrix(Effort_wtr1820, nrow = nrows, ncol = ncols, byrow = FALSE)
@@ -196,23 +211,23 @@
   head(srvy_covs[[2]])
 
 
-  #'  Save study-area specific survey covariates
+  #'  Call scaling function and save study-area specific survey covariates
   Hgt_NE <- stations$Height[stations$Study_Area == "NE"]
   Hgt_OK <- stations$Height[stations$Study_Area == "OK"]
   Dist_NE <- stations$Distance[stations$Study_Area == "NE"]
   Dist_OK <- stations$Distance[stations$Study_Area == "OK"]
   Temp_smr_NE <- temp_smr[temp_smr$Study_Area == "NE",] %>%
-    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) %>%
-    scale(.)
+    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) 
+  Temp_smr_NE_scaled <- scale_srvy_cov(Temp_smr_NE)
   Temp_smr_OK <- temp_smr[temp_smr$Study_Area == "OK",] %>%
-    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) %>%
-    scale(.)
+    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) 
+  Temp_smr_OK_scaled <- scale_srvy_cov(Temp_smr_OK)
   Temp_wtr_NE <- temp_wtr[temp_wtr$Study_Area == "NE",] %>%
-    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) %>%
-    scale(.)
+    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) 
+  Temp_wtr_NE_scaled <- scale_srvy_cov(Temp_wtr_NE)
   Temp_wtr_OK <- temp_wtr[temp_wtr$Study_Area == "OK",] %>%
-    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) %>%
-    scale(.)
+    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) 
+  Temp_wtr_OK_scaled <- scale_srvy_cov(Temp_wtr_OK)
   
   nrows_NE <- nrow(stations_NE)
   nrows_OK <- nrow(stations_OK)
@@ -229,8 +244,8 @@
                         Dist10 = Dist_NE, Dist11 = Dist_NE, Dist12 = Dist_NE,
                         Dist13 = Dist_NE),
                       nrow = nrows_NE, ncol = ncols, byrow = FALSE),
-    Temp_smr = Temp_smr_NE,
-    Temp_wtr = Temp_wtr_NE
+    Temp_smr = Temp_smr_NE_scaled,
+    Temp_wtr = Temp_wtr_NE_scaled
   )
   
   srvy_covs_OK <- list(
@@ -245,8 +260,8 @@
                         Dist10 = Dist_OK, Dist11 = Dist_OK, Dist12 = Dist_OK,
                         Dist13 = Dist_OK),
                       nrow = nrows_OK, ncol = ncols, byrow = FALSE),
-    Temp_smr = Temp_smr_OK,
-    Temp_wtr = Temp_wtr_OK
+    Temp_smr = Temp_smr_OK_scaled,
+    Temp_wtr = Temp_wtr_OK_scaled
   )
   
   #'  Double check these
