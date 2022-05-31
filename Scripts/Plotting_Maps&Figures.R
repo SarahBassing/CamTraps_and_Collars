@@ -161,11 +161,11 @@
     #'  DEPENDS ON HOW BIG YOUR PLOT WINDOW IS TOO!!!!
     geom_sf_text(data = OK_SA, aes(label = NAME, hjust = 1.3, vjust = 7), size = 7) + #vjust = -6.90
     geom_sf(data = NE_SA, fill = NA, color="black", size = 0.80) +
-    geom_sf_text(data = NE_SA, aes(label = NAME, hjust = 1.3, vjust = -6.5), size = 7) +
+    geom_sf_text(data = NE_SA, aes(label = NAME, hjust = 1.3, vjust = -5.5), size = 7) + #vjust = -6.5
     #'  Add camera locations and vary color by deployment year
     geom_sf(data = cams_reproj, aes(color = Year), shape = 16, size = 3) +
     #'  Change camera data aesthetics (make sure it's colorblind friendly)
-    scale_discrete_manual(aesthetics = "color", values = c("#a6611a", "#018571")) + #c("#dfc27d", "#80cdc1") #c("#601A4A", "#63ACBE")
+    scale_discrete_manual(aesthetics = "color", values = c("#E69F00", "#009E73")) + # #c("#a6611a", "#018571")
     labs(colour = "Camera\nlocations") +
     #'  Constrain plot to two study areas plus some room on the side & bottom
     coord_sf(xlim = c(480000.0, 810000.0), ylim = c(39000.0, 218000.0), expand = FALSE) +
@@ -174,10 +174,11 @@
     #'  Get rid of lines and axis names
     theme_bw() +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-          axis.title.x = element_blank(), axis.title.y = element_blank(),
+          axis.title.x = element_text(size = 18), axis.title.y = element_text(size = 18),
           axis.text.x = element_text(size = 16), axis.text.y = element_text(size = 16),
           legend.title = element_text(size = 18),
           legend.text = element_text(size = 16)) +
+    labs(x = "Longitude", y = "Latitude") +
     #'  Add north arrow
     annotation_north_arrow(location = "bl", which_north = "true", 
                            pad_x = unit(0.25, "in"), pad_y = unit(0.3, "in"),
@@ -191,20 +192,22 @@
   #'  Requires "cowplot" package
   #'  Don't use png or other calls to save while plotting- formatting gets messed up
   #'  Use export option in Plot window and formatting holds
-  png(file = "./Outputs/Figures/Maps/StudyAreas_Cameras1820_05.23.22.png",
-      width = 1000, height = 691)
+  # tiff(file = "./Outputs/Figures/Maps/StudyAreas_Cameras1820_05.31.22.tiff",
+  #     width = 1000, height = 691) 
+  tiff(file = "./Outputs/Figures/Maps/StudyAreas_Cameras_fig1.tiff",
+       units="in", width=11, height=6.5, res=800, compression = 'lzw') 
   StudyArea_Map <- ggdraw(cam_SA_map) +
     draw_plot(
       {
         WA_SA_map +
         #'  Label map of WA with "Washington State"
         #'  hjust & vjust will depend on inset map's width/height specified below
-        geom_sf_text(data = WA, aes(label = JURISDIC_3, hjust = 0.5, vjust = 2))  
+        geom_sf_text(data = WA, aes(label = JURISDIC_3, hjust = 0.5, vjust = 1), size = 5)  
       },
       #'  Distance along a (0,1) x-axis to draw the left edge of the plot
       x = 0.60,
       #'  Distance along a (0,1) y-axis to draw the bottom edge of the plot
-      y = 0.20,
+      y = 0.24,
       #'  Width & height of the plot expressed as proportion of the entire ggdraw object
       #'  THIS DEPENDS ON HOW BIG YOUR PLOT WINDOW IS TOO!!!!
       width = 0.22,
@@ -212,7 +215,7 @@
   plot(StudyArea_Map)
   dev.off()
   
-  
+
   
   ####  2. Maps of capture effort and MCPs  ####
   #'  ==========================================
@@ -521,21 +524,21 @@
   plot(coy_map)
   
   ####  Panel of maps  ####
-  capture_fig <- (md_map + elk_map + wtd_map) / (bob_map + coug_map) / (coy_map + wolf_map) + plot_annotation(tag_levels = 'A') & theme(plot.tag.position = c(0.02, 0.96), plot.tag = element_text(hjust = 0, vjust = 0)) #& theme(plot.tag = element_text(size = 8))
+  capture_fig <- (md_map + elk_map + wtd_map) / (bob_map + coug_map) / (coy_map + wolf_map) + plot_annotation(tag_levels = 'a') & theme(plot.tag.position = c(0.02, 0.96), plot.tag = element_text(hjust = 0, vjust = 0)) #& theme(plot.tag = element_text(size = 8))
   plot(capture_fig)
   
   
   #'  Save
-  ggsave("./Outputs/Figures/Maps/CaptureEffort_fig.png", capture_fig, width = 9, height = 7)
-  ggsave("./Outputs/Figures/Maps/MuleDeerCaptureEffort.png", md_map, width = 9, height = 7)
-  ggsave("./Outputs/Figures/Maps/ElkCaptureEffort.png", elk_map, width = 9, height = 7)
-  ggsave("./Outputs/Figures/Maps/WTDeerCaptureEffort.png", wtd_map, width = 9, height = 7)
-  ggsave("./Outputs/Figures/Maps/CougarCaptureEffort.png", coug_map, width = 10, height = 6)
-  ggsave("./Outputs/Figures/Maps/WolfCaptureEffort.png", wolf_map, width = 10, height = 6)
-  ggsave("./Outputs/Figures/Maps/BobcatCaptureEffort.png", bob_map, width = 10, height = 6)
-  ggsave("./Outputs/Figures/Maps/CoyoteCaptureEffort.png", coy_map, width = 10, height = 6)
+  ggsave("./Outputs/Figures/Maps/CaptureEffort_fig2.tiff", capture_fig, width = 9, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/MuleDeerCaptureEffort.tiff", md_map, width = 9, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/ElkCaptureEffort.tiff", elk_map, width = 9, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/WTDeerCaptureEffort.tiff", wtd_map, width = 9, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/CougarCaptureEffort.tiff", coug_map, width = 10, height = 6, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/WolfCaptureEffort.tiff", wolf_map, width = 10, height = 6, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/BobcatCaptureEffort.tiff", bob_map, width = 10, height = 6, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/CoyoteCaptureEffort.tiff", coy_map, width = 10, height = 6, dpi = 800, units = "in", device = 'tiff')
   
- 
+  
   
   ####  3. Plot OccMod & RSF Results  ####
   #'  ====================================
@@ -1219,7 +1222,7 @@
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Elevation") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients")  +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1236,7 +1239,7 @@
     geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) +  
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Slope") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients") +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1251,8 +1254,8 @@
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
     geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Percent Forest") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
+    labs(title = "Percent forest") +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients") +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) + 
     # theme_light() +
@@ -1267,8 +1270,8 @@
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
     geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) +
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Percent Grass") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
+    labs(title = "Percent grass") +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients") +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1283,8 +1286,8 @@
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
     geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) +
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Percent Shrub") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
+    labs(title = "Percent shrub") +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients") +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1299,8 +1302,8 @@
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Species)) +
     geom_point(stat = 'identity', aes(col = Species, shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Road Density") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients") +
+    labs(title = "Road density") +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients") +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1368,8 +1371,8 @@
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "Mule Deer") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    labs(title = "Mule deer") +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients")  +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1385,7 +1388,7 @@
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Elk") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients")  +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1400,8 +1403,8 @@
     geom_errorbarh(aes(xmin = l95_rsf, xmax = u95_rsf, colour = Parameter)) + 
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
-    labs(title = "White-tailed Deer") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    labs(title = "White-tailed deer") +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients")  +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1417,7 +1420,7 @@
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Cougar") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients")  +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1434,7 +1437,7 @@
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Wolf") +
     # xlim(-1.0, 0.5) +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients")  +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1450,7 +1453,7 @@
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Bobcat") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients")  +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1466,7 +1469,7 @@
     geom_point(stat = 'identity', aes(shape = Season), size = 3.5) + 
     scale_shape_manual(values = c(19, 23)) +
     labs(title = "Coyote") +
-    xlab("RSF Coefficients") + ylab("Occupancy Coefficients")  +
+    xlab("RSF coefficients") + ylab("Occupancy coefficients")  +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
     # theme_light() +
@@ -1508,12 +1511,13 @@
   corr_plot_spp <- bob_ci_fig + coug_ci_fig + coy_ci_fig + elk_ci_fig + md_ci_fig +
     wtd_ci_fig + wolf_ci_fig + guide_area() + plot_layout(guides = 'collect') + 
     plot_layout(ncol = 2) +  
-    plot_annotation(title = "Correlation between Estimated Occupancy and RSF Coefficients",
+    plot_annotation(title = "Correlation between estimated occupancy and RSF coefficients",
                     theme = theme(plot.title = element_text(size = 18))) + 
-    plot_annotation(tag_levels = 'A') & theme(plot.tag = element_text(size = 14)) +
+    plot_annotation(tag_levels = 'a') & theme(plot.tag = element_text(size = 14)) +
     theme(legend.box = 'horizontal')
   
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel_bySpp_9x15.png", corr_plot_spp, width = 9, height = 15, units = "in")
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel_bySpp_fig3.tiff", 
+         corr_plot_spp, width = 9, height = 15, dpi = 800, units = "in", device = 'tiff')
    
   #' #'  Save figure panel
   #' tiff("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel_bySpp.tiff", units="in", width=8.5, height=11, res=600, compression = 'lzw') 
