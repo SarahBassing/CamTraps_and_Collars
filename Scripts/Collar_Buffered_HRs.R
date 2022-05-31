@@ -160,7 +160,7 @@
       # plot(UD75, border = "green", col = NA, add = T)
       # plot(UD90, border = "green", col = NA, add = T)
       # plot(UD95, border = "darkgreen", col = NA, add = T)
-      
+
     }
     
     #'  Append AnimalID to polygon
@@ -170,17 +170,17 @@
   }
   #'  Estimate annual home range for each individual per study area
   #'  Add ex = 2.5, h = "href" if creating KDEs for mule deer; ex = 1.5 for other spp
-  md_OK_poly <- lapply(OK_split[[1]], avail_pts, T) 
-  elk_NE_poly <- lapply(NE_split[[1]], avail_pts, T)
-  wtd_NE_poly <- lapply(NE_split[[2]], avail_pts, T)
-  coug_OK_poly <- lapply(OK_split[[2]], avail_pts, T)
-  coug_NE_poly <- lapply(NE_split[[3]], avail_pts, T)
-  wolf_OK_poly <- lapply(OK_split[[3]], avail_pts, T)
-  wolf_NE_poly <- lapply(NE_split[[4]], avail_pts, T)
-  bob_OK_poly <- lapply(OK_split[[4]], avail_pts, T)
-  bob_NE_poly <- lapply(NE_split[[5]], avail_pts, T)
-  coy_OK_poly <- lapply(OK_split[[5]], avail_pts, T)
-  coy_NE_poly <- lapply(NE_split[[6]], avail_pts, T)
+  md_OK_poly <- lapply(OK_split[[1]], avail_pts, F) 
+  elk_NE_poly <- lapply(NE_split[[1]], avail_pts, F)
+  wtd_NE_poly <- lapply(NE_split[[2]], avail_pts, F)
+  coug_OK_poly <- lapply(OK_split[[2]], avail_pts, F)
+  coug_NE_poly <- lapply(NE_split[[3]], avail_pts, F)
+  wolf_OK_poly <- lapply(OK_split[[3]], avail_pts, F)
+  wolf_NE_poly <- lapply(NE_split[[4]], avail_pts, F)
+  bob_OK_poly <- lapply(OK_split[[4]], avail_pts, F)
+  bob_NE_poly <- lapply(NE_split[[5]], avail_pts, F)
+  coy_OK_poly <- lapply(OK_split[[5]], avail_pts, F)
+  coy_NE_poly <- lapply(NE_split[[6]], avail_pts, F)
   
   #'  List polygons together
   HR_poly <- list(md_OK_poly, elk_NE_poly, wtd_NE_poly, coug_OK_poly, coug_NE_poly, 
@@ -190,8 +190,89 @@
   #'  Save to use when sampling "available" resources
   save(HR_poly, file = "./Outputs/MCPs/MCP_HomeRange_Polygons_allSpp.RData")
   
+  
+  
   #'  Use this to define available extent for each animal in RSF analyses
   #'  Next: Collar_RSF_DataPrep.R
+  
+  
+  
+  #'  Create spatial polygons for mapping
+  load("./Outputs/MCPs/MCP_HomeRange_Polygons_allSpp.RData")
+  
+  #'  Convert buffered HR polygons to sf objects
+  HR_poly_sf <- function(poly) {
+    buffHR_sf <- st_as_sf(poly)
+    return(buffHR_sf)
+  }
+  buffHR_sf <- lapply(HR_poly, lapply, HR_poly_sf)
+  #'  Split up by species, merge into single df and dissolve inner boundaries of 
+  #'  overlappling buffered MCPS
+  md_buffHR <- buffHR_sf[[1]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  elk_buffHR <- buffHR_sf[[2]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  wtd_buffHR <- buffHR_sf[[3]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  coug_OK_buffHR <- buffHR_sf[[4]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  coug_NE_buffHR <- buffHR_sf[[5]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  wolf_OK_buffHR <- buffHR_sf[[6]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  wolf_NE_buffHR <- buffHR_sf[[7]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  bob_OK_buffHR <- buffHR_sf[[8]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  bob_NE_buffHR <- buffHR_sf[[9]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  coy_OK_buffHR <- buffHR_sf[[10]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  coy_NE_buffHR <- buffHR_sf[[11]] %>% dplyr::bind_rows(.) %>% st_union(.)
+  
+  #'  List polygons together
+  buffHR_poly <- list(md_buffHR, elk_buffHR, wtd_buffHR, coug_OK_buffHR, coug_NE_buffHR, 
+                  wolf_OK_buffHR, wolf_NE_buffHR, bob_OK_buffHR, bob_NE_buffHR, coy_OK_buffHR, 
+                  coy_NE_buffHR)
+  #  Save for plotting
+  save(buffHR_poly, file = "./Outputs/MCPs/MCP_BufferedHomeRange_Polygons_allSpp.RData")
+  
+  
+  #'  Generate individual home ranges (MCPs) without buffering
+  HR_poly <- function(locs, plotit = F) { 
+    
+    #'  Make each animal's locations spatial
+    locs_sp <- SpatialPointsDataFrame(locs[,c("x", "y")], data = locs[2], proj4string = sa_proj) 
+    
+    #'  Create MCPs for each animal 
+    MCP100 <- mcp(locs_sp, percent = 100, unin = "m", unout = "km2")
+    
+    #'  Convert to sf object instead of sp and add AnimalID back to df
+    MCP100_sf <- st_as_sf(MCP100)
+    
+    #'  Plot to make sure buffering and clipping worked
+    if(plotit) {
+      plot(locs_sp, col = "blue", pch = 19, cex = 0.75)
+      plot(OK_SA_sp, add = T)
+      plot(NE_SA_sp, add = T)
+      plot(MCP100, border = "darkgreen", col = NA, add = T)
+    }
+    
+    return(MCP100_sf)
+  }
+  #'  Estimate annual home range for each individual per study area, save as
+  #'  single sf object, and dissolve inner boundaries of overlapping MCPs
+  md_OK_HRpoly <- lapply(OK_split[[1]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+  elk_NE_HRpoly <- lapply(NE_split[[1]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+  wtd_NE_HRpoly <- lapply(NE_split[[2]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+  coug_OK_HRpoly <- lapply(OK_split[[2]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+  coug_NE_HRpoly <- lapply(NE_split[[3]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+  wolf_OK_HRpoly <- lapply(OK_split[[3]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+  wolf_NE_HRpoly <- lapply(NE_split[[4]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+  bob_OK_HRpoly <- lapply(OK_split[[4]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+  bob_NE_HRpoly <- lapply(NE_split[[5]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+  coy_OK_HRpoly <- lapply(OK_split[[5]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+  coy_NE_HRpoly <- lapply(NE_split[[6]], HR_poly, F) %>% dplyr::bind_rows(.) %>% st_union(.)
+ 
+  #'  List polygons together
+  indHR_poly <- list(md_OK_HRpoly, elk_NE_HRpoly, wtd_NE_HRpoly, coug_OK_HRpoly, coug_NE_HRpoly, 
+                  wolf_OK_HRpoly, wolf_NE_HRpoly, bob_OK_HRpoly, bob_NE_HRpoly, coy_OK_HRpoly, 
+                  coy_NE_HRpoly)
+  
+  #'  Save for making figures
+  save(indHR_poly, file = "./Outputs/MCPs/MCP_individual_HomeRange_Polygons_allSpp.RData")
+  
+  
   
   
   
