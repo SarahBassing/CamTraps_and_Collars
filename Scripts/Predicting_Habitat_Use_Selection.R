@@ -52,7 +52,7 @@
   
   ####  Load Model Results  ####
   #'  Occupancy model output
-  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_matchRSF_2022-05-03.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_matchRSF_2022-05-27.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 90% confidence intervals to mirror alpha = 0.1
     mutate(
       l95 = (Estimate - (1.64 * SE)),  #### REMINDER: this is 90% CI even though column says l95/u95
@@ -229,8 +229,6 @@
   occ_coefs_signif <- occ_out %>%
     dplyr::select(c(Species, Season, Parameter, Estimate, Pval)) %>%
     mutate(Parameter = ifelse(Parameter == "(Intercept)", "Intercept", Parameter)) %>%
-    #'  Use p-values to change non-significant coefficients (alpha-level = 0.1) to 0 so there is no effect
-    mutate(Estimate = ifelse(Pval > 0.1, Estimate == 0, Estimate)) %>%
     dplyr::select(-Pval) %>%
     #'  Spread data so each row represents model coefficients for a single season, single species model
     pivot_wider(names_from = Parameter, values_from = Estimate) %>%
@@ -349,7 +347,7 @@
     # relocate(Obs, .before = "Area")
   
   #'  Save
-  # write.csv(Predicted_occ, paste0("./Outputs/Tables/Predicted_Prob_Occupancy_", Sys.Date(), ".csv"))
+  write.csv(Predicted_occ, paste0("./Outputs/Tables/Predicted_Prob_Occupancy_", Sys.Date(), ".csv"))
 
   
   ####  Predict relative probability of selesction across study areas  ####
@@ -370,11 +368,6 @@
   rsf_coefs_signif <- rsf_out %>%
     dplyr::select(c(Species, Season, Parameter, Estimate, Pval)) %>%
     mutate(Parameter = ifelse(Parameter == "(Intercept)", "Intercept", Parameter)) %>%
-    #'  Use p-values to change non-significant coefficients (alpha-level = 0.05) to 0 so there is no effect
-    mutate(Estimate = ifelse(Pval > 0.05, Estimate == 0, Estimate)) %>%
-    #'  For some reason the mutation above changes estimates that are already 0.00 with Pval > 0.05 to equal 1!?!?!
-    #'  So changing those back to 0 since the effect is non-significant
-    mutate(Estimate = ifelse(Estimate == 1, Estimate == 0, Estimate)) %>%
     dplyr::select(-Pval) %>%
     #'  Spread data so each row represents model coefficients for a single season, single species model
     pivot_wider(names_from = Parameter, values_from = Estimate) %>%
@@ -581,7 +574,7 @@
   #'  Merge all predictions together (with unscaled RSF predictions)
   Predicted_Occ_RSF <- Predicted_occ %>%
     full_join(Predicted_rsf, by = c("obs", "Area", "x", "y"))
-  # write.csv(Predicted_Occ_RSF, paste0("./Outputs/Tables/Predictions_OccMod_v_RSF_buffHR_", Sys.Date(), ".csv"))  
+  write.csv(Predicted_Occ_RSF, paste0("./Outputs/Tables/Predictions_OccMod_v_RSF_buffHR_", Sys.Date(), ".csv"))  
   
   
   
@@ -632,12 +625,12 @@
       Species = spp,
       Season = season,
       #Correlation = as.numeric(corr),
-      Correlation = round(Correlation, digits = 2)
+      Correlation = round(corr, digits = 2)
     ) %>%
     arrange(Species)
   
   #'  Save correlations
-  # write.csv(corr_results, paste0("./Outputs/Tables/Correlation_OccMod_RSF_Predictions_BuffHR_1km_", Sys.Date(), ".csv"))  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o outliers)
+  write.csv(corr_results, paste0("./Outputs/Tables/Correlation_OccMod_RSF_Predictions_BuffHR_1km_", Sys.Date(), ".csv"))  # KEEP TRACK of which version of the predicted results I'm using (w/ or w/o outliers)
   
   
   ####  Re-scale RSF values between 0 & 1 for mapping  ####
@@ -649,7 +642,7 @@
       x = x,
       y = y,
       COUG_smr_rsf = round(COUG_smr_rsf2/(max(COUG_smr_rsf2, na.rm = T)), digits = 2),
-      COUG_wtr_rsf = round(COUG_wtr_rsf2/(max(COUG_wtr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
+      COUG_wtr_rsf = round(COUG_wtr_rsf2/(max(COUG_wtr_rsf2, na.rm = T)), digits = 2), 
       WOLF_smr_rsf = round(WOLF_smr_rsf2/(max(WOLF_smr_rsf2, na.rm = T)), digits = 2),
       WOLF_wtr_rsf = round(WOLF_wtr_rsf2/(max(WOLF_wtr_rsf2, na.rm = T)), digits = 2),
       BOB_smr_rsf = round(BOB_smr_rsf2/(max(BOB_smr_rsf2, na.rm = T)), digits = 2),
@@ -657,15 +650,15 @@
       COY_smr_rsf = round(COY_smr_rsf2/(max(COY_smr_rsf2, na.rm = T)), digits = 2),
       COY_wtr_rsf = round(COY_wtr_rsf2/(max(COY_wtr_rsf2, na.rm = T)), digits = 2),
       ELK_smr_rsf = round(ELK_smr_rsf2/(max(ELK_smr_rsf2, na.rm = T)), digits = 2),
-      ELK_wtr_rsf = round(ELK_wtr_rsf2/(max(ELK_wtr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
-      WTD_smr_rsf = round(WTD_smr_rsf2/(max(WTD_smr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
+      ELK_wtr_rsf = round(ELK_wtr_rsf2/(max(ELK_wtr_rsf2, na.rm = T)), digits = 2), 
+      WTD_smr_rsf = round(WTD_smr_rsf2/(max(WTD_smr_rsf2, na.rm = T)), digits = 2), 
       WTD_wtr_rsf = round(WTD_wtr_rsf2/(max(WTD_wtr_rsf2, na.rm = T)), digits = 2),
-      MD_smr_rsf = round(MD_smr_rsf2/(max(MD_smr_rsf2, na.rm = T)), digits = 2), # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
-      MD_wtr_rsf = round(MD_wtr_rsf2/(max(MD_wtr_rsf2, na.rm = T)), digits = 2)  # NOTE: EXCLUDING OUTLIER PREDICTIONS HERE
+      MD_smr_rsf = round(MD_smr_rsf2/(max(MD_smr_rsf2, na.rm = T)), digits = 2), 
+      MD_wtr_rsf = round(MD_wtr_rsf2/(max(MD_wtr_rsf2, na.rm = T)), digits = 2)  
     )
   
   #'  Save
-  # write.csv(Predicted_rsf_rescale, paste0("./Outputs/Tables/Predicted_Relative_Selection_rescale_1km_", Sys.Date(), ".csv"))
+  write.csv(Predicted_rsf_rescale, paste0("./Outputs/Tables/Predicted_Relative_Selection_rescale_1km_", Sys.Date(), ".csv"))
   
   
   #'  For some reason ggplot is freaking out over plotting actual 0 values and
@@ -1300,7 +1293,7 @@
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
     ggtitle("Coyote winter RSF")
   #'  patchwork figures together:
-  coy_wtr_map <- coy_wtr_occ_fig + coy_wtr_rsf_fig
+  coy_wtr_map <- coy_wtr_occ_fig / coy_wtr_rsf_fig
   
   ####  WHITE-TAILED DEER  ####
   #'  Summer Occ
@@ -1474,7 +1467,7 @@
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
     ggtitle("Cougar summer RSF")
   #'  patchwork figures together:
-  coug_smr_map <- coug_smr_occ_fig + coug_smr_rsf_fig
+  coug_smr_map <- coug_smr_occ_fig / coug_smr_rsf_fig
   
   #'  Winter Occ
   coug_wtr_occ_fig <- ggplot() +
@@ -1509,7 +1502,7 @@
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
     ggtitle("Cougar winter RSF")
   #'  patchwork figures together:
-  coug_wtr_map <- coug_wtr_occ_fig + coug_wtr_rsf_fig #+ plot_layout(ncol = 1)
+  coug_wtr_map <- coug_wtr_occ_fig / coug_wtr_rsf_fig #+ plot_layout(ncol = 1)
   
   ####  WOLF  ####
   #'  Summer Occ
@@ -1577,7 +1570,7 @@
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
     ggtitle("Wolf winter RSF")
   #'  patchwork figures together:
-  wolf_wtr_map <- wolf_wtr_occ_fig + wolf_wtr_rsf_fig
+  wolf_wtr_map <- wolf_wtr_occ_fig / wolf_wtr_rsf_fig
   
   ####  BOBCAT  ####
   #'  Summer Occ
@@ -1626,6 +1619,8 @@
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_text(size = 7)) +
+    theme(legend.position="none") +
     #'  Change legend, axis, & main titles
     xlab("Longitude") + ylab("Latitude") +
     labs(fill = 'Probability \nof site use')  +
@@ -1641,13 +1636,15 @@
     #'  Get rid of lines and gray background
     theme_bw() +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_text(size = 7)) +
     #'  Change legend, axis, & main titles
     xlab("Longitude") + ylab("Latitude") +
     theme(axis.text.x = element_text(size = 7)) +
+    theme(legend.position="none") +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
     ggtitle("Bobcat winter RSF")
   #'  patchwork figures together:
-  bob_wtr_map <- bob_wtr_occ_fig + bob_wtr_rsf_fig
+  bob_wtr_map <- bob_wtr_occ_fig / bob_wtr_rsf_fig
   
   
   ####  ELK  ####
@@ -1753,6 +1750,15 @@
     plot_annotation(title = "Consistent predicted space use")
   goodmatch_fig
   
+  goodmatch_fig2 <- (bob_smr_occ_fig / bob_smr_rsf_fig) | (md_wtr_occ_fig / md_wtr_rsf_fig) + 
+    plot_layout(widths = c(4,1)) + plot_layout(guides = 'collect')
+  goodmatch_fig2 + plot_annotation(tag_levels = "a")
+  goodmatch_fig2[[1]] <- goodmatch_fig2[[1]] + plot_layout(tag_level = "new")
+  goodmatch_fig2[[2]] <- goodmatch_fig2[[2]] + plot_layout(tag_level = "new")
+  goodmatch_fig2 <- goodmatch_fig2 + plot_annotation(tag_levels = c("a", "1")) +
+    plot_annotation(title = "Consistent predicted space use")
+  goodmatch_fig2
+  
   #' #' Additional plots for supplemental materials
   #' extramaps1_fig <- coug_smr_map / coy_wtr_map / wolf_smr_map
   #' extramaps1_fig + plot_annotation(tag_levels = "A")
@@ -1772,47 +1778,87 @@
   #' extramaps2_fig
   
   #' Additional plots for supplemental materials
-  extramaps1_fig <- coug_smr_map / coy_wtr_map 
-  extramaps1_fig + plot_annotation(tag_levels = "a")
+  extramaps1_fig <- coug_smr_map | coug_wtr_map 
+  extramaps1_fig + plot_layout(heights = c(2, 2)) + plot_annotation(tag_levels = "a")
   extramaps1_fig[[1]] <- extramaps1_fig[[1]] + plot_layout(tag_level = "new")
   extramaps1_fig[[2]] <- extramaps1_fig[[2]] + plot_layout(tag_level = "new")
   extramaps1_fig <- extramaps1_fig + plot_annotation(tag_levels = c("a", "1")) +
     plot_annotation(title = "Seasonal predicted space use")
   extramaps1_fig
   #'  Keep the tag levels consistent with those above by providing list of custom tags
-  extramaps2_fig <- md_smr_map / md_wtr_map 
-  extramaps2_fig[[1]] <- extramaps2_fig[[1]] + plot_layout(tag_level = "new")
-  extramaps2_fig[[2]] <- extramaps2_fig[[2]] + plot_layout(tag_level = "new")
-  extramaps2_fig <- extramaps2_fig + plot_annotation(tag_levels = list(c('c', 'd'), '1'))
+  extramaps2_fig <- coy_wtr_occ_fig / coy_wtr_rsf_fig #coy_wtr_map 
+  extramaps2_fig + plot_annotation(tag_levels = "a")
+  # extramaps2_fig[[1]] <- extramaps2_fig[[1]] + plot_layout(tag_level = "new")
+  # extramaps2_fig[[2]] <- extramaps2_fig[[2]] + plot_layout(tag_level = "new")
+  extramaps2_fig <- extramaps2_fig + plot_annotation(tag_levels = list(c('c')))
   extramaps2_fig
   #'  Keep the tag levels consistent with those above by providing list of custom tags
   extramaps3_fig <- wtd_wtr_map / wolf_smr_map + plot_layout(heights = c(1,2))
   extramaps3_fig[[1]] <- extramaps3_fig[[1]] + plot_layout(tag_level = "new")
   extramaps3_fig[[2]] <- extramaps3_fig[[2]] + plot_layout(tag_level = "new")
-  extramaps3_fig <- extramaps3_fig + plot_annotation(tag_levels = list(c('e', 'f'), '1'))
+  extramaps3_fig <- extramaps3_fig + plot_annotation(tag_levels = list(c('d', 'e'), '1'))
   extramaps3_fig
 
-  #' Lame maps for supplemental materials
-  rsfonly_figs <- (elk_smr_rsf_fig + elk_wtr_rsf_fig) / bob_wtr_rsf_fig / wolf_wtr_rsf_fig  + 
-    plot_layout(guides = 'collect') + plot_layout(heights = c(2, 2, 2))  
-  rsfonly_figs + plot_annotation(tag_levels = "a")
-  rsfonly_figs[[1]] <- rsfonly_figs[[1]] + plot_layout(tag_level = "new")
-  # rsfonly_figs[[2]] <- rsfonly_figs[[2]] + plot_layout(tag_level = "new")
-  # rsfonly_figs[[3]] <- rsfonly_figs[[3]] + plot_layout(tag_level = "new")
-  rsfonly_figs <- rsfonly_figs + plot_annotation(tag_levels = c("a", "1")) +
-    plot_annotation(title = "Predicted resource selection functions")#, \nIncomparable to Corresponding Occupancy Models
-  rsfonly_figs
+  extramaps3_figa <- (wolf_smr_occ_fig / wolf_smr_rsf_fig) | (wtd_wtr_occ_fig / wtd_wtr_rsf_fig) + 
+    plot_layout(widths = c(4,1)) + plot_layout(guides = 'collect')
+  extramaps3_figa + plot_annotation(tag_levels = "a")
+  extramaps3_figa[[1]] <- extramaps3_figa[[1]] + plot_layout(tag_level = "new")
+  extramaps3_figa[[2]] <- extramaps3_figa[[2]] + plot_layout(tag_level = "new")
+  extramaps3_figa <- extramaps3_figa + plot_annotation(tag_levels = list(c('d', 'e'), '1'))
+  extramaps3_figa
+  
+  extramaps4_fig <- (elk_smr_occ_fig / elk_smr_rsf_fig) | (elk_wtr_occ_fig / elk_wtr_rsf_fig) + 
+    plot_layout(widths = c(4,1)) + plot_layout(guides = 'collect')
+  extramaps4_fig + plot_annotation(tag_levels = "a")
+  extramaps4_fig[[1]] <- extramaps4_fig[[1]] + plot_layout(tag_level = "new")
+  extramaps4_fig[[2]] <- extramaps4_fig[[2]] + plot_layout(tag_level = "new")
+  extramaps4_fig <- extramaps4_fig + plot_annotation(tag_levels = c("a", "1")) +
+    plot_annotation(title = "Seasonal predicted space use")
+  extramaps4_fig
+  
+  extramaps5_fig <- bob_wtr_map | wolf_wtr_map + plot_layout(guides = 'collect')
+  extramaps5_fig + plot_annotation(tag_levels = "a")
+  extramaps5_fig[[1]] <- extramaps5_fig[[1]] + plot_layout(tag_level = "new")
+  extramaps5_fig[[2]] <- extramaps5_fig[[2]] + plot_layout(tag_level = "new")
+  extramaps5_fig <- extramaps5_fig + plot_annotation(tag_levels = list(c('c', 'd'), 1))
+  extramaps5_fig
+  
+  # extramaps4_5_fig <- ((elk_smr_occ_fig / elk_smr_rsf_fig) | (elk_wtr_occ_fig / elk_wtr_rsf_fig)) /
+  #   bob_wtr_map / wolf_wtr_map + plot_layout(widths = c(3,2)) + plot_layout(guides = 'collect') +
+  #   plot_layout(heights = c(1, 2, 2))
+  # extramaps4_5_fig + plot_annotation(tag_levels = "a")
+  # extramaps4_5_fig[[1]] <- extramaps4_5_fig[[1]] + plot_layout(tag_level = "new")
+  # extramaps4_5_fig[[2]] <- extramaps4_5_fig[[2]] + plot_layout(tag_level = "new")
+  # extramaps4_5_fig[[3]] <- extramaps4_5_fig[[3]] + plot_layout(tag_level = "new")
+  # extramaps4_5_fig <- extramaps4_5_fig + plot_annotation(tag_levels = c("a", "1")) +
+  #   plot_annotation(title = "Seasonal predicted space use")
+  # extramaps4_5_fig
+  
+  #' #' Lame maps for supplemental materials
+  #' rsfonly_figs <- (elk_smr_rsf_fig + elk_wtr_rsf_fig) / bob_wtr_rsf_fig / wolf_wtr_rsf_fig  + 
+  #'   plot_layout(guides = 'collect') + plot_layout(heights = c(2, 2, 2))  
+  #' rsfonly_figs + plot_annotation(tag_levels = "a")
+  #' rsfonly_figs[[1]] <- rsfonly_figs[[1]] + plot_layout(tag_level = "new")
+  #' # rsfonly_figs[[2]] <- rsfonly_figs[[2]] + plot_layout(tag_level = "new")
+  #' # rsfonly_figs[[3]] <- rsfonly_figs[[3]] + plot_layout(tag_level = "new")
+  #' rsfonly_figs <- rsfonly_figs + plot_annotation(tag_levels = c("a", "1")) +
+  #'   plot_annotation(title = "Predicted resource selection functions")#, \nIncomparable to Corresponding Occupancy Models
+  #' rsfonly_figs
   
   #'  Save 'em
   ggsave("./Outputs/Figures/Maps/Mismatch_fig.tiff", mismatch_fig, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
   ggsave("./Outputs/Figures/Maps/Mismatch_fig4.tiff", mismatch_fig2, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
-  ggsave("./Outputs/Figures/Maps/Match_fig5.tiff", goodmatch_fig, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Match_fig.tiff", goodmatch_fig, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Match_fig5.tiff", goodmatch_fig2, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
   ggsave("./Outputs/Figures/Maps/Extra1_fig.tiff", extramaps1_fig, width = 12, height = 7, dpi = 800, units = "in", device = 'tiff')
   ggsave("./Outputs/Figures/Maps/Extra2_fig.tiff", extramaps2_fig, width = 11, height = 11, dpi = 800, units = "in", device = 'tiff')
-  ggsave("./Outputs/Figures/Maps/Extra1_figa.tiff", extramaps1_fig, width = 12, height = 6, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Extra1_figa.tiff", extramaps1_fig, width = 12, height = 5, dpi = 800, units = "in", device = 'tiff')
   ggsave("./Outputs/Figures/Maps/Extra2_figa.tiff", extramaps2_fig, width = 11, height = 9, dpi = 800, units = "in", device = 'tiff')
-  ggsave("./Outputs/Figures/Maps/Extra3_figa.tiff", extramaps3_fig, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
-  ggsave("./Outputs/Figures/Maps/RSFonly_fig.tiff", rsfonly_figs, width = 7, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Extra3_fig.tiff", extramaps3_fig, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Extra3_figa.tiff", extramaps3_figa, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Extra4_fig.tiff", extramaps4_fig, width = 12, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Extra5_fig.tiff", extramaps5_fig, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
+  #ggsave("./Outputs/Figures/Maps/Extra4-5_fig.tiff", extramaps4_5_fig, width = 8, height = 11, dpi = 800, units = "in", device = 'tiff')
   
   
   
