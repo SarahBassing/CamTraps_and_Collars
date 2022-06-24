@@ -547,7 +547,7 @@
   #'  human modified landscape). Display in multiple panels by model and season.
   
   #'  Occupancy model output
-  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_matchRSF_2022-05-03.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
+  occ_out <- read.csv("./Outputs/Tables/OccMod_OccProb_Results_matchRSF_2022-05-27.csv") %>% # MAKE SURE IT'S MOST CURRENT DATE
     #'  Calculate 90% confidence intervals to mirror alpha = 0.1
     mutate(
       l95 = (Estimate - (1.64 * SE)),  #### REMINDER: this is 90% CI even though column says l95/u95
