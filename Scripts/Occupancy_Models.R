@@ -216,17 +216,19 @@
   Hgt_OK <- stations$Height[stations$Study_Area == "OK"]
   Dist_NE <- stations$Distance[stations$Study_Area == "NE"]
   Dist_OK <- stations$Distance[stations$Study_Area == "OK"]
+  
   Temp_smr_NE <- temp_smr[temp_smr$Study_Area == "NE",] %>%
     dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) 
-  Temp_smr_NE_scaled <- scale_srvy_cov(Temp_smr_NE)
   Temp_smr_OK <- temp_smr[temp_smr$Study_Area == "OK",] %>%
-    dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) 
-  Temp_smr_OK_scaled <- scale_srvy_cov(Temp_smr_OK)
+    dplyr::select(-c(CameraLocation, Study_Area, Year, Season))
   Temp_wtr_NE <- temp_wtr[temp_wtr$Study_Area == "NE",] %>%
     dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) 
-  Temp_wtr_NE_scaled <- scale_srvy_cov(Temp_wtr_NE)
   Temp_wtr_OK <- temp_wtr[temp_wtr$Study_Area == "OK",] %>%
     dplyr::select(-c(CameraLocation, Study_Area, Year, Season)) 
+  
+  Temp_smr_NE_scaled <- scale_srvy_cov(Temp_smr_NE)
+  Temp_smr_OK_scaled <- scale_srvy_cov(Temp_smr_OK)
+  Temp_wtr_NE_scaled <- scale_srvy_cov(Temp_wtr_NE)
   Temp_wtr_OK_scaled <- scale_srvy_cov(Temp_wtr_OK)
   
   nrows_NE <- nrow(stations_NE)
