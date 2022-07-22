@@ -44,7 +44,6 @@
     st_transform(crs = sa_proj)
   NE_SA$NAME <- "Northeast"
   
-  projection(WA)
   projection(OK_SA)
   extent(OK_SA)
   extent(NE_SA)
@@ -1232,15 +1231,19 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(legend.position = "none",
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("") + 
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("Coyote summer occupancy model") +
-    # theme(text = element_text(size = 14),
-    #       plot.title = element_text(size = 14)) +
-    theme(legend.position = "none")
+    ggtitle("Coyote summer occupancy model") #+
+    # theme(text = element_text(size = 8),
+    #       plot.title = element_text(size = 10)) +
+    # theme(legend.position = "none")
   #'  Summer RSF
   coy_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(COY_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
@@ -1250,15 +1253,17 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(legend.position = "none",
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
     xlab("Longitude") + ylab("Latitude") +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Coyote summer RSF") +
-    # theme(text = element_text(size = 14),
-    #       plot.title = element_text(size = 14)) +
-    theme(legend.position = "none")
+    ggtitle("Coyote summer RSF") #+
+    # theme(text = element_text(size = 8),
+    #       plot.title = element_text(size = 10)) +
+    
   #'  patchwork figures together:
   coy_smr_map <- coy_smr_occ_fig + coy_smr_rsf_fig #+ plot_layout(ncol = 1)
   
@@ -1271,12 +1276,14 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
     #'  Change legend, axis, & main titles
     xlab("Longitude") + ylab("Latitude") +
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("Coyote winter occupancy model") 
+    ggtitle("Coyote winter occupancy model") #+
+    # theme(text = element_text(size = 8),
+    #       plot.title = element_text(size = 10)) 
   #'  Winter RSF
   coy_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(COY_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
@@ -1286,12 +1293,14 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
     #'  Change legend, axis, & main titles
     xlab("Longitude") + ylab("Latitude") +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Coyote winter RSF")
+    ggtitle("Coyote winter RSF") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  patchwork figures together:
   coy_wtr_map <- coy_wtr_occ_fig / coy_wtr_rsf_fig
   
@@ -1304,15 +1313,19 @@
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    ylab("Latitude") + xlab("") + 
+    #theme(axis.text.x = element_text(size = 7)) +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
+    #scale_x_discrete(guide = guide_axis(check.overlap = TRUE)) +
     # theme(text = element_text(size = 14),
     #       plot.title = element_text(size = 14)) +
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("White-tailed deer \nsummer occupancy model") 
+    ggtitle("White-tailed deer summer occupancy model")  #White-tailed deer \nsummer occupancy model
   #'  Summer RSF
   wtd_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Northeast",], aes(x = x, y = y, fill = cut(WTD_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
@@ -1321,15 +1334,17 @@
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
     #'  Change legend, axis, & main titles
     xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    #theme(axis.text.x = element_text(size = 7)) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     # theme(text = element_text(size = 14),
     #       plot.title = element_text(size = 14)) +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("White-tailed deer \nsummer RSF")
+    ggtitle("White-tailed deer summer RSF") #"White-tailed deer \nsummer RSF"
   #'  patchwork figures together:
   wtd_smr_map <- wtd_smr_occ_fig + wtd_smr_rsf_fig + #guide_area() + 
     plot_layout(guides = 'collect') & theme(legend.box = 'horizontal')
@@ -1342,13 +1357,18 @@
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    ylab("Latitude") + xlab("") + 
+    #theme(axis.text.x = element_text(size = 7)) +
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("White-tailed deer \nsummer occupancy model") 
+    ggtitle("White-tailed deer \nwinter occupancy model") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  Winter RSF
   wtd_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Northeast",], aes(x = x, y = y, fill = cut(WTD_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
@@ -1357,13 +1377,17 @@
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    ylab("Latitude") + xlab("Longitude") + 
+    #theme(axis.text.x = element_text(size = 7)) +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("White-tailed deer winter RSF")
+    ggtitle("White-tailed deer \nwinter RSF") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16)) 
   #'  patchwork figures together:
   wtd_wtr_map <- wtd_wtr_occ_fig + wtd_wtr_rsf_fig #+ 
   #plot_layout(guides = 'collect') & theme(legend.box = 'horizontal')
@@ -1376,13 +1400,15 @@
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
     #'  Change legend, axis, & main titles
     xlab("Longitude") + ylab("Latitude") +
     theme(axis.text.x = element_text(size = 7)) +
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("Mule deer \nsummer occupancy model")
+    ggtitle("Mule deer \nsummer occupancy model") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  Summer RSF
   md_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Okanogan",], aes(x = x, y = y, fill = cut(MD_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) + 
@@ -1390,13 +1416,15 @@
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
     #'  Change legend, axis, & main titles
     xlab("Longitude") + ylab("Latitude") +
     theme(axis.text.x = element_text(size = 7)) +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Mule deer summer RSF")
+    ggtitle("Mule deer summer RSF") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  patchwork figures together:
   md_smr_map <- md_smr_occ_fig + md_smr_rsf_fig #+ 
     #plot_layout(guides = 'collect') & theme(legend.box = 'horizontal')
@@ -1408,13 +1436,18 @@
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    ylab("Latitude") + xlab("") + 
+    #theme(axis.text.x = element_text(size = 7)) +
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("Mule deer \nwinter occupancy model") #+
+    ggtitle("Mule deer winter occupancy model") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16)) #+
     #theme(legend.position = "none")
   #'  Winter RSF
   md_wtr_rsf_fig <- ggplot() +
@@ -1423,13 +1456,17 @@
     #'  Add study area outlines for reference
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    ylab("Latitude") + xlab("Longitude") + 
+    #theme(axis.text.x = element_text(size = 7)) +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
     ggtitle("Mule deer winter RSF") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16)) #+
     #theme(legend.position = "none")
   #'  patchwork figures together:
   md_wtr_map <- md_wtr_occ_fig + md_wtr_rsf_fig #+ 
@@ -1445,12 +1482,17 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("") + 
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("Cougar summer occupancy model") 
+    ggtitle("Cougar summer occupancy model") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  Summer RSF
   coug_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(COUG_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
@@ -1460,12 +1502,16 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("Longitude") + 
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Cougar summer RSF")
+    ggtitle("Cougar summer RSF") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  patchwork figures together:
   coug_smr_map <- coug_smr_occ_fig / coug_smr_rsf_fig
   
@@ -1477,10 +1523,13 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("") + 
     # theme(text = element_text(size = 16),
     #       plot.title = element_text(size = 16)) +
     labs(fill = 'Probability \nof site use')  +
@@ -1493,14 +1542,16 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("Longitude") + 
     # theme(text = element_text(size = 16),
     #       plot.title = element_text(size = 16)) +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Cougar winter RSF")
+    ggtitle("Cougar winter RSF") 
   #'  patchwork figures together:
   coug_wtr_map <- coug_wtr_occ_fig / coug_wtr_rsf_fig #+ plot_layout(ncol = 1)
   
@@ -1514,12 +1565,17 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("") + 
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("Wolf summer occupancy model") 
+    ggtitle("Wolf summer occupancy model") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  Summer RSF
   wolf_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(WOLF_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
@@ -1529,12 +1585,16 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("Longitude") + 
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Wolf summer RSF")
+    ggtitle("Wolf summer RSF") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  patchwork figures together:
   wolf_smr_map <- wolf_smr_occ_fig + wolf_smr_rsf_fig
   
@@ -1547,12 +1607,19 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("") + 
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("Wolf winter occupancy model") 
+    ggtitle("Wolf winter occupancy model") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  Winter RSF
   wolf_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(WOLF_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
@@ -1562,13 +1629,17 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    ylab("Latitude") + xlab("Longitude") + 
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Wolf winter RSF")
+    ggtitle("Wolf winter RSF") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  patchwork figures together:
   wolf_wtr_map <- wolf_wtr_occ_fig / wolf_wtr_rsf_fig
   
@@ -1581,10 +1652,13 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("") + 
     # theme(text = element_text(size = 16),
     #       plot.title = element_text(size = 16)) +
     labs(fill = 'Probability \nof site use')  +
@@ -1597,14 +1671,15 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("Longitude") + 
     # theme(text = element_text(size = 16),
     #       plot.title = element_text(size = 16)) +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Bobcat summer RSF")
+    ggtitle("Bobcat summer RSF") 
   #'  patchwork figures together:
   bob_smr_map <- bob_smr_occ_fig + bob_smr_rsf_fig #+ plot_layout(ncol = 1)
   
@@ -1617,14 +1692,18 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
-    theme(axis.text.x = element_text(size = 7)) +
-    theme(legend.position="none") +
+    theme(legend.position="none",
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("") + 
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("Bobcat winter occupancy model") 
+    ggtitle("Bobcat winter occupancy model") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  Winter RSF
   bob_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale, aes(x = x, y = y, fill = cut(BOB_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
@@ -1634,15 +1713,17 @@
     geom_sf(data = OK_SA, fill = NA, color = "grey20", size = 1) +
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
-    theme(axis.text.x = element_text(size = 7)) +
+    theme(plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
+    ylab("Latitude") + xlab("Longitude") + 
     theme(axis.text.x = element_text(size = 7)) +
     theme(legend.position="none") +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Bobcat winter RSF")
+    ggtitle("Bobcat winter RSF") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  patchwork figures together:
   bob_wtr_map <- bob_wtr_occ_fig / bob_wtr_rsf_fig
   
@@ -1656,13 +1737,18 @@
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    ylab("Longitude") + xlab("") + 
+    #theme(axis.text.x = element_text(size = 7)) +
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("Elk summer occupancy model") 
+    ggtitle("Elk summer occupancy model") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  Summer RSF
   elk_smr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Northeast",], aes(x = x, y = y, fill = cut(ELK_smr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
@@ -1671,13 +1757,17 @@
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    xlab("Longitude") + ylab("Latitude") + 
+    #theme(axis.text.x = element_text(size = 7)) +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Elk summer RSF")
+    ggtitle("Elk summer RSF") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  patchwork figures together:
   elk_smr_map <- elk_smr_occ_fig + elk_smr_rsf_fig
   
@@ -1689,13 +1779,20 @@
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    ylab("") + xlab("") + 
+    #theme(axis.text.x = element_text(size = 7)) +
     labs(fill = 'Probability \nof site use')  +
-    ggtitle("Elk winter occupancy model") 
+    ggtitle("Elk winter occupancy model") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  Winter RSF
   elk_wtr_rsf_fig <- ggplot() +
     geom_tile(data = Predicted_rsf_rescale[Predicted_rsf_rescale$Area == "Northeast",], aes(x = x, y = y, fill = cut(ELK_wtr_rsf, c(0, 0.2, 0.4, 0.6, 0.8, 1.0)))) +
@@ -1704,59 +1801,107 @@
     #'  Add study area outlines for reference
     geom_sf(data = NE_SA, fill = NA, color = "grey20", size = 1) +
     #'  Get rid of lines and gray background
-    theme_bw() +
+    theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    xlab("Longitude") + ylab("Latitude") +
-    theme(axis.text.x = element_text(size = 7)) +
+    ylab("") + xlab("Longitude") + 
+    #theme(axis.text.x = element_text(size = 7)) +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
-    ggtitle("Elk winter RSF")
+    ggtitle("Elk winter RSF") #+
+    # theme(text = element_text(size = 16),
+    #       plot.title = element_text(size = 16))
   #'  patchwork figures together:
   elk_wtr_map <- elk_wtr_occ_fig + elk_wtr_rsf_fig
   
   
   ####  Panels for publication  ####
+  p1 <- coy_smr_occ_fig / coy_smr_rsf_fig
+  p2 <- wtd_smr_occ_fig / wtd_smr_rsf_fig
+  mismatch_maps <- plot_grid(p1, p2, labels = c('a', 'b'), rel_widths = c(2, 1.5))
+  ggsave("./Outputs/Figures/Maps/Mismatch_Figure5.tiff", mismatch_maps, width = 10, height = 5, dpi = 800, units = "in", device = 'tiff')
+  
+  p3 <- bob_smr_occ_fig / bob_smr_rsf_fig
+  p4 <- md_wtr_occ_fig / md_wtr_rsf_fig
+  goodmatch_maps <- plot_grid(p3, p4, labels = c('a', 'b'), rel_widths = c(2, 1.25))
+  ggsave("./Outputs/Figures/Maps/Mismatch_Figure4.tiff", goodmatch_maps, width = 10, height = 5, dpi = 800, units = "in", device = 'tiff')
+  
+  p5 <- coug_smr_occ_fig / coug_smr_rsf_fig
+  p6 <- coug_wtr_occ_fig / coug_wtr_rsf_fig
+  appendix_map1 <- plot_grid(p5, p6, labels = 'a') +
+    plot_annotation(title = "Seasonal predicted space use")
+  ggsave("./Outputs/Figures/Maps/Appendix_map1.tiff", appendix_map1, width = 12, height = 5, dpi = 800, units = "in", device = 'tiff')
+  
+  p7 <- coy_wtr_occ_fig / coy_wtr_rsf_fig
+  appendix_map2 <- plot_grid(p7, labels = 'b')
+  ggsave("./Outputs/Figures/Maps/Appendix_map2.tiff", appendix_map2, width = 7, height = 5, dpi = 800, units = "in", device = 'tiff')
+  
+  p8 <- wolf_smr_occ_fig / wolf_smr_rsf_fig
+  p9 <- wtd_wtr_occ_fig / wtd_wtr_rsf_fig
+  appendix_map3 <- plot_grid(p8, p9, labels = c('c', 'd'), rel_widths = c(2, 1.25))
+  ggsave("./Outputs/Figures/Maps/Appendix_map3.tiff", appendix_map3, width = 10, height = 5, dpi = 800, units = "in", device = 'tiff')
+  
+  p10 <- elk_smr_occ_fig / elk_smr_rsf_fig
+  p11 <- elk_wtr_occ_fig / elk_wtr_rsf_fig
+  appendix_map4 <- plot_grid(p10, p11, labels = 'a', rel_widths = c(1.1, 1)) +
+    plot_annotation(title = "Seasonal predicted space use")
+  ggsave("./Outputs/Figures/Maps/Appendix_map4.tiff", appendix_map4, width = 8, height = 5, dpi = 800, units = "in", device = 'tiff')
+  
+  p12 <- bob_wtr_occ_fig / bob_wtr_rsf_fig
+  p13 <- wolf_wtr_occ_fig / wolf_wtr_rsf_fig
+  appendix_map5 <- plot_grid(p12, p13, labels = 'b', rel_widths = c(1, 1.25))
+  ggsave("./Outputs/Figures/Maps/Appendix_map5.tiff", appendix_map5, width = 12, height = 5, dpi = 800, units = "in", device = 'tiff')
+  
+
+  ####  OLD VERSIONS  ####
+  #'  ----------------
+  
   #'  Example mismatches Option 1
   mismatch_fig <- coy_smr_map / wtd_smr_map + plot_layout(heights = c(1,1)) #+
     #plot_layout(guides = 'collect') & theme(legend.box = 'horizontal')
-  mismatch_fig + plot_annotation(tag_levels = "a")
+  mismatch_fig + plot_annotation(tag_levels = "a") & theme(plot.tag = element_text(size = 16))
   mismatch_fig[[1]] <- mismatch_fig[[1]] + plot_layout(tag_level = "new")
   mismatch_fig[[2]] <- mismatch_fig[[2]] + plot_layout(tag_level = "new")
   mismatch_fig <- mismatch_fig + plot_annotation(tag_levels = c("a", "1")) + 
     plot_annotation(title = "Inconsistent predicted space use",
-                    theme = theme(plot.title = element_text(size = 16)))
+                    theme = theme(plot.title = element_text(size = 18)))
   mismatch_fig
   
   #'  Example mismatches Option 2
   coy_smr_map2 <- coy_smr_occ_fig / coy_smr_rsf_fig 
-  wtd_smr_map2 <- wtd_smr_occ_fig / wtd_smr_rsf_fig + theme(axis.text.x = element_text(size = 14))
+  wtd_smr_map2 <- wtd_smr_occ_fig / wtd_smr_rsf_fig #+ theme(axis.text.x = element_text(size = 16))
   
   mismatch_fig2 <- (coy_smr_occ_fig / coy_smr_rsf_fig) | (wtd_smr_occ_fig / wtd_smr_rsf_fig) + 
     plot_layout(widths = c(4,1)) + plot_layout(guides = 'collect')
-  mismatch_fig2 + plot_annotation(tag_levels = "a")
+  mismatch_fig2 + plot_annotation(tag_levels = "a") & theme(plot.tag = element_text(size = 16))
   mismatch_fig2[[1]] <- mismatch_fig2[[1]] + plot_layout(tag_level = "new")
   mismatch_fig2[[2]] <- mismatch_fig2[[2]] + plot_layout(tag_level = "new")
   mismatch_fig2 <- mismatch_fig2 + plot_annotation(tag_levels = c("a", "1")) + 
     plot_annotation(title = "Inconsistent predicted space use",
-                    theme = theme(plot.title = element_text(size = 16)))
+                    theme = theme(plot.title = element_text(size = 18)))
   mismatch_fig2
   
   #'  Example of consistent maps
   goodmatch_fig <- bob_smr_map / coug_wtr_map #+ plot_layout(heights = c(1,1))
-  goodmatch_fig + plot_annotation(tag_levels = "a")
+  goodmatch_fig + plot_annotation(tag_levels = "a") & theme(plot.tag = element_text(size = 16))
   goodmatch_fig[[1]] <- goodmatch_fig[[1]] + plot_layout(tag_level = "new")
   goodmatch_fig[[2]] <- goodmatch_fig[[2]] + plot_layout(tag_level = "new")
   goodmatch_fig <- goodmatch_fig + plot_annotation(tag_levels = c("a", "1")) +
-    plot_annotation(title = "Consistent predicted space use")
+    plot_annotation(title = "Consistent predicted space use",
+                    theme = theme(plot.title = element_text(size = 18)))
   goodmatch_fig
   
   goodmatch_fig2 <- (bob_smr_occ_fig / bob_smr_rsf_fig) | (md_wtr_occ_fig / md_wtr_rsf_fig) + 
     plot_layout(widths = c(4,1)) + plot_layout(guides = 'collect')
-  goodmatch_fig2 + plot_annotation(tag_levels = "a")
+  goodmatch_fig2 + plot_annotation(tag_levels = "a") & theme(plot.tag = element_text(size = 16))
   goodmatch_fig2[[1]] <- goodmatch_fig2[[1]] + plot_layout(tag_level = "new")
   goodmatch_fig2[[2]] <- goodmatch_fig2[[2]] + plot_layout(tag_level = "new")
   goodmatch_fig2 <- goodmatch_fig2 + plot_annotation(tag_levels = c("a", "1")) +
-    plot_annotation(title = "Consistent predicted space use")
+    plot_annotation(title = "Consistent predicted space use",
+                    theme = theme(plot.title = element_text(size = 18)))
   goodmatch_fig2
   
   #' #' Additional plots for supplemental materials
@@ -1783,7 +1928,8 @@
   extramaps1_fig[[1]] <- extramaps1_fig[[1]] + plot_layout(tag_level = "new")
   extramaps1_fig[[2]] <- extramaps1_fig[[2]] + plot_layout(tag_level = "new")
   extramaps1_fig <- extramaps1_fig + plot_annotation(tag_levels = c("a", "1")) +
-    plot_annotation(title = "Seasonal predicted space use")
+    plot_annotation(title = "Seasonal predicted space use",
+                    theme = theme(plot.title = element_text(size = 18)))
   extramaps1_fig
   #'  Keep the tag levels consistent with those above by providing list of custom tags
   extramaps2_fig <- coy_wtr_occ_fig / coy_wtr_rsf_fig #coy_wtr_map 
@@ -1813,7 +1959,8 @@
   extramaps4_fig[[1]] <- extramaps4_fig[[1]] + plot_layout(tag_level = "new")
   extramaps4_fig[[2]] <- extramaps4_fig[[2]] + plot_layout(tag_level = "new")
   extramaps4_fig <- extramaps4_fig + plot_annotation(tag_levels = c("a", "1")) +
-    plot_annotation(title = "Seasonal predicted space use")
+    plot_annotation(title = "Seasonal predicted space use",
+                    theme = theme(plot.title = element_text(size = 18)))
   extramaps4_fig
   
   extramaps5_fig <- bob_wtr_map | wolf_wtr_map + plot_layout(guides = 'collect')
@@ -1846,10 +1993,10 @@
   #' rsfonly_figs
   
   #'  Save 'em
-  ggsave("./Outputs/Figures/Maps/Mismatch_fig.tiff", mismatch_fig, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
-  ggsave("./Outputs/Figures/Maps/Mismatch_fig4.tiff", mismatch_fig2, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
-  ggsave("./Outputs/Figures/Maps/Match_fig.tiff", goodmatch_fig, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
-  ggsave("./Outputs/Figures/Maps/Match_fig5.tiff", goodmatch_fig2, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Mismatch_figa.tiff", mismatch_fig, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Mismatch_fig4a.tiff", mismatch_fig2, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Match_figa.tiff", goodmatch_fig, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
+  ggsave("./Outputs/Figures/Maps/Match_fig5a.tiff", goodmatch_fig2, width = 15, height = 7, dpi = 800, units = "in", device = 'tiff')
   ggsave("./Outputs/Figures/Maps/Extra1_fig.tiff", extramaps1_fig, width = 12, height = 7, dpi = 800, units = "in", device = 'tiff')
   ggsave("./Outputs/Figures/Maps/Extra2_fig.tiff", extramaps2_fig, width = 11, height = 11, dpi = 800, units = "in", device = 'tiff')
   ggsave("./Outputs/Figures/Maps/Extra1_figa.tiff", extramaps1_fig, width = 12, height = 5, dpi = 800, units = "in", device = 'tiff')
