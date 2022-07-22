@@ -1256,6 +1256,7 @@
     theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
     theme(legend.position = "none",
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
           plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
     xlab("Longitude") + ylab("Latitude") +
@@ -1673,7 +1674,8 @@
     #'  Get rid of lines and gray background
     theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
-    theme(plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
     ylab("Latitude") + xlab("Longitude") + 
     # theme(text = element_text(size = 16),
@@ -1821,13 +1823,15 @@
   ####  Panels for publication  ####
   p1 <- coy_smr_occ_fig / coy_smr_rsf_fig
   p2 <- wtd_smr_occ_fig / wtd_smr_rsf_fig
-  mismatch_maps <- plot_grid(p1, p2, labels = c('a', 'b'), rel_widths = c(2, 1.5))
+  mismatch_maps <- plot_grid(p1, p2, labels = c('a', 'b'), rel_widths = c(2, 1.5)) +
+    plot_annotation(title = "Inconsistent predicted space use")
   ggsave("./Outputs/Figures/Maps/Mismatch_Figure5.tiff", mismatch_maps, width = 10, height = 5, dpi = 800, units = "in", device = 'tiff')
   
   p3 <- bob_smr_occ_fig / bob_smr_rsf_fig
   p4 <- md_wtr_occ_fig / md_wtr_rsf_fig
-  goodmatch_maps <- plot_grid(p3, p4, labels = c('a', 'b'), rel_widths = c(2, 1.25))
-  ggsave("./Outputs/Figures/Maps/Mismatch_Figure4.tiff", goodmatch_maps, width = 10, height = 5, dpi = 800, units = "in", device = 'tiff')
+  goodmatch_maps <- plot_grid(p3, p4, labels = c('a', 'b'), rel_widths = c(2, 1.25)) +
+    plot_annotation(title = "Consistent predicted space use")
+  ggsave("./Outputs/Figures/Maps/Match_Figure4.tiff", goodmatch_maps, width = 10, height = 5, dpi = 800, units = "in", device = 'tiff')
   
   p5 <- coug_smr_occ_fig / coug_smr_rsf_fig
   p6 <- coug_wtr_occ_fig / coug_wtr_rsf_fig
