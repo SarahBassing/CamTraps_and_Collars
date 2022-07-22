@@ -1375,7 +1375,7 @@
     xlab("RSF coefficients") + ylab("Occupancy coefficients")  +
     theme(text = element_text(size = 18),
           plot.title = element_text(size = 18)) +
-    # theme_light() +
+    # theme_gray(base_size = 10) +
     # theme(axis.line = element_line(),
     #       panel.border = element_blank()) +
     theme(legend.box = "horizontal")
