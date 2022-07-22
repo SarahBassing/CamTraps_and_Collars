@@ -1513,10 +1513,10 @@
     plot_layout(ncol = 2) +  
     plot_annotation(title = "Correlation between estimated occupancy and RSF coefficients",
                     theme = theme(plot.title = element_text(size = 18))) + 
-    plot_annotation(tag_levels = 'a') & theme(plot.tag = element_text(size = 14)) +
+    plot_annotation(tag_levels = 'a') & theme(plot.tag = element_text(size = 18)) +
     theme(legend.box = 'horizontal')
   
-  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel_bySpp_fig3.tiff", 
+  ggsave("./Outputs/Figures/Occu-RSF-Correlation/Coefficient_Correlation_Panel_bySpp_fig3a.tiff", 
          corr_plot_spp, width = 9, height = 15, dpi = 800, units = "in", device = 'tiff')
    
   #' #'  Save figure panel
