@@ -1835,7 +1835,7 @@
   
   p3 <- bob_smr_occ_fig / bob_smr_rsf_fig
   p4 <- md_wtr_occ_fig / md_wtr_rsf_fig
-  goodmatch_maps <- plot_grid(p3, p4, labels = c('a', 'b'), rel_widths = c(2, 1.25)) +
+  goodmatch_maps <- plot_grid(p3, p4, labels = c('a', 'b'), rel_widths = c(2.1, 1.25)) +
     plot_annotation(title = "Consistent predicted space use")
   ggsave("./Outputs/Figures/Maps/Match_Figure4.tiff", goodmatch_maps, width = 10, height = 5, dpi = 800, units = "in", device = 'tiff')
   
