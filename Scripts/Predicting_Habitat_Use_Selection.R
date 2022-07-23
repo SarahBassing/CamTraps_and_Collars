@@ -1526,11 +1526,13 @@
     #'  Get rid of lines and gray background
     theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
-    theme(axis.text.x = element_blank(),
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.text.x = element_blank(),
           axis.ticks.x = element_blank(),
           plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    ylab("Latitude") + xlab("") + 
+    ylab("") + xlab("") + 
     # theme(text = element_text(size = 16),
     #       plot.title = element_text(size = 16)) +
     labs(fill = 'Probability \nof site use')  +
@@ -1545,10 +1547,12 @@
     #'  Get rid of lines and gray background
     theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
           plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    ylab("Latitude") + xlab("Longitude") + 
+    ylab("") + xlab("Longitude") + 
     # theme(text = element_text(size = 16),
     #       plot.title = element_text(size = 16)) +
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
@@ -1616,7 +1620,7 @@
           axis.ticks.x = element_blank(),
           plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    ylab("Latitude") + xlab("") + 
+    ylab("") + xlab("") + 
     labs(fill = 'Probability \nof site use')  +
     ggtitle("Wolf winter occupancy model") #+
     # theme(text = element_text(size = 16),
@@ -1634,9 +1638,10 @@
     theme(panel.border = element_blank()) +
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
           plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
-    ylab("Latitude") + xlab("Longitude") + 
+    ylab("") + xlab("Longitude") + 
     labs(fill = 'Re-scaled relative \nprobability of selection')  +
     ggtitle("Wolf winter RSF") #+
     # theme(text = element_text(size = 16),
@@ -1717,7 +1722,8 @@
     #'  Get rid of lines and gray background
     theme_bw(base_size = 10) +
     theme(panel.border = element_blank()) +
-    theme(plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+          plot.margin = margin(t = 0, r = 0, b = 0, l = 0)) +
     #'  Change legend, axis, & main titles
     ylab("Latitude") + xlab("Longitude") + 
     theme(axis.text.x = element_text(size = 7)) +
@@ -1835,7 +1841,7 @@
   
   p5 <- coug_smr_occ_fig / coug_smr_rsf_fig
   p6 <- coug_wtr_occ_fig / coug_wtr_rsf_fig
-  appendix_map1 <- plot_grid(p5, p6, labels = 'a') +
+  appendix_map1 <- plot_grid(p5, p6, labels = 'a', rel_widths = c(1.05, 1)) +
     plot_annotation(title = "Seasonal predicted space use")
   ggsave("./Outputs/Figures/Maps/Appendix_map1.tiff", appendix_map1, width = 12, height = 5, dpi = 800, units = "in", device = 'tiff')
   
@@ -1856,7 +1862,7 @@
   
   p12 <- bob_wtr_occ_fig / bob_wtr_rsf_fig
   p13 <- wolf_wtr_occ_fig / wolf_wtr_rsf_fig
-  appendix_map5 <- plot_grid(p12, p13, labels = 'b', rel_widths = c(1, 1.25))
+  appendix_map5 <- plot_grid(p12, p13, labels = c('b', 'c'), rel_widths = c(1, 1.2)) 
   ggsave("./Outputs/Figures/Maps/Appendix_map5.tiff", appendix_map5, width = 12, height = 5, dpi = 800, units = "in", device = 'tiff')
   
 
