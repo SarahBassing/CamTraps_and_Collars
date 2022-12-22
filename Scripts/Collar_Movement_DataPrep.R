@@ -212,14 +212,14 @@
   BOB_track <- bursts(rawBOB)
   COY_track <- bursts(rawCOY)
   
-  #'  Save track data sets
-  save(MD_track, file = "./Outputs/Telemetry_tracks/MD_track.RData")
-  save(ELK_track, file = "./Outputs/Telemetry_tracks/ELK_track.RData")
-  save(WTD_track, file = "./Outputs/Telemetry_tracks/WTD_track.RData")
-  save(COUG_track, file = "./Outputs/Telemetry_tracks/COUG_track.RData")
-  save(WOLF_track, file = "./Outputs/Telemetry_tracks/WOLF_track.RData")
-  save(BOB_track, file = "./Outputs/Telemetry_tracks/BOB_track.RData")
-  save(COY_track, file = "./Outputs/Telemetry_tracks/COY_track.RData")
+  #' #'  Save track data sets
+  #' save(MD_track, file = "./Outputs/Telemetry_tracks/MD_track.RData")
+  #' save(ELK_track, file = "./Outputs/Telemetry_tracks/ELK_track.RData")
+  #' save(WTD_track, file = "./Outputs/Telemetry_tracks/WTD_track.RData")
+  #' save(COUG_track, file = "./Outputs/Telemetry_tracks/COUG_track.RData")
+  #' save(WOLF_track, file = "./Outputs/Telemetry_tracks/WOLF_track.RData")
+  #' save(BOB_track, file = "./Outputs/Telemetry_tracks/BOB_track.RData")
+  #' save(COY_track, file = "./Outputs/Telemetry_tracks/COY_track.RData")
   
   #'  Save a list of all tracks, not broken down by season
   spp_all_tracks_all_seasons <- list(MD_track,ELK_track, WTD_track, COUG_track, WOLF_track, 
