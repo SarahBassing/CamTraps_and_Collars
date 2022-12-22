@@ -1086,13 +1086,3 @@
   
   
   
-  
-  # 2021-06-22 uses reprojected rasters
-  # 2021-08-10 uses my road density raster (km of road length/1 sq-km)... other versions use Lauren's raster that I think is meters of road length/1 sq-km
-  # 2021-09-13 uses the buffered MCPs with large water bodies masked out
-  # 2021-10-29 uses updated wolf MCP with dispersal events excluded
-  # 2022-04-06 updated available locations
-  # 2022-04-15 updated extent of availability to buffered home range per individual
-  
-  
-  
