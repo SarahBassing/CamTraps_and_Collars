@@ -426,16 +426,16 @@
   save(coy_global_smr, file = paste0("./Outputs/RSF_output/coy_RSF_smr_BuffHR_", Sys.Date(), ".RData"))
   save(coy_global_wtr, file = paste0("./Outputs/RSF_output/coy_RSF_wtr_BuffHR_", Sys.Date(), ".RData"))
   
-  save(md_SA_only_smr, file = paste0("./Outputs/RSF_output/md_RSF_smr_BuffHR_SAonly_", Sys.Date(), ".RData"))
-  
-  save(md_lowElev_only_smr, file = paste0("./Outputs/RSF_output/md_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
-  save(md_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/md_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
-  save(coug_lowElev_only_smr, file = paste0("./Outputs/RSF_output/coug_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
-  save(coug_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/coug_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
-  save(wolf_lowElev_only_smr, file = paste0("./Outputs/RSF_output/wolf_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
-  save(wolf_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/wolf_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
-  save(bob_lowElev_only_smr, file = paste0("./Outputs/RSF_output/bob_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
-  save(bob_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/bob_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  # save(md_SA_only_smr, file = paste0("./Outputs/RSF_output/md_RSF_smr_BuffHR_SAonly_", Sys.Date(), ".RData"))
+  # 
+  # save(md_lowElev_only_smr, file = paste0("./Outputs/RSF_output/md_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  # save(md_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/md_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  # save(coug_lowElev_only_smr, file = paste0("./Outputs/RSF_output/coug_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  # save(coug_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/coug_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  # save(wolf_lowElev_only_smr, file = paste0("./Outputs/RSF_output/wolf_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  # save(wolf_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/wolf_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  # save(bob_lowElev_only_smr, file = paste0("./Outputs/RSF_output/bob_RSF_smr_BuffHR_lowElev_", Sys.Date(), ".RData"))
+  # save(bob_lowElev_only_wtr, file = paste0("./Outputs/RSF_output/bob_RSF_wtr_BuffHR_lowElev_", Sys.Date(), ".RData"))
   
   
   ####  Summary tables  ####
@@ -458,7 +458,7 @@
   load("./Outputs/RSF_output/coy_RSF_smr_BuffHR_2022-05-03.RData")
   load("./Outputs/RSF_output/coy_RSF_wtr_BuffHR_2022-05-03.RData")
   
-  load("./Outputs/RSF_output/md_RSF_smr_SAonly_BuffHR_2022-05-03.RData")
+  # load("./Outputs/RSF_output/md_RSF_smr_SAonly_BuffHR_2022-05-03.RData")
   
 
   #'  Function to save parameter estimates & p-values
@@ -538,13 +538,12 @@
     arrange(match(Season, c("Summer", "Winter")))
   
   
-  #'  Save!
-  write.csv(rsf_results, paste0("./Outputs/Tables/RSF_Results_BuffHR_", Sys.Date(), ".csv"))  
-  write.csv(rsf_results_wide, paste0("./Outputs/Tables/RSF_Results_wide_BuffHR_", Sys.Date(), ".csv"))
+  #' #'  Save!
+  #' write.csv(rsf_results, paste0("./Outputs/Tables/RSF_Results_BuffHR_", Sys.Date(), ".csv"))  
+  #' write.csv(rsf_results_wide, paste0("./Outputs/Tables/RSF_Results_wide_BuffHR_", Sys.Date(), ".csv"))
+  #' 
+  #' save.image("./Outputs/RSF_script_results.RData")
   
-  save.image("./Outputs/RSF_script_results.RData")
   
   
-  
-  #'  SHOULD I BE CONSIDERING A VARIENCE INFLATION FACTOR ON THESE ESTIMATES????
-  
+ 
